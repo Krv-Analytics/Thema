@@ -5,3 +5,11 @@
 
 [coal_mapper GitHub](https://github.com/sgathrid/coal_mapper)
 
+#### A Kepler Mapper simplicial complex made using 5 parameters:
+- affectedDAC: the number of people within a 3 mile radius of each coal plant that are considered to be members of Disadvantaged Communities
+- PM 2.5 Emssions (tons): Amount of particulate matter 2.5 released annually
+- post2004RetrofitCosts: dollars spent on pollution control retrofits after 2004
+- CO2limitsOppose: the percent of people who oppose setting CO2 limits on coal powerplant emissions
+- StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
+
+file:///Users/gathrid/Documents/THESIS/coal-TDA/mappers/alltest.html#
