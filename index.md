@@ -13,3 +13,4 @@
 - StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
 
 {% include_relative file:///Users/gathrid/Documents/THESIS/coal-TDA/mappers/alltest.html# %}
+{% include_relative alltest.html %}
