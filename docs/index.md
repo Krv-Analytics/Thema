@@ -18,7 +18,7 @@ The goal of using these parameters is to view the relationships between Energy J
 
 ###### The linked cluster of plants within a three mile radius of the highest number of DAC members also happens to be a cluster of plants that generate low levels of power and criteria pollutants. However, these plants are located in areas that support limiting coal powerplant CO2 emissions. This can be seen by toggling the color scheme between the different indicator variables. By clicking the _[+] Help_ menu, a list of different key commands and viewing options will appear. <br/>
 
-### Usage and Explanation <br/>
+### Usage and Explanation
 
 While the structure of the simplicial complex was generated from the above 5 parameters, changing the color shceme allows the user to view how different parameters relate to the structure of the graph. 
 
