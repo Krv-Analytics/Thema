@@ -12,6 +12,8 @@
 - CO2limitsOppose: the percent of people who oppose setting CO2 limits on coal powerplant emissions
 - StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
 
+[Link to test map](https://github.com/sgathrid/coal_mapper/blob/main/docs/DAC_mapper.html)
+
 | Key Command    | Action             |
 | -------------- | ------------------ |
 | p              | Print View (white) |
@@ -20,9 +22,5 @@
 | m              | Expanded Layout    |
 | f              | Freeze Layout      |
 | x              | Unfreeze all Nodes |
-
-
-![The San Juan Mountains are beautiful!](/docs/DAC_mapper.html "San Juan Mountains")
-
 
 {% include_relative DAC_mapper.html %}
