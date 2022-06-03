@@ -12,5 +12,5 @@
 - CO2limitsOppose: the percent of people who oppose setting CO2 limits on coal powerplant emissions
 - StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
 
-{% include alltest.html max-width="200px" alt="DAC Map"
+{% include_relative alltest.html max-width="200px" alt="DAC Map"
 caption="This is the simplicial complex made clustering on the above 5 parameters" %}
