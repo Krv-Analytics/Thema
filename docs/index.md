@@ -13,14 +13,4 @@
 - StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
 
 
-| Key Command    | Action             |
-| -------------- | ------------------ |
-| p              | Print View (white) |
-| d              | Dark View (black)  |
-| e              | Tight Layout       |
-| m              | Expanded Layout    |
-| f              | Freeze Layout      |
-| x              | Unfreeze all Nodes |
-
-
-<iframe width="100%" height="500px" seamless="" frameborder="0" scrolling="no" src="./DAC_mapper.html"></iframe>
+<iframe width="100%" height="1000px" seamless="" frameborder="0" scrolling="no" src="./DAC_mapper.html"></iframe>
