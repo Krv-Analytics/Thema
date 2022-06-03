@@ -5,12 +5,20 @@
 
 [coal_mapper GitHub](https://github.com/sgathrid/coal_mapper)
 
-#### A Kepler Mapper simplicial complex made using 5 parameters:
-- affectedDAC: the number of people within a 3 mile radius of each coal plant that are considered to be members of Disadvantaged Communities
-- PM 2.5 Emssions (tons): Amount of particulate matter 2.5 released annually
-- post2004RetrofitCosts: dollars spent on pollution control retrofits after 2004
-- CO2limitsOppose: the percent of people who oppose setting CO2 limits on coal powerplant emissions
-- StateMineEmployment: the number of people employed by coal mining operations in the state in which the powerplant is located
+### Below is an example Kepler Mapper simplicial complex made using 5 parameters:
+- **affectedDAC:** number of people within a 3 mile radius of each coal plant that are considered to be members of Disadvantaged Communities<br/>
+- **PM 2.5 Emssions (tons):** tons of PM 2.5 released annually<br/>
+- **post2004RetrofitCosts:** dollars spent on pollution control retrofits after 2004<br/>
+- **CO2limitsOppose:** percent of people _in the plant's county_ who oppose setting CO2 limits on coal powerplant emissions<br/>
+- **StateMineEmployment:** number of people employed by coal mining operations _in the state_ in which the powerplant is located <br/>
 
+The goal of using these parameters is to view the relationships between Energy Justice (EJ) indicators, public opinion data, and coal plant pollution metrics.
 
 <iframe width="100%" height="700px" seamless="" frameborder="0" scrolling="no" src="./DAC_mapper.html"></iframe>
+
+###### The linked cluster of plants within a three mile radius of the highest number of DAC members also happens to be a cluster of plants that generate low levels of power and criteria pollutants. However, these plants are located in areas that support limiting coal powerplant CO2 emissions. This can be seen by toggling the color scheme between the different indicator variables. By clicking the _[+] Help_ menu, a list of different key commands and viewing options will appear. <br/>
+
+### Usage and Explanation <br/>
+
+While the structure of the simplicial complex was generated from the above 5 parameters, changing the color shceme allows the user to view how different parameters relate to the structure of the graph. 
+
