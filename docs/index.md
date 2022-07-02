@@ -26,4 +26,4 @@ While the structure of the simplicial complex was generated from the above 5 par
 – scenarios represent the sequential increase of decommisisoning difficulty, with scenario 1 plants being the easiest to decommission and 4 the hardest
 
 
-<iframe width="100%" height="700px" seamless="" frameborder="0" scrolling="no" src="./COAL_MAP.html"></iframe>
+<iframe width="102%" height="700px" seamless="" frameborder="0" scrolling="no" src="./COAL_MAP.html"></iframe>
