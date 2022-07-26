@@ -14,7 +14,7 @@
 
 The goal of using these parameters is to view the relationships between Energy Justice (EJ) indicators, public opinion data, and coal plant pollution metrics.
 
-<iframe width="100%" height="700px" seamless="" frameborder="0" scrolling="no" src="./DAC_mapper.html"></iframe>
+<iframe width="100%" height="700px" seamless="" frameborder="0" scrolling="no" src="./TSNE_LCOE_test.html"></iframe>
 
 ###### The linked cluster of plants within a three mile radius of the highest number of DAC members also happens to be a cluster of plants that generate low levels of power and criteria pollutants. However, these plants are located in areas that support limiting coal powerplant CO2 emissions. This can be seen by toggling the color scheme between the different indicator variables. By clicking the _[+] Help_ menu, a list of different key commands and viewing options will appear. <br/>
 
