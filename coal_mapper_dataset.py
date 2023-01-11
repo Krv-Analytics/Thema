@@ -2,7 +2,6 @@
 # coding: utf-8
 
 # class coal_mapper_dataset
-# In[19]:
 
 
 def EIA_dataset(choice: str):
@@ -13,8 +12,6 @@ def EIA_dataset(choice: str):
 
     # ### Initial Functions – Cleaning eGrid Data
 
-    # In[20]:
-
     def findYear(str):
 
         """Finds the eGrid Data year within the file name passed to the function.
@@ -24,15 +21,11 @@ def EIA_dataset(choice: str):
             if str[i : i + 5] == "egrid":
                 return str[i + 5 : i + 9]
 
-    # In[21]:
-
     def makeYearintoSheetName(str):
         """Due to the nature of the EIA eGrid datasets, each .xlsx file has many sheet names.
         This function ensures the PLNT sheet is selected and read in"""
         year = findYear(str)
         return "PLNT" + year[2:4]
-
-    # In[22]:
 
     def findHeader(df):
         """Because the eGrid datasheets are mnot standardized from year to year, this function is a necessity.
@@ -44,8 +37,6 @@ def EIA_dataset(choice: str):
                 break
             nmu = i
         return nmu
-
-    # In[23]:
 
     def isDecom(id):
         if id == "2020":
@@ -152,19 +143,13 @@ def EIA_dataset(choice: str):
 
     # ### An Example of what it looks to refrence the folder of eGrid data used to create the dataset
 
-    # In[26]:
-
     list = os.listdir("egrid 2005-2020")
     print(list)
-
-    # In[27]:
 
     list.remove(".DS_Store")
     print(list)
 
     # # Dataset Creation
-
-    # In[29]:
 
     if choice == "2020":
         list2 = ["egrid2020_data.xlsx"]
@@ -179,8 +164,6 @@ def dataset_addOn(inDF):
     """inDF should be a dataframe recieved from coal_mapper_dataset"""
     import pandas as pd
     import numpy as np
-
-    # In[2]:
 
     alldf = inDF
     alldf["percentCoal"] = alldf["PLGENACL"] / alldf["PLNGENAN"]
@@ -203,8 +186,6 @@ def dataset_addOn(inDF):
     # ### Add Yale YCOM_2020 Climate Change Public Opinion Dataset – county level data
 
     # ###### Due to the use of a GEOID and not state and county FIPS codes, these functions create a GEOID from the state and county FIPS that is compatible with the GEOID format of the data in the YCOM dataset. The goal of this is to join the datasets on GEOID so the powerplant county locations have YCOM county-level public opinion data associated with them
-
-    # In[3]:
 
     ## copy and pasted from: https://code.activestate.com/recipes/577775-state-fips-codes-dict/
 
@@ -262,8 +243,6 @@ def dataset_addOn(inDF):
         "OR": "41",
         "SD": "46",
     }
-
-    # In[4]:
 
     def clean_NaN(df):
         return df.drop_duplicates("ORISPL").fillna("")
