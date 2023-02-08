@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "coal-mapper"
+version = "0.1.0"
+description = ""
+authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "coal_mapper" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = "^1.24.2"
+networkx = "^3.0"
+
+[tool.poetry.group.dev.dependencies]
+kmapper = "^2.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
