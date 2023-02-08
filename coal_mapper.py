@@ -22,78 +22,13 @@ import plotly.graph_objects as go
 
 from sklearn.cluster import AgglomerativeClustering
 
+#### IMPORTANT FUNCTIONS
+def ORISPLmerge(df1, df2):
+    return df1.merge(df2, how='left', left_on='ORISPL', right_on='ORISPL')
 
-
-def egrid_clean(csv_path:str, eyear:str):
-    '''This function takes in a ~specific coal data set and performs the following cleaning:
-    - Sorts out non-coal fired powerplants
-    - changes na to 0
-    - Selects relevant pollution data
-    - sorts out US territories
-    - makes labels with the name, state, and year of data
-    Returns a pandas data frame with the cleaned data.
-'''
-    df = pd.read_csv(csv_path)
-    df.fillna(0)
-    df2 = df[df['COALFLAG'] == 1]
-    if (df2.size <2):
-        df2 = df[df['COALFLAG'] == 'Yes']
-    df = df2
-    df['Year'] = eyear
-    df = df[['Year', 'ORISPL', 'PSTATABB', 'LAT', 'LON', 'PNAME', 'FIPSST', 'FIPSCNTY',  'CAPFAC', 'PLNGENAN', 'PLNOXAN', 'PLSO2AN', 'PLCO2AN']]
-    df = df.assign(label=eyear + ": " + df['PNAME'] + ", " + df['PSTATABB'])
-    df.reset_index(drop=True, inplace=True)
-    return df
-
-
-def add_ccc (egrid:str, ccc:str):
-    '''combines egrid and coal cost crossover datasets to add economic data and renewable replacement factor:
-    - creates bin variable: 
-        bin = 0 means that coal is teh cheapest resource
-        bin = 1 means that either solar or wind is cheaper than current coal, according to CCC methods
-
-    returns a smaller dataset: 'Total Coal Going-Forward Cost', 'FIPSST', 'ID', 'CAPFAC', 'PLCO2AN', 'PLNGENAN', 'PLNOXAN', 'PLSO2AN', 'bin', 'label', '% least cost resource less than coal', LCR
-    '''
-
-    ccc = ccc.rename(columns={"EIA Plant ID": "ID"})
-    egrid = egrid.rename(columns={"ORISPL": "ID"})
-
-    egrid = egrid.astype(float, errors = "ignore")
-    ccc['ID'] = ccc['ID'].astype(float)
-
-    mergedf = ccc.merge(egrid, how = "inner", left_on='ID',right_on='ID')
-    mergedf = mergedf.rename(columns={"Overall least cost resource": "LCR"})
-
-    mergedf["bin"] = ""
-
-    for i, row in mergedf.iterrows():
-        if (mergedf['LCR'].at[i] == 'Coal'):
-            mergedf.at[i,'bin'] = 0
-        else :
-            mergedf.at[i,'bin'] = 1
-    
-    small = mergedf[['label', 'FIPSST', 'ID', 'CAPFAC', 'PLCO2AN', 'PLNGENAN', 'PLNOXAN', 'PLSO2AN', 'bin', 'LCR', 'Total Coal Going-Forward Cost', '% least cost resource less than coal']]
-    
-    return small
-    
-
-def add_yalePO (egridCCC:str, yale:str):
-    '''ADDS PO, the percent that oppose setting CO2 Limits for coal powerplants in that state'''
-
-    states = egridCCC
-    states['PO'] = ""
-    yale = yale[['GEOID', 'CO2limits','CO2limitsOppose']]
-    yale = yale.truncate(before=0, after=53)
-    states.head()   
-
-    for i, row in yale.iterrows():
-        for y, row in states.iterrows():
-            if (states['FIPSST'].at[y] == yale['GEOID'].at[i]):
-                states.PO[y] = yale.CO2limitsOppose[i]
-    
-    states['PO'] = states['PO'].astype(float)
-    states['bin'] = states['bin'].astype(float)
-    return states
+######
+#### OTHER FUNCTIONS
+######
 
 def coal_PCA (df:str):
     '''
@@ -133,66 +68,6 @@ def mapper_labels (df:pd.DataFrame):
     names = df.to_numpy()
     return names
 
-def make_mapper(cubes:int, clusters:int, overlap:int, fulldf:pd.DataFrame, labelsdf:pd.DataFrame, fileP:str,):
-    
-    '''This function takes in a dataframe set, data labels, and colors to make a mapper object with the specified number of groups, covers, and percent overlap.
-    Returns/updates an HTML based mapper graph
-    '''
-    #map with 2 lenses
-
-    df2 = fulldf
-    df = labelsdf
-
-    colors = df2
-    labels = mapper_labels(df['label'])
-
-
-    mapper = km.KeplerMapper(verbose=2)
-
-    projector = ensemble.IsolationForest(random_state=0, n_jobs=-1)
-    projector.fit(df2)
-    lens1 = projector.decision_function(df2)
-    lens2 = mapper.fit_transform(df2, projection="knn_distance_5")
-
-
-    lens = np.c_[lens1, lens2]
-
-    graph_new = mapper.map(
-        lens,
-        df2,
-        remove_duplicate_nodes=True,
-        cover=km.Cover(n_cubes=cubes, perc_overlap=overlap),
-        clusterer=cluster.AgglomerativeClustering(clusters))
-        #clusterer = sklearn.cluster.MiniBatchKMeans(n_clusters=clusters, random_state=1618033))
-        #clusterer = sklearn.cluster.KMeans(n_clusters=clusters, random_state=1618033))
-    
-    my_colorscale = [[0.0, '#001219'],
-             [0.1, '#005f73'],
-             [0.2, '#0a9396'],
-             [0.3, '#94d2bd'],
-             [0.4, '#e9d8a6'],
-             [0.5, '#ee9b00'],
-             [0.6, '#ca6702'],
-             [0.7, '#bb3e03'],
-             [0.8, '#ae2012'],
-             [0.9, '#9b2226'],
-             [1.0, '#a50026']]
-
-    mapper.visualize(
-        graph_new,
-        path_html=fileP,
-        title="Coal Trial 1 (" +str(cubes)+ " cube(s) at " +str(overlap*100) + "% overlap) with Plant Labels",
-        custom_tooltips=labels,
-        color_values = colors,
-        colorscale=my_colorscale,
-        color_function_name=list(df2.columns),
-        node_color_function=['mean', 'median', 'max'],
-        include_searchbar = True)
-
-    return graph_new
-
-    
-
 def view_kmeans(df:str, numclusters:int):
 
 # data
@@ -227,7 +102,7 @@ def view_kmeans(df:str, numclusters:int):
 
     fig = plt.figure(figsize=(8, 3))
     fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.9)
-    colors = ["#4EACC5", "#FF9C34", "#4E9A06"]
+    colors = ["#4EACC5", "#FF9C34", "#4E9A06", "#3082be"]
 
 # COLOR MiniBatchKMeans and the KMeans algorithm.
     k_means_cluster_centers = k_means.cluster_centers_
@@ -327,3 +202,4 @@ def percentCO2reduxMap(mapdf:pd.DataFrame, all:pd.DataFrame):
     )
 
     fig.show()
+
