@@ -10,9 +10,14 @@ packages = [{ include = "coal_mapper" }]
 python = "^3.9"
 numpy = "^1.24.2"
 networkx = "^3.0"
+black = "^23.1.0"
+pandas = "^1.5.3"
+jupyter = "^1.0.0"
+matplotlib = "^3.6.3"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
+ipykernel = "^6.21.1"
 
 [build-system]
 requires = ["poetry-core"]
