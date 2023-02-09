@@ -5,6 +5,12 @@ An implementation of the Kepler Mapper to analyze various energy datasets
 
 ## Installation
 
+To clone the coal_mapper repo, run in a bash shell (eg. terminal)
+
+```
+$ git clone git@github.com:sgathrid/coal_mapper.git
+```
+
 It is recommended to use the [`poetry`](https://python-poetry.org) package
 manager. With `poetry` installed, setting up the repository works like
 this:
@@ -15,6 +21,7 @@ $ poetry install
 
 Since `poetry` creates its own virtual environment, it is easiest to
 interact with scripts by calling `poetry shell`.
+
 
 ## MongoDB API Connection String Request and Configuration
 
