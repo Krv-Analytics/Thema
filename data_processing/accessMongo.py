@@ -8,7 +8,7 @@ def df_to_mongodb(client, database:str, col:str, df):
     database - name of the database you are accessing
     col - name of collection within database'''
     
-    client = client
+    client = pymongo.MongoClient(client)
     db = client[database]
     collection = db[col]
 
@@ -23,7 +23,7 @@ def mongodb_to_df(client, database:str, col:str):
     database - name of the database you are accessing
     col - name of collection within database'''
 
-    client = client
+    client = pymongo.MongoClient(client)
     db = client[database]
     collection = db[col]
 
