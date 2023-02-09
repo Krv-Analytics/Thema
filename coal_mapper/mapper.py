@@ -31,7 +31,7 @@ class CoalMapper(KeplerMapper):
         self.graph = None
         self.components = None
 
-        super(Coal_Mapper, self).__init__(verbose)
+        super(CoalMapper, self).__init__(verbose)
 
     def compute_mapper(
         self,
