@@ -26,4 +26,4 @@ In coal_mapper home directory, run the following commands:
 $ cp .env.SAMPLE .env
 $ vim .env
 ```
-This creates a .env file and opens that file in a vim editor. You will then copy your API access token into the mongo_client field.
+This creates a .env file and opens that file in a vim editor. You will then copy your API access token into the `mongo_client` field.
