@@ -8,4 +8,4 @@ import pymongo
 from accessMongo import *
 
 def getData(mongo_client):
-    return mongodb_to_df(client=mongo_client,database= "Merges",col= "eGRIDconsolidation")
+    return mongodb_to_df(client=mongo_client,database= "merged",col= "EIA")
