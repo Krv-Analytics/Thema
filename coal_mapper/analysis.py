@@ -7,11 +7,13 @@ from nammu.utils import make_node_filtration
 from mapper import CoalMapper
 
 
-class CurvatureAnalysis:
+class MapperAnalysis:
     """
-    Analyzing different mapper graphs using Ollivier Curvature.
+    Analyzing different mapper graphs using discrete curvature and persistenet homology.
+
     """
 
+    # TODO: Add full docstring and document functions
     def __init__(self, X):
 
         self.data = X
@@ -31,6 +33,7 @@ class CurvatureAnalysis:
     def diagrams(self):
         return self._diagrams
 
+    # TODO: Test these methods and interface with CoalMapper
     @graph.setter
     def graph(self, cover, min_intersection: int = 1):
 
@@ -104,6 +107,7 @@ class CurvatureAnalysis:
             except:
                 print("Invalid filter function.")
 
+    # TODO: Implement Visualization Methods. See starter code in ./nammu/
     def plot_curvature(self):
         # Look at filtration visualization script
         pass
