@@ -18,6 +18,10 @@ pymongo = "^4.3.3"
 cython = "^0.29.33"
 ripser = "^0.6.4"
 persim = "^0.3.1"
+fastapi = "^0.91.0"
+python-dotenv = "^0.21.1"
+uvicorn = "^0.20.0"
+pot = "^0.8.2"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
