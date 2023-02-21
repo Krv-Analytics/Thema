@@ -86,7 +86,7 @@ class CoalMapper(KeplerMapper):
             lens=self.lens, X=self.data, cover=self.cover, clusterer=self.clusterer
         )
 
-    def mapper_to_networkx(self, min_intersection: int = 1):
+    def to_networkx(self, min_intersection: int = 1):
         """
         Converts a kmapper simplicial complex into a networkx graph. Generates the `graph` attribute for CoalMapper.
         A simplicial complex must already be computed to use this function.
@@ -147,7 +147,7 @@ class CoalMapper(KeplerMapper):
                 self.components = components
             else:
                 # Intialize Graph representation
-                self.mapper_to_networkx(min_intersection)
+                self.to_networkx(min_intersection)
                 components = [
                     self.graph.subgraph(c).copy()
                     for c in nx.connected_components(self.graph)
@@ -184,7 +184,7 @@ class CoalMapper(KeplerMapper):
 
         assert (
             self.graph is not None
-        ), "First run `mapper_to_networkx` to generate a networkx graph."
+        ), "First run `to_networkx` to generate a networkx graph."
 
         clusters = {}
 
