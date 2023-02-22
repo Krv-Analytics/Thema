@@ -5,8 +5,8 @@
 
 import pandas as pd
 import pymongo
-from accessMongo import *
-from eGRID_helper import *
+from data_processing.accessMongo import *
+from data_processing.eGRID_helper import *
 
 def getCompiledData(mongo_client):
     '''returns a cleaned dataframe containing the most recent year's coal data from multiple sources'''
