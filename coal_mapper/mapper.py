@@ -2,17 +2,15 @@ import numpy as np
 import networkx as nx
 import kmapper as km
 import pandas as pd
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 
 from kmapper import KeplerMapper
 
 
 class CoalMapper(KeplerMapper):
     # TODO: Doc String
-    def __init__(
-        self,
-        X: np.array,
-        verbose: int = 0,
-    ):
+    def __init__(self, X: np.array, verbose: int = 0):
         """Constructor for CoalMapper class.
         Parameters
         ===========
@@ -37,8 +35,8 @@ class CoalMapper(KeplerMapper):
         self,
         n_cubes: int = 4,
         perc_overlap: float = 0.2,
-        projection="l2norm",
-        clusterer=None,
+        projection=TSNE(random_state=26779),
+        clusterer=KMeans(5),
     ):
         """
         A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
@@ -69,16 +67,18 @@ class CoalMapper(KeplerMapper):
 
         # Create Lens
         if self.lens is None:
+            print("Setting Lens")
             lens = self.fit_transform(self.data, projection)
             self.lens = lens
 
         # Create Cover
         if self.cover is None:
+            print("Setting Cover")
             cover = km.Cover(n_cubes, perc_overlap)
             self.cover = cover
 
         # Initialize Clustering Algorithm. Defualt is DBSCAN(eps=0.5, min_samples=3)
-        if clusterer:
+        if self.clusterer is None:
             self.clusterer = clusterer
 
         # Compute Simplicial Complex
