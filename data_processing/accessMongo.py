@@ -14,7 +14,7 @@ def df_to_mongodb(client, database:str, col:str, df):
 
     data = df.to_dict("records")
 
-    # Insert the data into the MongoDB collection
+    # Insert the data into specified MongoDB collection
     collection.insert_many(data)
 
 # %%
@@ -33,3 +33,5 @@ def mongodb_to_df(client, database:str, col:str):
 
 
 
+
+# %%
