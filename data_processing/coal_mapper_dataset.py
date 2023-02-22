@@ -16,14 +16,13 @@ def getEIA_allCoalData(mongo_client):
     '''returns a cleaned dataframe of 2008-2021 coal plant/generator data. Includes one instance of a plant per year, including plants that are no longer active'''
     return mongodb_to_df(client=mongo_client,database= "eGRID",col= "eGRID_allCoal")
 
+##to create/update the datasets in mongo##
+
 def coalFromList(e_list:list):
-
     '''This function creates the eGRID_allCoal datasheet contained in MongoDB. Returns a DF of all EIA eGRID coal data from 2009 onwards.
-
     Takes a sorted list containing eGRID data sheets. List must contain data from 2009 and later – earlier data cannot be processed by this function
 
     List can be formatted as follows:
-    
         os.chdir('/Users/<folder containing EIA eGRID data sheets>')
         e_list = sorted(os.listdir(<folder containing EIA eGRID data sheets>))
         e_list.remove(".DS_Store")'''

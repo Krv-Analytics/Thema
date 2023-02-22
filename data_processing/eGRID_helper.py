@@ -1,8 +1,4 @@
 import pandas as pd
-import os
-from datetime import datetime
-
-coalFuels = ['BIT', 'LIG', 'RC', 'SGC', 'SUB', 'WC']
 
 def drop_excess (id, sheet:str):
     '''Put the df on a weight loss program
@@ -19,6 +15,7 @@ def drop_excess (id, sheet:str):
         'GENYRRET']
     elif sheet == "PLNT":
         cols = [
+        'YEAR',
         'PNAME',
         'ORISPL', 
         'FIPSST',
@@ -144,6 +141,7 @@ def consolidate_genYears(allgen, e_list):
 
 def get_nonCoalGens(all_gens, c_gens, e_list):
     nonCoal = pd.DataFrame()
+    coalFuels = ['BIT', 'LIG', 'RC', 'SGC', 'SUB', 'WC']
     for sheet in e_list:
         year = str(findYear(sheet))
         temp = all_gens[(all_gens['YEAR']==year)&(~all_gens['FUELG1'].isin(coalFuels))&(all_gens['ORISPL'].isin(c_gens['ORISPL']))&(all_gens['GENSTAT']!='RE')&(all_gens['GENNTAN']>0)].groupby('ORISPL')['FUELG1'].apply(list).reset_index(name='NONcoal_FUELS')
@@ -154,5 +152,5 @@ def get_nonCoalGens(all_gens, c_gens, e_list):
 def add_nonCoalGens(eia, nonCoal, all_plnts):
     temp = pd.merge(eia, nonCoal,  how='left', left_on=['ORISPL', 'YEAR'], right_on = ['ORISPL', 'YEAR']).fillna(0)
     temp['YEAR'] = temp['YEAR'].astype(int)
-    return pd.merge(temp, all_plnts[['ORISPL','PNAME', 'YEAR','PLGENACL', 'PLSO2AN', 'PLPRMFL', 'PLCLPR', 'SECTOR', 'FIPSST', 'FIPSCNTY', 'LAT', 'LON']], left_on=['ORISPL', 'YEAR'], right_on=['ORISPL', 'YEAR'])
+    return pd.merge(temp, drop_excess(all_plnts, "PLNT"), left_on=['ORISPL', 'YEAR'], right_on=['ORISPL', 'YEAR'])
     
