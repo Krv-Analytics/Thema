@@ -154,3 +154,24 @@ def add_nonCoalGens(eia, nonCoal, all_plnts):
     temp['YEAR'] = temp['YEAR'].astype(int)
     return pd.merge(temp, drop_excess(all_plnts, "PLNT"), left_on=['ORISPL', 'YEAR'], right_on=['ORISPL', 'YEAR'])
     
+#####compile egrid dataset using all the above functions#####
+
+def coalFromList(e_list:list):
+    '''This function creates the eGRID_allCoal datasheet contained in MongoDB. Returns a DF of all EIA eGRID coal data from 2009 onwards.
+    Takes a sorted list containing eGRID data sheets. List must contain data from 2009 and later – earlier data cannot be processed by this function
+
+    List can be formatted as follows:
+        os.chdir('/Users/<folder containing EIA eGRID data sheets>')
+        e_list = sorted(os.listdir(<folder containing EIA eGRID data sheets>))
+        e_list.remove(".DS_Store")'''
+
+    print(e_list)
+    coalFuels = ['BIT', 'LIG', 'RC', 'SGC', 'SUB', 'WC']
+    all_plnts = egrid_PLNT(e_list)
+    all_gens = egrid_coalGEN(e_list)
+    c_gens=all_gens.copy()
+    c_gens = c_gens[c_gens['FUELG1'].isin(coalFuels)]
+    coal_plnts = all_plnts
+    coal_plnts['COALFLAG']=coal_plnts['COALFLAG'].apply(clean_coalflag)
+    tester = add_nonCoalGens(consolidate_genYears(c_gens, e_list), get_nonCoalGens(all_gens, c_gens, e_list), all_plnts)
+    return tester.fillna('not reported')
