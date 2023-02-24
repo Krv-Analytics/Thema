@@ -19,4 +19,4 @@ Our dataset includes all plants with an active coal fueled generator in 2021. Co
  |860 Utility           |EIA         |utility type & plant sector|269               |                       |                          |
  |State Utility Policy  |RMI         |state policies & partisanship|269             |                       |                          |
  |Climate Opinion Map   |YCOM        |county public opinion  |n/a               |                       |                          |
- |Coal Plant Health Impacts - All.    |CATF     |health impacts & costs |218               |unknown                 |97.16%                          |
+ |Coal Plant Health Impacts    |CATF     |health impacts & costs |218               |unknown                 |97.16%                          |
