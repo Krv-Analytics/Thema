@@ -1,5 +1,5 @@
 ### **Dataset Information**
-Our dataset includes all US plants with an active coal fueled generator in 2021 – 269 plants. Coal fuels are defined as:
+Our dataset includes all US plants with an active coal fueled generator in 2021 (269 plants). Coal fuels are defined as:
   - Bituminous coal
   - Lignite coal
   - Refined coal
