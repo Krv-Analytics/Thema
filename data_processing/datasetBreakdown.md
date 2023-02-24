@@ -8,7 +8,7 @@
 |Coal Cost Crossover   |Energy Innovation|coal plant forward costs|207         |unknown                |95.86%                    |
 |860 Utility           |EIA         |utility type/ownership |269               |                       |                          |
 |State Utility Policy  |RMI         |state policies + politics|269             |                       |                          |
-|Climate Opinion Map   |YCOM        |county public opinion  |                  |                       |                          |
+|Climate Opinion Map   |YCOM        |county public opinion  |n/                |                       |                          |
 
 
 
