@@ -1,3 +1,5 @@
+#### **Dataset Information**
+
 Our dataset includes all plants with an active coal fueled generator in 2021:
 
 Coal Fuels Include:
@@ -8,7 +10,7 @@ Coal Fuels Include:
   - Subbituminous coaL
   - Waste coal
 
-D
+#### **Data Sources**
 
 |dataset               |source      |data                   |# plants w/ data  |missing reason         |% coal capacity           |
 |----------------------|------------|-----------------------|------------------|-----------------------|--------------------------|
