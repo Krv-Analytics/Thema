@@ -1,3 +1,14 @@
+Our dataset includes all plants with a generator that used coal to generate electricity in 2021.
+
+Coal Fuels Included:
+Bituminous coal
+Lignite coal
+Refined coal
+Synthesis gas – coal-derived
+Subbituminous coaL
+Waste coal
+
+
 |dataset               |source      |data                   |# plants w/ data  |missing reason         |% coal capacity           |
 |----------------------|------------|-----------------------|------------------|-----------------------|--------------------------|
 |eGRID GEN21           |EIA         |all coal generators    |269               |                       |                          |
