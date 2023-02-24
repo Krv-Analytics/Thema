@@ -4,7 +4,7 @@ Our dataset includes all plants with an active coal fueled generator in 2021. Co
   - Bituminous coal
   - Lignite coal
   - Refined coal
-  - Synthesis gas – coal-derived
+  - Synthesis gas – coal derived
   - Subbituminous coaL
   - Waste coal
 
