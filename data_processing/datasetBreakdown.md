@@ -1,8 +1,6 @@
 ### **Dataset Information**
 
-Our dataset includes all plants with an active coal fueled generator in 2021:
-
-Coal Fuels Include:
+Our dataset includes all plants with an active coal fueled generator in 2021. Coal fuels are defined as:
   - Bituminous coal
   - Lignite coal
   - Refined coal
