@@ -7,7 +7,7 @@ Our dataset includes all US plants with an active coal fueled generator in 2021 
   - Subbituminous coal
   - Waste coal
 ### **Data Sources**
- |dataset               |source      |data year|data                   |# plants w/ data  |missing reason         |% coal capacity           |
+ |dataset               |source      |data year|data                   |# plants included |missing reason         |% coal capacity           |
  |----------------------|------------|---------|-----------------------|------------------|-----------------------|--------------------------|
  |eGRID GEN21           |EIA         |2021     |all coal generators    |269               |                       |                          |
  |eGRID PLNT21          |EIA         |2021     |plant information      |269               |                       |                          |
