@@ -11,7 +11,6 @@ Our dataset includes all plants with an active coal fueled generator in 2021. Co
  |----------------------|------------|-----------------------|------------------|-----------------------|--------------------------|
  |eGRID GEN21           |EIA         |all coal generators    |269               |                       |                          |
  |eGRID PLNT21          |EIA         |plant information      |269               |                       |                          |
- |Announced Retirements |Sierra Club |coal retirement plans  |163               |no announced retirement|59.39%                    |
  |Announced Retirements |Sierra Club |coal retirement plans  |163               |no announced retirement|40.60%                    |
  |860 EnviroAssoc       |EIA         |environmental retrofits|269               |                       |                          |
  |Uneconomic Dispatch   |RMI         |coal plant cash flows  |190               |only includes FERC Form 1 respondants    |89.73%  |
