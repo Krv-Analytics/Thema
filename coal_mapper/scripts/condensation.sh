@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Condensation Analysis
+# CONDENSATION ANALYSIS
+    #Scripts from the PECAN Library: https://github.com/KrishnaswamyLab/PECAN
+
 SEED=2023
-DATASET=../notebooks/coal_mapper.txt #Replace with txt file 
 KERNELS=(box alpha) # box gaussian laplacian)
 
-
-
-echo "How many samples of your dataset would you like to use in the condensation algorithm?"
-
+echo "Please indicate the path to the dataset you would like to run Condensation on:"
+read DATASET
+echo "And how many samples would you like to use?"
 read N_POINTS
+echo "Thanks!"
+
 for KERNEL in "${KERNELS[@]}"; do
 echo "Running condensation for $N_POINTS samples of $DATASET with '$KERNEL' kernel..."
     poetry run python ../coal_mapper/pecan/condensation.py --kernel ${KERNEL}                                         \
