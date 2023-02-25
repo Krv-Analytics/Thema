@@ -1,9 +1,13 @@
-from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
+import os
+import numpy as np
+import tempfile
+import subprocess
+from sklearn.cluster import KMeans
+
+
+from nammu.topology import calculate_persistence_diagrams
 from nammu.curvature import ollivier_ricci_curvature, forman_curvature
 from nammu.utils import make_node_filtration
-
-from sklearn.cluster import KMeans
-import numpy as np
 
 from mapper import CoalMapper
 
@@ -120,16 +124,6 @@ class MapperTopology:
         )
         self._diagram = pd
 
-        # # User Defined Edge Filtration
-        # else:
-        #     try:
-        #         edge_values = filter_fn(self._graph)
-        #         G = make_node_filtration(self._graph, edge_values, use_min=use_min)
-        #         pd = calculate_persistence_diagrams(G)
-        #         self._diagram = pd
-        #     except:
-        #         print("Invalid filter function.")
-
     # TODO: Implement Visualization Methods. See starter code in ./nammu/
     def plot_curvature(self):
         # Look at filtration visualization script
@@ -137,13 +131,3 @@ class MapperTopology:
 
     def plot_diagrams(self):
         pass
-
-
-class CoalCondensation:
-    """Handle Communications with PECAN"""
-
-    # TODO:
-    # check whether PECAN is installed
-    # feature selection and convert to np.array, save as txt
-    # Specify Callbacks
-    # How to handle nested poetry??
