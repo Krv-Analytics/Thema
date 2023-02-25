@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
-#
-# Create data sets for upcoming diffusion condensation publication. Feel
-# free to add additional scenarios here, but check that each output name
-# is unique---else, the script will overwrite everything.
+# Condensation Analysis
+SEED=2023
+DATASET=../notebooks/coal_mapper.txt #Replace with txt file 
+KERNELS=(box alpha) # box gaussian laplacian)
 
-SEED=2021
-N_POINTS= 128 # How many data points fo we have? Will we need to subsample?
 
-DATASET = ../data_processing/data #Replace with txt file 
-KERNELS=(box) # alpha box gaussian laplacian)
-# Lets try box first as it has the quickest convergence
 
+echo "How many samples of your dataset would you like to use in the condensation algorithm?"
+
+read N_POINTS
 for KERNEL in "${KERNELS[@]}"; do
-echo "Running condensation for $DATASET with '$KERNEL' kernel..."
-    poetry run python condensation.py --kernel ${KERNEL}                                         \
+echo "Running condensation for $N_POINTS samples of $DATASET with '$KERNEL' kernel..."
+    poetry run python ../coal_mapper/pecan/condensation.py --kernel ${KERNEL}                                         \
                                     --data ${DATASET}                                          \
                                     -s ${SEED}                                                 \
                                     -n ${N_POINTS}                                             \
                                     -c CalculateDiffusionHomology CalculatePersistentHomology  \
-                                    -o data/publication/${DATASET}_${KERNEL}_n${N_POINTS}.npz
+                                    -o ../outputs/condensation/${KERNEL}_n${N_POINTS}.npz --force
 
 done
