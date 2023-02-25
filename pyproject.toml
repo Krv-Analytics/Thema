@@ -24,6 +24,7 @@ uvicorn = "^0.20.0"
 pot = "^0.8.2"
 pytest = "^7.2.1"
 sklearn = "^0.0.post1"
+yaspin = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
