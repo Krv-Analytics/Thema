@@ -10,7 +10,7 @@ import numpy as np
 
 import data
 
-from callbacks import CalculateBifiltration
+
 from callbacks import CalculateDiffusionHomology
 from callbacks import CalculatePersistentHomology
 
