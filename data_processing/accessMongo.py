@@ -19,12 +19,12 @@ def df_to_mongodb(client, database:str, col:str, df):
 def mongo_pull(client, database='cleaned', col='coal_mapper', type='csv', filepath='./local_data/'):
     '''This function creates a local file containing the specified dataset
     
-    client - insert your pymongo.MongoClient token here
-    database - name of the database you are accessing
-    col - name of collection within database
+    client - insert your pymongo.MongoClient token here \n
+    database - name of the database you are accessing \n
+    col - name of collection within database \n 
     
-    DATASET OPTIONS:
-    – coal_mapper is a complied dataset of all information
+    DATASET OPTIONS: \n
+    – coal_mapper is a complied dataset of all information \n
     – eGrid_coal is a compiled dataset of a yearly instance of every US coal plant since 2009'''
 
     client = pymongo.MongoClient(client)
