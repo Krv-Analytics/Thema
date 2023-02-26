@@ -5,4 +5,5 @@ data_processing/__pycache__/
 *.ipynb
 data_processing/local_data/*.txt
 data_processing/local_data/*.csv
+data_processing/local_data/.DS_Store
 docs/.DS_Store
