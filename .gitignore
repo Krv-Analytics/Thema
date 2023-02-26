@@ -2,3 +2,5 @@ data_processing/.DS_Store
 data_processing/__pycache__/
 .env
 *__pycache__
+*.ipynb
+docs/.DS_Store
