@@ -30,7 +30,11 @@ def mongo_pull(
     – coal_mapper is a complied dataset of all information \n
     – eGrid_coal is a compiled dataset of a yearly instance of every US coal plant since 2009"""
 
-    client = pymongo.MongoClient(client)
+    try:
+        client = pymongo.MongoClient(client)
+    except:
+        return "Could not connect to MongoDB"
+
     db = client[database]
     collection = db[col]
 
