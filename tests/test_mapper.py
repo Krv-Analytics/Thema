@@ -4,13 +4,24 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 import kmapper as km
+import pickle
 
 
 from coal_mapper.mapper import CoalMapper
 
+file = "/Users/jeremy.wayland/Desktop/Dev/coal_mapper/data_processing/local_data/coal_mapper.pkl"
 # Randomly Sampled Data
-data = np.random.rand(100, 15)
-kmeans = KMeans(n_clusters=5, random_state=1618033, n_init="auto")
+with open(file, "rb") as f:
+    df = pickle.load(f)
+    print(f"The dataframe currently has {len(df.columns)}")
+    df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+    df = df.sample(n=5, axis="columns")
+
+
+print("Loaded data")
+data = df.select_dtypes(include=np.number).values[:100]
+
+kmeans = KMeans(n_clusters=8, random_state=1618033, n_init="auto")
 
 
 class TestCoalMapper:
@@ -25,24 +36,17 @@ class TestCoalMapper:
         assert test.components == None
 
     def test_compute_mapper(self):
-        n_cubes, perc_overlap = (3, 0.2)
+        n_cubes, perc_overlap = (6, 0.4)
         test = CoalMapper(X=data)
         test.clusterer = kmeans
         test.compute_mapper(n_cubes, perc_overlap)
         G = test.to_networkx()
+        components = test.connected_components()
 
         # Post Computation
         assert type(test.cover) == km.Cover
         assert type(G) == nx.Graph
         assert len(G.nodes) > 0
-
-    def test_connected_components(self):
-        n_cubes, perc_overlap = (np.random.randint(2, 10), 0.2)
-        test = CoalMapper(X=data)
-        test.clusterer = kmeans
-        test.compute_mapper(n_cubes, perc_overlap)
-        components = test.connected_components()
-
         assert type(components) == list
         assert len(components) >= 1 and len(components) <= len(test.graph.nodes())
         assert type(components[0]) == nx.Graph
