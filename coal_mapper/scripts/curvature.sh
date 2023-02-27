@@ -10,7 +10,7 @@ MIN_INTERSECTION=(1 2 3)
 
 #TODO(Sid): Configure Data Load
     #Added stub here for reference
-DATA=../notebooks/coal_mapper.txt
+DATA=../data_processing/local_data/coal_mapper
 
 for K_VAL in "${K_VALS[@]}"; do
     for N in "${N_CUBES[@]}"; do

@@ -32,7 +32,7 @@ if __name__ == "__main__":
         "-t",
         "--type",
         type=str,
-        default="csv",
+        default="pkl",
         help="Select file type for local data.",
     )
 
