@@ -35,8 +35,8 @@ class CoalMapper(KeplerMapper):
         self,
         n_cubes: int = 4,
         perc_overlap: float = 0.2,
-        projection=TSNE(random_state=26779),
-        clusterer=KMeans(5),
+        projection=TSNE(random_state=None),
+        clusterer=KMeans(5, random_state=None),
     ):
         """
         A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
