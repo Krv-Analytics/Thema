@@ -2,17 +2,15 @@ import pytest
 import networkx as nx
 import pandas as pd
 import numpy as np
-from sklearn.cluster import DBSCAN, KMeans
-from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 import kmapper as km
 
 
 from coal_mapper.mapper import CoalMapper
-import warnings
 
 # Randomly Sampled Data
 data = np.random.rand(100, 15)
-kmeans = KMeans(n_clusters=5, random_state=1618033)
+kmeans = KMeans(n_clusters=5, random_state=1618033, n_init="auto")
 
 
 class TestCoalMapper:
@@ -31,9 +29,20 @@ class TestCoalMapper:
         test = CoalMapper(X=data)
         test.clusterer = kmeans
         test.compute_mapper(n_cubes, perc_overlap)
-        G1 = test.to_networkx()
+        G = test.to_networkx()
 
         # Post Computation
         assert type(test.cover) == km.Cover
-        assert type(G1) == nx.Graph
-        assert len(G1.nodes) > 0
+        assert type(G) == nx.Graph
+        assert len(G.nodes) > 0
+
+    def test_connected_components(self):
+        n_cubes, perc_overlap = (np.random.randint(2, 10), 0.2)
+        test = CoalMapper(X=data)
+        test.clusterer = kmeans
+        test.compute_mapper(n_cubes, perc_overlap)
+        components = test.connected_components()
+
+        assert type(components) == list
+        assert len(components) >= 1 and len(components) <= len(test.graph.nodes())
+        assert type(components[0]) == nx.Graph
