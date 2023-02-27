@@ -8,11 +8,10 @@ import sys
 import numpy as np
 import pickle
 
-from coal_mapper.utils import curvature_analysis
+from utils import curvature_analysis
 
 
 if __name__ == "__main__":
-
 
     parser = argparse.ArgumentParser()
 
@@ -47,7 +46,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-n",
-        "--n_cubes"
+        "--n_cubes",
         default=2,
         type=int,
         help="Number of cubes used to cover your dataset.",
@@ -55,37 +54,40 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-p",
-        "--perc_overlap"
+        "--perc_overlap",
         default=0.2,
         type=float,
         help="Percentage overlap of cubes in the cover.",
     )
     parser.add_argument(
-        "--min_intersection"
-        default=[1],
-        type=list,
+        "--min_intersection",
+        nargs="+",
+        default=[1, 2],
+        type=int,
         help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
     )
-
-
-
 
     args = parser.parse_args()
     this = sys.modules[__name__]
 
     assert os.path.isfile(args.data), "Invalid Input Data"
-    
+
     data = np.loadtxt(args.data)
 
-    K,p,n = args.KMeans, args.perc_overlap, args.n_cubes
+    K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
     min_intersection_vals = args.min_intersection
 
-    #Manually Set Output Directory
-        #TODO: Add functionality to generate output directory if needed
-    output_file = f"../outputs/curvature/results_ncubes{n}_{p}perc_K{K}.pkl"
+    # Manually Set Output Directory
+    # TODO: Add functionality to generate output directory if needed
+    output_file = f"../outputs/curvature/results_ncubes{n}_{p*10}perc_K{K}.pkl"
 
-
-    results = curvature_analysis(X=data,n_cubes=n,perc_overlap=p,K=K,min_intersection_vals=min_intersection_vals)
-
+    results = curvature_analysis(
+        X=data,
+        n_cubes=n,
+        perc_overlap=p,
+        K=K,
+        min_intersection_vals=min_intersection_vals,
+    )
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print("\n")
