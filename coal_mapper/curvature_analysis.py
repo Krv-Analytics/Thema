@@ -5,6 +5,8 @@ import os
 import sys
 import numpy as np
 import pickle
+import pandas as pd
+
 
 from utils import curvature_analysis
 
@@ -17,6 +19,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
+        default="../data_processing/local_data/coal_mapper.pkl",
         help="Select location of local data set, as pulled from Mongo.",
     )
     parser.add_argument(
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--n_cubes",
-        default=2,
+        default=6,
         type=int,
         help="Number of cubes used to cover your dataset.",
     )
@@ -53,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p",
         "--perc_overlap",
-        default=0.2,
+        default=0.4,
         type=float,
         help="Percentage overlap of cubes in the cover.",
     )
@@ -64,15 +67,24 @@ if __name__ == "__main__":
         type=int,
         help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
     )
+    parser.add_argument(
+        "--column_sample",
+        default=0,
+        type=int,
+        help="Number of columns to sample from full datafile.",
+    )
 
     args = parser.parse_args()
     this = sys.modules[__name__]
 
     assert os.path.isfile(args.data), "Invalid Input Data"
-    # Load Dataframe
+    # Load Dataframe and One hot encode categorical variables
     with open(args.data, "rb") as f:
         print("Reading pickle file")
         df = pickle.load(f)
+        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+        if args.column_sample:
+            df = df.sample(n=args.column_sample, axis="columns")
 
     data = df.select_dtypes(include=np.number).values
 
@@ -89,6 +101,7 @@ if __name__ == "__main__":
         perc_overlap=p,
         K=K,
         min_intersection_vals=min_intersection_vals,
+        random_state=args.seed,
     )
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
