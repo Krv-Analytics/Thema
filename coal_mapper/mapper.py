@@ -147,11 +147,14 @@ class CoalMapper(KeplerMapper):
                 self.components = components
             else:
                 # Intialize Graph representation
+                print("Initializing Full Graph")
                 self.to_networkx(min_intersection)
+                print(self.graph)
                 components = [
                     self.graph.subgraph(c).copy()
                     for c in nx.connected_components(self.graph)
                 ]
+                self.components = components
 
         return self.components
 
@@ -195,10 +198,14 @@ class CoalMapper(KeplerMapper):
             if item in elements:
                 clusters[cluster] = elements
 
-        # Note: for min_intersection >1 it is possible that item may lie in clusters spread across different components.
-        subgraph_nodes = set.union(
-            *[nx.node_connected_component(self.graph, node) for node in clusters.keys()]
-        )
+                # Note: for min_intersection >1 it is possible that item may lie in clusters spread across different components.
+
+                subgraph_nodes = set.union(
+                    *[
+                        nx.node_connected_component(self.graph, node)
+                        for node in clusters.keys()
+                    ]
+                )
 
         subgraph = self.graph.subgraph(subgraph_nodes)
 
