@@ -1,15 +1,14 @@
-import os
 import numpy as np
-import tempfile
-import subprocess
+import pickle
 from sklearn.cluster import KMeans
 
 
-from nammu.topology import calculate_persistence_diagrams
-from nammu.curvature import ollivier_ricci_curvature, forman_curvature
-from nammu.utils import make_node_filtration
+from coal_mapper.nammu.topology import calculate_persistence_diagrams
+from coal_mapper.nammu.curvature import ollivier_ricci_curvature, forman_curvature
+from coal_mapper.nammu.utils import make_node_filtration
+from data_processing.accessMongo import mongo_pull
 
-from mapper import CoalMapper
+from coal_mapper.mapper import CoalMapper
 
 
 class MapperTopology:
@@ -131,3 +130,29 @@ class MapperTopology:
 
     def plot_diagrams(self):
         pass
+
+
+def curvature_analysis(
+    X,
+    n_cubes,
+    perc_overlap,
+    K,
+    min_intersection_vals,
+):
+
+    # Configure CoalMapper
+    mapper = MapperTopology(X=X)
+    clusterer = KMeans(n_clusters=K, n_init="auto")
+    cover = (n_cubes, perc_overlap)
+    # Generate Graphs
+    results = {}
+
+    for val in min_intersection_vals:
+        mapper.set_graph(cover=cover, clusterer=clusterer, min_intersection=val)
+        mapper.calculate_homology(filter_fn=ollivier_ricci_curvature, use_min=True)
+        results[val] = (
+            mapper.graph,
+            mapper.curvature,
+            mapper.diagram,
+        )
+    return results
