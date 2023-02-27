@@ -1,8 +1,6 @@
 """Ollivier-Ricci based analysis of Coal-Plant Mapper Graphs."""
 
 import argparse
-import datetime
-import logging
 import os
 import sys
 import numpy as np
@@ -71,8 +69,12 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     assert os.path.isfile(args.data), "Invalid Input Data"
+    # Load Dataframe
+    with open(args.data, "rb") as f:
+        print("Reading pickle file")
+        df = pickle.load(f)
 
-    data = np.loadtxt(args.data)
+    data = df.select_dtypes(include=np.number).values
 
     K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
     min_intersection_vals = args.min_intersection
