@@ -1,14 +1,15 @@
 import numpy as np
-import pickle
+import sys
 from sklearn.cluster import KMeans
 
 
-from coal_mapper.nammu.topology import calculate_persistence_diagrams
-from coal_mapper.nammu.curvature import ollivier_ricci_curvature, forman_curvature
-from coal_mapper.nammu.utils import make_node_filtration
-from data_processing.accessMongo import mongo_pull
+from nammu.topology import calculate_persistence_diagrams
+from nammu.curvature import ollivier_ricci_curvature, forman_curvature
+from nammu.utils import make_node_filtration
+from mapper import CoalMapper
 
-from coal_mapper.mapper import CoalMapper
+sys.path.append("../")
+from data_processing.accessMongo import mongo_pull
 
 
 class MapperTopology:
@@ -20,9 +21,14 @@ class MapperTopology:
     def __init__(self, X: np.ndarray):
 
         self.data = X
+        self._mapper = None
         self._curvature = None
         self._graph = None
         self._diagram = None
+
+    @property
+    def mapper(self):
+        return self._mapper
 
     @property
     def graph(self):
@@ -80,11 +86,14 @@ class MapperTopology:
                 min_intersection = 1
             else:
                 print("Computing Mapper Algorithm...")
-                mapper = CoalMapper(X=self.data)
-                mapper.clusterer = clusterer
-                mapper.compute_mapper(n_cubes, perc_overlap)
+                if self._mapper is None:
+                    self._mapper = CoalMapper(X=self.data)
+
+                self._mapper.clusterer = clusterer
+
+                self._mapper.compute_mapper(n_cubes, perc_overlap)
                 print("Generating networkx Graph...")
-                self._graph = mapper.to_networkx(min_intersection)
+                self._graph = self._mapper.to_networkx(min_intersection)
 
                 # Automatically Compute OR Curvature and corresponding Diagrams when changing a graph
                 print(
@@ -150,9 +159,5 @@ def curvature_analysis(
     for val in min_intersection_vals:
         mapper.set_graph(cover=cover, clusterer=clusterer, min_intersection=val)
         mapper.calculate_homology(filter_fn=ollivier_ricci_curvature, use_min=True)
-        results[val] = (
-            mapper.graph,
-            mapper.curvature,
-            mapper.diagram,
-        )
+        results[val] = mapper
     return results
