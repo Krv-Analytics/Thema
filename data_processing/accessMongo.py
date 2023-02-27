@@ -47,10 +47,12 @@ def mongo_pull(
             index=None,
         )
         return f"file saved to {filepath+col}.csv"
-    elif type == "txt":
+    elif type == "pkl":
         temp = pd.DataFrame(documents).drop(columns={"_id"})
-        temp.to_csv(filepath + col + ".txt", index=None, sep=" ", mode="a")
-        return f"file saved to {filepath+col}.txt"
+        temp.to_pickle(
+            filepath + col + ".pkl",
+        )
+        return f"Pickle file saved to {filepath+col}.pkl"
 
 
 def mongo_rename(client, database: str, col: str, new_name: str):
