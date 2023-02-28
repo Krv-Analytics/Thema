@@ -210,3 +210,16 @@ class CoalMapper(KeplerMapper):
         subgraph = self.graph.subgraph(subgraph_nodes)
 
         return clusters, subgraph
+
+    def plot(self, path_html):
+        """"""
+        assert (  # Make sure we've already computed a mapper
+            self.mapper is not None
+        ), "First run `compute_mapper` to generate a simplicial complex."
+        _ = self.mapper.visualize(
+            self.mapper,
+            path_html=path_html,
+            include_searchbar=True,
+            include_min_intersection_selector=True,
+        )
+        print(f"Go to {path_html} for a visualization of {self}!")
