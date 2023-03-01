@@ -63,7 +63,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--min_intersection",
         nargs="+",
-        default=[1, 2],
+        default=[1],
         type=int,
         help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
     )
@@ -78,11 +78,11 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     assert os.path.isfile(args.data), "Invalid Input Data"
-    # Load Dataframe and One hot encode categorical variables
+    # Load Dataframe
     with open(args.data, "rb") as f:
         print("Reading pickle file")
         df = pickle.load(f)
-        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+        #For Local Testing on Data Subsample
         if args.column_sample:
             df = df.sample(n=args.column_sample, axis="columns")
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     # Manually Set Output Directory
     # TODO: Add functionality to generate output directory if needed
-    output_file = f"../outputs/curvature/results_ncubes{n}_{p*10}perc_K{K}.pkl"
+    output_file = f"../outputs/curvature/results_ncubes{n}_{int(p*100)}perc_K{K}.pkl"
 
     results = curvature_analysis(
         X=data,
