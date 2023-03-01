@@ -18,7 +18,12 @@ def df_to_mongodb(client, database: str, col: str, df):
 
 
 def mongo_pull(
-    client, database="cleaned", col="coal_mapper", type="csv", filepath="./local_data/"
+    client,
+    database="cleaned",
+    col="coal_mapper",
+    one_hot=True,
+    type="csv",
+    filepath="./local_data/",
 ):
     """This function creates a local file containing the specified dataset
 
@@ -40,19 +45,26 @@ def mongo_pull(
 
     documents = list(collection.find())
     # Convert the list of documents into a Pandas DataFrame
+    df = pd.DataFrame(documents).drop(columns={"_id"})
 
+    # Encode Categorical Variables
+    if one_hot:
+        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+        file = filepath + col + "_one_hot"
+    else:
+        file = filepath + col
+
+    # Generate Output Files
     if type == "csv":
-        pd.DataFrame(documents).drop(columns={"_id"}).to_csv(
-            filepath + col + ".csv",
+        df.to_csv(
+            file + ".csv",
             index=None,
         )
-        return f"file saved to {filepath+col}.csv"
     elif type == "pkl":
-        temp = pd.DataFrame(documents).drop(columns={"_id"})
-        temp.to_pickle(
-            filepath + col + ".pkl",
+        df.to_pickle(
+            file + ".pkl",
         )
-        return f"Pickle file saved to {filepath+col}.pkl"
+    return file
 
 
 def mongo_rename(client, database: str, col: str, new_name: str):
