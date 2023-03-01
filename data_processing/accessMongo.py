@@ -46,30 +46,48 @@ def mongo_pull(
     documents = list(collection.find())
     # Convert the list of documents into a Pandas DataFrame
     df = pd.DataFrame(documents).drop(columns={"_id"})
+    temp = pd.DataFrame(documents).drop(columns={"_id"})
+    dict = temp.copy()
+
+    oneHot = [
+        "ORISPL",
+        "coal_FUELS",
+        "NONcoal_FUELS",
+        "ret_DATE",
+        "PNAME",
+        "FIPSST",
+        "FIPSCNTY",
+        "LAT",
+        "LON",
+        "Utility ID",
+        "Entity Type",
+        "STCLPR",
+        "STGSPR",
+    ]
+    temp.drop(columns=[col for col in temp if col in oneHot], inplace=True)
+    dict.drop(columns=[col for col in dict if not col in oneHot], inplace=True)
 
     # Encode Categorical Variables
     if one_hot:
-        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+        temp = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
         file = filepath + col + "_one_hot"
     else:
         file = filepath + col
 
     # Generate Output Files
     if type == "csv":
-        temp = pd.DataFrame(documents).drop(columns={"_id"})
-        dict = temp.copy()
-
-        oneHot = ['ORISPL', 'coal_FUELS', 'NONcoal_FUELS', 'ret_DATE', 'PNAME', 'FIPSST', 'FIPSCNTY', 'LAT', 'LON', 'Utility ID', 'Entity Type', 'STCLPR', 'STGSPR']
-        temp.drop(columns=[col for col in temp if col in oneHot], inplace=True)
-        dict.drop(columns=[col for col in dict if not col in oneHot], inplace=True)
-
+        dict.to_csv(
+            filepath + col + "_dict.csv",
+            index=None,
+        )
         temp.to_csv(
             filepath + col + ".csv",
             index=None,
         )
         return f"file saved to {filepath+col}.csv"
     elif type == "pkl":
-        df.to_pickle(
+        dict.to_pickle(filepath + col + "_dict.pkl")
+        temp.to_pickle(
             file + ".pkl",
         )
     return file
