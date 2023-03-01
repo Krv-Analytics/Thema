@@ -14,6 +14,6 @@ echo "Running condensation for $N_POINTS samples of $DATASET with '$KERNEL' kern
                                     --data ${DATASET}                                          \
                                     -s ${SEED}                                                 \                                           \
                                     -c CalculateDiffusionHomology CalculatePersistentHomology  \
-                                    -o ../outputs/condensation/${KERNEL}_n${N_POINTS}.npz --force
+                                    -o ../outputs/condensation/${KERNEL}_n.npz --force
 
 done
