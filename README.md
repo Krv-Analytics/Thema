@@ -34,3 +34,10 @@ $ cp .env.SAMPLE .env
 $ vim .env
 ```
 This creates a .env file and opens that file in a vim editor. You will then copy your API access token into the `mongo_client` field.
+Then run the following script to generate pickled data files:
+
+```
+$ cd data_processing/ 
+$ python data.py --type="pkl"
+```
+
