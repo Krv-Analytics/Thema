@@ -26,6 +26,7 @@ pytest = "^7.2.1"
 sklearn = "^0.0.post1"
 yaspin = "^2.3.0"
 datetime = "^5.0"
+kmapper = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"

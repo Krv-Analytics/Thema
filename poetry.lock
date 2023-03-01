@@ -787,7 +787,7 @@ python-versions = ">=3.7"
 name = "kmapper"
 version = "2.0.1"
 description = "Python implementation of Mapper algorithm for Topological Data Analysis."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1824,7 +1824,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6054a199c6de618447e251de0ca57b411407dc2accf423cf8295f92a2a5313a1"
+content-hash = "eb81f0892926b2bac92831e31a29dedd611f04216dcc7fda9ce4a16f9ecbeba8"
 
 [metadata.files]
 anyio = [
