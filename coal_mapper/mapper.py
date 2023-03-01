@@ -4,6 +4,7 @@ import kmapper as km
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
+import datetime
 
 from kmapper import KeplerMapper
 
@@ -33,10 +34,10 @@ class CoalMapper(KeplerMapper):
 
     def compute_mapper(
         self,
-        n_cubes: int = 4,
-        perc_overlap: float = 0.2,
+        n_cubes: int = 6,
+        perc_overlap: float = 0.4,
         projection=TSNE(random_state=None),
-        clusterer=KMeans(5, random_state=None),
+        clusterer=KMeans(8, random_state=None),
     ):
         """
         A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
@@ -210,3 +211,23 @@ class CoalMapper(KeplerMapper):
         subgraph = self.graph.subgraph(subgraph_nodes)
 
         return clusters, subgraph
+
+    def plot(self, output_dir: str = "../outputs/htmls/"):
+        """"""
+        assert (
+            self.mapper is not None
+        ), "First run `set_graph` to generate a simplicial complex."
+        time = int(datetime.datetime.now().timestamp())
+        path_html = output_dir + f"coal_mapper_{time}.html"
+        print(path_html)
+        dic = self.mapper
+        assert type(dic) == dict, "Not a dictionary"
+        _ = self.visualize(
+            dic,
+            path_html=path_html,
+            # include_searchbar=True,
+            # include_min_intersection_selector=False
+            # title="Coal Mapper",
+        )
+        print(f"Go to {path_html} for a visualization of your CoalMapper!")
+        return path_html

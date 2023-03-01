@@ -43,19 +43,26 @@ if __name__ == "__main__":
         default="./local_data/",
         help="Output Dir for results.",
     )
+    parser.add_argument(
+        "-e",
+        "--one_hot",
+        type=bool,
+        default=True,
+        help="Option for categorical variables to be one hot encoded via `pd.dummies`.",
+    )
 
     args = parser.parse_args()
-    mongo_pull(
+    file = mongo_pull(
         client,
         database=args.database,
+        one_hot=args.one_hot,
         type=args.type,
         col=args.col,
         filepath=args.output,
     )
 
-    assert os.path.isfile(
-        f"{args.output+args.col}.{args.type}"
-    ), "Failed to write data locally"
+    assert os.path.isfile(f"{file}.{args.type}"), "Failed to write data locally"
     print(
         f"Data successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database."
     )
+    print(f"Written to: {file}")

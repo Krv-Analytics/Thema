@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import sys
+import pickle
 
 import numpy as np
 
@@ -146,22 +147,13 @@ if __name__ == "__main__":
     # this. The unfortunate issue with this is that generators must be
     # named differently than files...
     if os.path.isfile(args.data):
-        X = np.loadtxt(args.data)
+        with open(args.data, "rb") as f:
+            print("Reading pickle file")
+            df = pickle.load(f).dropna(axis=1)
+        X = df.values
     else:
-        # Search for a generator routine, as requested by the client. This
-        # does not fail gracefully.
-        generator = getattr(data, args.data)
-
-        logging.info(f"Using generator routine {generator}")
-
-        X, C = generator(
-            args.num_samples,
-            random_state=seed,
-            r=args.r,
-            R=args.R,
-            K=args.K,
-            beta=args.beta,
-        )
+        print("Invalid File for Coal Analysis")
+        sys.exit(-1)
 
     if np.isnan(args.epsilon):
         args.epsilon = estimate_epsilon(X)
