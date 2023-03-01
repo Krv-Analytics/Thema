@@ -3,20 +3,16 @@
     #Scripts from the PECAN Library: https://github.com/KrishnaswamyLab/PECAN
 
 SEED=2023
-KERNELS=(box alpha) # box gaussian laplacian)
+KERNELS=(box) # box gaussian laplacian)
 
 echo "Please indicate the path to the dataset you would like to run Condensation on:"
 read DATASET
-echo "And how many samples would you like to use?"
-read N_POINTS
-echo "Thanks!"
 
 for KERNEL in "${KERNELS[@]}"; do
 echo "Running condensation for $N_POINTS samples of $DATASET with '$KERNEL' kernel..."
-    poetry run python ../coal_mapper/pecan/condensation.py --kernel ${KERNEL}                                         \
+    poetry run python ./pecan/condensation.py --kernel ${KERNEL}                               \
                                     --data ${DATASET}                                          \
-                                    -s ${SEED}                                                 \
-                                    -n ${N_POINTS}                                             \
+                                    -s ${SEED}                                                 \                                           \
                                     -c CalculateDiffusionHomology CalculatePersistentHomology  \
                                     -o ../outputs/condensation/${KERNEL}_n${N_POINTS}.npz --force
 
