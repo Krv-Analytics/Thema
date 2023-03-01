@@ -37,7 +37,6 @@ This creates a .env file and opens that file in a vim editor. You will then copy
 Then run the following script to generate pickled data files:
 
 ```
-$ poetry shell
 $ cd data_processing/ 
 $ poetry run python data.py --type="pkl"
 ```
