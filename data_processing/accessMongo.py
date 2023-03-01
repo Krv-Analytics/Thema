@@ -42,11 +42,22 @@ def mongo_pull(
     # Convert the list of documents into a Pandas DataFrame
 
     if type == "csv":
-        pd.DataFrame(documents).drop(columns={"_id"}).to_csv(
+        temp = pd.DataFrame(documents).drop(columns={"_id"})
+        dict = temp.copy()
+
+        oneHot = ['ORISPL', 'coal_FUELS', 'NONcoal_FUELS', 'ret_DATE', 'PNAME', 'FIPSST', 'FIPSCNTY', 'LAT', 'LON', 'Utility ID', 'Entity Type', 'STCLPR', 'STGSPR']
+        temp.drop(columns=[col for col in temp if col in oneHot], inplace=True)
+        dict.drop(columns=[col for col in dict if not col in oneHot], inplace=True)
+
+        temp.to_csv(
             filepath + col + ".csv",
             index=None,
         )
-        return f"file saved to {filepath+col}.csv"
+        dict.to_csv(
+            filepath + 'DICT-'+col + ".csv",
+            index=None,
+        )
+        return f"files saved to {filepath+col}.csv"
     elif type == "pkl":
         temp = pd.DataFrame(documents).drop(columns={"_id"})
         temp.to_pickle(
