@@ -50,12 +50,30 @@ if __name__ == "__main__":
         default=True,
         help="Option for categorical variables to be one hot encoded via `pd.dummies`.",
     )
+    parser.add_argument(
+        "-s",
+        "--scaled",
+        type=bool,
+        default=True,
+        help="Option to standardize data by removing the mean and scaling to unit variance.",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--TSNE_projected",
+        type=bool,
+        default=False,
+        help="Option to project the data into two dimensions using TSNE",
+    )
+    
 
     args = parser.parse_args()
     file = mongo_pull(
         client,
         database=args.database,
         one_hot=args.one_hot,
+        scaled=args.scaled,
+        TSNE=args.TSNE_projected,
         type=args.type,
         col=args.col,
         filepath=args.output,

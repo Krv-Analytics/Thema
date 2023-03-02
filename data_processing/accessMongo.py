@@ -1,6 +1,7 @@
 import pandas as pd
 import pymongo
-
+from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
 
 def df_to_mongodb(client, database: str, col: str, df):
     """client - insert your pymongo.MongoClient token here
@@ -16,12 +17,37 @@ def df_to_mongodb(client, database: str, col: str, df):
     # Insert the data into specified MongoDB collection
     collection.insert_many(data)
 
+def mongo_to_readable(
+    client,
+    database="cleaned",
+    col="coal_mapper",
+    filepath="./local_data/",
+):
+    '''this function returns a complete coal_mapper dataframe with readable values (not scaled, projected, or encoded)'''
+    try:
+        client = pymongo.MongoClient(client)
+    except:
+        return "Could not connect to MongoDB"
+
+    db = client[database]
+    collection = db[col]
+
+    documents = list(collection.find())
+    # Convert the list of documents into a Pandas DataFrame
+    temp = pd.DataFrame(documents).drop(columns={"_id"})
+    temp.to_csv(
+            filepath + col +"_READABLE"+ ".csv",
+            index=None,
+        )
+    return f"file saved to {filepath+col}.csv"
 
 def mongo_pull(
     client,
     database="cleaned",
     col="coal_mapper",
     one_hot=True,
+    scaled = True,
+    TSNE = False,
     type="csv",
     filepath="./local_data/",
 ):
@@ -46,48 +72,53 @@ def mongo_pull(
     documents = list(collection.find())
     # Convert the list of documents into a Pandas DataFrame
     df = pd.DataFrame(documents).drop(columns={"_id"})
-    temp = pd.DataFrame(documents).drop(columns={"_id"})
-    dict = temp.copy()
+    temp = df.copy()
 
-    oneHot = [
-        "ORISPL",
-        "coal_FUELS",
-        "NONcoal_FUELS",
-        "ret_DATE",
-        "PNAME",
-        "FIPSST",
-        "FIPSCNTY",
-        "LAT",
-        "LON",
-        "Utility ID",
-        "Entity Type",
-        "STCLPR",
-        "STGSPR",
-    ]
-    temp.drop(columns=[col for col in temp if col in oneHot], inplace=True)
-    dict.drop(columns=[col for col in dict if not col in oneHot], inplace=True)
+    dataDict = ['ORISPL', 'coal_FUELS', 'NONcoal_FUELS', 'ret_DATE', 'PNAME', 'FIPSST', 'PLPRMFL', 'FIPSCNTY', 'LAT', 'LON', 'Utility ID', 'Entity Type', 'STCLPR', 'STGSPR', 'SECTOR']
+    df.drop(dataDict, axis=1, inplace=True)
+    temp.drop(columns=[col for col in temp if not col in dataDict], inplace=True)
 
     # Encode Categorical Variables
     if one_hot:
-        temp = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
+        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
         file = filepath + col + "_one_hot"
     else:
         file = filepath + col
 
+    # Scale Data
+    if scaled:
+        scaler = StandardScaler()
+        data = scaler.fit_transform(df)
+        df = pd.DataFrame(data, columns = list(df.columns))
+        file = file + "_scaled"
+    else:
+        file = file
+
+    # TSNE project the data
+    if TSNE:
+        features = df.dropna()
+        tsne = TSNE(n_components=2, random_state=0)
+        projections = tsne.fit_transform(features)
+        df = pd.DataFrame(projections, columns = ['x', 'y'])
+        file = file + "_TSNE"
+    else:
+        file = file
+
     # Generate Output Files
     if type == "csv":
-        dict.to_csv(
-            filepath + col + "_dict.csv",
+
+        df.to_csv(
+            file + ".csv",
             index=None,
         )
         temp.to_csv(
-            filepath + col + ".csv",
+            filepath + col +"_dict"+ ".csv",
             index=None,
         )
         return f"file saved to {filepath+col}.csv"
+    
     elif type == "pkl":
-        dict.to_pickle(filepath + col + "_dict.pkl")
-        temp.to_pickle(
+        df.to_pickle(
             file + ".pkl",
         )
     return file
