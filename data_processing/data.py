@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-p",
-        "--TSNE_projected",
+        "--TSNE_project",
         type=bool,
         default=False,
         help="Option to project the data into two dimensions using TSNE",
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         database=args.database,
         one_hot=args.one_hot,
         scaled=args.scaled,
-        TSNE=args.TSNE_projected,
+        TSNE_project=args.TSNE_projected,
         type=args.type,
         col=args.col,
         filepath=args.output,

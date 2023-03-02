@@ -33,6 +33,7 @@ def mongo_to_readable(
     collection = db[col]
 
     documents = list(collection.find())
+
     # Convert the list of documents into a Pandas DataFrame
     temp = pd.DataFrame(documents).drop(columns={"_id"})
     temp.to_csv(
@@ -47,7 +48,7 @@ def mongo_pull(
     col="coal_mapper",
     one_hot=True,
     scaled = True,
-    TSNE = False,
+    TSNE_project = False,
     type="csv",
     filepath="./local_data/",
 ):
@@ -70,6 +71,7 @@ def mongo_pull(
     collection = db[col]
 
     documents = list(collection.find())
+
     # Convert the list of documents into a Pandas DataFrame
     df = pd.DataFrame(documents).drop(columns={"_id"})
     temp = df.copy()
@@ -85,7 +87,7 @@ def mongo_pull(
     else:
         file = filepath + col
 
-    # Scale Data
+    # Scale Data using StandardScaler
     if scaled:
         scaler = StandardScaler()
         data = scaler.fit_transform(df)
@@ -94,8 +96,8 @@ def mongo_pull(
     else:
         file = file
 
-    # TSNE project the data
-    if TSNE:
+    # TSNE project the data into 2 dimensions
+    if TSNE_project:
         features = df.dropna()
         tsne = TSNE(n_components=2, random_state=0)
         projections = tsne.fit_transform(features)
@@ -115,12 +117,12 @@ def mongo_pull(
             filepath + col +"_dict"+ ".csv",
             index=None,
         )
-        return f"file saved to {filepath+col}.csv"
     
     elif type == "pkl":
         df.to_pickle(
             file + ".pkl",
         )
+
     return file
 
 
