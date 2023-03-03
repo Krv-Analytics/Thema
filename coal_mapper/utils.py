@@ -2,9 +2,12 @@ import numpy as np
 import sys
 from sklearn.cluster import KMeans
 import pandas as pd
+import seaborn as sns
 
 
-from nammu.topology import calculate_persistence_diagrams
+
+from persim import plot_diagrams
+from nammu.topology import calculate_persistence_diagrams, PersistenceDiagram
 from nammu.curvature import ollivier_ricci_curvature, forman_curvature
 from nammu.utils import make_node_filtration
 from mapper import CoalMapper
@@ -141,10 +144,15 @@ class MapperTopology:
     # TODO: Implement Visualization Methods. See starter code in ./nammu/
     def plot_curvature(self):
         # Look at filtration visualization script
-        pass
+        return sns.histplot(self.curvature)
 
     def plot_diagrams(self):
-        pass
+        persim_diagrams = [np.asarray(self.diagram[0]._pairs), np.asarray(self.diagram[1]._pairs)]
+        #if filter:
+        #    dim0 = dim0[dim0.T[0] < dim0.T[1]]
+        #     if len(dim1) > 0:
+        #         dim1 = dim1[dim1.T[0] < dim1.T[1]]
+        return plot_diagrams(persim_diagrams, show=True)
 
 
 def curvature_analysis(

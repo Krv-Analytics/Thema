@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{ include = "coal_mapper" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 numpy = "^1.24.2"
 networkx = "^3.0"
 black = "^23.1.0"
@@ -27,6 +27,8 @@ sklearn = "^0.0.post1"
 yaspin = "^2.3.0"
 datetime = "^5.0"
 kmapper = "^2.0.1"
+scikit-learn = "^1.2.1"
+seaborn = "^0.12.2"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
