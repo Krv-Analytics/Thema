@@ -3,7 +3,7 @@ import sys
 from sklearn.cluster import KMeans
 import pandas as pd
 import seaborn as sns
-
+import ot
 
 
 from persim import plot_diagrams
@@ -147,8 +147,11 @@ class MapperTopology:
         return sns.histplot(self.curvature)
 
     def plot_diagrams(self):
-        persim_diagrams = [np.asarray(self.diagram[0]._pairs), np.asarray(self.diagram[1]._pairs)]
-        #if filter:
+        persim_diagrams = [
+            np.asarray(self.diagram[0]._pairs),
+            np.asarray(self.diagram[1]._pairs),
+        ]
+        # if filter:
         #    dim0 = dim0[dim0.T[0] < dim0.T[1]]
         #     if len(dim1) > 0:
         #         dim1 = dim1[dim1.T[0] < dim1.T[1]]
@@ -177,3 +180,12 @@ def curvature_analysis(
         mapper.calculate_homology(filter_fn=ollivier_ricci_curvature, use_min=True)
         results[val] = mapper
     return results
+
+
+def ot_metric(arr1, arr2):
+    """Compare the curvature arrays between two mapper graphs using optimal transport"""
+    # Cost Matrix
+    M = ot.dist(arr1, arr2)
+    d = ot.emd(arr1, arr2, M)
+    # TODO: Maybe add in sinkhord regularisation parameter? Depends on how well this does
+    return d
