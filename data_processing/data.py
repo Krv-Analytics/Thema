@@ -35,14 +35,6 @@ if __name__ == "__main__":
         default="pkl",
         help="Select file type for local data.",
     )
-
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        default="./local_data/",
-        help="Output Dir for results.",
-    )
     parser.add_argument(
         "-e",
         "--one_hot",
@@ -65,20 +57,26 @@ if __name__ == "__main__":
         default=False,
         help="Option to project the data into two dimensions using TSNE",
     )
-    
 
     args = parser.parse_args()
+
+    cwd = os.path.dirname(__file__)
+    output_dir = os.path.join(cwd, "local_data/")
+    # If ./local_data/ doesn't exist yet, create it
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
     file = mongo_pull(
         client,
+        filepath=output_dir,
         database=args.database,
         one_hot=args.one_hot,
         scaled=args.scaled,
         TSNE_project=args.TSNE_project,
         type=args.type,
         col=args.col,
-        filepath=args.output,
     )
-
+    print(__file__)
     assert os.path.isfile(f"{file}.{args.type}"), "Failed to write data locally"
     print(
         f"Data successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database."
