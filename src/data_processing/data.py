@@ -79,7 +79,15 @@ if __name__ == "__main__":
     )
     output_path = os.path.join(output_dir, file)
     assert os.path.isfile(f"{output_path}.{args.type}"), "Failed to write data locally"
+
+    # Setting message to print(readable) location of output message
+    out_dir_message =  output_path
+    out_dir_message = '/'.join(out_dir_message.split('/')[-2:])
+
+    print("-------------------------------------------------------------------------------- \n\n")
     print(
-        f"Data successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
+        f"Successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
     )
-    print(f"Written to data/{file}.{args.type}")
+    print(f"Written to {out_dir_message}.{args.type}")
+
+    print("\n\n -------------------------------------------------------------------------------- ")
