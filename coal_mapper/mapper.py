@@ -373,12 +373,22 @@ class MapperTopology:
         else:
             print("ERROR: This mapper computation produced a graph with 0 nodes")
 
-    # TODO: Implement Visualization Methods. See starter code in ./nammu/
-    def plot_curvature(self):
-        # Look at filtration visualization script
-        return sns.histplot(self.curvature)
+    def plot_curvature(self, bins="auto", kde=False):
+        """Visualize Curvature of a mapper graph as a histogram."""
+
+        ax = sns.histplot(
+            self.curvature,
+            discrete=True,
+            stat="probability",
+            kde=kde,
+            bins=bins,
+        )
+        ax.set(xlabel="Ollivier Ricci Edge Curvatures")
+
+        return ax
 
     def plot_diagrams(self):
+        """Visualize persistence diagrams of a mapper graph."""
         persim_diagrams = [
             np.asarray(self.diagram[0]._pairs),
             np.asarray(self.diagram[1]._pairs),
