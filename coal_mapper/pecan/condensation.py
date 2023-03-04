@@ -149,7 +149,8 @@ if __name__ == "__main__":
     if os.path.isfile(args.data):
         with open(args.data, "rb") as f:
             print("Reading pickle file")
-            df = pickle.load(f).dropna(axis=1)
+            # Drop Rows for now
+            df = pickle.load(f).dropna(axis=0)
         X = df.values
     else:
         print("Invalid File for Coal Analysis")
