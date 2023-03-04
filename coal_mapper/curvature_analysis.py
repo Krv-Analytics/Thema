@@ -7,9 +7,7 @@ import numpy as np
 import pickle
 import pandas as pd
 
-
-from utils import curvature_analysis
-
+from utils import curvature_analysis, generate_results_filename
 
 if __name__ == "__main__":
 
@@ -19,7 +17,6 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default="../data_processing/local_data/coal_mapper.pkl",
         help="Select location of local data set, as pulled from Mongo.",
     )
     parser.add_argument(
@@ -68,6 +65,7 @@ if __name__ == "__main__":
         help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
     )
     parser.add_argument(
+        "-c",
         "--column_sample",
         default=0,
         type=int,
@@ -82,19 +80,26 @@ if __name__ == "__main__":
     with open(args.data, "rb") as f:
         print("Reading pickle file")
         df = pickle.load(f)
-        #For Local Testing on Data Subsample
+        # For Local Testing on Data Subsample
         if args.column_sample:
             df = df.sample(n=args.column_sample, axis="columns")
 
     data = df.select_dtypes(include=np.number).values
 
+    output_file = generate_results_filename(args)
+
+    cwd = os.path.dirname(__file__)
+    output_dir = os.path.join(cwd, "../outputs/curvature/")
+
+    # Check if output directory already exists
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
+
     K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
     min_intersection_vals = args.min_intersection
-
-    # Manually Set Output Directory
-    # TODO: Add functionality to generate output directory if needed
-    output_file = f"../outputs/curvature/results_ncubes{n}_{int(p*100)}perc_K{K}.pkl"
-
     results = curvature_analysis(
         X=data,
         n_cubes=n,
