@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 
-from coal_mapper.nammu.curvature import ollivier_ricci_curvature, forman_curvature
-from coal_mapper.nammu.topology import PersistenceDiagram
+from src.nammu.curvature import ollivier_ricci_curvature, forman_curvature
+from src.nammu.topology import PersistenceDiagram
 
-from coal_mapper.utils import MapperTopology as MTop
+from src.utils import MapperTopology as MTop
 
 # Randomly Sampled Data
 data = np.random.rand(100, 15)
