@@ -1,4 +1,4 @@
-"""Ollivier-Ricci based analysis of Coal-Plant Mapper Graphs."""
+"""Compute ollivier-Ricci curvature for Coal-Plant Mapper Graphs."""
 
 import argparse
 import os
@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 import pandas as pd
 
-from utils import curvature_analysis, generate_results_filename
+from utils import curvature_iterator, generate_results_filename
 
 if __name__ == "__main__":
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
     min_intersection_vals = args.min_intersection
-    results = curvature_analysis(
+    results = curvature_iterator(
         X=data,
         n_cubes=n,
         perc_overlap=p,
@@ -108,6 +108,8 @@ if __name__ == "__main__":
         min_intersection_vals=min_intersection_vals,
         random_state=args.seed,
     )
+
+    results["hyperparameters"] = (n, p, K)
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
     print("\n")
