@@ -79,7 +79,7 @@ if __name__ == "__main__":
         "-v",
         "--Verbose",
         default=False,
-        type=bool,
+        action="store_true",
         help="If set, will print messages detailing computation and output.",
     )
 
