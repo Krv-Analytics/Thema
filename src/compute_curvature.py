@@ -9,6 +9,9 @@ import pandas as pd
 
 from utils import curvature_iterator, generate_results_filename
 
+
+cwd = os.path.dirname(__file__)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -17,6 +20,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
+        default = os.path.join(cwd, "../data/coal_mapper_one_hot_scaled_TSNE.pkl"),
         help="Select location of local data set, as pulled from Mongo.",
     )
     parser.add_argument(
@@ -71,6 +75,13 @@ if __name__ == "__main__":
         type=int,
         help="Number of columns to sample from full datafile.",
     )
+    parser.add_argument(
+        "-v",
+        "--Verbose",
+        default=False,
+        type=bool,
+        help="If set, will print messages detailing computation and output.",
+    )
 
     args = parser.parse_args()
     this = sys.modules[__name__]
@@ -88,7 +99,7 @@ if __name__ == "__main__":
 
     output_file = generate_results_filename(args)
 
-    cwd = os.path.dirname(__file__)
+   
     output_dir = os.path.join(cwd, "../outputs/curvature/")
 
     # Check if output directory already exists
@@ -109,7 +120,20 @@ if __name__ == "__main__":
         random_state=args.seed,
     )
 
+<<<<<<< HEAD:src/compute_curvature.py
     results["hyperparameters"] = (n, p, K)
+=======
+    out_dir_message =  output_file
+    out_dir_message = '/'.join(out_dir_message.split('/')[-2:])
+
+>>>>>>> main:src/curvature_analysis.py
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    print("\n")
+    if(args.Verbose):
+        print("\n")
+        print("-------------------------------------------------------------------------------- \n\n")
+        print(
+        f"Successfully written curvature analysis output to {out_dir_message}"
+        )
+
+        print("\n\n -------------------------------------------------------------------------------- ")

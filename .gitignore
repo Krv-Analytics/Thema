@@ -9,7 +9,11 @@ data_processing/local_data/.DS_Store
 docs/.DS_Store
 outputs/
 data/
+<<<<<<< HEAD
 .DS_Store
 notebooks/coal_mapper.pkl
 notebooks/coal_mapper.txt
 notebooks/diffusion.npz
+=======
+
+>>>>>>> main

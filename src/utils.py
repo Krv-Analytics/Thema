@@ -23,7 +23,7 @@ def curvature_iterator(
 
     # Configure CoalMapper
     mapper = MapperTopology(X=X)
-    clusterer = KMeans(n_clusters=K, random_state=random_state)
+    clusterer = KMeans(n_clusters=K, random_state=random_state, n_init=1)
     cover = (n_cubes, perc_overlap)
     # Generate Graphs
     results = {}
