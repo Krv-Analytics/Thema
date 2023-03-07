@@ -7,7 +7,7 @@ import kmapper as km
 import pickle
 
 
-from coal_mapper.mapper import CoalMapper
+from src.mapper import CoalMapper
 
 file = "/Users/jeremy.wayland/Desktop/Dev/coal_mapper/data_processing/local_data/coal_mapper.pkl"
 # Randomly Sampled Data
