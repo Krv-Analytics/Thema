@@ -120,13 +120,10 @@ if __name__ == "__main__":
         random_state=args.seed,
     )
 
-<<<<<<< HEAD:src/compute_curvature.py
     results["hyperparameters"] = (n, p, K)
-=======
     out_dir_message =  output_file
     out_dir_message = '/'.join(out_dir_message.split('/')[-2:])
 
->>>>>>> main:src/curvature_analysis.py
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
     if(args.Verbose):
