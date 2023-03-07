@@ -20,7 +20,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default = os.path.join(cwd, "../data/coal_mapper_one_hot_scaled_TSNE.pkl"),
+        default=os.path.join(cwd, "./../data/coal_mapper_one_hot_scaled_TSNE.pkl"),
         help="Select location of local data set, as pulled from Mongo.",
     )
     parser.add_argument(
@@ -99,7 +99,6 @@ if __name__ == "__main__":
 
     output_file = generate_results_filename(args)
 
-   
     output_dir = os.path.join(cwd, "../outputs/curvature/")
 
     # Check if output directory already exists
@@ -121,16 +120,18 @@ if __name__ == "__main__":
     )
 
     results["hyperparameters"] = (n, p, K)
-    out_dir_message =  output_file
-    out_dir_message = '/'.join(out_dir_message.split('/')[-2:])
+    out_dir_message = output_file
+    out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
     with open(output_file, "wb") as handle:
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    if(args.Verbose):
+    if args.Verbose:
         print("\n")
-        print("-------------------------------------------------------------------------------- \n\n")
         print(
-        f"Successfully written curvature analysis output to {out_dir_message}"
+            "-------------------------------------------------------------------------------- \n\n"
         )
+        print(f"Successfully written curvature analysis output to {out_dir_message}")
 
-        print("\n\n -------------------------------------------------------------------------------- ")
+        print(
+            "\n\n -------------------------------------------------------------------------------- "
+        )
