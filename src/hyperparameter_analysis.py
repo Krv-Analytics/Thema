@@ -9,7 +9,6 @@ from utils import (
     plot_dendrogram,
 )
 
-
 from sklearn.cluster import AgglomerativeClustering
 
 
