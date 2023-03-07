@@ -130,10 +130,14 @@ def get_diagrams():
             diagram = mappers[min_intersection].diagram
             new_key = (*hyper_params, min_intersection)
             diagrams[new_key] = diagram
-    return diagrams
+    keys = list(diagrams.keys())
+    keys.sort()
+    sorted_diagrams = {i: diagrams[i] for i in keys}
+
+    return keys, sorted_diagrams
 
 
-def plot_dendrogram(model, **kwargs):
+def plot_dendrogram(model, labels, distance, **kwargs):
     """Create linkage matrix and then plot the dendrogram for Hierarchical clustering."""
 
     counts = np.zeros(model.children_.shape[0])
@@ -152,5 +156,8 @@ def plot_dendrogram(model, **kwargs):
     ).astype(float)
 
     # Plot the corresponding dendrogram
-    dendrogram(linkage_matrix, **kwargs)
+    dendrogram(linkage_matrix, labels=labels, **kwargs)
+    plt.title("Hyperparameter Dendrogram")
+    plt.xlabel("Coordinates: (n_cubes,perc_overlap,K,min_intersection).")
+    plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
