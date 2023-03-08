@@ -307,7 +307,7 @@ class MapperTopology:
     def set_graph(
         self,
         cover,
-        clusterer=KMeans(5, n_init="auto", random_state=2023),
+        clusterer=KMeans(5, n_init=10, random_state=2023),
         min_intersection: int = 1,
     ):
         """Generate a new networkX graph from Data via mapper. Recompute"""
