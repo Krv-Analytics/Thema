@@ -114,9 +114,14 @@ def read_curvature_results():
         if file.endswith(".pkl"):
             with open(curvature_dir + file, "rb") as f:
                 result_dictionary = pickle.load(f)
-                hyper_params = result_dictionary["hyperparameters"]
-                result_dictionary.pop("hyperparameters")
-                data[hyper_params] = result_dictionary
+                test = result_dictionary[1]
+                try:
+                    if test.graph:
+                        hyper_params = result_dictionary["hyperparameters"]
+                        result_dictionary.pop("hyperparameters")
+                        data[hyper_params] = result_dictionary
+                except:
+                    print(f"{file} had an empty mapper!")
 
     return data
 
