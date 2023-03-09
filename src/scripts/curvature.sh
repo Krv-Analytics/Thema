@@ -3,10 +3,10 @@
 
 #Run from src/ directory
 
-K_VALS=(3)
-N_CUBES=(8)
-PERC_OVERLAP=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
-MIN_INTERSECTION=(1) 
+K_VALS=(6 7 8 9 10 11 12 13 14 15 )
+N_CUBES=(7 8 9 10 11 12 13 14 15 16 17 18 19)
+PERC_OVERLAP=(0.5)
+MIN_INTERSECTION=(1 2 3 4 5 6 7 8 9 10) 
 
 
 for K_VAL in "${K_VALS[@]}"; do
