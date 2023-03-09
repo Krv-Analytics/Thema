@@ -20,15 +20,20 @@ def curvature_metric(metric="bottleneck"):
     return keys, distances
 
 
-def cluster_hyperparams(metric="bottleneck"):
+# kernel based embedding
+
+
+def cluster_hyperparams(metric="bottleneck", p=3):
     keys, distances = curvature_metric(metric)
     model = AgglomerativeClustering(
         affinity="precomputed", linkage="single", compute_distances=True
     )
     model.fit(distances)
-
+    print(keys)
+    l = len(keys)
+    keys = [key[3] for key in keys]
     # plot the top three levels of the dendrogram
-    plot_dendrogram(model, keys, metric, truncate_mode="level", p=3)
+    return plot_dendrogram(model, range(len(keys)), metric, truncate_mode="level", p=p)
 
 
 if __name__ == "__main__":
