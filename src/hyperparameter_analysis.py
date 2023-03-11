@@ -31,7 +31,7 @@ def cluster_hyperparams(metric="bottleneck", p=3):
     model.fit(distances)
     print(keys)
     l = len(keys)
-    keys = [key[3] for key in keys]
+    keys = [key[2] for key in keys]
     # plot the top three levels of the dendrogram
     return plot_dendrogram(model, range(len(keys)), metric, truncate_mode="level", p=p)
 
