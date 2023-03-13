@@ -3,7 +3,10 @@ import pymongo
 from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import TSNE
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
+my_client = os.getenv("mongo_client")
 
 def df_to_mongodb(client, database: str, col: str, df):
     """client - insert your pymongo.MongoClient token here
@@ -20,11 +23,11 @@ def df_to_mongodb(client, database: str, col: str, df):
     collection.insert_many(data)
 
 
-def mongo_to_readable(
-    client,
+def mongo_getRawData(
+    client=my_client,
     database="cleaned",
     col="coal_mapper",
-    filepath="./local_data/",
+    TSNE = True,
 ):
     """this function returns a complete coal_mapper dataframe with readable values (not scaled, projected, or encoded)"""
     try:
@@ -34,16 +37,37 @@ def mongo_to_readable(
 
     db = client[database]
     collection = db[col]
-
     documents = list(collection.find())
 
     # Convert the list of documents into a Pandas DataFrame
-    temp = pd.DataFrame(documents).drop(columns={"_id"})
-    temp.to_csv(
-        filepath + col + "_READABLE" + ".csv",
-        index=None,
-    )
-    return f"file saved to {filepath+col}.csv"
+    if TSNE == True:
+        dataDict = [
+        "ORISPL",
+        "coal_FUELS",
+        "NONcoal_FUELS",
+        "ret_DATE",
+        "PNAME",
+        "FIPSST",
+        "PLPRMFL",
+        "FIPSCNTY",
+        "LAT",
+        "LON",
+        "Utility ID",
+        "Entity Type",
+        "STCLPR",
+        "STGSPR",
+        "SECTOR",
+        ]
+        df = pd.DataFrame(documents).drop(columns={"_id"})
+        temp=df.copy()
+        df.drop(dataDict, axis=1, inplace=True)
+        temp.drop(columns=[col for col in temp if not col in dataDict], inplace=True)
+
+        df = df.dropna()
+        return df.merge(temp, how='left', left_index=True, right_index=True)
+    else:
+        return pd.DataFrame(documents).drop(columns={"_id"})
+
 
 
 def mongo_pull(

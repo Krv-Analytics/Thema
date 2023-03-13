@@ -94,9 +94,12 @@ def convert_to_gtda(diagrams):
 def generate_results_filename(args, suffix=".pkl"):
     """Generate output filename string from CLI arguments when running compute_curvature script."""
 
-    K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
+    K, p, n, D = args.KMeans, args.perc_overlap, args.n_cubes, args.data
 
-    output_file = f"results_ncubes{n}_{int(p*100)}perc_K{K}.pkl"
+    D = "/".join(D.split("/")[-1:])
+    D = D.rsplit('.', 1)[0]
+
+    output_file = f"results_ncubes{n}_{int(p*100)}perc_K{K}_{D}.pkl"
 
     return output_file
 
