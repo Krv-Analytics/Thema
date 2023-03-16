@@ -48,9 +48,9 @@ def UMAP_grid(df, dists, neighbors):
              [0.5, '#ee9b00'],
              [0.6, '#ca6702'],
              [0.7, '#bb3e03'],
-             [0.8, '#ae2012'],
-             [0.9, '#9b2226'],
-             [1.0, '#a50026']]  
+             [0.8, '#e82f1e'],
+             [0.9, '#a30309'],
+             [1.0, '#780a23']]  
     
     # generate subplot titles
     fig = make_subplots(
