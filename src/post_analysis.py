@@ -38,10 +38,7 @@ if __name__ == "__main__":
 
     TM = df[1]
     TM.populate_raw_data(mongo_client = client)
-    TM._raw_data = TM._raw_data.dropna()
-    dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
-    neighbors = [3, 5, 10, 20, 40]
-    TM.UMAP_grid(dists=dists, neighbors = neighbors)
+    print(TM._raw_data.head())
 
 #TODO:
 # 1) finish mapper.py populate_connected_components() functionality
