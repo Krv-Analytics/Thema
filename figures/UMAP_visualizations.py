@@ -40,7 +40,7 @@ def UMAP_grid(df, dists, neighbors):
     )
 
     # define custom color scale
-    map_colors = [[0.0, '#001219'],
+    map_colors = [[0.0, '#043e4a'],
              [0.1, '#005f73'],
              [0.2, '#0a9396'],
              [0.3, '#94d2bd'],
