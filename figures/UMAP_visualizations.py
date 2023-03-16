@@ -3,8 +3,13 @@ import os
 import sys
 import pandas as pd
 import pickle
+import numpy as np
+
 
 from umap import UMAP
+import matplotlib.pyplot as plt
+import seaborn as sns
+import hdbscan
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -47,7 +52,7 @@ def UMAP_grid(df, dists, neighbors):
         shared_xaxes=True,
         shared_yaxes=True,
     )
-
+    cluster_distribution = []
     # generate figure
     for d in range(0, len(dists)):
         for n in range(0, len(neighbors)):
@@ -59,13 +64,21 @@ def UMAP_grid(df, dists, neighbors):
                 random_state=0,
             )
             proj_2d = umap_2d.fit_transform(data)
+            clusterer = hdbscan.HDBSCAN(min_cluster_size=10).fit(proj_2d)
             outdf = pd.DataFrame(proj_2d, columns=["0", "1"])
+            outdf["labels"] = clusterer.labels_
+
+            num_clusters = len(np.unique(clusterer.labels_))
+            cluster_distribution.append(num_clusters)
             fig.add_trace(
                 go.Scatter(
                     x=outdf["0"],
                     y=outdf["1"],
                     mode="markers",
-                    marker=dict(size=3, color="red"),
+                    marker=dict(
+                        size=3, color=outdf["labels"], cmid=0, colorscale="matter"
+                    ),
+                    hovertemplate=outdf["labels"],
                 ),
                 row=d + 1,
                 col=n + 1,
@@ -76,9 +89,18 @@ def UMAP_grid(df, dists, neighbors):
     )
     fig.update_xaxes(range=[-25, 25], showticklabels=False)
     fig.update_yaxes(range=[-25, 25], showticklabels=False)
+
     file_name = f"figures/UMAPgrid_min_dist({dists[0]}-{dists[len(dists)-1]})_neigh({neighbors[0]}-{neighbors[len(neighbors)-1]}).html"
     fig.write_html(file_name)
     pio.show(fig)
+
+    ax = sns.histplot(
+        cluster_distribution,
+        discrete=True,
+        stat="percent",
+    )
+    ax.set(xlabel="Num_Clusters based on HDBSCAN", title="Cluster Histogram")
+    plt.show()
     return file_name
 
 
