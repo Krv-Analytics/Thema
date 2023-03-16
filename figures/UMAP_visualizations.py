@@ -15,8 +15,8 @@ def UMAP_grid(df, dists, neighbors):
         # neighbors = [3, 5, 10, 20, 40]
         
         #TODO
-        # figure out a way around this .dropna() call
-        data=df.dropna(axis=1)
+        # figure out a way around this .dropna() call that removes all rows with missing data
+        data=df.dropna()
 
         #generate subplot titles
         fig = make_subplots(
