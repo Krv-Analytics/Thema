@@ -9,12 +9,13 @@ import plotly.graph_objects as go
 import pickle
 
 def UMAP_grid(df, dists, neighbors):
-        '''function reads in a scaled pkl file'''
+        '''function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations'''
         # example function inputs
         # dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
         # neighbors = [3, 5, 10, 20, 40]
         
         #TODO
+        # make the colors nicer/give more meaning here
         # figure out a way around this .dropna() call that removes all rows with missing data
         data=df.dropna()
 
