@@ -9,6 +9,9 @@ from sklearn.cluster import KMeans
 import datetime
 import seaborn as sns
 
+from umap import UMAP
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 from persim import plot_diagrams
 from nammu.topology import calculate_persistence_diagrams
@@ -420,6 +423,40 @@ class MapperTopology:
 
     def populate_connected_components(self):
         '''appends a column to the raw_data variable indicating the subgraph that each item (coalplant) is in'''
-        for i in range(len(self._raw_data)):
-            #cluster, subgraph = self.mapper.item_lookup(i)
-            return ""
+        #TODO
+
+    def UMAP_grid(self, dists, neighbors):
+        # example function inputs
+        # dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
+        # neighbors = [3, 5, 10, 20, 40]
+
+        data = self._raw_data
+
+        #generate subplot titles
+        fig = make_subplots(
+            rows=len(dists), 
+            cols=len(neighbors), 
+            column_titles = list(map(str, neighbors)),
+            x_title='n_neighbors',
+            row_titles = list(map(str, dists)),
+            y_title='min_dist',
+            vertical_spacing=0.05, horizontal_spacing=0.03,
+            shared_xaxes=True, shared_yaxes=True)
+
+        #generate figure
+        for d in range (0, len(dists)):
+            for n in range(0, len(neighbors)):
+                umap_2d = UMAP(min_dist = dists[d], n_neighbors=neighbors[n], n_components=2, init='random', random_state=0)
+                proj_2d = umap_2d.fit_transform(data)
+                outdf = pd.DataFrame(proj_2d, columns = ['0', '1'])
+                fig.add_trace(
+                    go.Scatter(x=outdf['0'], y=outdf['1'], mode='markers',
+                            marker = dict(size=3,color='red')),
+                    row=d+1, col=n+1)
+            
+
+        fig.update_layout(template='simple_white', showlegend=False,
+                        font=dict(color="black"))
+        fig.update_xaxes(range=[-25, 25], showticklabels=False)
+        fig.update_yaxes(range=[-25, 25], showticklabels=False)
+        fig.write_html("testGRID.html")

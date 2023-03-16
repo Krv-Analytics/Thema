@@ -38,5 +38,11 @@ if __name__ == "__main__":
 
     TM = df[1]
     TM.populate_raw_data(mongo_client = client)
-    #TM._raw_data.head()
-    print(len(TM.mapper.connected_components()))
+    TM._raw_data = TM._raw_data.dropna()
+    dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
+    neighbors = [3, 5, 10, 20, 40]
+    TM.UMAP_grid(dists=dists, neighbors = neighbors)
+
+#TODO:
+# 1) finish mapper.py populate_connected_components() functionality
+# 2) create a visualization comparing the mean or median of categories across connected components

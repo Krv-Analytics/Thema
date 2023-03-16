@@ -54,7 +54,7 @@ if __name__ == "__main__":
         "-p",
         "--TSNE_project",
         type=bool,
-        default=True,
+        default=False,
         help="Option to project the data into two dimensions using TSNE",
     )
 

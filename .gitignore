@@ -10,3 +10,4 @@ docs/.DS_Store
 outputs/
 data/
 *.DS_Store
+*.html
