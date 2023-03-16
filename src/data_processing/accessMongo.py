@@ -77,7 +77,7 @@ def mongo_pull(
     col="coal_mapper",
     one_hot=True,
     scaled=True,
-    TSNE_project=True,
+    TSNE_project=False,
     type="csv",
 ):
     """This function creates a local file containing the specified dataset
