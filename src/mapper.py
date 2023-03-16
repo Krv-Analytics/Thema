@@ -49,9 +49,6 @@ class CoalMapper(KeplerMapper):
         self,
         n_cubes: int = 6,
         perc_overlap: float = 0.4,
-        projection=TSNE(
-            random_state=None,
-        ),
         clusterer=KMeans(8, random_state=None, n_init="auto"),
     ):
         """
@@ -82,10 +79,10 @@ class CoalMapper(KeplerMapper):
         """
 
         # Create Lens
-        if self.lens is None:
-            print("Setting Lens")
-            lens = self.fit_transform(self.data, projection)
-            self.lens = lens
+        # if self.lens is None:
+        #     print("Setting Lens")
+        #     lens = projection.fit()
+        #     self.lens = lens
 
         # Create Cover
         if self.cover is None:
@@ -99,7 +96,7 @@ class CoalMapper(KeplerMapper):
 
         # Compute Simplicial Complex
         self.mapper = self.map(
-            lens=self.lens, X=self.data, cover=self.cover, clusterer=self.clusterer
+            lens=self.data, X=self.data, cover=self.cover, clusterer=self.clusterer
         )
 
     def to_networkx(self, min_intersection: int = 1):
@@ -258,7 +255,9 @@ class MapperTopology:
 
     """
 
-    def __init__(self, X: np.ndarray, raw_data_access = 'coal_mapper_one_hot_scaled_TSNE'):
+    def __init__(
+        self, X: np.ndarray, raw_data_access="coal_mapper_one_hot_scaled_TSNE"
+    ):
 
         self.data = X
         self._mapper = None
@@ -297,13 +296,13 @@ class MapperTopology:
     @property
     def raw_data_access(self):
         return self._raw_data_access
-    
+
     @property
     def raw_data(self):
         if self._raw_data is None:
             print(
-                'No raw data included. \
-                First run the populate raw data function.'
+                "No raw data included. \
+                First run the populate raw data function."
             )
         return self.raw_data
 
@@ -323,6 +322,11 @@ class MapperTopology:
             except:
                 print("Invalid Curvature function")
 
+    @graph.setter
+    def graph(self, min_intersection):
+        G = self._mapper.to_networkx(min_intersection)
+        self._graph = G
+
     def set_graph(
         self,
         cover,
@@ -339,6 +343,7 @@ class MapperTopology:
                 Defualt value (min_intersection=1) has been applied."
                 )
                 min_intersection = 1
+                self.graph = min_intersection
             else:
                 print("Computing Mapper Algorithm...")
                 # Save for looping over min_intersection
@@ -349,8 +354,7 @@ class MapperTopology:
                     self._mapper.clusterer = clusterer
                     self._mapper.compute_mapper(n_cubes, perc_overlap)
                 print("Generating networkx Graph...")
-                self._graph = self._mapper.to_networkx(min_intersection)
-
+                self.graph = min_intersection
                 if len(self.graph.nodes()) > 0:
                     # Automatically Compute OR Curvature and corresponding Diagrams when changing a graph
                     print(
@@ -413,14 +417,14 @@ class MapperTopology:
             np.asarray(self.diagram[1]._pairs),
         ]
         return plot_diagrams(persim_diagrams, show=True)
-    
+
     def populate_raw_data(self, mongo_client):
-        '''populates the raw_data field, containing actual values (not scaled or TSNE) for post analysis work'''
-        if 'TSNE' in self.raw_data_access:
-            self._raw_data = mongo_getRawData(client = mongo_client, TSNE=True)
+        """populates the raw_data field, containing actual values (not scaled or TSNE) for post analysis work"""
+        if "TSNE" in self.raw_data_access:
+            self._raw_data = mongo_getRawData(client=mongo_client, TSNE=True)
         else:
-            self._raw_data = mongo_getRawData(client = mongo_client, TSNE=False)
+            self._raw_data = mongo_getRawData(client=mongo_client, TSNE=False)
 
     def populate_connected_components(self):
-        '''appends a column to the raw_data variable indicating the subgraph that each item (coalplant) is in'''
-        #TODO
+        """appends a column to the raw_data variable indicating the subgraph that each item (coalplant) is in"""
+        # TODO
