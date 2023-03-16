@@ -39,6 +39,19 @@ def UMAP_grid(df, dists, neighbors):
         "-------------------------------------------------------------------------------- \n"
     )
 
+    # define custom color scale
+    map_colors = [[0.0, '#001219'],
+             [0.1, '#005f73'],
+             [0.2, '#0a9396'],
+             [0.3, '#94d2bd'],
+             [0.4, '#e9d8a6'],
+             [0.5, '#ee9b00'],
+             [0.6, '#ca6702'],
+             [0.7, '#bb3e03'],
+             [0.8, '#ae2012'],
+             [0.9, '#9b2226'],
+             [1.0, '#a50026']]  
+    
     # generate subplot titles
     fig = make_subplots(
         rows=len(dists),
@@ -49,8 +62,8 @@ def UMAP_grid(df, dists, neighbors):
         y_title="min_dist",
         vertical_spacing=0.05,
         horizontal_spacing=0.03,
-        shared_xaxes=True,
-        shared_yaxes=True,
+        #shared_xaxes=True,
+        #shared_yaxes=True,
     )
     cluster_distribution = []
     # generate figure
@@ -76,7 +89,7 @@ def UMAP_grid(df, dists, neighbors):
                     y=outdf["1"],
                     mode="markers",
                     marker=dict(
-                        size=3, color=outdf["labels"], cmid=0, colorscale="matter"
+                        size=4, color=outdf["labels"], cmid=0.5, colorscale=map_colors
                     ),
                     hovertemplate=outdf["labels"],
                 ),
@@ -87,8 +100,13 @@ def UMAP_grid(df, dists, neighbors):
     fig.update_layout(
         template="simple_white", showlegend=False, font=dict(color="black")
     )
-    fig.update_xaxes(range=[-25, 25], showticklabels=False)
-    fig.update_yaxes(range=[-25, 25], showticklabels=False)
+    
+    fig.update_xaxes(showticklabels=False, 
+                     tickwidth=0, 
+                     tickcolor='rgba(0,0,0,0)')
+    fig.update_yaxes(showticklabels=False, 
+                     tickwidth=0, 
+                     tickcolor='rgba(0,0,0,0)')
 
     file_name = f"figures/UMAPgrid_min_dist({dists[0]}-{dists[len(dists)-1]})_neigh({neighbors[0]}-{neighbors[len(neighbors)-1]}).html"
     fig.write_html(file_name)
