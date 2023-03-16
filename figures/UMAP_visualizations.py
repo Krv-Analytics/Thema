@@ -12,6 +12,7 @@ import seaborn as sns
 import hdbscan
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 import plotly.io as pio
 
 pio.renderers.default = "browser"
@@ -112,15 +113,31 @@ def UMAP_grid(df, dists, neighbors):
     fig.write_html(file_name)
     pio.show(fig)
 
-    ax = sns.histplot(
-        cluster_distribution,
-        discrete=True,
-        stat="percent",
-    )
-    ax.set(xlabel="Num_Clusters based on HDBSCAN", title="Cluster Histogram")
-    plt.show()
-    return file_name
+    # ax = sns.histplot(
+    #     cluster_distribution,
+    #     discrete=True,
+    #     stat="percent",
+    # )
+    # ax.set(xlabel="Num_Clusters based on HDBSCAN", Num_Clusters based on HDBSCAN)
+    # plt.show()
 
+    colors = pd.DataFrame(cluster_distribution, columns=['Num'])
+    fig2 = px.histogram(colors, 
+                        x='Num',
+                        color='Num',
+                        color_discrete_map = {1:'#005f73', 
+                                            2:'#0a9396', 
+                                            3:'#94d2bd', 
+                                            4:'#e9d8a6', 
+                                            5:'#ee9b00',
+                                            6:'#ca6702',
+                                            7:'#bb3e03', 
+                                            8:'#e82f1e'}
+                    )
+    fig2.update_layout(template='simple_white', showlegend=False, xaxis_title='Num_Clusters based on HDBSCAN', title = 'Cluster Histogram')
+    pio.show(fig2)
+
+    return file_name
 
 ######################################################################################################
 ##############################################################################
