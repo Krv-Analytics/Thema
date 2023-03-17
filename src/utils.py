@@ -8,31 +8,32 @@ from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
 
 
-from mapper import MapperTopology
 from nammu.curvature import ollivier_ricci_curvature
+from mapper import CoalMapper
 
 
 def curvature_iterator(
-    X,
+    data,
+    projection,
     n_cubes,
     perc_overlap,
-    K,
+    umap_params,
+    hdbscan_params,
     min_intersection_vals,
     random_state=None,
 ):
 
     # Configure CoalMapper
-    mapper = MapperTopology(X=X)
-    clusterer = KMeans(n_clusters=K, random_state=random_state, n_init=1)
-    cover = (n_cubes, perc_overlap)
+    coal_mapper = CoalMapper(data, projection)
+    coal_mapper.fit(n_cubes, perc_overlap)
     # Generate Graphs
     results = {}
 
     print("Computing Curvature Values and Persistence Diagrams")
     for val in min_intersection_vals:
-        mapper.set_graph(cover=cover, clusterer=clusterer, min_intersection=val)
-        mapper.calculate_homology(filter_fn=ollivier_ricci_curvature, use_min=True)
-        results[val] = mapper
+        coal_mapper.to_networkx(min_intersection=val)
+        coal_mapper.calculate_homology()
+        results[val] = coal_mapper
     return results
 
 
@@ -97,7 +98,7 @@ def generate_results_filename(args, suffix=".pkl"):
     K, p, n, D = args.KMeans, args.perc_overlap, args.n_cubes, args.data
 
     D = "/".join(D.split("/")[-1:])
-    D = D.rsplit('.', 1)[0]
+    D = D.rsplit(".", 1)[0]
 
     output_file = f"results_ncubes{n}_{int(p*100)}perc_K{K}_{D}.pkl"
 
