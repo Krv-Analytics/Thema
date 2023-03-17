@@ -4,52 +4,141 @@ import numpy as np
 import networkx as nx
 import kmapper as km
 import pandas as pd
-from sklearn.manifold import TSNE
-from sklearn.cluster import KMeans
 import datetime
 import seaborn as sns
+import itertools
 
-from umap import UMAP
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
+from hdbscan import HDBSCAN
 
 from persim import plot_diagrams
-from nammu.topology import calculate_persistence_diagrams
-from nammu.curvature import ollivier_ricci_curvature, forman_curvature
+from nammu.topology import calculate_persistence_diagrams, PersistenceDiagram
+from nammu.curvature import ollivier_ricci_curvature
 from nammu.utils import make_node_filtration
-from data_processing.accessMongo import mongo_getRawData
 
 from kmapper import KeplerMapper
 
 
-class CoalMapper(KeplerMapper):
-    # TODO: Doc String
-    def __init__(self, X: np.array, verbose: int = 0):
+class CoalMapper:
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        projection: np.array,
+        verbose: int = 0,
+    ):
         """Constructor for CoalMapper class.
         Parameters
         ===========
         X: np.array
             Dataset features you wish to analyze using the mapper algorithm.
+        projection: np.array
+            Projected data. The low dimensional representation
+            (e.g. post UMAP or TSNE) of X.
+            Can combine representations, will become `lens` in `kmapper`.
+            #TODO: Implement wrapper class here for handing projected data
+
 
         verbose: int, default is 0
-            Logging level. Currently 3 levels (0,1,2) are supported. For no logging, set `verbose=0`. For some logging, set `verbose=1`. For complete logging, set `verbose=2`.
+            Logging level for `kmapper`. Levels (0,1,2) are supported.
         """
+        # User Inputs
+        self.data = data
+        self.projection = projection
 
-        self.data = X
-        self.lens = None
-        self.clusterer = None
-        self.cover = None
-        self.nerve = None
-        self.graph = None
-        self.components = None
+        # Initialize Mapper
+        self._mapper = KeplerMapper(verbose=verbose)
 
-        super(CoalMapper, self).__init__(verbose)
+        # Inputs for `fit`
+        self._clusterer = None
+        self._cover = None
 
-    def compute_mapper(
+        # Analysis Objects
+        self._complex = dict()
+        self._graph = nx.Graph()
+        self._components = dict()
+        self._curvature = np.array([])
+        self._diagram = PersistenceDiagram()
+
+    @property
+    def mapper(self):
+        return self._mapper
+
+    @property
+    def cover(self):
+        return self._cover
+
+    @property
+    def clusterer(self):
+        return self._clusterer
+
+    @property
+    def complex(self):
+        if len(self._complex["nodes"]) == 0:
+            print(
+                "Your simplicial complex is empty!\
+                Run `fit()` to generate a simplicial complex. \
+                Note: some parameters may produce a trivial mapper representation."
+            )
+        return self._complex
+
+    @property
+    def graph(self):
+        if len(self._graph.nodes()) == 0:
+            print(
+                "Your graph is empty! \
+                Run `to_networkx()` to generate a graph. \
+                Note: some parameters may produce a trivial mapper representation."
+            )
+        return self._graph
+
+    @property
+    def components(self):
+        if len(self._components) == 0:
+            print(
+                "You don't have any connected components! \
+                Run `connected_components()` to generate a graph. \
+                Note: some parameters may produce a trivial mapper representation."
+            )
+        return self._components
+
+    @property
+    def curvature(self):
+        if len(self._curvature) == 0:
+            print(
+                "You don't have any edge curvatures! \
+                First generate a nonempty networkx Graph with `to_networkx()`."
+            )
+        return self._curvature
+
+    @curvature.setter
+    def curvature(self, curvature_fn):
+        assert (
+            len(self._graph.nodes()) > 0
+        ), "First run `to_networkx` to generate a non-empty networkx graph."
+
+        try:
+            curvature = curvature_fn(self.graph)
+            assert len(curvature) == len(self._graph.edges())
+            self._curvature = curvature
+        except:
+            print("Invalid Curvature function")
+
+    @property
+    def diagram(self):
+        if self._diagram is None:
+            print(
+                "Your persistence diagrams are empty! \
+                First generate a networkx Graph with `to_networkx()`."
+            )
+        return self._diagram
+
+    #############################################################################################################################################
+    #############################################################################################################################################
+
+    def fit(
         self,
         n_cubes: int = 6,
         perc_overlap: float = 0.4,
-        clusterer=KMeans(8, random_state=None, n_init="auto"),
+        clusterer=HDBSCAN(min_cluster_size=10),
     ):
         """
         A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
@@ -58,17 +147,11 @@ class CoalMapper(KeplerMapper):
         -----------
         n_cubes: int, defualt 4
             Number of cubes used to cover of the latent space. Used to construct a kmapper.Cover object.
-            Only impactful if a cover attribute has not been manually specified.
 
         perc_overlap: float, default 0.2
-            Percentage of intersection between the cubes covering the latent space.
-            Used to construct a kmapper.Cover object. Only impactful if a cover attribute has not been manually specified.
+            Percentage of intersection between the cubes covering the latent space.Used to construct a kmapper.Cover object.
 
-        projection: str, default is `l2norm'
-            A choice of projection to be used to generate a lens using `fit_transform` inherited method.
-            Only impactful if a cover attribute has not been manually specified.
-
-        clusterer: default is DBSCAN
+        clusterer: default is HDBSCAN
             Scikit-learn API compatible clustering algorithm. Must provide `fit` and `predict`.
 
         Returns
@@ -77,27 +160,19 @@ class CoalMapper(KeplerMapper):
             A dictionary with "nodes", "links" and "meta" information.
 
         """
-
-        # Create Lens
-        # if self.lens is None:
-        #     print("Setting Lens")
-        #     lens = projection.fit()
-        #     self.lens = lens
-
-        # Create Cover
-        if self.cover is None:
-            print("Setting Cover")
-            cover = km.Cover(n_cubes, perc_overlap)
-            self.cover = cover
-
-        # Initialize Clustering Algorithm. Defualt is DBSCAN(eps=0.5, min_samples=3)
-        if self.clusterer is None:
-            self.clusterer = clusterer
+        # Log cover and clusterer from most recent fit
+        self._cover = km.Cover(n_cubes, perc_overlap)
+        self._clusterer = clusterer
 
         # Compute Simplicial Complex
-        self.mapper = self.map(
-            lens=self.data, X=self.data, cover=self.cover, clusterer=self.clusterer
+        self._complex = self._mapper.map(
+            lens=self.projection,
+            X=self.projection,
+            cover=self.cover,
+            clusterer=self.clusterer,
         )
+
+        return self._complex
 
     def to_networkx(self, min_intersection: int = 1):
         """
@@ -117,98 +192,104 @@ class CoalMapper(KeplerMapper):
 
         """
         # Initialize Nerve
-        if self.nerve is None:
-            nerve = km.GraphNerve(min_intersection)
-            self.nerve = nerve
-
+        nerve = km.GraphNerve(min_intersection)
         assert (
-            self.mapper is not None
-        ), "You must first generate a Simplicial Complex with compute_mapper() before you can convert to Networkx "
+            len(self._complex["nodes"]) > 0
+        ), "You must first generate a non-empty Simplicial Complex with `fit()` before you can convert to Networkx "
 
-        nodes = self.mapper["nodes"]
-        _, simplices = self.nerve.compute(nodes)
+        nodes = self._complex["nodes"]
+        _, simplices = nerve.compute(nodes)
         edges = [edge for edge in simplices if len(edge) == 2]
 
-        G = nx.Graph(nodes=nodes)
-        G.add_edges_from(edges)
+        # Setting self._graph
+        self._graph = nx.Graph()
+        self._graph.add_nodes_from(nodes)
+        nx.set_node_attributes(self._graph, dict(self.complex["nodes"]), "membership")
+        self._graph.add_edges_from(edges)
 
-        # Save Graph attritbute
-        self.graph = G
-        return self.graph
+        return self._graph
 
-    def connected_components(self, min_intersection: int = 1):
+    def connected_components(self):
         """
-
-        Parameters
-        -----------
-        min_intersection: int, default is 1
-            Minimum intersection considered when computing the graph.
-            An edge will be created only when the intersection between two nodes is greater than or equal to `min_intersection`.
-
+        Compute the connected components of `self._graph`
         Returns
         -----------
-        components: list
-            A list of graphs comprised of the connected components of the simplicial complex as dictated by `min_intersection`.
+        components: dict
+            A dictionary labeling the connected components of `self._graph`.
+            Keys are networkX Graphs and items are integer labels.
 
         """
-        if self.components is None:
-            if self.graph:
-                components = [
-                    self.graph.subgraph(c).copy()
-                    for c in nx.connected_components(self.graph)
-                ]
-                self.components = components
-            else:
-                # Intialize Graph representation
-                print("Initializing Full Graph")
-                self.to_networkx(min_intersection)
-                print(self.graph)
-                components = [
-                    self.graph.subgraph(c).copy()
-                    for c in nx.connected_components(self.graph)
-                ]
-                self.components = components
+        assert (
+            len(self.graph.nodes()) > 0
+        ), "First run `to_networkx` to generate a non-empty networkx graph."
+
+        self._components = dict(
+            [
+                (self.graph.subgraph(c).copy(), i)
+                for i, c in enumerate(nx.connected_components(self.graph))
+            ]
+        )
 
         return self.components
 
+    def calculate_homology(self, filter_fn=ollivier_ricci_curvature, use_min=True):
+        """Compute Persistent Diagrams based on a curvature filtration of `self._graph`."""
+        assert (
+            len(self.graph.nodes()) > 0
+        ), "First run `to_networkx` to generate a non-empty networkx graph."
+
+        if self._curvature is None:
+            "Computing edge curvature values"
+            self.curvature = filter_fn  # Set curvatures
+
+        G = make_node_filtration(
+            self.graph,
+            self.curvature,
+            attribute_name="curvature",
+            use_min=use_min,
+        )
+        pd = calculate_persistence_diagrams(
+            G,
+            "curvature",
+            "curvature",
+        )
+        self._diagram = pd
+        return self.diagram
+
     def item_lookup(
         self,
-        item: str,
+        index: int,
     ):
         """
+        For an item in your dataset, find the subgraph and clusters that contain the item.
+
         Parameters
         -----------
-        item: str
-            identifier for `item` (one element within a given cluster)
-            #TODO Need more info on how the coal data will work here
-
-        min_intersection: int, default is 1
-            Minimum intersection considered when computing the graph.
-            An edge will be created only when the intersection between two nodes is greater than or equal to `min_intersection`
+        index: int
+            identifier for an item in `self.data`.
 
         Returns
         -----------
         clusters: dict
             A dict of clusters that contain `item`. Keys are cluster labels, and values are cluster items.
         subgraph: list
-            A subgraph made up of the connected componnets generated by clusters
+            A subgraph made up of the connected componnets generated by clusters.
+            In most cases this is the connected component that contains the item.
 
         """
         assert (
-            self.mapper is not None
-        ), "First run `compute_mapper` to generate a simplicial complex."
-
-        assert (
-            self.graph is not None
-        ), "First run `to_networkx` to generate a networkx graph."
+            len(self.complex) > 0
+        ), "You must first generate a Simplicial Complex with `fit()` before you perform `item_lookup`."
 
         clusters = {}
 
         all_clusters = self.graph.nodes()
 
+        subgraph_nodes = set()
+
         for cluster in all_clusters:
-            elements = self.mapper["nodes"][cluster]
-            if item in elements:
+            elements = self.complex["nodes"][cluster]
+            if index in elements:
                 clusters[cluster] = elements
 
                 # Note: for min_intersection >1 it is possible that item may lie in clusters spread across different components.
@@ -224,177 +305,55 @@ class CoalMapper(KeplerMapper):
 
         return clusters, subgraph
 
+    def mapper_clustering(self):
+        """
+        Execute a mapper-based clutering based on connected components.
+        Append a column to `self.data` labeling each item.
+
+        Returns
+        -----------
+        data: pd.Dataframe
+            An updated dataframe with a column titled `cluster_labels`
+
+        """
+        assert (
+            len(self.complex) > 0
+        ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
+
+        # Initialize Labels as -1 (`unclustered`)
+        labels = -np.ones(len(self.data))
+        count = 0
+        for component in self.components.keys():
+            cluster_label = self.components[component]
+            clusters = component.nodes()
+
+            elements = []
+            for cluster in clusters:
+                elements.append(self.complex["nodes"][cluster])
+
+            indices = set(itertools.chain(*elements))
+            count += len(indices)
+            labels[list(indices)] = cluster_label
+        self.data["cluster_labels"] = labels
+        return labels
+
+    #############################################################################################################################################
+    #############################################################################################################################################
+
     def plot(self, output_dir: str = "../outputs/htmls/"):
         """"""
         assert (
-            self.mapper is not None
-        ), "First run `set_graph` to generate a simplicial complex."
+            len(self.complex) > 0
+        ), "First run `fit()` to generate a nonempty simplicial complex."
         time = int(datetime.datetime.now().timestamp())
         path_html = output_dir + f"coal_mapper_{time}.html"
-        print(path_html)
-        dic = self.mapper
-        assert type(dic) == dict, "Not a dictionary"
-        _ = self.visualize(
-            dic,
+
+        _ = self.mapper.visualize(
+            self.complex,
             path_html=path_html,
-            # include_searchbar=True,
-            # include_min_intersection_selector=False
-            # title="Coal Mapper",
         )
         print(f"Go to {path_html} for a visualization of your CoalMapper!")
         return path_html
-
-
-##############################################################################################################################################
-##############################################################################################################################################
-
-
-class MapperTopology:
-    """
-    Analyzing different mapper graphs using discrete curvature and persistenet homology.
-
-    """
-
-    def __init__(
-        self, X: np.ndarray, raw_data_access="coal_mapper_one_hot_scaled_TSNE"
-    ):
-
-        self.data = X
-        self._mapper = None
-        self._curvature = None
-        self._graph = None
-        self._diagram = None
-        self._raw_data_access = raw_data_access
-        self._raw_data = None
-
-    @property
-    def mapper(self):
-        return self._mapper
-
-    @property
-    def graph(self):
-        return self._graph
-
-    @property
-    def curvature(self):
-        if self._curvature is None:
-            print(
-                "Curvature has not been computed yet. \
-                First generate a networkx Graph from the dataset via Mapper."
-            )
-        return self._curvature
-
-    @property
-    def diagram(self):
-        if self._diagram is None:
-            print(
-                "Persistent Homology has not been computed yet. \
-                First generate a networkx Graph from the dataset via Mapper."
-            )
-        return self._diagram
-
-    @property
-    def raw_data_access(self):
-        return self._raw_data_access
-
-    @property
-    def raw_data(self):
-        if self._raw_data is None:
-            print(
-                "No raw data included. \
-                First run the populate raw data function."
-            )
-        return self.raw_data
-
-    @curvature.setter
-    def curvature(self, curvature_fn):
-
-        if self._graph is None:
-            print(
-                "You must first define a graph representation for \
-                `X` via using `kmapper` before you can compute edge curvatures"
-            )
-        else:
-            try:
-                curvature = curvature_fn(self.graph)
-                assert len(curvature) == len(self._graph.edges())
-                self._curvature = curvature
-            except:
-                print("Invalid Curvature function")
-
-    @graph.setter
-    def graph(self, min_intersection):
-        G = self._mapper.to_networkx(min_intersection)
-        self._graph = G
-
-    def set_graph(
-        self,
-        cover,
-        clusterer=KMeans(5, n_init=10, random_state=2023),
-        min_intersection: int = 1,
-    ):
-        """Generate a new networkX graph from Data via mapper. Recompute"""
-        # Check that a reasonable Cover is provided
-        if (len(cover) == 2) and type(cover) is tuple:
-            n_cubes, perc_overlap = cover
-            if type(min_intersection) is not int or min_intersection < 1:
-                print(
-                    "Invalid Minimum Intersection Parameter for Mapper. \
-                Defualt value (min_intersection=1) has been applied."
-                )
-                min_intersection = 1
-                self.graph = min_intersection
-            else:
-                print("Computing Mapper Algorithm...")
-                # Save for looping over min_intersection
-                if self._mapper is not None:
-                    self._graph = self._mapper.to_networkx(min_intersection)
-                else:
-                    self._mapper = CoalMapper(X=self.data)
-                    self._mapper.clusterer = clusterer
-                    self._mapper.compute_mapper(n_cubes, perc_overlap)
-                print("Generating networkx Graph...")
-                self.graph = min_intersection
-                if len(self.graph.nodes()) > 0:
-                    # Automatically Compute OR Curvature and corresponding Diagrams when changing a graph
-                    print(
-                        "Using Ollivier Ricci filtration to compute edge curvature values and persistence diagrams. "
-                    )
-                    self.curvature = ollivier_ricci_curvature
-                    self.calculate_homology(filter_fn=ollivier_ricci_curvature)
-
-        else:
-            print(
-                "Please enter a valid Cover of the form \
-                (n_cubes,perc_overlap)"
-            )
-
-    def calculate_homology(self, filter_fn, use_min=True):
-        if self._graph is None:
-            print(
-                "You must first define a graph representation for \
-                `X` via using `kmapper` before you can compute persistent diagrams"
-            )
-        elif len(self.graph.nodes()) > 0:
-            # Default to OR Curvature
-            if self._curvature is None:
-                "Computing edge curvature values"
-                self._curvature = filter_fn(self._graph)  # Set curvatures
-
-            G = make_node_filtration(
-                self._graph,
-                self._curvature,
-                attribute_name="curvature",
-                use_min=use_min,
-            )
-            pd = calculate_persistence_diagrams(
-                G,
-                "curvature",
-                "curvature",
-            )
-            self._diagram = pd
-        else:
-            print("ERROR: This mapper computation produced a graph with 0 nodes")
 
     def plot_curvature(self, bins="auto", kde=False):
         """Visualize Curvature of a mapper graph as a histogram."""
@@ -417,14 +376,3 @@ class MapperTopology:
             np.asarray(self.diagram[1]._pairs),
         ]
         return plot_diagrams(persim_diagrams, show=True)
-
-    def populate_raw_data(self, mongo_client):
-        """populates the raw_data field, containing actual values (not scaled or TSNE) for post analysis work"""
-        if "TSNE" in self.raw_data_access:
-            self._raw_data = mongo_getRawData(client=mongo_client, TSNE=True)
-        else:
-            self._raw_data = mongo_getRawData(client=mongo_client, TSNE=False)
-
-    def populate_connected_components(self):
-        """appends a column to the raw_data variable indicating the subgraph that each item (coalplant) is in"""
-        # TODO
