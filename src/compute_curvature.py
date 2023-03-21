@@ -8,6 +8,7 @@ import pickle
 import pandas as pd
 
 from utils import curvature_iterator, generate_results_filename
+from umap import UMAP
 
 
 cwd = os.path.dirname(__file__)
@@ -31,9 +32,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-K",
-        "--KMeans",
-        default=8,
+        "--min_cluster_size",
+        default=10,
+        type=int,
+        help="Sets number of clusters for the KMeans algorithm used in KMapper.",
+    )
+    parser.add_argument(
+        "--max_cluster_size",
+        default=0,
         type=int,
         help="Sets number of clusters for the KMeans algorithm used in KMapper.",
     )
@@ -69,13 +75,6 @@ if __name__ == "__main__":
         help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
     )
     parser.add_argument(
-        "-c",
-        "--column_sample",
-        default=0,
-        type=int,
-        help="Number of columns to sample from full datafile.",
-    )
-    parser.add_argument(
         "-v",
         "--Verbose",
         default=False,
@@ -91,11 +90,19 @@ if __name__ == "__main__":
     with open(args.data, "rb") as f:
         print("Reading pickle file")
         df = pickle.load(f)
-        # For Local Testing on Data Subsample
-        if args.column_sample:
-            df = df.sample(n=args.column_sample, axis="columns")
 
-    data = df.select_dtypes(include=np.number).values
+    data = df.dropna()
+
+    # TODO: Read in a particular projection
+    # For now we generate one
+    print("Generating UMAP Projection")
+    proj_2D = UMAP(
+        min_dist=0,
+        n_neighbors=10,
+        n_components=2,
+        init="random",
+        random_state=0,
+    ).fit_transform(data)
 
     output_file = generate_results_filename(args)
 
@@ -108,18 +115,21 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, output_file)
 
-    K, p, n = args.KMeans, args.perc_overlap, args.n_cubes
-    min_intersection_vals = args.min_intersection
+    n, p = args.n_cubes, args.perc_overlap
+    min_intersections = args.min_intersection
+    hdbscan_params = args.min_cluster_size, args.max_cluster_size
+
     results = curvature_iterator(
-        X=data,
+        data=data,
+        projection=proj_2D,
         n_cubes=n,
         perc_overlap=p,
-        K=K,
-        min_intersection_vals=min_intersection_vals,
+        hdbscan_params=hdbscan_params,
+        min_intersection_vals=min_intersections,
         random_state=args.seed,
     )
 
-    results["hyperparameters"] = (n, p, K)
+    results["hyperparameters"] = (n, p, proj_2D, hdbscan_params)
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
