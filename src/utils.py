@@ -3,7 +3,6 @@ import os
 import pickle
 import numpy as np
 
-from umap import UMAP
 from hdbscan import HDBSCAN
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
@@ -34,15 +33,27 @@ def curvature_iterator(
     # Configure CoalMapper
     coal_mapper = CoalMapper(data, projection)
     coal_mapper.fit(n_cubes, perc_overlap, clusterer)
+
     # Generate Graphs
     results = {}
 
-    print("Computing Curvature Values and Persistence Diagrams")
-    for val in min_intersection_vals:
-        coal_mapper.to_networkx(min_intersection=val)
-        coal_mapper.calculate_homology(filter_fn=ollivier_ricci_curvature)
-        results[val] = coal_mapper
-    return results
+    if len(coal_mapper.complex["links"]) > 0:
+        print("Computing Curvature Values and Persistence Diagrams")
+        for val in min_intersection_vals:
+            coal_mapper.to_networkx(min_intersection=val)
+            coal_mapper.calculate_homology(filter_fn=ollivier_ricci_curvature)
+            results[val] = coal_mapper
+        return results
+    else:
+        print(
+            "-------------------------------------------------------------------------------- \n\n"
+        )
+        print(f"Empty Simplicial Complex. No file written")
+
+        print(
+            "\n\n -------------------------------------------------------------------------------- "
+        )
+        return results
 
 
 def convert_to_gtda(diagrams):
@@ -103,7 +114,7 @@ def convert_to_gtda(diagrams):
 def generate_results_filename(args, suffix=".pkl"):
     """Generate output filename string from CLI arguments when running compute_curvature script."""
 
-    min_cluster_size, n, p, D = (
+    min_cluster_size, p, n, D = (
         args.min_cluster_size,
         args.perc_overlap,
         args.n_cubes,
@@ -132,14 +143,9 @@ def read_curvature_results():
         if file.endswith(".pkl"):
             with open(curvature_dir + file, "rb") as f:
                 result_dictionary = pickle.load(f)
-                test = result_dictionary[1]
-                try:
-                    if test.graph:
-                        hyper_params = result_dictionary["hyperparameters"]
-                        result_dictionary.pop("hyperparameters")
-                        data[hyper_params] = result_dictionary
-                except:
-                    print(f"{file} had an empty mapper!")
+                hyper_params = result_dictionary["hyperparameters"][:2]
+                result_dictionary.pop("hyperparameters")
+                data[hyper_params] = result_dictionary
 
     return data
 
@@ -150,7 +156,8 @@ def get_diagrams():
     for hyper_params in data.keys():
         mappers = data[hyper_params]
         for min_intersection in mappers.keys():
-            diagram = mappers[min_intersection].diagram
+
+            diagram = mappers[min_intersection].calculate_homology()
             new_key = (*hyper_params, min_intersection)
             diagrams[new_key] = diagram
     keys = list(diagrams.keys())
