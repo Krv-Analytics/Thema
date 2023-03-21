@@ -25,6 +25,12 @@ if __name__ == "__main__":
         help="Select location of local data set, as pulled from Mongo.",
     )
     parser.add_argument(
+        "--projection",
+        type=str,
+        default=os.path.join(cwd, "./../data/umap_2D_nbors10_minD0.2.pkl"),
+        help="Select location of local data set, as pulled from Mongo.",
+    )
+    parser.add_argument(
         "-f",
         "--force",
         action="store_true",
@@ -88,21 +94,14 @@ if __name__ == "__main__":
     assert os.path.isfile(args.data), "Invalid Input Data"
     # Load Dataframe
     with open(args.data, "rb") as f:
-        print("Reading pickle file")
+        print("Reading Mongo Data File")
         df = pickle.load(f)
 
     data = df.dropna()
 
-    # TODO: Read in a particular projection
-    # For now we generate one
-    print("Generating UMAP Projection")
-    proj_2D = UMAP(
-        min_dist=0,
-        n_neighbors=10,
-        n_components=2,
-        init="random",
-        random_state=0,
-    ).fit_transform(data)
+    with open(args.projection, "rb") as g:
+        print("Reading in UMAP Projection")
+        proj_2D = pickle.load(g)
 
     output_file = generate_results_filename(args)
 
@@ -133,15 +132,18 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    with open(output_file, "wb") as handle:
-        pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    if args.Verbose:
-        print("\n")
-        print(
-            "-------------------------------------------------------------------------------- \n\n"
-        )
-        print(f"Successfully written curvature analysis output to {out_dir_message}")
+    if len(results) > 1:
+        with open(output_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(
+                f"Successfully written curvature analysis output to {out_dir_message}"
+            )
 
-        print(
-            "\n\n -------------------------------------------------------------------------------- "
-        )
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
