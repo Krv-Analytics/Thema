@@ -22,7 +22,7 @@ class CoalMapper:
     def __init__(
         self,
         data: pd.DataFrame,
-        projection: np.array,
+        projection: np.ndarray,
         verbose: int = 0,
     ):
         """Constructor for CoalMapper class.
@@ -238,7 +238,7 @@ class CoalMapper:
             len(self.graph.nodes()) > 0
         ), "First run `to_networkx` to generate a non-empty networkx graph."
 
-        if self._curvature is None:
+        if not self._curvature:
             "Computing edge curvature values"
             self.curvature = filter_fn  # Set curvatures
 
