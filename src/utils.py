@@ -188,6 +188,6 @@ def plot_dendrogram(model, labels, distance, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, labels=labels, **kwargs)
     plt.title("Hyperparameter Dendrogram")
-    plt.xlabel("Coordinates: (n_cubes,perc_overlap,K,min_intersection).")
+    plt.xlabel("Coordinates: (n_cubes,perc_overlap,min_intersection).")
     plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
