@@ -10,11 +10,9 @@ from umap import UMAP
 cwd = os.path.dirname(__file__)
 
 
-def uMAP_file_name(n_neighbors=10, min_dist=0.2, dimensions=2):
+def uMAP_file_name(dimensions=2):
     output_dir = os.path.join(cwd, "../outputs/projections/")
-    output_file = os.path.join(
-        output_dir, f"umap_{dimensions}D_nbors{n_neighbors}_minD{min_dist}.pkl"
-    )
+    output_file = os.path.join(output_dir, f"umap_{dimensions}D.pkl")
     return output_file
 
 
@@ -32,7 +30,7 @@ def uMAP_grid(df, dists, neighbors, dimensions=2):
         "-------------------------------------------------------------------------------- \n"
     )
 
-    # generate figure
+    results = {}
     for d in dists:
         for n in neighbors:
             umap_2d = UMAP(
@@ -42,10 +40,17 @@ def uMAP_grid(df, dists, neighbors, dimensions=2):
                 init="random",
                 random_state=0,
             )
+
             projection = umap_2d.fit_transform(data)
-            output_file = uMAP_file_name(n, d, dimensions=dimensions)
-            with open(output_file, "wb") as f:
-                pickle.dump(projection, f)
+
+            results[(n, d)] = projection
+
+    keys = list(results.keys())
+    keys.sort()
+    sorted_results = {i: results[i] for i in keys}
+    output_file = uMAP_file_name(dimensions=dimensions)
+    with open(output_file, "wb") as f:
+        pickle.dump(sorted_results, f)
 
 
 ######################################################################################################
