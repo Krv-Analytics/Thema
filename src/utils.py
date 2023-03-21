@@ -20,6 +20,7 @@ def curvature_iterator(
     hdbscan_params,
     min_intersection_vals,
     random_state=0,
+    verbose=0,
 ):
     """ """
 
@@ -41,18 +42,20 @@ def curvature_iterator(
         print("Computing Curvature Values and Persistence Diagrams")
         for val in min_intersection_vals:
             coal_mapper.to_networkx(min_intersection=val)
-            coal_mapper.calculate_homology(filter_fn=ollivier_ricci_curvature)
+            coal_mapper.curvature = ollivier_ricci_curvature
+            coal_mapper.calculate_homology()
             results[val] = coal_mapper
         return results
     else:
-        print(
-            "-------------------------------------------------------------------------------- \n\n"
-        )
-        print(f"Empty Simplicial Complex. No file written")
+        if verbose:
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(f"Empty Simplicial Complex. No file written")
 
-        print(
-            "\n\n -------------------------------------------------------------------------------- "
-        )
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
         return results
 
 
@@ -111,21 +114,16 @@ def convert_to_gtda(diagrams):
     return Xt_padded
 
 
-def generate_results_filename(args, suffix=".pkl"):
+def generate_results_filename(args, n_neighbors, min_dist, suffix=".pkl"):
     """Generate output filename string from CLI arguments when running compute_curvature script."""
 
-    min_cluster_size, p, n, D = (
+    min_cluster_size, p, n = (
         args.min_cluster_size,
         args.perc_overlap,
         args.n_cubes,
-        args.data,
     )
 
-    # TODO: Here want to grab the UMAP hyperparameters
-    D = "/".join(D.split("/")[-1:])
-    D = D.rsplit(".", 1)[0]
-
-    output_file = f"results_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_.pkl"
+    output_file = f"results_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}.pkl"
 
     return output_file
 
