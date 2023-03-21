@@ -27,8 +27,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--projection",
         type=str,
-        default=os.path.join(cwd, "./../data/umap_2D_nbors10_minD0.2.pkl"),
-        help="Select location of local data set, as pulled from Mongo.",
+        default=os.path.join(cwd, "./../outputs/projections/umap_2D.pkl"),
+        help="Select location of UMAP projections.",
     )
     parser.add_argument(
         "-f",
@@ -100,50 +100,62 @@ if __name__ == "__main__":
     data = df.dropna()
 
     with open(args.projection, "rb") as g:
-        print("Reading in UMAP Projection")
-        proj_2D = pickle.load(g)
+        print("Reading in UMAP Projections \n")
+        projections = pickle.load(g)
 
-    output_file = generate_results_filename(args)
+    for hyper_params in projections.keys():
+        nbors, d = hyper_params
 
-    output_dir = os.path.join(cwd, "../outputs/curvature/")
+        print(f"N_nbors:{nbors}")
+        print(f"min_distance:{d} \n\n")
+        proj_2D = projections[hyper_params]
 
-    # Check if output directory already exists
-    if os.path.isdir(output_dir):
-        output_file = os.path.join(output_dir, output_file)
-    else:
-        os.makedirs(output_dir, exist_ok=True)
-        output_file = os.path.join(output_dir, output_file)
+        output_file = generate_results_filename(args, nbors, d)
 
-    n, p = args.n_cubes, args.perc_overlap
-    min_intersections = args.min_intersection
-    hdbscan_params = args.min_cluster_size, args.max_cluster_size
+        output_dir = os.path.join(cwd, "../outputs/curvature/")
 
-    results = curvature_iterator(
-        data=data,
-        projection=proj_2D,
-        n_cubes=n,
-        perc_overlap=p,
-        hdbscan_params=hdbscan_params,
-        min_intersection_vals=min_intersections,
-        random_state=args.seed,
-    )
+        # Check if output directory already exists
+        if os.path.isdir(output_dir):
+            output_file = os.path.join(output_dir, output_file)
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            output_file = os.path.join(output_dir, output_file)
 
-    results["hyperparameters"] = (n, p, proj_2D, hdbscan_params)
-    out_dir_message = output_file
-    out_dir_message = "/".join(out_dir_message.split("/")[-2:])
+        n, p = args.n_cubes, args.perc_overlap
+        min_intersections = args.min_intersection
+        hdbscan_params = args.min_cluster_size, args.max_cluster_size
 
-    if len(results) > 1:
-        with open(output_file, "wb") as handle:
-            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        if args.Verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------- \n\n"
-            )
-            print(
-                f"Successfully written curvature analysis output to {out_dir_message}"
-            )
+        results = curvature_iterator(
+            data=data,
+            projection=proj_2D,
+            n_cubes=n,
+            perc_overlap=p,
+            hdbscan_params=hdbscan_params,
+            min_intersection_vals=min_intersections,
+            random_state=args.seed,
+        )
 
-            print(
-                "\n\n -------------------------------------------------------------------------------- "
-            )
+        results["hyperparameters"] = (
+            n,
+            p,
+            nbors,
+            d,
+        )
+        out_dir_message = output_file
+        out_dir_message = "/".join(out_dir_message.split("/")[-2:])
+
+        if len(results) > 1:
+            with open(output_file, "wb") as handle:
+                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            if args.Verbose:
+                print("\n")
+                print(
+                    "-------------------------------------------------------------------------------- \n\n"
+                )
+                print(
+                    f"Successfully written curvature analysis output to {out_dir_message}"
+                )
+
+                print(
+                    "\n\n -------------------------------------------------------------------------------- "
+                )
