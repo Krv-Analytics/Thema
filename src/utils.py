@@ -3,7 +3,8 @@ import os
 import pickle
 import numpy as np
 
-from sklearn.cluster import KMeans
+from umap import UMAP
+from hdbscan import HDBSCAN
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
 
@@ -17,22 +18,29 @@ def curvature_iterator(
     projection,
     n_cubes,
     perc_overlap,
-    umap_params,
     hdbscan_params,
     min_intersection_vals,
-    random_state=None,
+    random_state=0,
 ):
+    """ """
+
+    # HDBSCAN
+    min_cluster_size, max_cluster_size = hdbscan_params
+    clusterer = HDBSCAN(
+        min_cluster_size=min_cluster_size,
+        max_cluster_size=max_cluster_size,
+    )
 
     # Configure CoalMapper
     coal_mapper = CoalMapper(data, projection)
-    coal_mapper.fit(n_cubes, perc_overlap)
+    coal_mapper.fit(n_cubes, perc_overlap, clusterer)
     # Generate Graphs
     results = {}
 
     print("Computing Curvature Values and Persistence Diagrams")
     for val in min_intersection_vals:
         coal_mapper.to_networkx(min_intersection=val)
-        coal_mapper.calculate_homology()
+        coal_mapper.calculate_homology(filter_fn=ollivier_ricci_curvature)
         results[val] = coal_mapper
     return results
 
@@ -95,12 +103,18 @@ def convert_to_gtda(diagrams):
 def generate_results_filename(args, suffix=".pkl"):
     """Generate output filename string from CLI arguments when running compute_curvature script."""
 
-    K, p, n, D = args.KMeans, args.perc_overlap, args.n_cubes, args.data
+    min_cluster_size, n, p, D = (
+        args.min_cluster_size,
+        args.perc_overlap,
+        args.n_cubes,
+        args.data,
+    )
 
+    # TODO: Here want to grab the UMAP hyperparameters
     D = "/".join(D.split("/")[-1:])
     D = D.rsplit(".", 1)[0]
 
-    output_file = f"results_ncubes{n}_{int(p*100)}perc_K{K}_{D}.pkl"
+    output_file = f"results_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_.pkl"
 
     return output_file
 
