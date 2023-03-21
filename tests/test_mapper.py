@@ -1,4 +1,5 @@
 import pytest
+import os
 import networkx as nx
 import pandas as pd
 import numpy as np
@@ -7,39 +8,55 @@ import kmapper as km
 import pickle
 
 
+from hdbscan import HDBSCAN
+from umap import UMAP
+from src.nammu.topology import PersistenceDiagram
+from src.nammu.curvature import ollivier_ricci_curvature, forman_curvature
 from src.mapper import CoalMapper
 
-file = "/Users/jeremy.wayland/Desktop/Dev/coal_mapper/data_processing/local_data/coal_mapper.pkl"
+cwd = os.path.dirname(__file__)
+
+file = os.path.join(cwd, "../data/coal_mapper_one_hot_scaled_TSNE.pkl")
 # Randomly Sampled Data
 with open(file, "rb") as f:
     df = pickle.load(f)
     print(f"The dataframe currently has {len(df.columns)}")
-    df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
-    df = df.sample(n=5, axis="columns")
+    df = df.dropna()
 
+data = df.values
+projection = UMAP(
+    min_dist=0,
+    n_neighbors=10,
+    n_components=2,
+    init="random",
+    random_state=0,
+)
 
 print("Loaded data")
-data = df.select_dtypes(include=np.number).values[:100]
 
-kmeans = KMeans(n_clusters=8, random_state=1618033, n_init="auto")
+N = np.random.randint(1, 15)
+clusterer = HDBSCAN(min_cluster_size=N)
 
 
 class TestCoalMapper:
     def test_init(self):
-        test = CoalMapper(X=data)
-        assert type(test.data) == np.ndarray
-        assert test.lens == None
+        test = CoalMapper(data=data, projection=projection)
+        assert type(test.data) == pd.DataFrame
+        assert type(test.projection) == np.ndarray
+
         assert test.clusterer == None
         assert test.cover == None
-        assert test.nerve == None
-        assert test.graph == None
-        assert test.components == None
+
+        assert test.complex == dict()
+        assert test.graph == nx.Graph()
+        assert test.components == dict()
+        assert test.curvature == np.array([])
+        assert test.diagram == PersistenceDiagram()
 
     def test_compute_mapper(self):
-        n_cubes, perc_overlap = (6, 0.4)
-        test = CoalMapper(X=data)
-        test.clusterer = kmeans
-        test.compute_mapper(n_cubes, perc_overlap)
+        test = CoalMapper(data=data, projection=projection)
+
+        test.fit()
         G = test.to_networkx()
         components = test.connected_components()
 
@@ -50,3 +67,27 @@ class TestCoalMapper:
         assert type(components) == list
         assert len(components) >= 1 and len(components) <= len(test.graph.nodes())
         assert type(components[0]) == nx.Graph
+
+    def test_topology(self):
+        test = CoalMapper(data=data, projection=projection)
+        test.to_networkx()
+        # Graph is networkx and Undirected
+        assert not nx.is_directed(test.graph)
+
+        for curvature_fn in [ollivier_ricci_curvature, forman_curvature]:
+            # Setter Method
+            test.curvature = curvature_fn
+            assert type(test.curvature) == np.ndarray
+            assert len(test.curvature) == len(test.graph.edges())
+
+            test.calculate_homology(ollivier_ricci_curvature)
+
+            assert len(test.diagram) == 2
+            dgm0 = test.diagram[0]
+            dgm1 = test.diagram[1]
+
+            assert isinstance(dgm0.betti, int)
+            assert isinstance(dgm1.betti, int)
+
+            assert isinstance(dgm0.p_norm(), float)
+            assert isinstance(dgm1.p_norm(), float)
