@@ -19,13 +19,15 @@ pio.renderers.default = "browser"
 
 
 def UMAP_grid(df, dists, neighbors):
-    """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations"""
+    """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations
+    
+    grid search the UMAP parameter space, choose the representations that occur most often in the given parameter space, based on the generated histogram"""
     # example function inputs
     # dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
-    # neighbors = [3, 5, 10, 20, 40]
+    # neighbors = [3, 5, 10, 20, 4_0]
 
     # TODO
-    # make the colors nicer/give more meaning here
+    # marl outlying points in a different color - check the cluster_distribution output
     # figure out a way around this .dropna() call that removes all rows with missing data
     data = df.dropna()
     assert type(dists) == list, "Not list"
@@ -125,6 +127,7 @@ def UMAP_grid(df, dists, neighbors):
     fig2 = px.histogram(colors, 
                         x='Num',
                         color='Num',
+                        nbins=max(cluster_distribution),
                         color_discrete_map = {1:'#005f73', 
                                             2:'#0a9396', 
                                             3:'#94d2bd', 
