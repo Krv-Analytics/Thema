@@ -74,9 +74,9 @@ class CoalMapper:
     def complex(self):
         if len(self._complex["nodes"]) == 0:
             print(
-                "Your simplicial complex is empty!\
-                Run `fit()` to generate a simplicial complex. \
-                Note: some parameters may produce a trivial mapper representation."
+                "Your simplicial complex is empty! \n\
+                Run `fit()` to generate a simplicial complex. \n \
+                Note: some parameters may produce a trivial mapper representation. \n"
             )
         return self._complex
 
@@ -84,9 +84,9 @@ class CoalMapper:
     def graph(self):
         if len(self._graph.nodes()) == 0:
             print(
-                "Your graph is empty! \
-                Run `to_networkx()` to generate a graph. \
-                Note: some parameters may produce a trivial mapper representation."
+                "Your graph is empty! \n \
+                Run `to_networkx()` to generate a graph. \n \
+                Note: some parameters may produce a trivial mapper representation.\n"
             )
         return self._graph
 
@@ -94,9 +94,9 @@ class CoalMapper:
     def components(self):
         if len(self._components) == 0:
             print(
-                "You don't have any connected components! \
-                Run `connected_components()` to generate a graph. \
-                Note: some parameters may produce a trivial mapper representation."
+                "You don't have any connected components! \n \
+                Run `connected_components()` to generate a graph. \n\
+                Note: some parameters may produce a trivial mapper representation.\n"
             )
         return self._components
 
@@ -238,7 +238,7 @@ class CoalMapper:
             len(self.graph.nodes()) > 0
         ), "First run `to_networkx` to generate a non-empty networkx graph."
 
-        if not self._curvature:
+        if len(self._curvature) > 0:
             "Computing edge curvature values"
             self.curvature = filter_fn  # Set curvatures
 
