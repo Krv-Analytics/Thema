@@ -3,7 +3,7 @@ import os
 import pickle
 import numpy as np
 
-from sklearn.cluster import KMeans
+from hdbscan import HDBSCAN
 from scipy.cluster.hierarchy import dendrogram
 from matplotlib import pyplot as plt
 
@@ -17,24 +17,46 @@ def curvature_iterator(
     projection,
     n_cubes,
     perc_overlap,
-    umap_params,
     hdbscan_params,
     min_intersection_vals,
-    random_state=None,
+    random_state=0,
+    verbose=0,
 ):
+    """ """
+
+    # HDBSCAN
+    min_cluster_size, max_cluster_size = hdbscan_params
+    clusterer = HDBSCAN(
+        min_cluster_size=min_cluster_size,
+        max_cluster_size=max_cluster_size,
+    )
 
     # Configure CoalMapper
     coal_mapper = CoalMapper(data, projection)
-    coal_mapper.fit(n_cubes, perc_overlap)
+    coal_mapper.fit(n_cubes, perc_overlap, clusterer)
+
     # Generate Graphs
     results = {}
 
-    print("Computing Curvature Values and Persistence Diagrams")
-    for val in min_intersection_vals:
-        coal_mapper.to_networkx(min_intersection=val)
-        coal_mapper.calculate_homology()
-        results[val] = coal_mapper
-    return results
+    if len(coal_mapper.complex["links"]) > 0:
+        print("Computing Curvature Values and Persistence Diagrams")
+        for val in min_intersection_vals:
+            coal_mapper.to_networkx(min_intersection=val)
+            coal_mapper.curvature = ollivier_ricci_curvature
+            coal_mapper.calculate_homology()
+            results[val] = coal_mapper
+        return results
+    else:
+        if verbose:
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(f"Empty Simplicial Complex. No file written")
+
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
+        return results
 
 
 def convert_to_gtda(diagrams):
@@ -92,15 +114,16 @@ def convert_to_gtda(diagrams):
     return Xt_padded
 
 
-def generate_results_filename(args, suffix=".pkl"):
+def generate_results_filename(args, n_neighbors, min_dist, suffix=".pkl"):
     """Generate output filename string from CLI arguments when running compute_curvature script."""
 
-    K, p, n, D = args.KMeans, args.perc_overlap, args.n_cubes, args.data
+    min_cluster_size, p, n = (
+        args.min_cluster_size,
+        args.perc_overlap,
+        args.n_cubes,
+    )
 
-    D = "/".join(D.split("/")[-1:])
-    D = D.rsplit(".", 1)[0]
-
-    output_file = f"results_ncubes{n}_{int(p*100)}perc_K{K}_{D}.pkl"
+    output_file = f"results_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}.pkl"
 
     return output_file
 
@@ -118,14 +141,9 @@ def read_curvature_results():
         if file.endswith(".pkl"):
             with open(curvature_dir + file, "rb") as f:
                 result_dictionary = pickle.load(f)
-                test = result_dictionary[1]
-                try:
-                    if test.graph:
-                        hyper_params = result_dictionary["hyperparameters"]
-                        result_dictionary.pop("hyperparameters")
-                        data[hyper_params] = result_dictionary
-                except:
-                    print(f"{file} had an empty mapper!")
+                hyper_params = result_dictionary["hyperparameters"][:2]
+                result_dictionary.pop("hyperparameters")
+                data[hyper_params] = result_dictionary
 
     return data
 
@@ -136,7 +154,8 @@ def get_diagrams():
     for hyper_params in data.keys():
         mappers = data[hyper_params]
         for min_intersection in mappers.keys():
-            diagram = mappers[min_intersection].diagram
+
+            diagram = mappers[min_intersection].calculate_homology()
             new_key = (*hyper_params, min_intersection)
             diagrams[new_key] = diagram
     keys = list(diagrams.keys())
@@ -167,6 +186,6 @@ def plot_dendrogram(model, labels, distance, **kwargs):
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, labels=labels, **kwargs)
     plt.title("Hyperparameter Dendrogram")
-    plt.xlabel("Coordinates: (n_cubes,perc_overlap,K,min_intersection).")
+    plt.xlabel("Coordinates: (n_cubes,perc_overlap,min_intersection).")
     plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
