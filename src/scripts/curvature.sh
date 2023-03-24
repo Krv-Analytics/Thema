@@ -4,10 +4,10 @@
 #Run from src/ directory
 
 
-MIN_CLUSTER_SIZES=(10)
-N_CUBES=(7 8 9 10 11)
-PERC_OVERLAP=(0.5)
-MIN_INTERSECTION=(1) 
+MIN_CLUSTER_SIZES=(6)
+N_CUBES=(3 4 5 6 7 8 9 10 11)
+PERC_OVERLAP=(0.3 0.35 0.4 0.45 0.5 0.55)
+MIN_INTERSECTION=(1)
 
 poetry shell
 echo "Initializing Poetry Shell"

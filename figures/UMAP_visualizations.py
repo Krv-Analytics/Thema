@@ -80,21 +80,38 @@ def UMAP_grid(df, dists, neighbors):
                 random_state=0,
             )
             proj_2d = umap_2d.fit_transform(data)
-            clusterer = hdbscan.HDBSCAN(min_cluster_size=10).fit(proj_2d)
+            clusterer = hdbscan.HDBSCAN(min_cluster_size=5).fit(proj_2d)
             outdf = pd.DataFrame(proj_2d, columns=["0", "1"])
             outdf["labels"] = clusterer.labels_
 
             num_clusters = len(np.unique(clusterer.labels_))
             cluster_distribution.append(num_clusters)
+            df = outdf[outdf['labels']!=-1]
             fig.add_trace(
                 go.Scatter(
-                    x=outdf["0"],
-                    y=outdf["1"],
+                    x=df["0"],
+                    y=df["1"],
                     mode="markers",
                     marker=dict(
-                        size=4, color=outdf["labels"], cmid=0.5, colorscale=map_colors
+                        size=4, color=df["labels"], cmid=0.5, colorscale='Turbo' #colorscale=map_colors
                     ),
-                    hovertemplate=outdf["labels"],
+                    hovertemplate=df["labels"],
+                ),
+                row=d + 1,
+                col=n + 1,
+            )
+            
+            df = outdf[outdf['labels']==-1]
+            fig.add_trace(
+                go.Scatter(
+                    x=df["0"],
+                    y=df["1"],
+                    mode="markers",
+                    marker=dict(
+                        size=4, color='yellow', line=dict(width=0.1,
+                                        color='DarkSlateGrey')
+                    ),
+                    hovertemplate=df["labels"],
                 ),
                 row=d + 1,
                 col=n + 1,

@@ -21,8 +21,8 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default=os.path.join(cwd, "./../data/coal_mapper_one_hot_scaled_TSNE.pkl"),
-        help="Select location of local data set, as pulled from Mongo.",
+        default=os.path.join(cwd, "./../data/coal_mapper.pkl"),
+        help="Select location of local data set, as pulled from Mongo. Ensure you have pulled an unscaled/unprojected dataset as well",
     )
     parser.add_argument(
         "--projection",
