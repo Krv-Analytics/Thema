@@ -8,6 +8,11 @@ import datetime
 import seaborn as sns
 import itertools
 
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import plotly.io as pio
+from sklearn.preprocessing import MinMaxScaler
+
 from hdbscan import HDBSCAN
 
 from persim import plot_diagrams
@@ -348,8 +353,28 @@ class CoalMapper:
         time = int(datetime.datetime.now().timestamp())
         path_html = output_dir + f"coal_mapper_{time}.html"
 
+        ### to color mapper nodes ###
+        tempData = self.data.copy()
+        string_cols = tempData.select_dtypes(exclude='number').columns
+        df_numeric = tempData.drop(string_cols, axis=1)
+        my_colorscale = [[0.0, '#001219'],
+             [0.1, '#005f73'],
+             [0.2, '#0a9396'],
+             [0.3, '#94d2bd'],
+             [0.4, '#e9d8a6'],
+             [0.5, '#ee9b00'],
+             [0.6, '#ca6702'],
+             [0.7, '#bb3e03'],
+             [0.8, '#ae2012'],
+             [0.9, '#9b2226'],
+             [1.0, '#a50026']]  
+
         _ = self.mapper.visualize(
             self.complex,
+            node_color_function=['mean', 'median', 'std', 'min', 'max'],
+            color_values = df_numeric.dropna(),
+            color_function_name=list(df_numeric.dropna().columns),
+            colorscale=my_colorscale,
             path_html=path_html,
         )
         print(f"Go to {path_html} for a visualization of your CoalMapper!")
@@ -376,3 +401,54 @@ class CoalMapper:
             np.asarray(self.diagram[1]._pairs),
         ]
         return plot_diagrams(persim_diagrams, show=True)
+
+    def connected_component_heatmaps(self):
+        viz=self.data
+
+        targetCols=['NAMEPCAP', 'GENNTAN', 'weighted_coal_CAPFAC', 'weighted_coal_AGE', 'Retrofit Costs', 'forwardCosts', 'PLSO2AN']
+
+        #mean data
+        viz2 = viz.groupby('cluster_labels', as_index=False).mean()[targetCols]
+        c_labels=viz.groupby('cluster_labels').mean().reset_index()['cluster_labels']
+        scaler = MinMaxScaler()
+        data = scaler.fit_transform(viz2)
+        df = pd.DataFrame(data, columns=list(viz2.columns)).set_index(c_labels)
+
+        #% of max data
+        #TODO: fix the below to append 'cluster_labels' to targetCols so targetCols can be a user input
+        df2 = viz[['NAMEPCAP', 'GENNTAN', 'weighted_coal_CAPFAC', 'weighted_coal_AGE', 'Retrofit Costs', 'forwardCosts', 'PLSO2AN', 'cluster_labels']]
+        df2 = df2.groupby(['cluster_labels']).sum()/df2[targetCols].sum()
+
+        fig = make_subplots(
+            rows=1, cols=2,
+            vertical_spacing=0.1,
+            subplot_titles=("Connected Component Averages", "Connected Component % of Total"),
+            specs=[[{"type": "Heatmap"}, {"type": "Heatmap"}]],
+            y_title='Cluster Label'
+            )
+
+        col=1
+        for df in [df, df2]:
+            if col==1:
+                text=viz2.round(2).values.tolist()
+                texttemplate = ("%{text}")
+            else:
+                text=df.round(2).values.tolist()
+                texttemplate = ("%{text}")+"%"
+
+            fig.add_trace(go.Heatmap(x=df.columns.to_list(), 
+                                    y=df.index.to_list(), 
+                                    z=df.values.tolist(),
+                                    text=text,
+                                    colorscale = 'rdylgn_r', 
+                                    xgap = 2, ygap = 2, 
+                                    texttemplate=texttemplate
+            ),row=1, col=col)
+            col = col+1
+
+        fig.update_xaxes(tickangle=45)
+        fig.update_layout(font=dict(size=10))
+        fig.update_traces(showscale=False)
+        print('Number of Plants in each Connected Component (-1 indicates not displayed on mapper):\n')
+        print(viz.groupby('cluster_labels').count().rename(columns={'NAMEPCAP':'#CoalPlants'})['#CoalPlants'])
+        pio.show(fig)
