@@ -27,7 +27,7 @@ def curvature_metric(metric="bottleneck"):
 def cluster_hyperparams(metric="bottleneck", p_frac=0.25):
     keys, distances = curvature_metric(metric)
     model = AgglomerativeClustering(
-        affinity="precomputed", linkage="single", compute_distances=True
+        affinity="precomputed", linkage="average", compute_distances=True
     )
     model.fit(distances)
     keys = [key[:2] for key in keys]
