@@ -1,5 +1,5 @@
-/config.local
+/config
 /tmp
 /cache
 client_ID.json
-
+config

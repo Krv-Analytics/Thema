@@ -12,3 +12,5 @@ data/
 *.DS_Store
 *.html
 .dvc/client_ID.json
+.dvc/config
+
