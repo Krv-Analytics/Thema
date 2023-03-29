@@ -1,0 +1,4 @@
+outs:
+- md5: 112b0fdfb28c30c20d86ec6b0160f700
+  size: 42589
+  path: results_ncubes6_35perc_hdbscan8_UMAP_5Nbors_minD0.05.pkl
