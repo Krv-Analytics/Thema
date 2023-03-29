@@ -1,0 +1,4 @@
+outs:
+- md5: c4e05bf935337a30efbf2c29a9c23cfd
+  size: 23127
+  path: Curvature_Values_Analysis.ipynb
