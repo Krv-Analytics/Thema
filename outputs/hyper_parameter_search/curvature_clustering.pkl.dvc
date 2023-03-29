@@ -1,0 +1,4 @@
+outs:
+- md5: 0dac46b37ce063042c5100dc2c8d9e8b
+  size: 3815
+  path: curvature_clustering.pkl
