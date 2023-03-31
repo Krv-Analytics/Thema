@@ -8,6 +8,8 @@ from utils import (
     get_diagrams,
     plot_dendrogram,
 )
+import pickle
+import os
 
 from sklearn.cluster import AgglomerativeClustering
 
@@ -18,24 +20,29 @@ def curvature_metric(metric="bottleneck"):
     distance_metric = PairwiseDistance(metric=metric)
     distance_metric.fit(curvature_dgms)
     distances = distance_metric.transform(curvature_dgms)
+
     return keys, distances
 
 
 # kernel based embedding
 
 
-def cluster_hyperparams(metric="bottleneck", p_frac=0.25):
-    keys, distances = curvature_metric(metric)
+def cluster_hyperparams(keys, distances, metric, p_frac=0.1):
     model = AgglomerativeClustering(
         affinity="precomputed", linkage="average", compute_distances=True
     )
     model.fit(distances)
+
     keys = [key[:2] for key in keys]
 
     # What percentage of Labels do you want to visualize?
     p = int(p_frac * len(keys))
-    return plot_dendrogram(model, keys, metric, truncate_mode="level", p=p)
+    plot_dendrogram(model, keys, metric, truncate_mode="level", p=p)
 
+    return model
+
+
+cwd = os.path.dirname(__file__)
 
 if __name__ == "__main__":
 
@@ -56,7 +63,60 @@ if __name__ == "__main__":
         help="Fraction of Labels to see in dendrogram plot.",
     )
 
+    parser.add_argument(
+        "-s",
+        "--save_model",
+        default=True,
+        help="If True, save the clustering model and distances as pickle files.",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--Verbose",
+        default=False,
+        action="store_true",
+        help="If set, will print messages detailing computation and output.",
+    )
+
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    cluster_hyperparams(p_frac=args.p_frac)
+    keys, distances = curvature_metric(args.metric)
+    model = cluster_hyperparams(keys, distances, p_frac=args.p_frac, metric=args.metric)
+
+    results = dict([(model, keys)])
+
+    if args.save_model:
+
+        distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
+        model_file = f"curvature_{args.metric}_clustering_model.pkl"
+
+        out_dir_message = f"{distance_file} and {model_file} successfully written."
+
+        output_dir = os.path.join(cwd, "../outputs/hyper_parameter_search/")
+
+        # Check if output directory already exists
+        if os.path.isdir(output_dir):
+            distance_file = os.path.join(output_dir, distance_file)
+            model_file = os.path.join(output_dir, model_file)
+
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            distance_file = os.path.join(output_dir, distance_file)
+            model_file = os.path.join(output_dir, model_file)
+
+        with open(distance_file, "wb") as handle:
+            pickle.dump(distances, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(model_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(f"{out_dir_message}")
+
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
