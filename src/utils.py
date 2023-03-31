@@ -141,7 +141,7 @@ def read_curvature_results():
         if file.endswith(".pkl"):
             with open(curvature_dir + file, "rb") as f:
                 result_dictionary = pickle.load(f)
-                hyper_params = result_dictionary["hyperparameters"][:2]
+                hyper_params = result_dictionary["hyperparameters"]
                 result_dictionary.pop("hyperparameters")
                 data[hyper_params] = result_dictionary
 
@@ -184,8 +184,9 @@ def plot_dendrogram(model, labels, distance, **kwargs):
     ).astype(float)
 
     # Plot the corresponding dendrogram
-    dendrogram(linkage_matrix, labels=labels, **kwargs)
+    d = dendrogram(linkage_matrix, labels=labels, **kwargs)
     plt.title("Hyperparameter Dendrogram")
     plt.xlabel("Coordinates: (n_cubes,perc_overlap,min_intersection).")
     plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
+    return d
