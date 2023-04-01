@@ -1,6 +1,9 @@
 import os
 import argparse
 import sys
+import pickle
+
+from projections_helper import projection_driver
 
 
 cwd = os.path.dirname(__file__)
@@ -13,7 +16,7 @@ if __name__ == "__main__":
         "-p",
         "--path",
         type=str,
-        default=os.path.join(cwd, "./../data/coal_mapper_one_hot_scaled.pkl"),
+        default=os.path.join(cwd, "./../../data/coal_mapper_one_hot_scaled.pkl"),
         help="Select location of local data set, as pulled from Mongo.",
     )
 
@@ -49,7 +52,8 @@ if __name__ == "__main__":
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    uMAP_grid(df, dists=args.min_dists, neighbors=args.neighbors_list)
+    projection_params = (args.min_dists, args.neighbors_list)
+    projection_driver(df, projection_params)
 
     print(
         "\n################################################################################## \n\n"

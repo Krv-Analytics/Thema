@@ -14,10 +14,12 @@ def projection_file_name(projection, dimensions=2):
     return output_file
 
 
-def projection_driver(data, dimensions=2, projection="UMAP",projection_params):
+def projection_driver(df, projection_params, dimensions=2, projection="UMAP"):
 
     assert projection == "UMAP", "No other projections supported at this time."
-    assert len(projection_params) == 2, "Must pass min_dist and num_neighbors parameters for UMAP."
+    assert (
+        len(projection_params) == 2
+    ), "Must pass min_dist and num_neighbors parameters for UMAP."
     dists, neighbors = projection_params
     data = df.dropna()
     assert type(dists) == list, "Not list"
@@ -51,6 +53,6 @@ def projection_driver(data, dimensions=2, projection="UMAP",projection_params):
     keys = list(results.keys())
     keys.sort()
     sorted_results = {i: results[i] for i in keys}
-    output_file = projection_file_name(projection,dimensions=dimensions)
+    output_file = projection_file_name(projection, dimensions=dimensions)
     with open(output_file, "wb") as f:
         pickle.dump(sorted_results, f)
