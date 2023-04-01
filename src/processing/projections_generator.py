@@ -46,7 +46,7 @@ if __name__ == "__main__":
     with open(args.path, "rb") as f:
         df = pickle.load(f)
 
-    output_dir = os.path.join(cwd, "../outputs/projections/")
+    output_dir = os.path.join(cwd, "../../outputs/projections/")
 
     # Check if output directory already exists
     if not os.path.isdir(output_dir):
