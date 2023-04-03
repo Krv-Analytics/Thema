@@ -20,18 +20,7 @@ def get_data(
 
     df = mongo_object.pull()
 
-    file = "coal_plant_data"
-    # Encode Categorical Variables
-    if one_hot:
-        df = pd.get_dummies(df, prefix="One_hot", prefix_sep="_")
-        file += "_one_hot"
-
-    # Scale Data using StandardScaler
-    if scaled:
-        scaler = StandardScaler()
-        data = scaler.fit_transform(df)
-        df = pd.DataFrame(data, columns=list(df.columns))
-        file += "_scaled"
+    file = "coal_plant_data_raw"
 
     output_path = os.path.join(out_dir, file)
     # Generate Output Files

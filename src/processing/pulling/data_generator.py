@@ -54,7 +54,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cwd = os.path.dirname(__file__)
-    output_dir = os.path.join(cwd, "../../data/processed/")
+    output_dir = os.path.join(cwd, "../../../data/raw/")
     # Create Data dir and Processed subdir on first run
     if not os.path.isdir(output_dir):
         print("Creating local data directory...")
