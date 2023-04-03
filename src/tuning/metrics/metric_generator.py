@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-s",
-        "--save_model",
+        "--save",
         default=True,
         help="If True, save the clustering model and distances as pickle files.",
     )
