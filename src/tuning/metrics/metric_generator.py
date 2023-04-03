@@ -5,8 +5,6 @@ import pickle
 
 from metric_helper import topology_metric
 
-sys.path.append("./../../")
-
 
 cwd = os.path.dirname(__file__)
 
