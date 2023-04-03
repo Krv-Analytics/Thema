@@ -54,8 +54,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cwd = os.path.dirname(__file__)
-    output_dir = os.path.join(cwd, "../../data/")
-    # If ./local_data/ doesn't exist yet, create it
+    output_dir = os.path.join(cwd, "../../data/processed/")
+    # Create Data dir and Processed subdir on first run
     if not os.path.isdir(output_dir):
         print("Creating local data directory...")
         os.makedirs(output_dir, exist_ok=True)
@@ -67,6 +67,7 @@ if __name__ == "__main__":
         one_hot=args.one_hot,
         scaled=args.scaled,
     )
+
     output_path = os.path.join(output_dir, file)
     assert os.path.isfile(f"{output_path}.{args.type}"), "Failed to write data locally"
 
