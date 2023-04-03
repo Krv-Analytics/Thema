@@ -3,9 +3,10 @@ import pickle
 import numpy as np
 
 from gtda.diagrams import PairwiseDistance
+from coal_mapper import CoalMapper
 
 
-def topology_metric(metric="bottleneck", dir="./outputs/curvature/"):
+def topology_metric(metric="bottleneck", dir="./../../../data/mappers/"):
     keys, diagrams = get_diagrams(dir)
     curvature_dgms = convert_to_gtda(diagrams.values())
     distance_metric = PairwiseDistance(metric=metric)
@@ -21,10 +22,12 @@ def mapper_reader(dir):
     ), "Please first compute mapper objects using `coal_mapper_generator.py`"
 
     data = {}
-
+    cwd = os.path.dirname(__file__)
+    dir = os.path.join(cwd, dir)
     for file in os.listdir(dir):
         if file.endswith(".pkl"):
-            with open(dir + file, "rb") as f:
+            mapper_file = os.path.join(dir, file)
+            with open(mapper_file, "rb") as f:
                 result_dictionary = pickle.load(f)
             hyper_params = result_dictionary["hyperparameters"]
             result_dictionary.pop("hyperparameters")
