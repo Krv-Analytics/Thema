@@ -1,6 +1,7 @@
 from hdbscan import HDBSCAN
 from coal_mapper import CoalMapper
 
+
 # from nammu import ollivier_ricci_curvature
 
 
@@ -11,7 +12,6 @@ def coal_mapper_generator(
     perc_overlap,
     hdbscan_params,
     min_intersection_vals,
-    random_state=0,
     verbose=0,
 ):
     """ """
