@@ -1,5 +1,7 @@
 from hdbscan import HDBSCAN
 from coal_mapper import CoalMapper
+import datetime
+import os
 
 
 from nammu.curvature import ollivier_ricci_curvature
@@ -60,6 +62,6 @@ def generate_results_filename(args, n_neighbors, min_dist):
         args.n_cubes,
     )
 
-    output_file = f"results_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}.pkl"
+    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}.pkl"
 
     return output_file
