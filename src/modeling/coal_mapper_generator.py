@@ -142,7 +142,6 @@ if __name__ == "__main__":
             perc_overlap=p,
             hdbscan_params=hdbscan_params,
             min_intersection_vals=min_intersections,
-            random_state=args.seed,
         )
 
         results["hyperparameters"] = (
