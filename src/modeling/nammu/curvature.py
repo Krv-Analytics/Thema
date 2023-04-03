@@ -1,4 +1,6 @@
-"""Curvature measures for graphs."""
+"""Curvature measures for graphs.
+
+Credit to: AIDOS Lab (https://github.com/aidos-lab)."""
 
 import ot
 import warnings
