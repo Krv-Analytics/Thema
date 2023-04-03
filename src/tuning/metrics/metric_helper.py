@@ -1,9 +1,15 @@
 import os
 import pickle
 import numpy as np
+import sys
 
 from gtda.diagrams import PairwiseDistance
-from coal_mapper import CoalMapper
+
+
+SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) + "/../"
+print(SRC)
+sys.path.append(SRC)
+from modeling.coal_mapper import CoalMapper
 
 
 def topology_metric(metric="bottleneck", dir="./../../../data/mappers/"):

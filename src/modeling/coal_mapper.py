@@ -4,9 +4,10 @@ import numpy as np
 import networkx as nx
 import kmapper as km
 import pandas as pd
-import datetime
+import os
 import seaborn as sns
 import itertools
+import sys
 
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -22,6 +23,15 @@ from nammu.curvature import ollivier_ricci_curvature
 from nammu.utils import make_node_filtration
 
 from kmapper import KeplerMapper
+
+
+SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(SRC)
+from visualizing.visualization_helper import (
+    config_plot_data,
+    custom_color_scale,
+    mapper_plot_outfile,
+)
 
 
 class CoalMapper:
@@ -346,38 +356,24 @@ class CoalMapper:
     #############################################################################################################################################
     #############################################################################################################################################
 
-    def plot(self, output_dir: str = "../outputs/htmls/"):
+    def plot(
+        self,
+    ):
         """"""
         assert (
             len(self.complex) > 0
         ), "First run `fit()` to generate a nonempty simplicial complex."
-        time = int(datetime.datetime.now().timestamp())
-        path_html = output_dir + f"coal_mapper_{time}.html"
 
-        ### to color mapper nodes ###
-        tempData = self.data.copy()
-        string_cols = tempData.select_dtypes(exclude="number").columns
-        df_numeric = tempData.drop(string_cols, axis=1)
-        my_colorscale = [
-            [0.0, "#001219"],
-            [0.1, "#005f73"],
-            [0.2, "#0a9396"],
-            [0.3, "#94d2bd"],
-            [0.4, "#e9d8a6"],
-            [0.5, "#ee9b00"],
-            [0.6, "#ca6702"],
-            [0.7, "#bb3e03"],
-            [0.8, "#ae2012"],
-            [0.9, "#9b2226"],
-            [1.0, "#a50026"],
-        ]
+        path_html = mapper_plot_outfile(self.cover)
 
+        numeric_data, labels = config_plot_data(self.data)
+        colorscale = custom_color_scale()
         _ = self.mapper.visualize(
             self.complex,
             node_color_function=["mean", "median", "std", "min", "max"],
-            color_values=df_numeric.dropna(),
-            color_function_name=list(df_numeric.dropna().columns),
-            colorscale=my_colorscale,
+            color_values=numeric_data,
+            color_function_name=labels,
+            colorscale=colorscale,
             path_html=path_html,
         )
         print(f"Go to {path_html} for a visualization of your CoalMapper!")
