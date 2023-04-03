@@ -8,15 +8,14 @@ from umap import UMAP
 cwd = os.path.dirname(__file__)
 
 
-def projection_file_name(projection, dimensions=2):
-    output_dir = os.path.join(cwd, "../outputs/projections/")
-    output_file = os.path.join(output_dir, f"{projection}_{dimensions}D.pkl")
+def projection_file_name(projector, dimensions=2):
+    output_file = f"{projector}_{dimensions}D.pkl"
     return output_file
 
 
-def projection_driver(df, projection_params, dimensions=2, projection="UMAP"):
+def projection_driver(df, projection_params, dimensions=2, projector="UMAP"):
 
-    assert projection == "UMAP", "No other projections supported at this time."
+    assert projector == "UMAP", "No other projections supported at this time."
     assert (
         len(projection_params) == 2
     ), "Must pass min_dist and num_neighbors parameters for UMAP."
@@ -53,6 +52,4 @@ def projection_driver(df, projection_params, dimensions=2, projection="UMAP"):
     keys = list(results.keys())
     keys.sort()
     sorted_results = {i: results[i] for i in keys}
-    output_file = projection_file_name(projection, dimensions=dimensions)
-    with open(output_file, "wb") as f:
-        pickle.dump(sorted_results, f)
+    return sorted_results
