@@ -5,7 +5,7 @@ import sys
 import os
 import pickle
 
-from parameter_clustering_helper import cluster_hyperparams
+from parameter_clustering_helper import cluster_hyperparams, read_distance_matrices
 
 cwd = os.path.dirname(__file__)
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "-m",
         "--metric",
         type=str,
-        default="bottleneck",
+        default="landscape",
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-s",
-        "--save_model",
+        "--save",
         default=True,
         help="If True, save the clustering model and distances as pickle files.",
     )
@@ -48,20 +48,19 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
 
-    keys, distances = read_distance_matrices()  # TODO: implement
+    keys, distances = read_distance_matrices(args.metric)
     model = cluster_hyperparams(keys, distances, p_frac=args.p_frac, metric=args.metric)
 
-    results = dict([model, keys])
+    results = {"keys": keys, "model": model}
     if args.save:
         model_file = f"curvature_{args.metric}_clustering_model.pkl"
 
         out_dir_message = f"{model_file} successfully written."
 
-        output_dir = os.path.join(cwd, "../data/")
+        output_dir = os.path.join(cwd, "../../../data/parameter_modeling/models/")
 
         # Check if output directory already exists
         if os.path.isdir(output_dir):
-            distance_file = os.path.join(output_dir, distance_file)
             model_file = os.path.join(output_dir, model_file)
 
         else:
