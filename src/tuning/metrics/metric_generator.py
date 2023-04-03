@@ -5,6 +5,9 @@ import pickle
 
 from metric_helper import topology_metric
 
+sys.path.append("./../../")
+
+
 cwd = os.path.dirname(__file__)
 
 if __name__ == "__main__":
@@ -44,7 +47,7 @@ if __name__ == "__main__":
 
         out_dir_message = f"{distance_file} successfully written."
 
-        output_dir = os.path.join(cwd, "../data/parameter_models/")
+        output_dir = os.path.join(cwd, "./../../data/parameter_modeling/")
 
         # Check if output directory already exists
         if os.path.isdir(output_dir):
