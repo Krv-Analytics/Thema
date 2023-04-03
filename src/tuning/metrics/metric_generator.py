@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "-m",
         "--metric",
         type=str,
-        default="bottleneck",
+        default="landscape",
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
 
@@ -39,13 +39,16 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     keys, distances = topology_metric(args.metric)
+    results = {"keys": keys, "distances": distances}
 
     if args.save:
         distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
 
         out_dir_message = f"{distance_file} successfully written."
 
-        output_dir = os.path.join(cwd, "./../../data/parameter_modeling/")
+        output_dir = os.path.join(
+            cwd, "./../../../data/parameter_modeling/distance_matrices/"
+        )
 
         # Check if output directory already exists
         if os.path.isdir(output_dir):
@@ -56,7 +59,7 @@ if __name__ == "__main__":
             distance_file = os.path.join(output_dir, distance_file)
 
         with open(distance_file, "wb") as handle:
-            pickle.dump(distances, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         if args.Verbose:
             print("\n")
