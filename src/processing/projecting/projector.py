@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "--path",
         type=str,
         default=os.path.join(
-            cwd, "./../../data/processed/coal_plant_data_one_hot_scaled.pkl"
+            cwd, "./../../../data/processed/coal_plant_data_one_hot_scaled.pkl"
         ),
         help="Select location of local data set, as pulled from Mongo.",
     )
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     with open(args.path, "rb") as f:
         df = pickle.load(f)
 
-    output_dir = os.path.join(cwd, "./../../data/projections/UMAP/")
+    output_dir = os.path.join(cwd, "./../../../data/projections/UMAP/")
     output_file = projection_file_name(projector="UMAP", dimensions=2)
 
     output_file = os.path.join(output_dir, output_file)
