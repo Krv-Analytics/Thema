@@ -2,7 +2,7 @@ from hdbscan import HDBSCAN
 from coal_mapper import CoalMapper
 
 
-# from nammu import ollivier_ricci_curvature
+from nammu.curvature import ollivier_ricci_curvature
 
 
 def coal_mapper_generator(
@@ -34,7 +34,7 @@ def coal_mapper_generator(
         print("Computing Curvature Values and Persistence Diagrams")
         for val in min_intersection_vals:
             coal_mapper.to_networkx(min_intersection=val)
-            # coal_mapper.curvature = ollivier_ricci_curvature
+            coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
             results[val] = coal_mapper
         return results
