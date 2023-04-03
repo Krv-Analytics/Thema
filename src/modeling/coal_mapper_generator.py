@@ -18,14 +18,22 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default=os.path.join(cwd, "./../data/coal_mapper.pkl"),
+        default=os.path.join(
+            cwd, "./../../data/processed/coal_plant_data_one_hot_scaled.pkl"
+        ),
         help="Select location of local data set, as pulled from Mongo. Ensure you have pulled an unscaled/unprojected dataset as well",
     )
     parser.add_argument(
-        "--projection",
+        "--projector",
         type=str,
-        default=os.path.join(cwd, "./../../outputs/projections/umap_2D.pkl"),
-        help="Select location of UMAP projections.",
+        default="UMAP",
+        help="Select type of projection for initializing `CoalMapper` objects.",
+    )
+    parser.add_argument(
+        "--dimension",
+        type=int,
+        default=2,
+        help="Select dimension of projections for initializing `CoalMapper` objects.",
     )
     parser.add_argument(
         "-f",
@@ -58,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--n_cubes",
-        default=6,
+        default=10,
         type=int,
         help="Number of cubes used to cover your dataset.",
     )
@@ -66,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p",
         "--perc_overlap",
-        default=0.4,
+        default=0.6,
         type=float,
         help="Percentage overlap of cubes in the cover.",
     )
@@ -96,7 +104,12 @@ if __name__ == "__main__":
 
     data = df.dropna()
 
-    with open(args.projection, "rb") as g:
+    # Load Projections
+    projections_file = os.path.join(
+        cwd,
+        f"./../../data/projections/{args.projector}/{args.projector}_{args.dimension}D.pkl",
+    )
+    with open(projections_file, "rb") as g:
         print("Reading in UMAP Projections \n")
         projections = pickle.load(g)
 
@@ -109,7 +122,7 @@ if __name__ == "__main__":
 
         output_file = generate_results_filename(args, nbors, d)
 
-        output_dir = os.path.join(cwd, "../../data/L_Mappers/")
+        output_dir = os.path.join(cwd, "../../data/mappers/")
 
         # Check if output directory already exists
         if os.path.isdir(output_dir):
@@ -138,6 +151,7 @@ if __name__ == "__main__":
             nbors,
             d,
         )
+
         out_dir_message = output_file
         out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
@@ -150,7 +164,7 @@ if __name__ == "__main__":
                     "-------------------------------------------------------------------------------- \n\n"
                 )
                 print(
-                    f"Successfully written curvature analysis output to {out_dir_message}"
+                    f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
                 )
 
                 print(
