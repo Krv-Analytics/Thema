@@ -17,9 +17,9 @@ from hdbscan import HDBSCAN
 
 from persim import plot_diagrams
 
-# from nammu.topology import calculate_persistence_diagrams, PersistenceDiagram
-# from nammu.curvature import ollivier_ricci_curvature
-# from nammu.utils import make_node_filtration
+from nammu.topology import calculate_persistence_diagrams, PersistenceDiagram
+from nammu.curvature import ollivier_ricci_curvature
+from nammu.utils import make_node_filtration
 
 from kmapper import KeplerMapper
 
