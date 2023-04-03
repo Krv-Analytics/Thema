@@ -238,7 +238,7 @@ class CoalMapper:
 
         return self.components
 
-    def calculate_homology(self, use_min=True):
+    def calculate_homology(self, filter_fn=ollivier_ricci_curvature, use_min=True):
         """Compute Persistent Diagrams based on a curvature filtration of `self._graph`."""
         assert (
             len(self.graph.nodes()) > 0
@@ -248,18 +248,18 @@ class CoalMapper:
             "Computing edge curvature values"
             self.curvature = filter_fn  # Set curvatures
 
-        # G = make_node_filtration(
-        #     self.graph,
-        #     self.curvature,
-        #     attribute_name="curvature",
-        #     use_min=use_min,
-        # )
-        # pd = calculate_persistence_diagrams(
-        #     G,
-        #     "curvature",
-        #     "curvature",
-        # )
-        # self._diagram = pd
+        G = make_node_filtration(
+            self.graph,
+            self.curvature,
+            attribute_name="curvature",
+            use_min=use_min,
+        )
+        pd = calculate_persistence_diagrams(
+            G,
+            "curvature",
+            "curvature",
+        )
+        self._diagram = pd
         return self.diagram
 
     def item_lookup(
