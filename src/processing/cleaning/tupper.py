@@ -29,7 +29,7 @@ class Tupper:
     @property
     def clean(self):
         assert self._clean, "Please Specify a valid path to clean data"
-        with open(self._raw, "rb") as clean_file:
+        with open(self._clean, "rb") as clean_file:
             reference = pickle.load(clean_file)
         clean_df = reference["clean_data"]
         # dropped_columns = reference["dropped_columns"]
@@ -43,3 +43,10 @@ class Tupper:
             projection_array = reference["projection"]
 
         return projection_array
+    
+    def get_projection_parameters(self):
+        with open(self._projection, "rb") as projection_file:
+            reference = pickle.load(projection_file)
+            projection_parameters = reference["hyper_parameters"]
+
+        return projection_parameters 
