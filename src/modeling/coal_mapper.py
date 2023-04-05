@@ -19,15 +19,14 @@ load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
 
-from modeling.model import Model
 from processing.cleaning.tupper import Tupper
 
-# TODO: Move Visualization functionality into visualizations
-from visualizing.visualization_helper import (
-    config_plot_data,
-    custom_color_scale,
-    mapper_plot_outfile,
-)
+# # TODO: Move Visualization functionality into visualizations
+# from visualizing.visualization_helper import (
+#     config_plot_data,
+#     custom_color_scale,
+#     mapper_plot_outfile,
+# )
 
 
 class CoalMapper:
@@ -66,8 +65,6 @@ class CoalMapper:
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
-        # Model
-        self._model = Model(tupper=self.tupper)
 
     @property
     def tupper(self):

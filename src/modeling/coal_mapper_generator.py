@@ -127,7 +127,7 @@ if __name__ == "__main__":
         hdbscan_params=hdbscan_params,
         min_intersection_vals=min_intersections,
     )
-
+    # TODO: configure hyperparameters as a dictionary
     results["hyperparameters"] = (
         n,
         p,
