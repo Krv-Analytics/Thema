@@ -1,13 +1,11 @@
-import pandas as pd
 import os
-from sklearn.preprocessing import StandardScaler
 
 
 def get_data(
     mongo_object,
     out_dir,
-    one_hot=True,
-    scaled=True,
+    data_base,
+    col,
 ):
     """This function creates a local file containing the specified dataset
 
@@ -18,7 +16,7 @@ def get_data(
     – coal_mapper is a complied dataset of all information \n
     – eGrid_coal is a compiled dataset of a yearly instance of every US coal plant since 2009"""
 
-    df = mongo_object.pull()
+    df = mongo_object.pull(data_base, col)
 
     file = "coal_plant_data_raw"
 
