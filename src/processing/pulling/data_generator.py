@@ -30,25 +30,11 @@ if __name__ == "__main__":
         help="Select collection to pull from within `--database`.",
     )
     parser.add_argument(
-        "-t",
-        "--type",
-        type=str,
-        default="pkl",
-        help="Select file type for local data.",
-    )
-    parser.add_argument(
-        "-e",
-        "--one_hot",
-        type=bool,
-        default=True,
-        help="Option for categorical variables to be one hot encoded via `pd.dummies`.",
-    )
-    parser.add_argument(
-        "-s",
-        "--scaled",
-        type=bool,
-        default=True,
-        help="Option to standardize data by removing the mean and scaling to unit variance.",
+        "-v",
+        "--Verbose",
+        default=False,
+        action="store_true",
+        help="If set, will print messages detailing computation and output.",
     )
 
     args = parser.parse_args()
@@ -64,25 +50,25 @@ if __name__ == "__main__":
     file = get_data(
         mongo_object=mongo_object,
         out_dir=output_dir,
-        one_hot=args.one_hot,
-        scaled=args.scaled,
+        data_base=args.database,
+        col=args.col,
     )
 
     output_path = os.path.join(output_dir, file)
-    assert os.path.isfile(f"{output_path}.{args.type}"), "Failed to write data locally"
+    assert os.path.isfile(f"{output_path}.pkl"), "Failed to write data locally"
 
     # Setting message to print(readable) location of output message
     out_dir_message = output_path
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
+    if args.Verbose:
+        print(
+            "-------------------------------------------------------------------------------- \n\n"
+        )
+        print(
+            f"Successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
+        )
+        print(f"Written to {out_dir_message}.pkl")
 
-    print(
-        "-------------------------------------------------------------------------------- \n\n"
-    )
-    print(
-        f"Successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
-    )
-    print(f"Written to {out_dir_message}.{args.type}")
-
-    print(
-        "\n\n -------------------------------------------------------------------------------- "
-    )
+        print(
+            "\n\n -------------------------------------------------------------------------------- "
+        )
