@@ -99,8 +99,10 @@ if __name__ == "__main__":
 
             ## Selecting projection to write
             projection = projections[keys]
+
+            output = {"projection": projection, "hyper_parameters": keys}
             with open(output_file, "wb") as f:
-                pickle.dump(projection, f)
+                pickle.dump(output, f)
 
             if args.Verbose:
                 print(f"Writing {keys} to {out_dir_message}")
