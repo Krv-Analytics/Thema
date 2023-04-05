@@ -1,39 +1,33 @@
 """Object file for Coal Mapper computations and analysis"""
 
-import numpy as np
-import networkx as nx
-import kmapper as km
-import pandas as pd
 import os
-import seaborn as sns
-import itertools
 import sys
 
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import plotly.io as pio
-from sklearn.preprocessing import MinMaxScaler
-
+import kmapper as km
+import networkx as nx
+import numpy as np
+from dotenv import load_dotenv
 from hdbscan import HDBSCAN
-
-from persim import plot_diagrams
-
-from nammu.topology import calculate_persistence_diagrams, PersistenceDiagram
-from nammu.curvature import ollivier_ricci_curvature
-from nammu.utils import make_node_filtration
-
 from kmapper import KeplerMapper
 
+from nammu.curvature import ollivier_ricci_curvature
+from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
+from nammu.utils import make_node_filtration
 
-SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.append(SRC)
+# Add src/ to PATH
+load_dotenv()
+src = os.getenv("src")
+sys.path.append(src)
+
+from modeling.model import Model
+from processing.cleaning.tupper import Tupper
+
+# TODO: Move Visualization functionality into visualizations
 from visualizing.visualization_helper import (
     config_plot_data,
     custom_color_scale,
     mapper_plot_outfile,
 )
-from processing.cleaning.tupper import Tupper
-from modeling.model import Model
 
 
 class CoalMapper:
@@ -51,8 +45,6 @@ class CoalMapper:
             Projected data. The low dimensional representation
             (e.g. post UMAP or TSNE) of X.
             Can combine representations, will become `lens` in `kmapper`.
-            #TODO: Implement wrapper class here for handing projected data
-
 
         verbose: int, default is 0
             Logging level for `kmapper`. Levels (0,1,2) are supported.
@@ -74,7 +66,7 @@ class CoalMapper:
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
-        #Model
+        # Model
         self._model = Model(tupper=self.tupper)
 
     @property
@@ -330,194 +322,6 @@ class CoalMapper:
         subgraph = self.graph.subgraph(subgraph_nodes)
 
         return clusters, subgraph
-    
-    def label_item_by_node(self):
-        # Initialize Labels as -1 
-        N = len(self.tupper.clean)
-        place_holder = [list() for _ in range(N)]
-        labels = dict()
-        nodes = self.complex["nodes"]
-        for idx in range(N):
-            for node_label in nodes.keys():
-                if idx in nodes[node_label]:
-                    place_holder[idx].append(node_label)
-
-            labels[idx] = place_holder
-
-        self._model._node_id = labels 
-        #TODO: Compute node density description 
-            
-
-
-        
-
-    def label_item_by_component(self):
-        """
-        Execute a mapper-based clutering based on connected components.
-        Append a column to `self.data` labeling each item.
-
-        Returns
-        -----------
-        data: pd.Dataframe
-            An updated dataframe with a column titled `cluster_labels`
-
-        """
-        assert (
-            len(self.complex) > 0
-        ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
-
-        # Initialize Labels as -1 (`unclustered`)
-        labels = -np.ones(len(self.tupper.clean))
-        count = 0
-        for component in self.components.keys():
-            cluster_label = self.components[component]
-            nodes = component.nodes()
-
-            elements = []
-            for node in nodes:
-                elements.append(self.complex["nodes"][node])
-
-            indices = set(itertools.chain(*elements))
-            count += len(indices)
-            labels[list(indices)] = cluster_label
-        
-        
-        self._model.cluster_ids = labels
-        #TODO: Compute node density description 
-
-
 
     #############################################################################################################################################
     #############################################################################################################################################
-
-    def plot(
-        self,
-    ):
-        """"""
-        assert (
-            len(self.complex) > 0
-        ), "First run `fit()` to generate a nonempty simplicial complex."
-
-        path_html = mapper_plot_outfile(self.n_cubes,self.perc_overlap)
-
-        numeric_data, labels = config_plot_data(self.tupper)
-        colorscale = custom_color_scale()
-        
-        self.mapper.visualize(
-            self.complex,
-            node_color_function=["mean", "median", "std", "min", "max"],
-            color_values=numeric_data,
-            color_function_name=labels,
-            colorscale=colorscale,
-            path_html=path_html,
-        )
-        print(f"Go to {path_html} for a visualization of your CoalMapper!")
-        return path_html
-
-    def plot_curvature(self, bins="auto", kde=False):
-        """Visualize Curvature of a mapper graph as a histogram."""
-
-        ax = sns.histplot(
-            self.curvature,
-            discrete=True,
-            stat="probability",
-            kde=kde,
-            bins=bins,
-        )
-        ax.set(xlabel="Ollivier Ricci Edge Curvatures")
-
-        return ax
-
-    def plot_diagrams(self):
-        """Visualize persistence diagrams of a mapper graph."""
-        persim_diagrams = [
-            np.asarray(self.diagram[0]._pairs),
-            np.asarray(self.diagram[1]._pairs),
-        ]
-        return plot_diagrams(persim_diagrams, show=True)
-
-    def connected_component_heatmaps(self):
-        viz = self.data
-
-        targetCols = [
-            "NAMEPCAP",
-            "GENNTAN",
-            "weighted_coal_CAPFAC",
-            "weighted_coal_AGE",
-            "Retrofit Costs",
-            "forwardCosts",
-            "PLSO2AN",
-        ]
-
-        # mean data
-        viz2 = viz.groupby("cluster_labels", as_index=False).mean()[targetCols]
-        c_labels = viz.groupby("cluster_labels").mean().reset_index()["cluster_labels"]
-        scaler = MinMaxScaler()
-        data = scaler.fit_transform(viz2)
-        df = pd.DataFrame(data, columns=list(viz2.columns)).set_index(c_labels)
-
-        #% of max data
-        # TODO: fix the below to append 'cluster_labels' to targetCols so targetCols can be a user input
-        df2 = viz[
-            [
-                "NAMEPCAP",
-                "GENNTAN",
-                "weighted_coal_CAPFAC",
-                "weighted_coal_AGE",
-                "Retrofit Costs",
-                "forwardCosts",
-                "PLSO2AN",
-                "cluster_labels",
-            ]
-        ]
-        df2 = df2.groupby(["cluster_labels"]).sum() / df2[targetCols].sum()
-
-        fig = make_subplots(
-            rows=1,
-            cols=2,
-            vertical_spacing=0.1,
-            subplot_titles=(
-                "Connected Component Averages",
-                "Connected Component % of Total",
-            ),
-            specs=[[{"type": "Heatmap"}, {"type": "Heatmap"}]],
-            y_title="Cluster Label",
-        )
-
-        col = 1
-        for df in [df, df2]:
-            if col == 1:
-                text = viz2.round(2).values.tolist()
-                texttemplate = "%{text}"
-            else:
-                text = df.round(2).values.tolist()
-                texttemplate = ("%{text}") + "%"
-
-            fig.add_trace(
-                go.Heatmap(
-                    x=df.columns.to_list(),
-                    y=df.index.to_list(),
-                    z=df.values.tolist(),
-                    text=text,
-                    colorscale="rdylgn_r",
-                    xgap=2,
-                    ygap=2,
-                    texttemplate=texttemplate,
-                ),
-                row=1,
-                col=col,
-            )
-            col = col + 1
-
-        fig.update_xaxes(tickangle=45)
-        fig.update_layout(font=dict(size=10))
-        fig.update_traces(showscale=False)
-        print(
-            "Number of Plants in each Connected Component (-1 indicates not displayed on mapper):\n"
-        )
-        print(
-            viz.groupby("cluster_labels")
-            .count()
-            .rename(columns={"NAMEPCAP": "#CoalPlants"})["#CoalPlants"]
-        )
-        pio.show(fig)
