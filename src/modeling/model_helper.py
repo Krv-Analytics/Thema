@@ -1,49 +1,55 @@
-def label_item_by_node(self):
-    # Initialize Labels as -1
-    N = len(self.tupper.clean)
-    place_holder = [list() for _ in range(N)]
-    labels = dict()
-    nodes = self.complex["nodes"]
-    for idx in range(N):
-        for node_label in nodes.keys():
-            if idx in nodes[node_label]:
-                place_holder[idx].append(node_label)
+"Helper functions for Mapper Policy Model"
 
-        labels[idx] = place_holder
+import datetime
+import os
+import sys
 
-    self._model._node_id = labels
-    # TODO: Compute node density description
+from dotenv import load_dotenv
+from coal_mapper import CoalMapper
+from model import Model
+
+load_dotenv()
+root = os.getenv("root")
+src = os.getenv("src")
+sys.path.append(src)
 
 
-def label_item_by_component(self):
-    """
-    Execute a mapper-based clutering based on connected components.
-    Append a column to `self.data` labeling each item.
+def mapper_plot_outfile(
+    hyper_parameters,
+):
+    n, p, nbors, d, hdbscan_params = hyper_parameters
+    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{nbors}Nbors_minD{d}.html"
+    output_dir = os.path.join(root, "data/visualizations/mapper_htmls/")
 
-    Returns
-    -----------
-    data: pd.Dataframe
-        An updated dataframe with a column titled `cluster_labels`
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
 
-    """
-    assert (
-        len(self.complex) > 0
-    ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
+    return output_file
 
-    # Initialize Labels as -1 (`unclustered`)
-    labels = -np.ones(len(self.tupper.clean))
-    count = 0
-    for component in self.components.keys():
-        cluster_label = self.components[component]
-        nodes = component.nodes()
 
-        elements = []
-        for node in nodes:
-            elements.append(self.complex["nodes"][node])
+def config_plot_data(model: Model):
+    temp_data = model.tupper.clean
+    string_cols = temp_data.select_dtypes(exclude="number").columns
+    numeric_data = temp_data.drop(string_cols, axis=1).dropna()
+    labels = list(numeric_data.columns)
+    return numeric_data, labels
 
-        indices = set(itertools.chain(*elements))
-        count += len(indices)
-        labels[list(indices)] = cluster_label
 
-    self._model.cluster_ids = labels
-    # TODO: Compute node density description
+def custom_color_scale():
+    colorscale = [
+        [0.0, "#001219"],
+        [0.1, "#005f73"],
+        [0.2, "#0a9396"],
+        [0.3, "#94d2bd"],
+        [0.4, "#e9d8a6"],
+        [0.5, "#ee9b00"],
+        [0.6, "#ca6702"],
+        [0.7, "#bb3e03"],
+        [0.8, "#ae2012"],
+        [0.9, "#9b2226"],
+        [1.0, "#a50026"],
+    ]
+    return colorscale
