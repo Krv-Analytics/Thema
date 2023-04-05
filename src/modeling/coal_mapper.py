@@ -32,13 +32,14 @@ from visualizing.visualization_helper import (
     custom_color_scale,
     mapper_plot_outfile,
 )
+from processing.cleaning.tupper import Tupper
+from modeling.model import Model
 
 
 class CoalMapper:
     def __init__(
         self,
-        data: pd.DataFrame,
-        projection: np.ndarray,
+        tupper: Tupper,
         verbose: int = 0,
     ):
         """Constructor for CoalMapper class.
@@ -57,8 +58,7 @@ class CoalMapper:
             Logging level for `kmapper`. Levels (0,1,2) are supported.
         """
         # User Inputs
-        self.data = data
-        self.projection = projection
+        self._tupper = tupper
 
         # Initialize Mapper
         self._mapper = KeplerMapper(verbose=verbose)
@@ -72,7 +72,14 @@ class CoalMapper:
         self._graph = nx.Graph()
         self._components = dict()
         self._curvature = np.array([])
-        self._diagram = None  # PersistenceDiagram()
+        self._diagram = PersistenceDiagram()
+
+        #Model
+        self._model = Model(tupper=self.tupper)
+
+    @property
+    def tupper(self):
+        return self._tupper
 
     @property
     def mapper(self):
@@ -180,10 +187,11 @@ class CoalMapper:
         self._cover = km.Cover(n_cubes, perc_overlap)
         self._clusterer = clusterer
 
+        projection = self.tupper.projection()
         # Compute Simplicial Complex
         self._complex = self._mapper.map(
-            lens=self.projection,
-            X=self.projection,
+            lens=projection,
+            X=projection,
             cover=self.cover,
             clusterer=self.clusterer,
         )
@@ -336,6 +344,8 @@ class CoalMapper:
             len(self.complex) > 0
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
 
+        ##Initialize a product object
+
         # Initialize Labels as -1 (`unclustered`)
         labels = -np.ones(len(self.data))
         count = 0
@@ -350,8 +360,14 @@ class CoalMapper:
             indices = set(itertools.chain(*elements))
             count += len(indices)
             labels[list(indices)] = cluster_label
-        self.data["cluster_labels"] = labels
+        
+        # Edit Tupper object to include cluster labels
+        self.tupper.add_raw_column(name="cluster_id",labels)
+        
         return labels
+    
+    def cluster_density(self):
+        pass
 
     #############################################################################################################################################
     #############################################################################################################################################
