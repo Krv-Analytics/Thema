@@ -4,7 +4,7 @@ import argparse
 import os
 import sys
 import pickle
-
+from dotenv import load_dotenv
 from coal_mapper_helper import coal_mapper_generator, generate_results_filename
 
 
@@ -17,16 +17,16 @@ from processing.cleaning.tupper import Tupper
 
 
 if __name__ == "__main__":
-
+    load_dotenv()
     parser = argparse.ArgumentParser()
-    cwd = os.path.dirname(__file__)
+    root = os.getenv("root")
 
     parser.add_argument(
         "--raw",
         type=str,
         default=os.path.join(
-            cwd,
-            "./../../data/raw/coal_plant_data_raw.pkl",
+            root,
+            "data/raw/coal_plant_data_raw.pkl",
         ),
         help="Select location of raw data set, as pulled from Mongo.",
     )
@@ -34,15 +34,14 @@ if __name__ == "__main__":
         "--clean",
         type=str,
         default=os.path.join(
-            cwd,
-            "./../../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
+            root,
+            "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
         ),
         help="Select location of clean data.",
     )
     parser.add_argument(
         "--projection",
         type=str,
-        default=""
         help="Select location of projection.",
     )
 
@@ -106,53 +105,51 @@ if __name__ == "__main__":
 
     
 
-    
+    nbors, d = tupper.get_projection_parameters()
     output_file = generate_results_filename(args, nbors, d)
 
-        output_dir = os.path.join(cwd, "../../data/mappers/")
+    output_dir = os.path.join(root, "data/mappers/")
 
-        # Check if output directory already exists
-        if os.path.isdir(output_dir):
-            output_file = os.path.join(output_dir, output_file)
-        else:
-            os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, output_file)
+    # Check if output directory already exists
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
 
-        n, p = args.n_cubes, args.perc_overlap
-        min_intersections = args.min_intersection
-        hdbscan_params = args.min_cluster_size, args.max_cluster_size
+    n, p = args.n_cubes, args.perc_overlap
+    min_intersections = args.min_intersection
+    hdbscan_params = args.min_cluster_size, args.max_cluster_size
+    results = coal_mapper_generator(
+        tupper,
+        n_cubes=n,
+        perc_overlap=p,
+        hdbscan_params=hdbscan_params,
+        min_intersection_vals=min_intersections,
+    )
 
-        results = coal_mapper_generator(
-            data=data,
-            projection=proj_2D,
-            n_cubes=n,
-            perc_overlap=p,
-            hdbscan_params=hdbscan_params,
-            min_intersection_vals=min_intersections,
-        )
+    results["hyperparameters"] = (
+        n,
+        p,
+        nbors,
+        d,
+    )
 
-        results["hyperparameters"] = (
-            n,
-            p,
-            nbors,
-            d,
-        )
+    out_dir_message = output_file
+    out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-        out_dir_message = output_file
-        out_dir_message = "/".join(out_dir_message.split("/")[-2:])
+    if len(results) > 1:
+        with open(output_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(
+                f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
+            )
 
-        if len(results) > 1:
-            with open(output_file, "wb") as handle:
-                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            if args.Verbose:
-                print("\n")
-                print(
-                    "-------------------------------------------------------------------------------- \n\n"
-                )
-                print(
-                    f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
-                )
-
-                print(
-                    "\n\n -------------------------------------------------------------------------------- "
-                )
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
