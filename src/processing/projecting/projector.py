@@ -2,8 +2,9 @@ import os
 import argparse
 import sys
 import pickle
+import shutil
 
-from projections_helper import projection_driver, projection_file_name
+from projector_helper import projection_driver, projection_file_name
 
 
 cwd = os.path.dirname(__file__)
@@ -21,6 +22,7 @@ if __name__ == "__main__":
         ),
         help="Select location of local data set, as pulled from Mongo.",
     )
+
     parser.add_argument(
         "--umap",
         type=bool,
@@ -45,6 +47,20 @@ if __name__ == "__main__":
         default=[0, 0.01, 0.05, 0.1, 0.5, 1],
         help="Insert a list of min_dists to grid search",
     )
+    parser.add_argument(
+        "--clear",
+        type=bool,
+        default=True,
+        help="Clear directory before generating files",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--Verbose",
+        default=False,
+        action="store_true",
+        help="If set, will print messages detailing computation and output.",
+    )
 
     args = parser.parse_args()
     this = sys.modules[__name__]
@@ -55,10 +71,11 @@ if __name__ == "__main__":
         df = pickle.load(f)
 
     output_dir = os.path.join(cwd, "./../../../data/projections/UMAP/")
-    output_file = projection_file_name(projector="UMAP", dimensions=2)
 
-    output_file = os.path.join(output_dir, output_file)
-
+    # Clear contents if the directory exists
+    if args.clear and os.path.isdir(output_dir):
+        print(f"\nRemoving previous projections...\n")
+        shutil.rmtree(output_dir)
     # Check if output directory already exists
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
@@ -68,14 +85,34 @@ if __name__ == "__main__":
 
         projection_params = (args.min_dists, args.neighbors_list)
         projections = projection_driver(df, projection_params)
+        print(
+            "\n---------------------------------------------------------------------------------- \n"
+        )
+        for keys in projections.keys():
+            output_file = projection_file_name(
+                projector="UMAP", keys=keys, dimensions=2
+            )
+            output_file = os.path.join(output_dir, output_file)
 
-        with open(output_file, "wb") as f:
-            pickle.dump(projections, f)
+            ## Output Message
+            out_dir_message = "/".join(output_file.split("/")[-2:])
+
+            ## Selecting projection to write
+            projection = projections[keys]
+            with open(output_file, "wb") as f:
+                pickle.dump(projection, f)
+
+            if args.Verbose:
+                print(f"Writing {keys} to {out_dir_message}")
+
+        print(
+            "\n---------------------------------------------------------------------------------- \n"
+        )
 
         print(
             "\n################################################################################## \n\n"
         )
-        print(f"Successfully Generated UMAP Projection")
+        print(f"Finished writing UMAP Projections")
 
         print(
             "\n\n##################################################################################\n"

@@ -8,8 +8,9 @@ from umap import UMAP
 cwd = os.path.dirname(__file__)
 
 
-def projection_file_name(projector, dimensions=2):
-    output_file = f"{projector}_{dimensions}D.pkl"
+def projection_file_name(projector, keys, dimensions=2):
+    n_neighbors, min_dist = keys
+    output_file = f"{projector}_N{n_neighbors}_minDist_{min_dist}_{dimensions}D.pkl"
     return output_file
 
 
