@@ -13,6 +13,7 @@ if __name__ == "__main__":
 
     load_dotenv()
     client = os.getenv("mongo_client")
+    root = os.getenv("root")
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -39,8 +40,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    cwd = os.path.dirname(__file__)
-    output_dir = os.path.join(cwd, "../../../data/raw/")
+    output_dir = os.path.join(root, "data/raw/")
     # Create Data dir and Processed subdir on first run
     if not os.path.isdir(output_dir):
         print("Creating local data directory...")
