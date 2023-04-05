@@ -2,7 +2,6 @@ import pickle
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.cluster.hierarchy import dendrogram
 
 
 from sklearn.cluster import AgglomerativeClustering

@@ -67,7 +67,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-
     assert os.path.isfile(args.path), "Invalid Input Data"
     # Load Dataframe
     with open(args.path, "rb") as f:
@@ -89,15 +88,15 @@ if __name__ == "__main__":
 
         projection_params = (args.min_dists, args.neighbors_list)
         if args.Verbose:
-                print(f"Computing UMAP Grid Search! ")
-                print(
-                    "--------------------------------------------------------------------------------"
-                )
-                print(f"Choices for n_neighbors: {args.neighbors_list}")
-                print(f"Choices for m_dist: {args.min_dists}")
-                print(
+            print(f"Computing UMAP Grid Search! ")
+            print(
+                "--------------------------------------------------------------------------------"
+            )
+            print(f"Choices for n_neighbors: {args.neighbors_list}")
+            print(f"Choices for m_dist: {args.min_dists}")
+            print(
                 "-------------------------------------------------------------------------------- \n"
-                )
+            )
         projections = projection_driver(df, projection_params)
 
         for keys in projections.keys():
@@ -112,7 +111,7 @@ if __name__ == "__main__":
             ## Selecting projection to write
             projection = projections[keys]
 
-            output = {"projection": projection, "hyper_parameters": keys}
+            output = {"projection": projection, "hyperparameters": keys}
             with open(output_file, "wb") as f:
                 pickle.dump(output, f)
 
