@@ -43,11 +43,11 @@ class Tupper:
             projection_array = reference["projection"]
 
         return projection_array
-    
+
     def get_projection_parameters(self):
         assert self._projection, "Please Specify a valid path to clean data"
         with open(self._projection, "rb") as projection_file:
             reference = pickle.load(projection_file)
-            projection_parameters = reference["hyper_parameters"]
+            projection_parameters = reference["hyperparameters"]
 
-        return projection_parameters 
+        return projection_parameters
