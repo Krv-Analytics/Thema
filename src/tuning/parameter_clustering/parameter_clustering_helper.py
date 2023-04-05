@@ -1,12 +1,15 @@
-import pickle
 import os
-import numpy as np
-import matplotlib.pyplot as plt
+import pickle
+import sys
 
-
+from dotenv import load_dotenv
 from sklearn.cluster import AgglomerativeClustering
 
-cwd = os.path.dirname(__file__)
+load_dotenv()
+src = os.getenv("src")
+sys.path.append(src)
+
+from visualizing.visualization_helper import plot_dendrogram
 
 
 def cluster_hyperparams(keys, distances, metric, p_frac=0.1):

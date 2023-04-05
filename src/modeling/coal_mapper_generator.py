@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from coal_mapper_helper import coal_mapper_generator, generate_results_filename
 
 
-SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(SRC)
+load_dotenv()
+src = os.getenv("src")
+sys.path.append(src)
 
 
 from processing.cleaning.tupper import Tupper
