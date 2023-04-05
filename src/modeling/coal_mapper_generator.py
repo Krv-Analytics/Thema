@@ -8,51 +8,55 @@ import pickle
 from coal_mapper_helper import coal_mapper_generator, generate_results_filename
 
 
-cwd = os.path.dirname(__file__)
+SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
+sys.path.append(SRC)
+
+
+from processing.cleaning.tupper import Tupper
+
+
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
+    cwd = os.path.dirname(__file__)
 
     parser.add_argument(
-        "-d",
-        "--data",
+        "--raw",
         type=str,
         default=os.path.join(
-            cwd, "./../../data/processed/coal_plant_data_one_hot_scaled.pkl"
+            cwd,
+            "./../../data/raw/coal_plant_data_raw.pkl",
         ),
-        help="Select location of local data set, as pulled from Mongo. Ensure you have pulled an unscaled/unprojected dataset as well",
+        help="Select location of raw data set, as pulled from Mongo.",
     )
     parser.add_argument(
-        "--projector",
+        "--clean",
         type=str,
-        default="UMAP",
-        help="Select type of projection for initializing `CoalMapper` objects.",
+        default=os.path.join(
+            cwd,
+            "./../../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
+        ),
+        help="Select location of clean data.",
     )
     parser.add_argument(
-        "--dimension",
-        type=int,
-        default=2,
-        help="Select dimension of projections for initializing `CoalMapper` objects.",
-    )
-    parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="If set, overwrites existing output files.",
+        "--projection",
+        type=str,
+        default=""
+        help="Select location of projection.",
     )
 
     parser.add_argument(
         "--min_cluster_size",
-        default=10,
+        default=2,
         type=int,
-        help="Sets number of clusters for the KMeans algorithm used in KMapper.",
+        help="Sets `min_cluster_size`, a parameter for HDBSCAN.",
     )
     parser.add_argument(
         "--max_cluster_size",
         default=0,
         type=int,
-        help="Sets number of clusters for the KMeans algorithm used in KMapper.",
+        help="Sets `max_cluster_size`, a parameter for HDBSCAN.",
     )
 
     parser.add_argument(
@@ -96,31 +100,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    assert os.path.isfile(args.data), "Invalid Input Data"
-    # Load Dataframe
-    with open(args.data, "rb") as f:
-        print("Reading Mongo Data File")
-        df = pickle.load(f)
+    
+    # Initialize a `Tupper`
+    tupper = Tupper(raw = args.raw,clean = args.clean, projection = args.projection)
 
-    data = df.dropna()
+    
 
-    # Load Projections
-    projections_file = os.path.join(
-        cwd,
-        f"./../../data/projections/{args.projector}/{args.projector}_{args.dimension}D.pkl",
-    )
-    with open(projections_file, "rb") as g:
-        print("Reading in UMAP Projections \n")
-        projections = pickle.load(g)
-
-    for hyper_params in projections.keys():
-        nbors, d = hyper_params
-
-        print(f"N_nbors:{nbors}")
-        print(f"min_distance:{d} \n\n")
-        proj_2D = projections[hyper_params]
-
-        output_file = generate_results_filename(args, nbors, d)
+    
+    output_file = generate_results_filename(args, nbors, d)
 
         output_dir = os.path.join(cwd, "../../data/mappers/")
 
