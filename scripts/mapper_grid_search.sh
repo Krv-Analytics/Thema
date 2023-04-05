@@ -9,6 +9,8 @@ N_CUBES=(3 4 5 6 7 8 9 10 11)
 PERC_OVERLAP=(0.45 0.5 0.55)
 MIN_INTERSECTION=(1)
 
+PROJECTIONS = # GRAB FILES IN PROJECTIONS_DIR
+
 poetry shell
 echo "Initializing Poetry Shell"
 #TODO: Need to add umap to Poetry, for now need to run normal python within VE
