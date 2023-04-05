@@ -8,12 +8,11 @@ from dotenv import load_dotenv
 from coal_mapper_helper import coal_mapper_generator, generate_results_filename
 
 
-SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) 
+SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(SRC)
 
 
 from processing.cleaning.tupper import Tupper
-
 
 
 if __name__ == "__main__":
@@ -99,11 +98,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    
     # Initialize a `Tupper`
-    tupper = Tupper(raw = args.raw,clean = args.clean, projection = args.projection)
-
-    
+    tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
 
     nbors, d = tupper.get_projection_parameters()
     output_file = generate_results_filename(args, nbors, d)
@@ -133,6 +129,7 @@ if __name__ == "__main__":
         p,
         nbors,
         d,
+        hdbscan_params,
     )
 
     out_dir_message = output_file
