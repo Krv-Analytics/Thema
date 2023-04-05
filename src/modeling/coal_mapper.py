@@ -21,13 +21,6 @@ sys.path.append(src)
 
 from processing.cleaning.tupper import Tupper
 
-# # TODO: Move Visualization functionality into visualizations
-# from visualizing.visualization_helper import (
-#     config_plot_data,
-#     custom_color_scale,
-#     mapper_plot_outfile,
-# )
-
 
 class CoalMapper:
     def __init__(
@@ -64,7 +57,6 @@ class CoalMapper:
         self._components = dict()
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
-
 
     @property
     def tupper(self):
