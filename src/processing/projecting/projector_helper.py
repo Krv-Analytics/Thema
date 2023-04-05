@@ -24,17 +24,6 @@ def projection_driver(df, projection_params, dimensions=2, projector="UMAP"):
     data = df.dropna()
     assert type(dists) == list, "Not list"
     assert type(neighbors) == list, "Not list"
-
-    print(f"Computing UMAP Grid Search! ")
-    print(
-        "--------------------------------------------------------------------------------"
-    )
-    print(f"Choices for n_neighbors: {neighbors}")
-    print(f"Choices for m_dist: {dists}")
-    print(
-        "-------------------------------------------------------------------------------- \n"
-    )
-
     results = {}
     for d in dists:
         for n in neighbors:
