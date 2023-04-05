@@ -3,19 +3,21 @@ import argparse
 import os
 import pickle
 from sklearn.preprocessing import StandardScaler
+from dotenv import load_dotenv
 
 from cleaner_helper import data_cleaner, clean_data_filename
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    cwd = os.path.dirname(__file__)
+    load_dotenv()
+    root = os.getenv("root")
 
     parser.add_argument(
         "-d",
         "--data",
         type=str,
-        default=os.path.join(cwd, "../../../data/raw/coal_plant_data_raw.pkl"),
+        default=os.path.join(root, "data/raw/coal_plant_data_raw.pkl"),
         help="Select raw data to clean.",
     )
     parser.add_argument(
@@ -83,7 +85,7 @@ if __name__ == "__main__":
         encoding=args.encoding,
     )
 
-    output_dir = os.path.join(cwd, "../../../data/clean/")
+    output_dir = os.path.join(root, "data/clean/")
 
     column_filter = False
     if len(args.remove_columns) > 0:
