@@ -64,7 +64,7 @@ class CoalMapper:
         self._mapper = KeplerMapper(verbose=verbose)
 
         # Inputs for `fit`
-        self._clusterer = None
+        self._clusterer = dict()
         self._cover = None
 
         # Analysis Objects
@@ -184,10 +184,12 @@ class CoalMapper:
 
         """
         # Log cover and clusterer from most recent fit
+        self.n_cubes = n_cubes
+        self.perc_overlap = perc_overlap
         self._cover = km.Cover(n_cubes, perc_overlap)
         self._clusterer = clusterer
 
-        projection = self.tupper.projection()
+        projection = self.tupper.projection
         # Compute Simplicial Complex
         self._complex = self._mapper.map(
             lens=projection,
@@ -328,8 +330,28 @@ class CoalMapper:
         subgraph = self.graph.subgraph(subgraph_nodes)
 
         return clusters, subgraph
+    
+    def label_item_by_node(self):
+        # Initialize Labels as -1 
+        N = len(self.tupper.clean)
+        place_holder = [list() for _ in range(N)]
+        labels = dict()
+        nodes = self.complex["nodes"]
+        for idx in range(N):
+            for node_label in nodes.keys():
+                if idx in nodes[node_label]:
+                    place_holder[idx].append(node_label)
 
-    def mapper_clustering(self):
+            labels[idx] = place_holder
+
+        self._model._node_id = labels 
+        #TODO: Compute node density description 
+            
+
+
+        
+
+    def label_item_by_component(self):
         """
         Execute a mapper-based clutering based on connected components.
         Append a column to `self.data` labeling each item.
@@ -344,30 +366,26 @@ class CoalMapper:
             len(self.complex) > 0
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
 
-        ##Initialize a product object
-
         # Initialize Labels as -1 (`unclustered`)
-        labels = -np.ones(len(self.data))
+        labels = -np.ones(len(self.tupper.clean))
         count = 0
         for component in self.components.keys():
             cluster_label = self.components[component]
-            clusters = component.nodes()
+            nodes = component.nodes()
 
             elements = []
-            for cluster in clusters:
-                elements.append(self.complex["nodes"][cluster])
+            for node in nodes:
+                elements.append(self.complex["nodes"][node])
 
             indices = set(itertools.chain(*elements))
             count += len(indices)
             labels[list(indices)] = cluster_label
         
-        # Edit Tupper object to include cluster labels
-        self.tupper.add_raw_column(name="cluster_id",labels)
         
-        return labels
-    
-    def cluster_density(self):
-        pass
+        self._model.cluster_ids = labels
+        #TODO: Compute node density description 
+
+
 
     #############################################################################################################################################
     #############################################################################################################################################
@@ -380,11 +398,12 @@ class CoalMapper:
             len(self.complex) > 0
         ), "First run `fit()` to generate a nonempty simplicial complex."
 
-        path_html = mapper_plot_outfile(self.cover)
+        path_html = mapper_plot_outfile(self.n_cubes,self.perc_overlap)
 
-        numeric_data, labels = config_plot_data(self.data)
+        numeric_data, labels = config_plot_data(self.tupper)
         colorscale = custom_color_scale()
-        _ = self.mapper.visualize(
+        
+        self.mapper.visualize(
             self.complex,
             node_color_function=["mean", "median", "std", "min", "max"],
             color_values=numeric_data,
