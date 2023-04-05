@@ -1,7 +1,5 @@
 from hdbscan import HDBSCAN
 from coal_mapper import CoalMapper
-import datetime
-import os
 
 
 from nammu.curvature import ollivier_ricci_curvature
@@ -26,15 +24,14 @@ def coal_mapper_generator(
     # Configure CoalMapper
     coal_mapper = CoalMapper(tupper)
     coal_mapper.fit(n_cubes, perc_overlap, clusterer)
-    
 
     results = {}
 
     if len(coal_mapper.complex["links"]) > 0:
         for val in min_intersection_vals:
-            # Generate Graph            
+            # Generate Graph
             coal_mapper.to_networkx(min_intersection=val)
-            #Compute Curvature and Persistence Diagram
+            # Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
 
