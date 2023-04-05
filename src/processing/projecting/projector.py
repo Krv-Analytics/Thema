@@ -3,11 +3,13 @@ import argparse
 import sys
 import pickle
 import shutil
-
+from dotenv import load_dotenv
 from projector_helper import projection_driver, projection_file_name
 
 
-cwd = os.path.dirname(__file__)
+# Load Root directory from .env
+load_dotenv()
+root = os.getenv("root")
 
 if __name__ == "__main__":
 
@@ -18,7 +20,7 @@ if __name__ == "__main__":
         "--path",
         type=str,
         default=os.path.join(
-            cwd, "./../../../data/processed/coal_plant_data_one_hot_scaled.pkl"
+            root, "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl"
         ),
         help="Select location of local data set, as pulled from Mongo.",
     )
@@ -65,16 +67,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
+
     assert os.path.isfile(args.path), "Invalid Input Data"
     # Load Dataframe
     with open(args.path, "rb") as f:
-        df = pickle.load(f)
-
-    output_dir = os.path.join(cwd, "./../../../data/projections/UMAP/")
+        reference = pickle.load(f)
+        df = reference["clean_data"]
+    output_dir = os.path.join(root, "data/projections/UMAP/")
 
     # Clear contents if the directory exists
     if args.clear and os.path.isdir(output_dir):
-        print(f"\nRemoving previous projections...\n")
+        if args.Verbose:
+            print(f"\n Removing previous projections...\n")
         shutil.rmtree(output_dir)
     # Check if output directory already exists
     if not os.path.isdir(output_dir):
@@ -84,10 +88,18 @@ if __name__ == "__main__":
         # Check if output directory already exists
 
         projection_params = (args.min_dists, args.neighbors_list)
+        if args.Verbose:
+                print(f"Computing UMAP Grid Search! ")
+                print(
+                    "--------------------------------------------------------------------------------"
+                )
+                print(f"Choices for n_neighbors: {args.neighbors_list}")
+                print(f"Choices for m_dist: {args.min_dists}")
+                print(
+                "-------------------------------------------------------------------------------- \n"
+                )
         projections = projection_driver(df, projection_params)
-        print(
-            "\n---------------------------------------------------------------------------------- \n"
-        )
+
         for keys in projections.keys():
             output_file = projection_file_name(
                 projector="UMAP", keys=keys, dimensions=2
@@ -105,20 +117,22 @@ if __name__ == "__main__":
                 pickle.dump(output, f)
 
             if args.Verbose:
+                print(
+                    "\n---------------------------------------------------------------------------------- \n"
+                )
                 print(f"Writing {keys} to {out_dir_message}")
+                print(
+                    "\n----------------------------------------------------------------------------------"
+                )
 
-        print(
-            "\n---------------------------------------------------------------------------------- \n"
-        )
+                print(
+                    "\n################################################################################## \n\n"
+                )
+                print(f"Finished writing UMAP Projections")
 
-        print(
-            "\n################################################################################## \n\n"
-        )
-        print(f"Finished writing UMAP Projections")
-
-        print(
-            "\n\n##################################################################################\n"
-        )
+                print(
+                    "\n\n##################################################################################\n"
+                )
     else:
         print(
             f"UMAP is only dimensionality reduction algorithm supported at this time."
