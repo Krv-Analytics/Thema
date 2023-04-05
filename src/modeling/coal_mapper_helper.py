@@ -8,8 +8,7 @@ from nammu.curvature import ollivier_ricci_curvature
 
 
 def coal_mapper_generator(
-    data,
-    projection,
+    tupper,
     n_cubes,
     perc_overlap,
     hdbscan_params,
@@ -24,20 +23,23 @@ def coal_mapper_generator(
         min_cluster_size=min_cluster_size,
         max_cluster_size=max_cluster_size,
     )
-
     # Configure CoalMapper
-    coal_mapper = CoalMapper(data, projection)
+    coal_mapper = CoalMapper(tupper)
     coal_mapper.fit(n_cubes, perc_overlap, clusterer)
+    
 
-    # Generate Graphs
     results = {}
 
     if len(coal_mapper.complex["links"]) > 0:
-        print("Computing Curvature Values and Persistence Diagrams")
         for val in min_intersection_vals:
+            # Generate Graph            
             coal_mapper.to_networkx(min_intersection=val)
+            #Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
+
+            # Mapper Clustering
+            coal_mapper.label_item_by_component()
             results[val] = coal_mapper
         return results
     else:
