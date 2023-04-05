@@ -5,8 +5,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from coal_mapper import CoalMapper
-from model import Model
+
 
 load_dotenv()
 root = os.getenv("root")
@@ -30,8 +29,8 @@ def mapper_plot_outfile(
     return output_file
 
 
-def config_plot_data(model: Model):
-    temp_data = model.tupper.clean
+def config_plot_data(tupper):
+    temp_data = tupper.clean
     string_cols = temp_data.select_dtypes(exclude="number").columns
     numeric_data = temp_data.drop(string_cols, axis=1).dropna()
     labels = list(numeric_data.columns)
