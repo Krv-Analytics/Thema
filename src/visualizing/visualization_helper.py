@@ -3,7 +3,7 @@
 import os
 import datetime
 
-
+from dotenv import load_dotenv
 import os
 import sys
 
@@ -11,12 +11,18 @@ import sys
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(SRC)
 
+from processing.cleaning.tupper import Tupper
 
-def mapper_plot_outfile(cover):
-    cwd = os.path.dirname(__file__)
+
+
+
+def mapper_plot_outfile(n,p):
+    load_dotenv()
+    root = os.getenv("root")
     time = int(datetime.datetime.now().timestamp())
-    output_file = f"mapper_{cover}_{time}.html"
-    output_dir = os.path.join(cwd, "./../../data/visualizations/mapper_htmls/")
+
+    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_{time}.html"
+    output_dir = os.path.join(root, "data/visualizations/mapper_htmls/")
 
     if os.path.isdir(output_dir):
         output_file = os.path.join(output_dir, output_file)
@@ -27,8 +33,8 @@ def mapper_plot_outfile(cover):
     return output_file
 
 
-def config_plot_data(data):
-    temp_data = data.copy()
+def config_plot_data(tupper:Tupper):
+    temp_data = tupper.clean
     string_cols = temp_data.select_dtypes(exclude="number").columns
     numeric_data = temp_data.drop(string_cols, axis=1).dropna()
     labels = list(numeric_data.columns)
