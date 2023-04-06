@@ -105,8 +105,18 @@ if __name__ == "__main__":
     nbors, d = tupper.get_projection_parameters()
     output_file = generate_mapper_filename(args, nbors, d)
 
-    output_dir = os.path.join(root, "data/mappers/")
+    n, p = args.n_cubes, args.perc_overlap
+    min_intersections = args.min_intersection
+    hdbscan_params = args.min_cluster_size, args.max_cluster_size
+    results, num_clusters = coal_mapper_generator(
+        tupper,
+        n_cubes=n,
+        perc_overlap=p,
+        hdbscan_params=hdbscan_params,
+        min_intersection_vals=min_intersections,
+    )
 
+    output_dir = os.path.join(root, f"data/mappers/{num_clusters}_policy_groups/")
     # Check if output directory already exists
     if os.path.isdir(output_dir):
         output_file = os.path.join(output_dir, output_file)
@@ -114,16 +124,6 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, output_file)
 
-    n, p = args.n_cubes, args.perc_overlap
-    min_intersections = args.min_intersection
-    hdbscan_params = args.min_cluster_size, args.max_cluster_size
-    results = coal_mapper_generator(
-        tupper,
-        n_cubes=n,
-        perc_overlap=p,
-        hdbscan_params=hdbscan_params,
-        min_intersection_vals=min_intersections,
-    )
     # TODO: configure hyperparameters as a dictionary
     results["hyperparameters"] = (
         n,
