@@ -35,7 +35,7 @@ def coal_mapper_generator(
             # Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
-    
+
             results[val] = coal_mapper
         return results
     else:
@@ -51,7 +51,7 @@ def coal_mapper_generator(
         return results
 
 
-def generate_results_filename(args, n_neighbors, min_dist):
+def generate_mapper_filename(args, n_neighbors, min_dist):
     """Generate output filename string from CLI arguments when running  script."""
 
     min_cluster_size, p, n = (
