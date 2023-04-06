@@ -2,18 +2,28 @@ import os
 import pickle
 import numpy as np
 import sys
+from dotenv import load_dotenv
 
 from gtda.diagrams import PairwiseDistance
 
 
-SRC = os.path.abspath(os.path.dirname(os.path.dirname(__file__))) + "/../"
-print(SRC)
-sys.path.append(SRC)
+load_dotenv()
+src = os.getenv("src")
+root = os.getenv("root")
+sys.path.append(src)
+
+modeling = os.path.join(src, "modeling/")
+sys.path.append(modeling)
+
+
 from modeling.coal_mapper import CoalMapper
 
 
-def topology_metric(metric="bottleneck", dir="./../../../data/mappers/"):
-    keys, diagrams = get_diagrams(dir)
+def topology_metric(
+    files,
+    metric="bottleneck",
+):
+    keys, diagrams = get_diagrams(files)
     curvature_dgms = convert_to_gtda(diagrams.values())
     distance_metric = PairwiseDistance(metric=metric)
     distance_metric.fit(curvature_dgms)
@@ -27,6 +37,7 @@ def mapper_reader(dir):
         dir
     ), "Please first compute mapper objects using `coal_mapper_generator.py`"
 
+    # TODO: add a filter here for `unlcustered` plants
     data = {}
     cwd = os.path.dirname(__file__)
     dir = os.path.join(cwd, dir)

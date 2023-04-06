@@ -25,7 +25,7 @@ from sklearn.decomposition import PCA
 pio.renderers.default = "browser"
 
 
-def plot_dendrogram(model, labels, distance, **kwargs):
+def plot_dendrogram(model, labels, distance, p, n, **kwargs):
     """Create linkage matrix and then plot the dendrogram for Hierarchical clustering."""
 
     counts = np.zeros(model.children_.shape[0])
@@ -44,9 +44,14 @@ def plot_dendrogram(model, labels, distance, **kwargs):
     ).astype(float)
 
     # Plot the corresponding dendrogram
-    d = dendrogram(linkage_matrix, labels=labels, **kwargs)
-    plt.title("Hyperparameter Dendrogram")
-    plt.xlabel("Coordinates: (n_cubes,perc_overlap,min_intersection).")
+    d = dendrogram(
+        linkage_matrix,
+        labels=None,
+        p=p,
+        truncate_mode="level",
+    )
+    plt.title(f"Clustering Models with {n} Policy Groups")
+    plt.xlabel("Coordinates: Model Parameters.")
     plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
     return d

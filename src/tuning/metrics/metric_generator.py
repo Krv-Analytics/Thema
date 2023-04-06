@@ -1,12 +1,15 @@
 import argparse
-import sys
 import os
 import pickle
+import sys
 
+from dotenv import load_dotenv
 from metric_helper import topology_metric
 
-
-cwd = os.path.dirname(__file__)
+load_dotenv()
+src = os.getenv("src")
+root = os.getenv("root")
+sys.path.append(src)
 
 if __name__ == "__main__":
 
@@ -18,6 +21,14 @@ if __name__ == "__main__":
         type=str,
         default="landscape",
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
+    )
+
+    parser.add_argument(
+        "-n",
+        "--num_policy_groups",
+        type=int,
+        default=6,
+        help="Select folder of mapper objects to compare,identified by the number of policy groups.",
     )
 
     parser.add_argument(
@@ -38,7 +49,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    keys, distances = topology_metric(args.metric)
+    n = args.num_policy_groups
+    path_to_mappers = os.path.join(root, f"data/mappers/{n}_policy_groups")
+
+    keys, distances = topology_metric(files=path_to_mappers, metric=args.metric)
     results = {"keys": keys, "distances": distances}
 
     if args.save:
@@ -47,7 +61,8 @@ if __name__ == "__main__":
         out_dir_message = f"{distance_file} successfully written."
 
         output_dir = os.path.join(
-            cwd, "./../../../data/parameter_modeling/distance_matrices/"
+            root,
+            f"data/model_analysis/distance_matrices/{n}_policy_groups/",
         )
 
         # Check if output directory already exists
