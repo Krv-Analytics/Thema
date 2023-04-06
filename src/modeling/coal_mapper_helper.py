@@ -1,15 +1,12 @@
 from hdbscan import HDBSCAN
 from coal_mapper import CoalMapper
-import datetime
-import os
 
 
 from nammu.curvature import ollivier_ricci_curvature
 
 
 def coal_mapper_generator(
-    data,
-    projection,
+    tupper,
     n_cubes,
     perc_overlap,
     hdbscan_params,
@@ -24,22 +21,23 @@ def coal_mapper_generator(
         min_cluster_size=min_cluster_size,
         max_cluster_size=max_cluster_size,
     )
-
     # Configure CoalMapper
-    coal_mapper = CoalMapper(data, projection)
+    coal_mapper = CoalMapper(tupper)
     coal_mapper.fit(n_cubes, perc_overlap, clusterer)
 
-    # Generate Graphs
     results = {}
 
     if len(coal_mapper.complex["links"]) > 0:
-        print("Computing Curvature Values and Persistence Diagrams")
         for val in min_intersection_vals:
+            # Generate Graph
             coal_mapper.to_networkx(min_intersection=val)
+            components = coal_mapper.connected_components()
+            # Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
+
             results[val] = coal_mapper
-        return results
+        return results, len(components)
     else:
         if verbose:
             print(
@@ -53,7 +51,7 @@ def coal_mapper_generator(
         return results
 
 
-def generate_results_filename(args, n_neighbors, min_dist):
+def generate_mapper_filename(args, n_neighbors, min_dist):
     """Generate output filename string from CLI arguments when running  script."""
 
     min_cluster_size, p, n = (

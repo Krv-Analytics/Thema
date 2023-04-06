@@ -4,55 +4,58 @@ import argparse
 import os
 import sys
 import pickle
+from dotenv import load_dotenv
+from coal_mapper_helper import coal_mapper_generator, generate_mapper_filename
 
-from coal_mapper_helper import coal_mapper_generator, generate_results_filename
+
+load_dotenv()
+src = os.getenv("src")
+sys.path.append(src)
 
 
-cwd = os.path.dirname(__file__)
+from processing.cleaning.tupper import Tupper
+
 
 if __name__ == "__main__":
-
+    load_dotenv()
     parser = argparse.ArgumentParser()
+    root = os.getenv("root")
 
     parser.add_argument(
-        "-d",
-        "--data",
+        "--raw",
         type=str,
         default=os.path.join(
-            cwd, "./../../data/processed/coal_plant_data_one_hot_scaled.pkl"
+            root,
+            "data/raw/coal_plant_data_raw.pkl",
         ),
-        help="Select location of local data set, as pulled from Mongo. Ensure you have pulled an unscaled/unprojected dataset as well",
+        help="Select location of raw data set, as pulled from Mongo.",
     )
     parser.add_argument(
-        "--projector",
+        "--clean",
         type=str,
-        default="UMAP",
-        help="Select type of projection for initializing `CoalMapper` objects.",
+        default=os.path.join(
+            root,
+            "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
+        ),
+        help="Select location of clean data.",
     )
     parser.add_argument(
-        "--dimension",
-        type=int,
-        default=2,
-        help="Select dimension of projections for initializing `CoalMapper` objects.",
-    )
-    parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="If set, overwrites existing output files.",
+        "--projection",
+        type=str,
+        help="Select location of projection.",
     )
 
     parser.add_argument(
         "--min_cluster_size",
-        default=10,
+        default=2,
         type=int,
-        help="Sets number of clusters for the KMeans algorithm used in KMapper.",
+        help="Sets `min_cluster_size`, a parameter for HDBSCAN.",
     )
     parser.add_argument(
         "--max_cluster_size",
         default=0,
         type=int,
-        help="Sets number of clusters for the KMeans algorithm used in KMapper.",
+        help="Sets `max_cluster_size`, a parameter for HDBSCAN.",
     )
 
     parser.add_argument(
@@ -96,76 +99,55 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    assert os.path.isfile(args.data), "Invalid Input Data"
-    # Load Dataframe
-    with open(args.data, "rb") as f:
-        print("Reading Mongo Data File")
-        df = pickle.load(f)
+    # Initialize a `Tupper`
+    tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
 
-    data = df.dropna()
+    nbors, d = tupper.get_projection_parameters()
+    output_file = generate_mapper_filename(args, nbors, d)
 
-    # Load Projections
-    projections_file = os.path.join(
-        cwd,
-        f"./../../data/projections/{args.projector}/{args.projector}_{args.dimension}D.pkl",
+    n, p = args.n_cubes, args.perc_overlap
+    min_intersections = args.min_intersection
+    hdbscan_params = args.min_cluster_size, args.max_cluster_size
+    results, num_clusters = coal_mapper_generator(
+        tupper,
+        n_cubes=n,
+        perc_overlap=p,
+        hdbscan_params=hdbscan_params,
+        min_intersection_vals=min_intersections,
     )
-    with open(projections_file, "rb") as g:
-        print("Reading in UMAP Projections \n")
-        projections = pickle.load(g)
 
-    for hyper_params in projections.keys():
-        nbors, d = hyper_params
+    output_dir = os.path.join(root, f"data/mappers/{num_clusters}_policy_groups/")
+    # Check if output directory already exists
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
 
-        print(f"N_nbors:{nbors}")
-        print(f"min_distance:{d} \n\n")
-        proj_2D = projections[hyper_params]
+    # TODO: configure hyperparameters as a dictionary
+    results["hyperparameters"] = (
+        n,
+        p,
+        nbors,
+        d,
+        hdbscan_params,
+    )
 
-        output_file = generate_results_filename(args, nbors, d)
+    out_dir_message = output_file
+    out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-        output_dir = os.path.join(cwd, "../../data/mappers/")
+    if len(results) > 1:
+        with open(output_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(
+                f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
+            )
 
-        # Check if output directory already exists
-        if os.path.isdir(output_dir):
-            output_file = os.path.join(output_dir, output_file)
-        else:
-            os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, output_file)
-
-        n, p = args.n_cubes, args.perc_overlap
-        min_intersections = args.min_intersection
-        hdbscan_params = args.min_cluster_size, args.max_cluster_size
-
-        results = coal_mapper_generator(
-            data=data,
-            projection=proj_2D,
-            n_cubes=n,
-            perc_overlap=p,
-            hdbscan_params=hdbscan_params,
-            min_intersection_vals=min_intersections,
-        )
-
-        results["hyperparameters"] = (
-            n,
-            p,
-            nbors,
-            d,
-        )
-
-        out_dir_message = output_file
-        out_dir_message = "/".join(out_dir_message.split("/")[-2:])
-
-        if len(results) > 1:
-            with open(output_file, "wb") as handle:
-                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            if args.Verbose:
-                print("\n")
-                print(
-                    "-------------------------------------------------------------------------------- \n\n"
-                )
-                print(
-                    f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
-                )
-
-                print(
-                    "\n\n -------------------------------------------------------------------------------- "
-                )
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )

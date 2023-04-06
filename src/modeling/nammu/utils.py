@@ -1,6 +1,6 @@
 """Various utility functions and classes.
 
-Credit to: AIDOS Lab (https://github.com/aidos-lab).""""
+Credit to: AIDOS Lab (https://github.com/aidos-lab)."""
 
 import collections
 
