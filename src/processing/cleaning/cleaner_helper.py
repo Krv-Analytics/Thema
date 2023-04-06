@@ -30,7 +30,7 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     # Scale
     cleaned_data = pd.DataFrame(
         scaler.fit_transform(cleaned_data), columns=list(cleaned_data.columns)
-    )
+    ).dropna()
 
     return cleaned_data
 
