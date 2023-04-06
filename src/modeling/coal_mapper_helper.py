@@ -31,13 +31,13 @@ def coal_mapper_generator(
         for val in min_intersection_vals:
             # Generate Graph
             coal_mapper.to_networkx(min_intersection=val)
-            coal_mapper.connected_components()
+            components = coal_mapper.connected_components()
             # Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
 
             results[val] = coal_mapper
-        return results
+        return results, len(components)
     else:
         if verbose:
             print(
