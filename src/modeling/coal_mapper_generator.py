@@ -11,6 +11,7 @@ from coal_mapper_helper import coal_mapper_generator, generate_mapper_filename
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
+sys.path.append(src + "modeling/nammu/")
 
 
 from processing.cleaning.tupper import Tupper
@@ -134,6 +135,7 @@ if __name__ == "__main__":
     )
 
     out_dir_message = output_file
+    print(results["hyperparameters"])
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
     if len(results) > 1:
