@@ -5,7 +5,7 @@ import os
 import sys
 import pickle
 from dotenv import load_dotenv
-from coal_mapper_helper import coal_mapper_generator, generate_results_filename
+from coal_mapper_helper import coal_mapper_generator, generate_mapper_filename
 
 
 load_dotenv()
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
 
     nbors, d = tupper.get_projection_parameters()
-    output_file = generate_results_filename(args, nbors, d)
+    output_file = generate_mapper_filename(args, nbors, d)
 
     output_dir = os.path.join(root, "data/mappers/")
 
