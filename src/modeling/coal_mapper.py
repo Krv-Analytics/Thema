@@ -129,10 +129,7 @@ class CoalMapper:
     @property
     def curvature(self):
         if len(self._curvature) == 0:
-            print(
-                "You don't have any edge curvatures! \
-                First generate a nonempty networkx Graph with `to_networkx()`."
-            )
+            print("You don't have any edge curvatures! Try running `to_networkx`")
         return self._curvature
 
     @curvature.setter
