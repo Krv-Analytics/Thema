@@ -45,10 +45,11 @@ def mapper_reader(dir):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
             with open(mapper_file, "rb") as f:
-                result_dictionary = pickle.load(f)
-            hyper_params = result_dictionary["hyperparameters"]
-            result_dictionary.pop("hyperparameters")
-            data[hyper_params] = result_dictionary
+                reference = pickle.load(f)
+
+            mapper = reference["mapper"]
+            hyper_params = reference["hyperparameters"]
+            data[hyper_params] = mapper
 
     return data
 
