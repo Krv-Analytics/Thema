@@ -11,6 +11,7 @@ from model_helper import (
     config_plot_data,
     custom_color_scale,
     mapper_plot_outfile,
+    get_minimal_std,
 )
 
 
@@ -138,10 +139,24 @@ class Model:
         self._cluster_ids = labels
 
     def compute_node_descriptions(self):
-        pass
+        nodes = self.complex["nodes"]
+        self._node_description = {}
+        for node in nodes.keys():
+            mask = nodes[node]
+            label = get_minimal_std(
+                df=self.tupper.clean,
+                mask=mask,
+            )
+            self._node_description[node] = label
 
     def compute_cluster_descriptions(self):
-        pass
+        """Choose the column in the `tupper.clean` with the lowest standard deviation."""
+        clusters = np.unique(self.cluster_ids)
+        self._cluster_description = {}
+        for cluster in clusters:
+            mask = np.array(np.where(self.cluster_ids == cluster, 1, 0), dtype=bool)
+            label = get_minimal_std(df=self.tupper.clean, mask=mask)
+            self._cluster_description[cluster] = label
 
     def visualize_mapper(self):
         assert len(self.complex) > 0, "Model needs a `fitted` mapper."

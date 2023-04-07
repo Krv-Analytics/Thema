@@ -1,16 +1,22 @@
 "Helper functions for Mapper Policy Model"
 
-import datetime
 import os
 import sys
 
+import numpy as np
+import pandas as pd
 from dotenv import load_dotenv
-
 
 load_dotenv()
 root = os.getenv("root")
 src = os.getenv("src")
 sys.path.append(src)
+
+
+def get_minimal_std(df: pd.DataFrame, mask: np.array):
+    subset = df.iloc[mask]
+    col_label = subset.columns[subset.std(axis=0).argmin()]
+    return col_label
 
 
 def mapper_plot_outfile(
