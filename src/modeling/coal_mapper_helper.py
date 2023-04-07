@@ -11,7 +11,7 @@ def coal_mapper_generator(
     perc_overlap,
     hdbscan_params,
     min_intersection_vals,
-    verbose=0,
+    verbose=False,
 ):
     """ """
 
@@ -29,12 +29,16 @@ def coal_mapper_generator(
     if len(coal_mapper.complex["links"]) > 0:
         for val in min_intersection_vals:
             # Generate Graph
-            coal_mapper.to_networkx(min_intersection=val)
-            coal_mapper.connected_components()
-            # Compute Curvature and Persistence Diagram
-            coal_mapper.curvature = ollivier_ricci_curvature
-            coal_mapper.calculate_homology()
-            results[val] = coal_mapper
+            try:
+                coal_mapper.to_networkx(min_intersection=val)
+                coal_mapper.connected_components()
+                # Compute Curvature and Persistence Diagram
+                coal_mapper.curvature = ollivier_ricci_curvature
+                coal_mapper.calculate_homology()
+                results[val] = coal_mapper
+            except:
+                if verbose:
+                    print("Empty Mapper!")
         return results
     else:
         if verbose:
