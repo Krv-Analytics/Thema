@@ -120,6 +120,7 @@ if __name__ == "__main__":
     for val in min_intersections:
         assert val in results.keys(), "Empty Mapper!"
         mapper = results[val]
+        output = {"mapper": results[val]}
         num_policy_groups = mapper.num_policy_groups
         output_dir = os.path.join(
             root, f"data/mappers/{num_policy_groups}_policy_groups/"
@@ -133,7 +134,7 @@ if __name__ == "__main__":
             output_file = os.path.join(output_dir, output_file)
 
         # TODO: configure hyperparameters as a dictionary
-        results["hyperparameters"] = (
+        output["hyperparameters"] = (
             n,
             p,
             nbors,
@@ -142,12 +143,11 @@ if __name__ == "__main__":
         )
 
         out_dir_message = output_file
-        print(results["hyperparameters"])
         out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-        if len(results) > 1:
+        if len(mapper.complex) > 0:
             with open(output_file, "wb") as handle:
-                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(output, handle, protocol=pickle.HIGHEST_PROTOCOL)
             if args.Verbose:
                 print("\n")
                 print(

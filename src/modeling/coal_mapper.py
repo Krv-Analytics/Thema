@@ -55,9 +55,13 @@ class CoalMapper:
         # Analysis Objects
         self._complex = dict()
         self._graph = nx.Graph()
+        self._min_intersection = None
         self._components = dict()
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
+
+        # Number of Policy Group
+        self._num_policy_groups = None
 
     @property
     def tupper(self):
@@ -96,6 +100,17 @@ class CoalMapper:
         return self._graph
 
     @property
+    def min_intersection(self):
+        if len(self._graph.nodes()) == 0:
+            print(
+                "Your graph is empty! \n \
+                Run `to_networkx()` to generate a graph. \n \
+                Note: some parameters may produce a trivial mapper representation.\n"
+            )
+            self.to_networkx()
+        return self._min_intersection
+
+    @property
     def components(self):
         if len(self._components) == 0:
             print(
@@ -104,6 +119,12 @@ class CoalMapper:
                 Note: some parameters may produce a trivial mapper representation.\n"
             )
         return self._components
+
+    @property
+    def num_policy_groups(self):
+        if self._num_policy_groups is None:
+            self.connected_components()
+        return self._num_policy_groups
 
     @property
     def curvature(self):
@@ -200,6 +221,7 @@ class CoalMapper:
 
         """
         # Initialize Nerve
+        self._min_intersection = min_intersection
         nerve = km.GraphNerve(min_intersection)
         assert (
             len(self._complex["nodes"]) > 0
@@ -237,7 +259,7 @@ class CoalMapper:
                 for i, c in enumerate(nx.connected_components(self.graph))
             ]
         )
-
+        self._num_policy_groups = len(self._components)
         return self.components
 
     def calculate_homology(self, filter_fn=ollivier_ricci_curvature, use_min=True):

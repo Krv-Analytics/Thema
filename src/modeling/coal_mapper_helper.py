@@ -26,18 +26,16 @@ def coal_mapper_generator(
     coal_mapper.fit(n_cubes, perc_overlap, clusterer)
 
     results = {}
-
     if len(coal_mapper.complex["links"]) > 0:
         for val in min_intersection_vals:
             # Generate Graph
             coal_mapper.to_networkx(min_intersection=val)
-            components = coal_mapper.connected_components()
+            coal_mapper.connected_components()
             # Compute Curvature and Persistence Diagram
             coal_mapper.curvature = ollivier_ricci_curvature
             coal_mapper.calculate_homology()
-
             results[val] = coal_mapper
-        return results, len(components)
+        return results
     else:
         if verbose:
             print(
@@ -51,7 +49,7 @@ def coal_mapper_generator(
         return results
 
 
-def generate_mapper_filename(args, n_neighbors, min_dist):
+def generate_mapper_filename(args, n_neighbors, min_dist, min_intersection):
     """Generate output filename string from CLI arguments when running  script."""
 
     min_cluster_size, p, n = (
@@ -59,7 +57,6 @@ def generate_mapper_filename(args, n_neighbors, min_dist):
         args.perc_overlap,
         args.n_cubes,
     )
-
-    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}.pkl"
+    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minD{min_dist}_min_int{min_intersection}.pkl"
 
     return output_file
