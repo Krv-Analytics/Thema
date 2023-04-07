@@ -22,6 +22,13 @@ if __name__ == "__main__":
         default="landscape",
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
+    parser.add_argument(
+        "-f",
+        "--coverage_filter",
+        type=float,
+        default=0.8,
+        help="Select the percentage of unqiue samples that need to be covered by Mapper's fit.",
+    )
 
     parser.add_argument(
         "-n",
@@ -52,7 +59,9 @@ if __name__ == "__main__":
     n = args.num_policy_groups
     path_to_mappers = os.path.join(root, f"data/mappers/{n}_policy_groups")
 
-    keys, distances = topology_metric(files=path_to_mappers, metric=args.metric)
+    keys, distances = topology_metric(
+        files=path_to_mappers, metric=args.metric, coverage=args.coverage_filter
+    )
     results = {"keys": keys, "distances": distances}
 
     if args.save:

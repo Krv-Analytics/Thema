@@ -142,6 +142,7 @@ if __name__ == "__main__":
                 nbors,
                 d,
                 hdbscan_params,
+                val,
             )
 
             out_dir_message = output_file

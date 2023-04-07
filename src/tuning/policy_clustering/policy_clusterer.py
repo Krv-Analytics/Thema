@@ -80,7 +80,7 @@ if __name__ == "__main__":
         out_dir_message = f"{model_file} successfully written."
 
         output_dir = os.path.join(
-            root, f"data/parameter_modeling/models/{n}_policy_groups/"
+            root, f"data/model_analysis/models/{n}_policy_groups/"
         )
 
         # Check if output directory already exists
