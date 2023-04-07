@@ -16,14 +16,12 @@ from model_helper import (
 
 
 class Model:
-    def __init__(self, mapper: str, min_intersection=1):
+    def __init__(self, mapper: str):
 
         self._mapper = None
         self._tupper = None
         self._complex = None
         self._hyper_parameters = None
-
-        self.min_intersection = min_intersection
 
         # Check is valid mapper path
         if isfile(mapper):
@@ -44,7 +42,7 @@ class Model:
         assert self._mapper, "Please Specify a valid path to a mapper object"
         with open(self._mapper, "rb") as mapper_file:
             reference = pickle.load(mapper_file)
-            mapper = reference[self.min_intersection]
+            mapper = reference["mapper"]
         return mapper
 
     @property

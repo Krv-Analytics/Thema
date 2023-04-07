@@ -7,12 +7,21 @@
 MIN_CLUSTER_SIZES=(6)
 N_CUBES=(3 4 5 6 7 8 9 10 11 12 13 14 15)
 PERC_OVERLAP=(0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7)
-MIN_INTERSECTION=(1)
+MIN_INTERSECTION=(4)
 
 PROJECTIONS="../data/projections/UMAP/*.pkl"
 
 poetry shell
 echo "Initializing Poetry Shell"
+echo "Would you like to clean out existing mapper objects? yes or no"
+
+read clean
+
+if [ $clean == "yes" ];then
+    echo "Cleaning..."
+    rm -r ../data/mappers/
+fi
+
 
 echo "Computing Mapper Parameter Grid Search, over all available projections!"
             echo "--------------------------------------------------------------------------------"
