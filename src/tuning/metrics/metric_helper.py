@@ -48,7 +48,7 @@ def get_diagrams(dir, coverage):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
             model = Model(mapper_file)
-            if len(model.unclustered_items) / len(model.tupper.clean) > 1-coverage:
+            if len(model.unclustered_items) / len(model.tupper.clean) < 1-coverage:
                 mapper = model.mapper
                 hyper_params = model.hyper_parameters
                 diagrams[hyper_params] = mapper.diagram
