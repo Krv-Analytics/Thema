@@ -35,7 +35,8 @@ class Model:
 
         # Mapper Cluster Attributes
         self._cluster_ids = None
-        self._cluster_description = None
+        self._cluster_descriptions = None
+        self._cluster_sizes = None
         self._unclustered_items = None
 
     @property
@@ -83,10 +84,16 @@ class Model:
         return self._cluster_ids
 
     @property
-    def cluster_description(self):
-        if self._cluster_description is None:
+    def cluster_descriptions(self):
+        if self._cluster_descriptions is None:
             self.compute_cluster_descriptions()
-        return self._cluster_description
+        return self._cluster_descriptions
+
+    @property
+    def cluster_sizes(self):
+        if self._cluster_sizes is None:
+            self.label_item_by_cluster()
+        return self._cluster_sizes
 
     @property
     def unclustered_items(self):
@@ -121,8 +128,8 @@ class Model:
             len(self.complex) > 0
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
 
+        self._cluster_sizes = {}
         labels = -np.ones(len(self.tupper.clean))
-        count = 0
         components = self.mapper.components
         for component in components.keys():
             cluster_id = components[component]
@@ -133,12 +140,15 @@ class Model:
                 elements.append(self.complex["nodes"][node])
 
             indices = set(itertools.chain(*elements))
-            count += len(indices)
+            size = len(indices)
             labels[list(indices)] = cluster_id
+            self._cluster_sizes[cluster_id] = size
 
         self._cluster_ids = labels
+        self._cluster_sizes[-1] = len(self.unclustered_items)
 
     def compute_node_descriptions(self):
+        """Choose the column in the `tupper.clean` with the lowest standard deviation."""
         nodes = self.complex["nodes"]
         self._node_description = {}
         for node in nodes.keys():
@@ -147,16 +157,41 @@ class Model:
                 df=self.tupper.clean,
                 mask=mask,
             )
-            self._node_description[node] = label
+            size = len(mask)
+            self._node_description[node] = {"label": label, "size": size}
 
     def compute_cluster_descriptions(self):
-        """Choose the column in the `tupper.clean` with the lowest standard deviation."""
-        clusters = np.unique(self.cluster_ids)
-        self._cluster_description = {}
-        for cluster in clusters:
-            mask = np.array(np.where(self.cluster_ids == cluster, 1, 0), dtype=bool)
-            label = get_minimal_std(df=self.tupper.clean, mask=mask)
-            self._cluster_description[cluster] = label
+        """Compute a density based description of the cluster based on its nodes."""
+        self._cluster_descriptions = {}
+        components = self.mapper.components
+        # View cluster as networkX graph
+        for G in components.keys():
+            cluster_id = components[G]
+            nodes = G.nodes()
+            holder = {}
+            N = 0
+            for node in nodes:
+                label = self.node_description[node]["label"]
+                size = self.node_description[node]["size"]
+
+                N += size
+                # If multiple nodes have same identifying column
+                if label in holder.keys():
+                    size += holder[label]
+                holder[label] = size
+            density = {label: np.round(size / N, 2) for label, size in holder.items()}
+            self._cluster_descriptions[cluster_id] = {
+                "density": density,
+                "size": self.cluster_sizes[cluster_id],
+            }
+
+        unclustered_label = get_minimal_std(
+            df=self.tupper.clean, mask=self.unclustered_items
+        )
+        self._cluster_descriptions[-1] = {
+            "density": {unclustered_label: 1.0},
+            "size": self.cluster_sizes[-1],
+        }
 
     def visualize_mapper(self):
         assert len(self.complex) > 0, "Model needs a `fitted` mapper."
