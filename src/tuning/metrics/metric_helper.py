@@ -17,13 +17,16 @@ sys.path.append(modeling)
 
 
 from modeling.coal_mapper import CoalMapper
+from modeling.model import Model
 
 
 def topology_metric(
     files,
     metric="bottleneck",
+    coverage=0.6,
 ):
-    keys, diagrams = get_diagrams(files)
+    keys, diagrams = get_diagrams(files, coverage)
+    assert len(diagrams) > 0, "Coverage parameter is too strict"
     curvature_dgms = convert_to_gtda(diagrams.values())
     distance_metric = PairwiseDistance(metric=metric)
     distance_metric.fit(curvature_dgms)
@@ -32,38 +35,24 @@ def topology_metric(
     return keys, distances
 
 
-def mapper_reader(dir):
+def get_diagrams(dir, coverage):
     assert os.path.isdir(
         dir
     ), "Please first compute mapper objects using `coal_mapper_generator.py`"
 
     # TODO: add a filter here for `unlcustered` plants
-    data = {}
+    diagrams = {}
     cwd = os.path.dirname(__file__)
     dir = os.path.join(cwd, dir)
     for file in os.listdir(dir):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
-            with open(mapper_file, "rb") as f:
-                reference = pickle.load(f)
+            model = Model(mapper_file)
+            if len(model.unclustered_items) / len(model.tupper.clean) > coverage:
+                mapper = model.mapper
+                hyper_params = model.hyper_parameters
+                diagrams[hyper_params] = mapper.diagram
 
-            mapper = reference["mapper"]
-            hyper_params = reference["hyperparameters"]
-            data[hyper_params] = mapper
-
-    return data
-
-
-def get_diagrams(dir):
-    data = mapper_reader(dir)
-    diagrams = {}
-    for hyper_params in data.keys():
-        mappers = data[hyper_params]
-        for min_intersection in mappers.keys():
-
-            diagram = mappers[min_intersection].diagram
-            new_key = (*hyper_params, min_intersection)
-            diagrams[new_key] = diagram
     keys = list(diagrams.keys())
     keys.sort()
     sorted_diagrams = {i: diagrams[i] for i in keys}
