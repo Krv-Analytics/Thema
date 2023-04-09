@@ -71,11 +71,21 @@ Once you have have configured your local environment, you're all set to start us
 
 ## File Descriptions 
 Here we will give a brief overview of our provided files in the src/ directory. 
-### Processing  
-#### 
+### Processing 
+#### Pulling
+#### Cleaning
+#### Projecting
+ 
+
+### Tuning
+#### Metrics
+#### Par
+### Visualizing
 
 
 
-#### Scripts 
+## Scripts 
+
+## Ouputs
 
 
