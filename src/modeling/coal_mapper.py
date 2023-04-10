@@ -82,48 +82,60 @@ class CoalMapper:
     @property
     def complex(self):
         if len(self._complex["nodes"]) == 0:
-            print(
-                "Your simplicial complex is empty! \n\
-                Run `fit()` to generate a simplicial complex. \n \
-                Note: some parameters may produce a trivial mapper representation. \n"
-            )
+            try:
+                self.fit(clusterer=self.clusterer)
+            except:
+                print("Your simplicial complex is empty!")
+                print(
+                    "Note: some parameters may produce a trivial mapper representation. \n"
+                )
         return self._complex
 
     @property
     def graph(self):
         if len(self._graph.nodes()) == 0:
-            print(
-                "Your graph is empty! \n \
-                Run `to_networkx()` to generate a graph. \n \
-                Note: some parameters may produce a trivial mapper representation.\n"
-            )
+            try:
+                self.to_networkx(self.min_intersection)
+            except:
+                print("Your simplicial complex is empty!")
+                print(
+                    "Note: some parameters may produce a trivial mapper representation. \n"
+                )
         return self._graph
 
     @property
     def min_intersection(self):
-        if len(self._graph.nodes()) == 0:
-            print(
-                "Your graph is empty! \n \
-                Run `to_networkx()` to generate a graph. \n \
-                Note: some parameters may produce a trivial mapper representation.\n"
-            )
-            self.to_networkx()
+        if self._min_intersection is None:
+            print("Please choose a minimum intersection to generate a networkX graph!")
         return self._min_intersection
 
     @property
     def components(self):
         if len(self._components) == 0:
-            print(
-                "You don't have any connected components! \n \
-                Run `connected_components()` to generate a graph. \n\
-                Note: some parameters may produce a trivial mapper representation.\n"
-            )
+            try:
+                self.connected_components()
+            except:
+                print(
+                    "Connected components could not be obtained from this simplicial complex!"
+                )
+                print(
+                    "Note: some parameters may produce a trivial mapper representation. \n"
+                )
         return self._components
 
     @property
     def num_policy_groups(self):
         if self._num_policy_groups is None:
-            self.connected_components()
+            try:
+                self.connected_components()
+            except:
+                print(
+                    "Number of policy groups could not be obtained from this simplicial complex!"
+                )
+                print(
+                    "Note: some parameters may produce a trivial mapper representation. \n"
+                )
+
         return self._num_policy_groups
 
     @property
@@ -133,7 +145,7 @@ class CoalMapper:
         return self._curvature
 
     @curvature.setter
-    def curvature(self, curvature_fn):
+    def curvature(self, curvature_fn=ollivier_ricci_curvature):
         assert (
             len(self._graph.nodes()) > 0
         ), "First run `to_networkx` to generate a non-empty networkx graph."
@@ -148,9 +160,10 @@ class CoalMapper:
     @property
     def diagram(self):
         if self._diagram is None:
+            try:
+                self.calculate_homology()
             print(
-                "Your persistence diagrams are empty! \
-                First generate a networkx Graph with `to_networkx()`."
+                "Persistence Diagrams could not be obtained from this simplicial complex!"
             )
         return self._diagram
 
