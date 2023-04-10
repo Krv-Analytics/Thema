@@ -162,9 +162,10 @@ class CoalMapper:
         if self._diagram is None:
             try:
                 self.calculate_homology()
-            print(
-                "Persistence Diagrams could not be obtained from this simplicial complex!"
-            )
+            except:
+                print(
+                    "Persistence Diagrams could not be obtained from this simplicial complex!"
+                )
         return self._diagram
 
     #############################################################################################################################################
@@ -174,7 +175,7 @@ class CoalMapper:
         self,
         n_cubes: int = 6,
         perc_overlap: float = 0.4,
-        clusterer=HDBSCAN(min_cluster_size=10),
+        clusterer=HDBSCAN(min_cluster_size=6),
     ):
         """
         A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
