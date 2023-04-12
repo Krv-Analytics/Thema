@@ -30,7 +30,6 @@ pio.renderers.default = "browser"
 load_dotenv
 root = os.getenv("root")
 src = os.getenv("src")
-
 sys.path.append(src)
 
 
