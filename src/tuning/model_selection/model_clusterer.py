@@ -6,8 +6,8 @@ import os
 import pickle
 from dotenv import load_dotenv
 
-from policy_clusterer_helper import (
-    cluster_policy_reccomendations,
+from model_clusterer_helper import (
+    cluster_models,
     read_distance_matrices,
 )
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     # Read in Keys and distances from pickle file
     n = args.num_policy_groups
     keys, distances = read_distance_matrices(metric=args.metric, n=n)
-    model = cluster_policy_reccomendations(
+    model = cluster_models(
         keys,
         distances,
         p=args.dendrogram_levels,

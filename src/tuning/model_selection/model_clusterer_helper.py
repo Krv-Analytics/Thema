@@ -13,7 +13,7 @@ sys.path.append(src)
 from visualizing.visualization_helper import plot_dendrogram
 
 
-def cluster_policy_reccomendations(keys, distances, metric, num_policy_groups, p=3):
+def cluster_models(keys, distances, metric, num_policy_groups, p=3):
 
     model = AgglomerativeClustering(
         affinity="precomputed", linkage="average", compute_distances=True, n_clusters=3
