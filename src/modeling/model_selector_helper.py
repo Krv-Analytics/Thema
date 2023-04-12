@@ -69,7 +69,6 @@ def select_models(keys, clustering, n):
     selection = []
     for subgroup in subgroups.values():
         best_model = get_best_covered_model(subgroup)
-        print(f"Selected {best_model}")
         selection.append(best_model)
     return selection
 
