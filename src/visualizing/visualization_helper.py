@@ -3,13 +3,17 @@
 import time
 import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
+import os
+import sys
 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 import plotly.express as px
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
+import seaborn as sns
 
 
 from umap import UMAP
@@ -23,9 +27,14 @@ from sklearn.decomposition import PCA
 
 
 pio.renderers.default = "browser"
+load_dotenv
+root = os.getenv("root")
+src = os.getenv("src")
+
+sys.path.append(src)
 
 
-def plot_dendrogram(model, labels, distance, p, n, **kwargs):
+def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs):
     """Create linkage matrix and then plot the dendrogram for Hierarchical clustering."""
 
     counts = np.zeros(model.children_.shape[0])
@@ -46,10 +55,12 @@ def plot_dendrogram(model, labels, distance, p, n, **kwargs):
     # Plot the corresponding dendrogram
     d = dendrogram(
         linkage_matrix,
-        labels=None,
         p=p,
-        truncate_mode="level",
+        distance_sort=True,
+        color_threshold=distance_threshold,
     )
+    for leaf, leaf_color in zip(plt.gca().get_xticklabels(), d["leaves_color_list"]):
+        leaf.set_color(leaf_color)
     plt.title(f"Clustering Models with {n} Policy Groups")
     plt.xlabel("Coordinates: Model Parameters.")
     plt.ylabel(f"{distance} distance between persistence diagrams")
