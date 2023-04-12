@@ -16,12 +16,10 @@ from visualizing.visualization_helper import plot_dendrogram
 def cluster_policy_reccomendations(keys, distances, metric, num_policy_groups, p=3):
 
     model = AgglomerativeClustering(
-        affinity="precomputed", linkage="average", compute_distances=True
+        affinity="precomputed", linkage="average", compute_distances=True, n_clusters=3
     )
     model.fit(distances)
 
-    # keys = [key[:2] for key in keys]
-    id_labels = [i for i in range(len(keys))]
     # What percentage of Labels do you want to visualize?
     plot_dendrogram(
         model=model,
