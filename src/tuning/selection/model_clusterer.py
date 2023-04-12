@@ -1,4 +1,4 @@
-"Group policy Models based on their graph structure using Ollivier Ricci Curvature and TDA"
+"Group Mapper Models based on their graph structure using Ollivier Ricci Curvature and TDA"
 
 import argparse
 import sys
@@ -37,6 +37,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-d",
+        "--distance_threshold",
+        type=float,
+        default=0.5,
+        help="Select distance threshold for agglomerative clustering model.",
+    )
+
+    parser.add_argument(
         "-p",
         "--dendrogram_levels",
         type=int,
@@ -47,8 +55,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--save",
-        default=True,
-        help="If True, save the clustering model and distances as pickle files.",
+        default=False,
+        action="store_true",
+        help="If tagged, save the clustering model as a pickle files.",
     )
 
     parser.add_argument(
@@ -66,21 +75,26 @@ if __name__ == "__main__":
     n = args.num_policy_groups
     keys, distances = read_distance_matrices(metric=args.metric, n=n)
     model = cluster_models(
-        keys,
         distances,
         p=args.dendrogram_levels,
         metric=args.metric,
         num_policy_groups=n,
+        distance_threshold=args.distance_threshold,
+        plot=not args.save,
     )
 
-    results = {"keys": keys, "model": model}
+    results = {
+        "keys": keys,
+        "model": model,
+        "distance_threshold": args.distance_threshold,
+    }
     if args.save:
         model_file = f"curvature_{args.metric}_clustering_model.pkl"
 
         out_dir_message = f"{model_file} successfully written."
 
         output_dir = os.path.join(
-            root, f"data/model_analysis/models/{n}_policy_groups/"
+            root, f"data/model_analysis/graph_clustering/{n}_policy_groups/"
         )
 
         # Check if output directory already exists
