@@ -12,7 +12,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 import plotly.express as px
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
+import seaborn as sns
 
 
 from umap import UMAP
@@ -29,63 +30,10 @@ pio.renderers.default = "browser"
 load_dotenv
 root = os.getenv("root")
 src = os.getenv("src")
-
 sys.path.append(src)
 
-from modeling.model import Model
 
-
-
-
-def unpack_policy_group_dir(folder):
-    n = int(folder[:folder.index('_')])
-    return n
-
-
-def get_viable_models(n:int,coverage_filter:float):
-    dir = f"data/{n}_policy_groups/"
-    dir = os.path.join(root)
-    files = os.listdir(folder_path)
-    count = 0
-    models = []
-    for file in files:
-        model = Model(file)
-        N = len(model.tupper.clean)
-        if model.unclustered_items/N <= 1 - coverage_filter:
-            models.append(file)
-
-    return models
-    
-
-
-
-
-def plot_mapper_histogram(coverage_filter=0.8):
-    mappers = os.path.join(root,"data/mappers/")
-    policy_groups = os.listdir(mappers) # get a list of folder names in the directory
-    counts = {} # initialize an empty list to store the number of files in each folder
-    for folder in policy_groups:
-        n = unpack_policy_group_dir(folder)
-        models = get_viable_models(n,coverage_filter)
-        counts[n] = len(models)
-    keys = list(folder_counts.keys())
-    keys.sort()
-    sorted_counts = {i: folder_counts[i] for i in keys}
-    # plot the histogram
-    ax = sns.barplot(x = list(sorted_counts.keys()),y =list(sorted_counts.values()))
-    ax.set(xlabel="Number of files per folder")
-    plt.show()
-    
-
-
-
-
-
-
-
-
-
-def plot_dendrogram(model, labels, distance, p, n, **kwargs):
+def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs):
     """Create linkage matrix and then plot the dendrogram for Hierarchical clustering."""
 
     counts = np.zeros(model.children_.shape[0])
@@ -106,10 +54,12 @@ def plot_dendrogram(model, labels, distance, p, n, **kwargs):
     # Plot the corresponding dendrogram
     d = dendrogram(
         linkage_matrix,
-        labels=None,
         p=p,
-        truncate_mode="level",
+        distance_sort=True,
+        color_threshold=distance_threshold,
     )
+    for leaf, leaf_color in zip(plt.gca().get_xticklabels(), d["leaves_color_list"]):
+        leaf.set_color(leaf_color)
     plt.title(f"Clustering Models with {n} Policy Groups")
     plt.xlabel("Coordinates: Model Parameters.")
     plt.ylabel(f"{distance} distance between persistence diagrams")

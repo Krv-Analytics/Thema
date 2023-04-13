@@ -1,11 +1,10 @@
 import os
-import pickle
-import numpy as np
 import sys
+
+import numpy as np
+import pandas as pd
 from dotenv import load_dotenv
-
 from gtda.diagrams import PairwiseDistance
-
 
 load_dotenv()
 src = os.getenv("src")
@@ -16,7 +15,6 @@ modeling = os.path.join(src, "modeling/")
 sys.path.append(modeling)
 
 
-from modeling.coal_mapper import CoalMapper
 from modeling.model import Model
 
 
@@ -25,14 +23,33 @@ def topology_metric(
     metric="bottleneck",
     coverage=0.6,
 ):
-    keys, diagrams = get_diagrams(files, coverage)
+    diagrams = get_diagrams(files, coverage)
     assert len(diagrams) > 0, "Coverage parameter is too strict"
     curvature_dgms = convert_to_gtda(diagrams.values())
     distance_metric = PairwiseDistance(metric=metric)
     distance_metric.fit(curvature_dgms)
-    distances = distance_metric.transform(curvature_dgms)
+    all_distances = distance_metric.transform(curvature_dgms)
 
-    return keys, distances
+    keys = np.array(list(diagrams.keys()), dtype=object)
+    trimmed_keys, trimmed_distances = collapse_eq_classes(keys, all_distances)
+
+    return trimmed_keys, trimmed_distances
+
+
+def collapse_eq_classes(keys, distance_matrix):
+    equivalent_items = np.argwhere(distance_matrix == 0)
+    drops = set()
+    for pair in equivalent_items:
+        if pair[0] != pair[1]:  # non-diagonal elements
+            drops.add(max(pair))
+    df = pd.DataFrame(distance_matrix)
+    df.drop(labels=list(drops), axis=0, inplace=True)
+    df.drop(labels=list(drops), axis=1, inplace=True)
+
+    trimmed_keys = keys[list(df.index)]
+
+    trimmed_matrix = df.values
+    return trimmed_keys, trimmed_matrix
 
 
 def get_diagrams(dir, coverage):
@@ -48,7 +65,7 @@ def get_diagrams(dir, coverage):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
             model = Model(mapper_file)
-            if len(model.unclustered_items) / len(model.tupper.clean) < 1-coverage:
+            if len(model.unclustered_items) / len(model.tupper.clean) < 1 - coverage:
                 mapper = model.mapper
                 hyper_params = model.hyper_parameters
                 diagrams[hyper_params] = mapper.diagram
@@ -57,7 +74,7 @@ def get_diagrams(dir, coverage):
     keys.sort()
     sorted_diagrams = {i: diagrams[i] for i in keys}
 
-    return keys, sorted_diagrams
+    return sorted_diagrams
 
 
 def convert_to_gtda(diagrams):
