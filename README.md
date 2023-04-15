@@ -1,7 +1,7 @@
 # coal_mapper
 
 ## Description 
-An implementation of the Kepler Mapper to analyze various energy datasets. 
+An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorithm to analyze various energy datasets. 
 
 
 
@@ -67,17 +67,23 @@ and populate the `gdrive_client_id` and `gdrive_client_secret` fields in .dvc/co
 
 ## Work Flow 
 
-Once you have have configured your local environment, you're all set to start using our provided functionality. As an overview, we provide functionality for loading data, cleaning data, projecting data, modeling data, and comparing models. For each stage of functionality, we provide a python driver file to perform the desired operation and save the output in a corresponding data directory. Note that the functionality we have fits together lineaerly in a pipeline, beginning with data generation and terminating with a representatives models. 
+Once you have have configured your local environment, you're all set to start using our functionality! As an overview, we provide functionality for loading data, cleaning data, projecting data, modeling data, and comparing models. For each stage of our pipeline, we provide a python driver file to perform the desired operation and save the output in an corresponding `data` directory. 
 
 ## File Descriptions 
-Here we will give a brief overview of our provided files in the src/ directory. 
-### Processing 
-#### Pulling
+Here we will give a brief overview of our provided files in the `src` directory. 
+
+### Processing
+This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering technique only requires `pickle` files that store `raw` and `clean` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, named in the repo as `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to adjust methods. However, hopefully our methods for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method (: 
+
+
+#### Pulling 
+
 #### Cleaning
 #### Projecting
  
 
 ### Tuning
+
 #### Metrics
 #### Par
 ### Visualizing
