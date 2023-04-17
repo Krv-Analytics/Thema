@@ -73,7 +73,7 @@ Once you have have configured your local environment, you're all set to start us
 Here we will give a brief overview of our provided files in the `src` directory. 
 
 ### Processing
-This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering technique only requires `pickle` files that store `raw` and `clean` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, named in the repo as `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to adjust methods. However, hopefully our methods for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method (: 
+This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering technique only requires `pickle` files that store `raw` and `clean` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, or `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to incorporate other methods. However, hopefully our functionality for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method.
 
 
 #### Pulling 
@@ -86,6 +86,8 @@ This subdirectory handles all data processing. Our project interfaces directly w
 
 #### Metrics
 #### Par
+
+
 ### Visualizing
 
 
