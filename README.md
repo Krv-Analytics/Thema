@@ -91,10 +91,23 @@ Now that you have a local copy of your `raw` data, you can run:
 $ python src/processing/cleaning/cleaner.py -v
 ``` 
 
-to clean your data, adding a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `Nans`, scaling, and encoding categorical variables. Our methods for this study are defualted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
+to clean your data, adding a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defualted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
 
 
 #### 3: Projecting
+To produce a single projection, of your `clean` data run:
+
+```
+$ python src/processing/projecting/projector.py -n 10 -d 0
+``` 
+
+Notice, the projection is parameterized by 2 inputs which represent `n_neighbors` and `min_dist` (n,d). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a (topological and geometric) stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and run the following command:
+
+```
+$ ./projection_grid_search.sh
+``` 
+
+to script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP/` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like in the bash file.
  
 
 ### Tuning
