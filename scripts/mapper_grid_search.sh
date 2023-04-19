@@ -19,6 +19,7 @@ read clean
 
 if [ $clean == "yes" ];then
     echo "Cleaning..."
+    echo -e 
     rm -r ../data/mappers/
 fi
 
