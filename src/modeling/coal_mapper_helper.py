@@ -1,8 +1,20 @@
+import os
+import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from dotenv import load_dotenv
 from hdbscan import HDBSCAN
+
 from coal_mapper import CoalMapper
-
-
+from model import Model
 from nammu.curvature import ollivier_ricci_curvature
+
+load_dotenv()
+root = os.getenv("root")
+src = os.getenv("src")
+sys.path.append(src)
 
 
 def coal_mapper_generator(

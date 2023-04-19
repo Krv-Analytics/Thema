@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--min_cluster_size",
-        default=2,
+        default=4,
         type=int,
         help="Sets `min_cluster_size`, a parameter for HDBSCAN.",
     )
@@ -124,6 +124,9 @@ if __name__ == "__main__":
             mapper = results[val]
             output = {"mapper": results[val]}
             num_policy_groups = mapper.num_policy_groups
+            if num_policy_groups > len(mapper.tupper.clean):
+                print(f"More components than elements!!")
+                sys.exit(1)
             output_dir = os.path.join(
                 root, f"data/mappers/{num_policy_groups}_policy_groups/"
             )

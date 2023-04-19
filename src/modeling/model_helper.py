@@ -22,8 +22,8 @@ def get_minimal_std(df: pd.DataFrame, mask: np.array):
 def mapper_plot_outfile(
     hyper_parameters,
 ):
-    n, p, nbors, d, hdbscan_params = hyper_parameters
-    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{nbors}Nbors_minD{d}.html"
+    n, p, nbors, d, hdbscan_params, min_intersection = hyper_parameters
+    output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{nbors}Nbors_minD{d}_min_Intersection{min_intersection}.html"
     output_dir = os.path.join(root, "data/visualizations/mapper_htmls/")
 
     if os.path.isdir(output_dir):

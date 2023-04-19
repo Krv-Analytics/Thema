@@ -13,24 +13,30 @@ sys.path.append(src)
 from visualizing.visualization_helper import plot_dendrogram
 
 
-def cluster_policy_reccomendations(keys, distances, metric, num_policy_groups, p=3):
+def cluster_models(
+    distances, metric, num_policy_groups, p=3, distance_threshold=0.5, plot=True
+):
 
     model = AgglomerativeClustering(
-        affinity="precomputed", linkage="average", compute_distances=True
+        affinity="precomputed",
+        linkage="average",
+        compute_distances=True,
+        distance_threshold=distance_threshold,
+        n_clusters=None,
     )
     model.fit(distances)
 
-    # keys = [key[:2] for key in keys]
-    id_labels = [i for i in range(len(keys))]
     # What percentage of Labels do you want to visualize?
-    plot_dendrogram(
-        model=model,
-        labels=None,
-        distance=metric,
-        truncate_mode="level",
-        p=p,
-        n=num_policy_groups,
-    )
+    if plot:
+        plot_dendrogram(
+            model=model,
+            labels=None,
+            distance=metric,
+            truncate_mode="level",
+            p=p,
+            n=num_policy_groups,
+            distance_threshold=distance_threshold,
+        )
 
     return model
 
