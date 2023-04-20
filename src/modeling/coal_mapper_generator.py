@@ -128,7 +128,7 @@ if __name__ == "__main__":
                 print(f"More components than elements!!")
                 sys.exit(1)
             output_dir = os.path.join(
-                root, f"data/mappers/{num_policy_groups}_policy_groups/"
+                root, f"data/models/{num_policy_groups}_policy_groups/"
             )
             output_file = generate_mapper_filename(args, nbors, d, min_intersection=val)
             # Check if output directory already exists
