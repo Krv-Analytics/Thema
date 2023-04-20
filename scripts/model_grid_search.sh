@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MAPPER GRID SEARCH
+# MODEL GRID SEARCH
 
 #Run from root/scripts/
 
@@ -37,7 +37,7 @@ for MIN_CLUSTER_SIZE in "${MIN_CLUSTER_SIZES[@]}"; do
         for P in "${PERC_OVERLAP[@]}"; do
             echo -e 
             echo -e "Computing mapper with $N cubes and $P% overlap."
-            python ../src/modeling/coal_mapper_generator.py                                    \
+            python ../src/modeling/model_generator.py                                    \
                                     -n ${N}                                                    \
                                     -p ${P}                                                    \
                                     --min_cluster_size ${MIN_CLUSTER_SIZE}                     \
