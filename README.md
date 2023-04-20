@@ -73,7 +73,7 @@ Once you have have configured your local environment, you're all set to start us
 Here we will give a brief overview of our provided files in the `src` directory. 
 
 ### Processing
-This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering technique only requires `pickle` files that store `raw`, `clean`, and `projected` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, or `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to incorporate other methods. However, hopefully our functionality for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method.
+This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering method only requires `pickle` files that store `raw`, `clean`, and `projected` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, or `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to incorporate other methods. However, hopefully our functionality for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method.
 
 
 #### 1: Pulling 
@@ -101,7 +101,7 @@ To produce a single projection, of your `clean` data run:
 $ python src/processing/projecting/projector.py -n 10 -d 0
 ``` 
 
-Notice, the projection is parameterized by 2 inputs which represent `n_neighbors` and `min_dist` (n,d). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a (topological and geometric) stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and run the following command:
+Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and run the following command:
 
 ```
 $ ./projection_grid_search.sh
@@ -110,19 +110,53 @@ $ ./projection_grid_search.sh
 to script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP/` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like in the bash file.
  
 
-### Tuning
+### Modeling
+
+
+
 
 
 #### Metrics
 #### Par
 
 
+### Tuning
+
+
 ### Visualizing
+**work in progress**
+This subdirectory contains various visualization functions to help inform stages of the pipeline. Most of the functionality for visualizing properties of models are methods of the `Model` class. However, there are other interesting summary visualizations that we hope to support in this section. 
 
 
 
 ## Scripts 
 
-## Ouputs
+```
+├── mapper_grid_search.sh
+└── projection_grid_search.sh
+```
+With the current implementation, these bash shells *must be run from the scripts* directory.
+
+## Outputs
+See below, the tree structure of the `data` directory, generated by running through our workflow:
+
+```
+├── data
+│   ├── clean
+│   ├── models
+│   ├── model_analysis
+│   │   ├── distance_matrices
+│   │   ├── graph_clustering
+│   │   └── models
+│   ├── projections
+│   │   └── UMAP
+│   ├── raw
+│   └── visualizations
+│       └── mapper_htmls
+```
+
+
+
+
 
 
