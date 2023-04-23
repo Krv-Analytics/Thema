@@ -191,6 +191,15 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
+    def visualize_projection(self):
+        projection, parameters = (
+            self.tupper.projection,
+            self.tupper.get_projection_parameters,
+        )
+        ax = sns.scatterplot(projection)
+        ax.set(title=f"UMAP: {parameters}")
+        return ax
+
     def visualize_mapper(self):
         assert len(self.complex) > 0, "Model needs a `fitted` mapper."
         kepler = self.mapper.mapper

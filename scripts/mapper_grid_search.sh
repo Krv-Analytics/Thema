@@ -9,7 +9,7 @@ N_CUBES=(3 4 5 6 7 8 9 10 11)
 PERC_OVERLAP=(.3 .35 .4 .45 .5 .55 .6 .65 .7)
 MIN_INTERSECTION=(1 2 3 4 5 6)
 
-PROJECTIONS="../data/projections/UMAP/*.pkl"
+PROJECTIONS="../data/projections/UMAP/*.pkl" # TODO: Need to make this relative to root so the tuppers can be accessed from any dir
 
 poetry shell
 echo "Initializing Poetry Shell"
@@ -19,6 +19,7 @@ read clean
 
 if [ $clean == "yes" ];then
     echo "Cleaning..."
+    echo -e 
     rm -r ../data/mappers/
 fi
 
