@@ -189,7 +189,7 @@ this populates a pickle file with your equivalence class representatives!
 
 ### Visualizing
 **work in progress**
-This subdirectory contains various visualization functions to help inform stages of the pipeline. Most of the functionality for visualizing properties of models are methods of the `Model` class. However, there are other interesting summary visualizations that we hope to support in this section. 
+This subdirectory contains various visualization functions to help inform stages of the pipeline. Most of the functionality for visualizing properties of models are methods of the `Model` class. However, there are other interesting summary visualizations that we hope to support in this section that will populate the corresponding visualizations subdirectory in `data`.
 
 
 

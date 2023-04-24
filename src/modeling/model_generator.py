@@ -1,20 +1,18 @@
-"""Compute ollivier-Ricci curvature for Coal-Plant Mapper Graphs."""
+"""Generate Graph Models by using JMapper."""
 
 import argparse
 import os
-import sys
 import pickle
-from dotenv import load_dotenv
-from coal_mapper_helper import coal_mapper_generator, generate_mapper_filename
+import sys
 
+from dotenv import load_dotenv
+from model_helper import generate_mapper_filename, model_generator
+from tupper import Tupper
 
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "modeling/nammu/")
-
-
-from processing.cleaning.tupper import Tupper
 
 
 if __name__ == "__main__":
@@ -108,7 +106,7 @@ if __name__ == "__main__":
     n, p = args.n_cubes, args.perc_overlap
     min_intersections = args.min_intersection
     hdbscan_params = args.min_cluster_size, args.max_cluster_size
-    results = coal_mapper_generator(
+    results = model_generator(
         tupper,
         n_cubes=n,
         perc_overlap=p,

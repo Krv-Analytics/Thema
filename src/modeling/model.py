@@ -6,7 +6,7 @@ import itertools
 from persim import plot_diagrams
 import seaborn as sns
 
-from coal_mapper import CoalMapper
+from jmapper import JMapper
 from model_helper import (
     config_plot_data,
     custom_color_scale,
@@ -217,7 +217,7 @@ class Model:
             path_html=path_html,
         )
 
-        print(f"Go to {path_html} for a visualization of your CoalMapper!")
+        print(f"Go to {path_html} for a visualization of your JMapper!")
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize Curvature of a mapper graph as a histogram."""

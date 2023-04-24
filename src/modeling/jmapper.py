@@ -1,46 +1,35 @@
-"""Object file for Coal Mapper computations and analysis"""
-
-import os
-import sys
-
+"""Object file for JMapper."""
 import kmapper as km
 import networkx as nx
 import numpy as np
-from dotenv import load_dotenv
 from hdbscan import HDBSCAN
 from kmapper import KeplerMapper
-
 from nammu.curvature import ollivier_ricci_curvature
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
 from nammu.utils import make_node_filtration
-
-# Add src/ to PATH
-load_dotenv()
-src = os.getenv("src")
-sys.path.append(src)
+from tupper import Tupper
 
 
-from processing.cleaning.tupper import Tupper
+class JMapper:
+    """A new spin on scikit-tda's `KMapper` using Graph Curvature and Persistent Homology.
 
+    This class allows you to generate graph models of high dimensional data based on Singh et al.'s Mapper algorithm.
+    More importantly, the class can compute descriptions of these models on novel graph metrics that combine discrete curvature and persistent homology.
+    """
 
-class CoalMapper:
     def __init__(
         self,
         tupper: Tupper,
         verbose: int = 0,
     ):
-        """Constructor for CoalMapper class.
+        """Constructor for JMapper class.
         Parameters
         ===========
-        X: np.array
-            Dataset features you wish to analyze using the mapper algorithm.
-        projection: np.array
-            Projected data. The low dimensional representation
-            (e.g. post UMAP or TSNE) of X.
-            Can combine representations, will become `lens` in `kmapper`.
+        Tupper: <src.processing.cleaning.tupper.Tupper>
+            A data container that holds raw, cleaned, and projected versions of user data.
 
         verbose: int, default is 0
-            Logging level for `kmapper`. Levels (0,1,2) are supported.
+            Logging level passed through to `kmapper`. Levels (0,1,2) are supported.
         """
         # User Inputs
         self._tupper = tupper
@@ -63,24 +52,32 @@ class CoalMapper:
         # Number of Policy Group
         self._num_policy_groups = None
 
+    #############################################################################################################################################
+    #############################################################################################################################################
+
     @property
     def tupper(self):
+        """Return the data container Tupper used to initialize JMapper."""
         return self._tupper
 
     @property
     def mapper(self):
+        """Return the scikit-tda object generated when executing the Mapper algorithm."""
         return self._mapper
 
     @property
     def cover(self):
+        """Return the cover used to fit JMapper."""
         return self._cover
 
     @property
     def clusterer(self):
+        """Return the clusterer used to fit JMapper."""
         return self._clusterer
 
     @property
     def complex(self):
+        """Return the clusterer used to fit JMapper."""
         if len(self._complex["nodes"]) == 0:
             try:
                 self.fit(clusterer=self.clusterer)
@@ -178,23 +175,23 @@ class CoalMapper:
         clusterer=HDBSCAN(min_cluster_size=6),
     ):
         """
-        A wrapper function for kmapper that generates a simplicial complex based on a given lens, cover, and clustering algorithm.
+        Apply scikit-tda's implementation of the Mapper algorithm. Returns a dictionary that summarizes the fitted simplicial complex.
 
         Parameters
         -----------
-        n_cubes: int, defualt 4
+        n_cubes: int, defualt 6
             Number of cubes used to cover of the latent space. Used to construct a kmapper.Cover object.
 
-        perc_overlap: float, default 0.2
-            Percentage of intersection between the cubes covering the latent space.Used to construct a kmapper.Cover object.
+        perc_overlap: float, default 0.4
+            Percentage of intersection between the cubes covering the latent space. Used to construct a kmapper.Cover object.
 
         clusterer: default is HDBSCAN
             Scikit-learn API compatible clustering algorithm. Must provide `fit` and `predict`.
 
         Returns
         -----------
-        simplicial_complex : dict
-            A dictionary with "nodes", "links" and "meta" information.
+        complex : dict
+            A dictionary with "nodes", "links" and "meta" information of a simplicial complex.
 
         """
         # Log cover and clusterer from most recent fit
@@ -216,7 +213,7 @@ class CoalMapper:
 
     def to_networkx(self, min_intersection: int = 1):
         """
-        Converts a kmapper simplicial complex into a networkx graph. Generates the `graph` attribute for CoalMapper.
+        Converts a complex into a networkx graph. Generates the `graph` attribute for JMapper.
         A simplicial complex must already be computed to use this function.
 
         Parameters
@@ -227,7 +224,7 @@ class CoalMapper:
 
         Returns
         -----------
-        nx.Graph()
+        nx.Graph
             A networkx graph based on a Kepler Mapper simplicial complex. Nodes determined by clusters and edges based on `min_intersection`.
 
         """
@@ -274,13 +271,27 @@ class CoalMapper:
         return self.components
 
     def calculate_homology(self, filter_fn=ollivier_ricci_curvature, use_min=True):
-        """Compute Persistent Diagrams based on a curvature filtration of `self._graph`."""
+        """Compute Persistent Diagrams based on a curvature filtration of `self._graph`.
+        Parameters
+        -----------
+        filter_fn: func
+            Number of cubes used to cover of the latent space. Used to construct a kmapper.Cover object.
+
+        use_min: bool
+
+
+        Returns
+        -----------
+        persistence_diagram: src.modeling.nammu.topology.PersistenceDiagram
+            An array of tuples (b,d) that represent the birth and death of homological features in your graph according to the provided filtration function.
+
+
+        """
         assert (
             len(self.graph.nodes()) > 0
         ), "First run `to_networkx` to generate a non-empty networkx graph."
 
         if len(self._curvature) > 0:
-            "Computing edge curvature values"
             self.curvature = filter_fn  # Set curvatures
 
         G = make_node_filtration(
@@ -345,6 +356,3 @@ class CoalMapper:
         subgraph = self.graph.subgraph(subgraph_nodes)
 
         return clusters, subgraph
-
-    #############################################################################################################################################
-    #############################################################################################################################################
