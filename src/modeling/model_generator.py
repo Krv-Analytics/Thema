@@ -1,24 +1,23 @@
-"""Generate Graph Models by using JMapper."""
+"""Generate Graph Models using JMapper."""
 
 import argparse
 import os
 import pickle
 import sys
 
-from dotenv import load_dotenv
-from model_helper import generate_mapper_filename, model_generator
+from model_helper import generate_mapper_filename, model_generator, env
 from tupper import Tupper
-
-load_dotenv()
-src = os.getenv("src")
-sys.path.append(src)
-sys.path.append(src + "modeling/nammu/")
 
 
 if __name__ == "__main__":
-    load_dotenv()
+
     parser = argparse.ArgumentParser()
-    root = os.getenv("root")
+    root = env()
+
+    raw = os.path.join(
+        root,
+        "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
+    )
 
     parser.add_argument(
         "--raw",
@@ -32,10 +31,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--clean",
         type=str,
-        default=os.path.join(
-            root,
-            "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
-        ),
+        default=raw,
         help="Select location of clean data.",
     )
     parser.add_argument(
@@ -85,7 +81,8 @@ if __name__ == "__main__":
         nargs="+",
         default=[1],
         type=int,
-        help="Minimum intersection reuired between cluster elements to form an edge in the graph representation.",
+        help="Minimum intersection reuired between cluster elements to \
+            form an edge in the graph representation.",
     )
     parser.add_argument(
         "-v",
@@ -101,11 +98,16 @@ if __name__ == "__main__":
     # Initialize a `Tupper`
     tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
 
-    nbors, d = tupper.get_projection_parameters()
+    nbors, d, dimension = tupper.get_projection_parameters()
 
     n, p = args.n_cubes, args.perc_overlap
     min_intersections = args.min_intersection
     hdbscan_params = args.min_cluster_size, args.max_cluster_size
+
+    # GENERATE MODELS
+    # Given our hyperparameters, we generate graphs, curvature,
+    # and diagrams for all min_intersection values from a single JMapper fit.
+    # This is done for efficiency purposes.
     results = model_generator(
         tupper,
         n_cubes=n,
@@ -115,20 +117,24 @@ if __name__ == "__main__":
         verbose=args.Verbose,
     )
 
-    # Generate File for each min intersection value
+    # Unpack each graph (based on min_intersection) into it's own output file.
     for val in min_intersections:
         try:
-            assert val in results.keys(), "Empty Mapper!"
             mapper = results[val]
             output = {"mapper": results[val]}
             num_policy_groups = mapper.num_policy_groups
             if num_policy_groups > len(mapper.tupper.clean):
-                print(f"More components than elements!!")
+                print("More components than elements!!")
                 sys.exit(1)
             output_dir = os.path.join(
                 root, f"data/models/{num_policy_groups}_policy_groups/"
             )
-            output_file = generate_mapper_filename(args, nbors, d, min_intersection=val)
+            output_file = generate_mapper_filename(
+                args,
+                nbors,
+                d,
+                min_intersection=val,
+            )
             # Check if output directory already exists
             if os.path.isdir(output_dir):
                 output_file = os.path.join(output_dir, output_file)
@@ -136,7 +142,6 @@ if __name__ == "__main__":
                 os.makedirs(output_dir, exist_ok=True)
                 output_file = os.path.join(output_dir, output_file)
 
-            # TODO: configure hyperparameters as a dictionary
             output["hyperparameters"] = (
                 n,
                 p,
@@ -151,19 +156,26 @@ if __name__ == "__main__":
 
             if len(mapper.complex) > 0:
                 with open(output_file, "wb") as handle:
-                    pickle.dump(output, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(
+                        output,
+                        handle,
+                        protocol=pickle.HIGHEST_PROTOCOL,
+                    )
                 if args.Verbose:
                     print("\n")
                     print(
-                        "-------------------------------------------------------------------------------- \n\n"
+                        "-------------------------------------------------------------------------------------- \n\n"
                     )
-                    print(
-                        f"Successfully generated `CoalMapper object`. Written to {out_dir_message}"
-                    )
+                    print("Successfully generated `JMapper`.")
+                    print("Written to:")
+                    print(out_dir_message)
 
                     print(
-                        "\n\n -------------------------------------------------------------------------------- "
+                        "\n\n -------------------------------------------------------------------------------------- "
                     )
-        except:
+        except val not in results.keys():
             if args.Verbose:
-                print("These parameters resulted in an empty Mapper representation")
+                print(
+                    "These parameters resulted in an \
+                    empty Mapper representation."
+                )

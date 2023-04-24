@@ -4,7 +4,7 @@
 #Run from root/scripts/
 
 
-N_NEIGHBORS=(3 5 10 20 40)
+N_NEIGHBORS=(3 6 9 12 15 18 21 24 27 30)
 MIN_DISTS=(0 0.01 0.05 0.1 0.5 1)
 
 

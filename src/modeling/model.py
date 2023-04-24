@@ -16,7 +16,35 @@ from model_helper import (
 
 
 class Model:
+    """A clustering model for point cloud data
+    based on the Mapper Algorithm.
+
+    This class interprets the graph representation of a JMapper
+    as a clustering:
+    Connected Components of the graph are the clusters which we call
+    "Policy Groups" for our project. We provide functionality
+    for analyzing nodes (or subgroups),
+    as well as the policy groups themselves.
+
+    Most notably, we provide functionality for understanding the structural
+    equivalency classes of an arbitrary number of different models. Different
+    meaning the models are generated from different hyperparameters, but it
+    may be that the graphs they generate have very similar structure. We
+    analyze these structural equivalence classes using the functioanlity
+    in JMapper for computing curvature filtrations on graphs.
+
+    We also provide functionality for visualizing various attributes
+    of our graph models.
+    """
+
     def __init__(self, mapper: str):
+        """Constructor for Model class.
+        Parameters
+        -----------
+        mapper: <jmapper.JMapper>
+            A data container that holds raw, cleaned, and projected
+            versions of user data.
+        """
 
         self._mapper = None
         self._tupper = None
@@ -47,10 +75,12 @@ class Model:
 
     @property
     def tupper(self):
+        """Return the Tupper assocaited with `self.mapper`."""
         return self.mapper.tupper
 
     @property
     def hyper_parameters(self):
+        """Return the hyperparameters used to fit this model."""
         if self._hyper_parameters:
             return self._hyper_parameters
         assert self._mapper, "Please Specify a valid path to a mapper object"
@@ -61,47 +91,65 @@ class Model:
 
     @property
     def complex(self):
+        """Return the complex from a fitted JMapper."""
         return self.mapper.complex
 
     @property
     def node_ids(self):
+        """Return the node labels according to the graph clustering."""
         if self._node_ids is None:
             self.label_item_by_node()
         return self._node_ids
 
     @property
     def node_description(self):
+        """Return the node descriptions according to the graph clustering."""
         if self._node_description is None:
             self.compute_node_descriptions()
         return self._node_description
 
     @property
     def cluster_ids(self):
+        """Return the policy group labels according to the graph clustering."""
         if self._cluster_ids is None:
             self.label_item_by_cluster()
         return self._cluster_ids
 
     @property
     def cluster_descriptions(self):
+        """Return the policy group descriptions according
+        to the graph clustering."""
         if self._cluster_descriptions is None:
             self.compute_cluster_descriptions()
         return self._cluster_descriptions
 
     @property
     def cluster_sizes(self):
+        """Return the policy group sizes according to the graph clustering."""
         if self._cluster_sizes is None:
             self.label_item_by_cluster()
         return self._cluster_sizes
 
     @property
     def unclustered_items(self):
+        """Return the items left out of the graph clustering."""
         if self._unclustered_items is None:
             self.label_item_by_node()
         return self._unclustered_items
 
     def label_item_by_node(self):
-        """Function to set the node_id"""
+        """Label each item in the data set according to its corresponding
+        node in the graph.
 
+        This function loops through each of the connected components in
+        the graph and labels each item with the component ID
+        of the corresponding node.
+
+        Returns
+        -------
+        self._cluster_ids : np.ndarray, shape (N,)
+            Array with policy group (cluster) ID for each item in the data.
+        """
         N = len(self.tupper.clean)
         labels = dict()
         nodes = self.complex["nodes"]
@@ -122,6 +170,15 @@ class Model:
         return self._node_ids
 
     def label_item_by_cluster(self):
+        """Label each item in the data set according to its corresponding
+        policy group, i.e. connected component in the graph.
+
+        Returns
+        -------
+        self._node_description : dict
+            Dictionary with node ID as key and a string with the node
+            description as value.
+        """
         assert (
             len(self.complex) > 0
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
@@ -146,7 +203,19 @@ class Model:
         self._cluster_sizes[-1] = len(self.unclustered_items)
 
     def compute_node_descriptions(self):
-        """Choose the column in the `tupper.clean` with the lowest standard deviation."""
+        """
+        Compute a simple description of each node in the graph.
+
+        This function labels each node based on the column in
+        the dataframe that admits the smallest (normalized)
+        standard deviation amongst items in the node.
+
+        Returns
+        -------
+        self._node_description : dict
+            Dictionary with node ID as key and a string with the node
+            description as value.
+        """
         nodes = self.complex["nodes"]
         self._node_description = {}
         for node in nodes.keys():
@@ -159,7 +228,18 @@ class Model:
             self._node_description[node] = {"label": label, "size": size}
 
     def compute_cluster_descriptions(self):
-        """Compute a density based description of the cluster based on its nodes."""
+        """
+        Compute a simple description of each cluster (policy group).
+
+        This function creates a density description based on each of
+        the node lables in the policy group.
+
+        Returns
+        -------
+        self._cluster_descriptions : dict
+            Dictionary with cluster ID as key and a dictionary with the
+            labeled density descriptions as values.
+        """
         self._cluster_descriptions = {}
         components = self.mapper.components
         # View cluster as networkX graph
@@ -201,6 +281,12 @@ class Model:
         return ax
 
     def visualize_mapper(self):
+        """
+        Plot using the Keppler Mapper html functionality.
+
+        NOTE: These visualizations are no longer maintained by KepplerMapper
+        and we do not reccomend using them.
+        """
         assert len(self.complex) > 0, "Model needs a `fitted` mapper."
         kepler = self.mapper.mapper
         path_html = mapper_plot_outfile(self.hyper_parameters)
@@ -220,7 +306,15 @@ class Model:
         print(f"Go to {path_html} for a visualization of your JMapper!")
 
     def visualize_curvature(self, bins="auto", kde=False):
-        """Visualize Curvature of a mapper graph as a histogram."""
+        """Visualize th curvature of a graph graph as a histogram.
+
+        Parameters
+        ----------
+        bins: str, defualt is "auto"
+            Method for seaborn to assign bins in the histogram.
+        kde: bool
+            If true then draw a density plot.
+        """
 
         ax = sns.histplot(
             self.mapper.curvature,

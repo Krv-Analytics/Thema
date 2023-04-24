@@ -5,7 +5,7 @@
 
 
 MIN_CLUSTER_SIZES=(6)
-N_CUBES=(3 4 5 6 7 8 9 10 11)
+N_CUBES=(2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
 PERC_OVERLAP=(.3 .35 .4 .45 .5 .55 .6 .65 .7)
 MIN_INTERSECTION=(1 2 3 4 5 6)
 
@@ -20,7 +20,7 @@ read clean
 if [ $clean == "yes" ];then
     echo "Cleaning..."
     echo -e 
-    rm -r ../data/mappers/
+    rm -r ../data/models/
 fi
 
 
@@ -35,8 +35,8 @@ for PROJECTION in $PROJECTIONS; do
 for MIN_CLUSTER_SIZE in "${MIN_CLUSTER_SIZES[@]}"; do
     for N in "${N_CUBES[@]}"; do
         for P in "${PERC_OVERLAP[@]}"; do
-            echo -e 
-            echo -e "Computing mapper with $N cubes and $P% overlap."
+            # echo -e 
+            # echo -e "Computing mapper with $N cubes and $P% overlap."
             python ../src/modeling/model_generator.py                                    \
                                     -n ${N}                                                    \
                                     -p ${P}                                                    \

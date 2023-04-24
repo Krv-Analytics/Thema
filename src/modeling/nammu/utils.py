@@ -86,7 +86,10 @@ def propagate_edge_attribute_to_nodes(G, attribute, pooling_fn=np.sum):
 
 
 def make_node_filtration(
-    G, edge_values, attribute_name="weight", use_min=True
+    G,
+    edge_values,
+    attribute_name="weight",
+    use_min=True,
 ):
     """Create filtration based on edge values.
 
@@ -127,7 +130,8 @@ def make_node_filtration(
         vertex_values[source].append(value)
         vertex_values[target].append(value)
 
-    # this doesn't work if the graph isn't fully connected. I here set the curvature to be zero at a vertex in nodes but not edges
+    # this doesn't work if the graph isn't fully connected.
+    # I here set the curvature to be zero at a vertex in nodes but not edges
     for node in G.nodes():
         if node not in vertex_values:
             vertex_values[node].append(0)

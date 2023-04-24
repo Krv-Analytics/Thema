@@ -1,16 +1,15 @@
 """ Reducing Coal Mapper Dataset to low dimensions using UMAP"""
 
 import os
-import pickle
+import sys
+
 import pandas as pd
-
+from dotenv import load_dotenv
 from umap import UMAP
-
-cwd = os.path.dirname(__file__)
 
 
 def projection_file_name(projector, n, d, dimensions=2):
-    output_file = f"{projector}_N{n}_minDist_{d}_{dimensions}D.pkl"
+    output_file = f"{projector}_Nbors{n}_minDist_{d}_{dimensions}D.pkl"
     return output_file
 
 
@@ -38,3 +37,14 @@ def projection_driver(
     results = {"projection": projection, "hyperparameters": [n, d, dimensions]}
 
     return results
+
+
+def env():
+    """Load .env file and add necessary folders to your `sys` path."""
+    load_dotenv()
+    root = os.getenv("root")
+    src = os.getenv("src")
+    sys.path.append(root)
+    sys.path.append(src)
+    sys.path.append(src + "modeling/nammu/")
+    return root
