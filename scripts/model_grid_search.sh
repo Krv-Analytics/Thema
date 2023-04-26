@@ -3,13 +3,18 @@
 
 #Run from root/scripts/
 
+#USER INPUTS
+RAW=$1
+CLEAN=$2
+PROJECTIONS=$3
 
+
+# PARAMETER GRID
 MIN_CLUSTER_SIZES=(6)
 N_CUBES=(2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
 PERC_OVERLAP=(.3 .35 .4 .45 .5 .55 .6 .65 .7)
 MIN_INTERSECTION=(1 2 3 4 5 6)
 
-PROJECTIONS="../data/projections/UMAP/*.pkl" # TODO: Need to make this relative to root so the tuppers can be accessed from any dir
 
 poetry shell
 echo "Initializing Poetry Shell"
@@ -37,11 +42,13 @@ for MIN_CLUSTER_SIZE in "${MIN_CLUSTER_SIZES[@]}"; do
         for P in "${PERC_OVERLAP[@]}"; do
             # echo -e 
             # echo -e "Computing mapper with $N cubes and $P% overlap."
-            python ../src/modeling/model_generator.py                                    \
+            python ../src/modeling/model_generator.py                                          \
+                                    --raw ${RAW}                                               \
+                                    --clean ${CLEAN}                                           \
+                                    --projection ${PROJECTION}                                 \
                                     -n ${N}                                                    \
                                     -p ${P}                                                    \
                                     --min_cluster_size ${MIN_CLUSTER_SIZE}                     \
-                                    --projection ${PROJECTION}                                 \
                                     --min_intersection ${MIN_INTERSECTION[@]}                  \
                                    #Using Default min_intersection for now
             done 
