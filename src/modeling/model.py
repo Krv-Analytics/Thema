@@ -278,11 +278,14 @@ class Model:
         the JMapper's graph in a matplotlib figure, coloring the nodes
         by their respective policy group.
         """
-
-        color_scale = np.array(custom_color_scale()).T[1]
-        pos = nx.spring_layout(self.mapper.graph)
+        # Config Pyplot
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot()
+        color_scale = np.array(custom_color_scale()).T[1]
+        # Get Node Coords
+        pos = nx.spring_layout(self.mapper.graph)
+
+        # Plot and color components
         components, labels = zip(*self.mapper.components.items())
         for i, g in enumerate(components):
             nx.draw_networkx(
@@ -306,14 +309,22 @@ class Model:
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
 
+    # TODO: 1) Fix Color Scale and match with visualize_model
+    # 2) plot each component seperately and label in legend
     def visualize_projection(self):
 
         projection, parameters = (
             self.tupper.projection,
-            self.tupper.get_projection_parameters,
+            self.tupper.get_projection_parameters(),
         )
-        ax = sns.scatterplot(projection)
-        ax.set(title=f"UMAP: {parameters}")
+        plt.scatter(
+            projection.T[0],
+            projection.T[1],
+            c=self.cluster_ids,
+        )
+
+        # plt.legend(np.unique(self.cluster_ids))
+        plt.title(f"UMAP: {parameters}")
         plt.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
