@@ -5,7 +5,12 @@ import os
 import pickle
 import sys
 
-from model_helper import generate_model_filename, model_generator, env
+from model_helper import (
+    generate_model_filename,
+    model_generator,
+    env,
+    script_paths,
+)
 from tupper import Tupper
 
 
@@ -14,24 +19,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     root = env()
 
-    raw = os.path.join(
-        root,
-        "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl",
-    )
-
     parser.add_argument(
         "--raw",
         type=str,
-        default=os.path.join(
-            root,
-            "data/raw/coal_plant_data_raw.pkl",
-        ),
         help="Select location of raw data set, as pulled from Mongo.",
     )
     parser.add_argument(
         "--clean",
         type=str,
-        default=raw,
         help="Select location of clean data.",
     )
     parser.add_argument(
@@ -85,6 +80,13 @@ if __name__ == "__main__":
             form an edge in the graph representation.",
     )
     parser.add_argument(
+        "--script",
+        default=False,
+        action="store_true",
+        help="If set, we update paths to match the `scripts` dir.",
+    )
+
+    parser.add_argument(
         "-v",
         "--Verbose",
         default=False,
@@ -95,10 +97,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    # TODO: Pass a full path into tupper
+    # Adjust Paths when running model_grid_search.sh
+    if args.script:
+        raw, clean, projection = script_paths([args.raw, args.clean, args.projection])
+    else:
+        raw, clean, projection = args.raw, args.clean, args.projection
 
     # Initialize a `Tupper`
-    tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
+    tupper = Tupper(raw, clean, projection)
 
     nbors, d, dimension = tupper.get_projection_parameters()
 

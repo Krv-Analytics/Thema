@@ -50,6 +50,7 @@ for MIN_CLUSTER_SIZE in "${MIN_CLUSTER_SIZES[@]}"; do
                                     -p ${P}                                                    \
                                     --min_cluster_size ${MIN_CLUSTER_SIZE}                     \
                                     --min_intersection ${MIN_INTERSECTION[@]}                  \
+                                    --script                                                   \
                                    #Using Default min_intersection for now
             done 
         done

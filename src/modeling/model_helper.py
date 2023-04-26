@@ -247,3 +247,13 @@ def env():
     sys.path.append(src)
     sys.path.append(src + "modeling/nammu/")
     return root
+
+
+def script_paths(paths):
+    root = env()
+    scripts_dir = os.path.join(root, "scripts/")
+    new_paths = []
+    for rel_path in paths:
+        abs_path = os.path.join(scripts_dir, rel_path)
+        new_paths.append(abs_path)
+    return new_paths
