@@ -1,18 +1,19 @@
-from os.path import isfile
-import pickle
-import numpy as np
 import itertools
+import pickle
+from os.path import isfile
 
-from persim import plot_diagrams
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 import seaborn as sns
-
 from jmapper import JMapper
 from model_helper import (
     config_plot_data,
     custom_color_scale,
-    mapper_plot_outfile,
     get_minimal_std,
+    mapper_plot_outfile,
 )
+from persim import plot_diagrams
 
 
 class Model:
@@ -271,6 +272,34 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
+    def visualize_model(self):
+        color_scale = np.array(custom_color_scale()).T[1]
+        pos = nx.spring_layout(self.mapper.graph)
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot()
+        components, labels = zip(*self.mapper.components.items())
+        for i, g in enumerate(components):
+            nx.draw_networkx(
+                g,
+                pos=pos,
+                node_color=color_scale[i],
+                node_size=100,
+                font_size=6,
+                with_labels=False,
+                ax=ax,
+                label=f"Policy Group {labels[i]}",
+                edgelist=[],
+            )
+            nx.draw_networkx_edges(
+                g,
+                pos=pos,
+                width=2,
+                ax=ax,
+                label=None,
+            )
+        ax.legend(loc="best", prop={"size": 8})
+        plt.axis("off")
+
     def visualize_projection(self):
         projection, parameters = (
             self.tupper.projection,
@@ -280,6 +309,45 @@ class Model:
         ax.set(title=f"UMAP: {parameters}")
         return ax
 
+    def visualize_curvature(self, bins="auto", kde=False):
+        """Visualize th curvature of a graph graph as a histogram.
+
+        Parameters
+        ----------
+        bins: str, defualt is "auto"
+            Method for seaborn to assign bins in the histogram.
+        kde: bool
+            If true then draw a density plot.
+
+        Returns
+        ----------
+        ax: plt.axis
+            A matplotlib.pyplot axis containing a histogram of
+            curvature values.
+        """
+
+        ax = sns.histplot(
+            self.mapper.curvature,
+            discrete=True,
+            stat="probability",
+            kde=kde,
+            bins=bins,
+        )
+        ax.set(xlabel="Ollivier Ricci Edge Curvatures")
+
+        return ax
+
+    def visualize_persistence_diagram(self):
+        """Visualize persistence diagrams of a mapper graph
+        using functionality from Persim."""
+        assert len(self.mapper.diagram) > 0, "Persistence Diagram is empty."
+        persim_diagrams = [
+            np.asarray(self.mapper.diagram[0]._pairs),
+            np.asarray(self.mapper.diagram[1]._pairs),
+        ]
+        return plot_diagrams(persim_diagrams, show=True)
+
+    @DeprecationWarning
     def visualize_mapper(self):
         """
         Plot using the Keppler Mapper html functionality.
@@ -304,33 +372,3 @@ class Model:
         )
 
         print(f"Go to {path_html} for a visualization of your JMapper!")
-
-    def visualize_curvature(self, bins="auto", kde=False):
-        """Visualize th curvature of a graph graph as a histogram.
-
-        Parameters
-        ----------
-        bins: str, defualt is "auto"
-            Method for seaborn to assign bins in the histogram.
-        kde: bool
-            If true then draw a density plot.
-        """
-
-        ax = sns.histplot(
-            self.mapper.curvature,
-            discrete=True,
-            stat="probability",
-            kde=kde,
-            bins=bins,
-        )
-        ax.set(xlabel="Ollivier Ricci Edge Curvatures")
-
-        return ax
-
-    def visualize_persistence_diagram(self):
-        """Visualize persistence diagrams of a mapper graph."""
-        persim_diagrams = [
-            np.asarray(self.mapper.diagram[0]._pairs),
-            np.asarray(self.mapper.diagram[1]._pairs),
-        ]
-        return plot_diagrams(persim_diagrams, show=True)
