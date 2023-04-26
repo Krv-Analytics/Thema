@@ -5,7 +5,7 @@ import os
 import pickle
 import sys
 
-from model_helper import generate_mapper_filename, model_generator, env
+from model_helper import generate_model_filename, model_generator, env
 from tupper import Tupper
 
 
@@ -95,6 +95,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
+    # TODO: Pass a full path into tupper
+
     # Initialize a `Tupper`
     tupper = Tupper(raw=args.raw, clean=args.clean, projection=args.projection)
 
@@ -129,7 +131,7 @@ if __name__ == "__main__":
             output_dir = os.path.join(
                 root, f"data/models/{num_policy_groups}_policy_groups/"
             )
-            output_file = generate_mapper_filename(
+            output_file = generate_model_filename(
                 args,
                 nbors,
                 d,

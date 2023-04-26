@@ -273,6 +273,12 @@ class Model:
         }
 
     def visualize_model(self):
+        """
+        Visualize the clustering as a network. This function plots
+        the JMapper's graph in a matplotlib figure, coloring the nodes
+        by their respective policy group.
+        """
+
         color_scale = np.array(custom_color_scale()).T[1]
         pos = nx.spring_layout(self.mapper.graph)
         fig = plt.figure(figsize=(8, 8))
@@ -301,13 +307,14 @@ class Model:
         plt.axis("off")
 
     def visualize_projection(self):
+
         projection, parameters = (
             self.tupper.projection,
             self.tupper.get_projection_parameters,
         )
         ax = sns.scatterplot(projection)
         ax.set(title=f"UMAP: {parameters}")
-        return ax
+        plt.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.
@@ -318,12 +325,6 @@ class Model:
             Method for seaborn to assign bins in the histogram.
         kde: bool
             If true then draw a density plot.
-
-        Returns
-        ----------
-        ax: plt.axis
-            A matplotlib.pyplot axis containing a histogram of
-            curvature values.
         """
 
         ax = sns.histplot(
@@ -334,8 +335,7 @@ class Model:
             bins=bins,
         )
         ax.set(xlabel="Ollivier Ricci Edge Curvatures")
-
-        return ax
+        plt.show()
 
     def visualize_persistence_diagram(self):
         """Visualize persistence diagrams of a mapper graph
