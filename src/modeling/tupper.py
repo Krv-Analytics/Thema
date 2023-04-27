@@ -68,7 +68,7 @@ class Tupper:
 
     def get_projection_parameters(self):
         """Get the parameters used to generate the projected data in your Tupper object."""
-        assert self._projection, "Please Specify a valid path to clean data"
+        assert self._projection, "Please Specify a valid path to projected data"
         with open(self._projection, "rb") as projection_file:
             reference = pickle.load(projection_file)
             projection_parameters = reference["hyperparameters"]

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     n = args.num_policy_groups
-    path_to_mappers = os.path.join(root, f"data/mappers/{n}_policy_groups")
+    path_to_mappers = os.path.join(root, f"data/models/{n}_policy_groups")
 
     keys, distances = topology_metric(
         files=path_to_mappers, metric=args.metric, coverage=args.coverage_filter
