@@ -1,4 +1,4 @@
-"Group Mapper Models based on their graph structure using Ollivier Ricci Curvature and TDA"
+"Group Models based on their graph structure via curvature filtrations."
 
 import argparse
 import sys
@@ -74,6 +74,8 @@ if __name__ == "__main__":
     # Read in Keys and distances from pickle file
     n = args.num_policy_groups
     keys, distances = read_distance_matrices(metric=args.metric, n=n)
+
+    # Fit Hierarchical Clustering
     model = cluster_models(
         distances,
         p=args.dendrogram_levels,

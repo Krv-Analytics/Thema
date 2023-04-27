@@ -6,7 +6,7 @@ import numpy as np
 from dotenv import load_dotenv
 
 from mongo import Mongo
-from data_helper import get_data
+from data_helper import get_raw_data
 
 
 if __name__ == "__main__":
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
 
     mongo_object = Mongo(client_id=client)
-    file = get_data(
+    file = get_raw_data(
         mongo_object=mongo_object,
         out_dir=output_dir,
         data_base=args.database,

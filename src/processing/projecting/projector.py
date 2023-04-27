@@ -1,18 +1,15 @@
-import os
+"Project cleaned data using UMAP."
+
 import argparse
-import sys
+import os
 import pickle
-import shutil
-from dotenv import load_dotenv
-from projector_helper import projection_driver, projection_file_name
+import sys
 
-
-# Load Root directory from .env
-load_dotenv()
-root = os.getenv("root")
+from projector_helper import env, projection_driver, projection_file_name
 
 if __name__ == "__main__":
 
+    root = env()
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -77,8 +74,7 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
 
     if args.umap:
-        # Check if output directory already exists
-
+        # Generate Projection
         results = projection_driver(
             df, n=args.n_neighbors, d=args.min_dist, dimensions=args.dim
         )
@@ -88,24 +84,23 @@ if __name__ == "__main__":
         )
         output_file = os.path.join(output_dir, output_file)
 
-        ## Output Message
+        # Output Message
         out_dir_message = "/".join(output_file.split("/")[-2:])
 
         with open(output_file, "wb") as f:
             pickle.dump(results, f)
 
         if args.Verbose:
+            print("\n")
             print(
-                "\n################################################################################## \n\n"
+                "-------------------------------------------------------------------------------------- \n\n"
             )
 
             print(f"Finished projecting! Written to {out_dir_message}")
-
+            print("\n")
             print(
-                "\n\n##################################################################################\n"
+                "-------------------------------------------------------------------------------------- \n\n"
             )
     else:
-        print(
-            f"UMAP is only dimensionality reduction algorithm supported at this time."
-        )
-        print(f"Please set `--umap` to True.")
+        print("UMAP is only dimensionality reduction algorithm supported at this time.")
+        print("Please set `--umap` to True.")

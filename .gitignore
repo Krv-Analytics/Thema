@@ -1,15 +1,11 @@
-data_processing/.DS_Store
-data_processing/__pycache__/
 .env
 .vscode
 *__pycache__
 *.ipynb
-data_processing/local_data/*.txt
-data_processing/local_data/*.csv
-data_processing/local_data/.DS_Store
 docs/.DS_Store
 outputs/
 data/
+*.ipynb_checkpoints
 *.DS_Store
 *.html
 .dvc/client_ID.json

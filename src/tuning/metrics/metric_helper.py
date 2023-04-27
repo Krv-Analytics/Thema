@@ -23,6 +23,27 @@ def topology_metric(
     metric="bottleneck",
     coverage=0.6,
 ):
+    """
+    Compute the pairwise distance matrix between topological persistence diagrams using Giotto-TDA.
+
+    Parameters:
+    -----------
+    files : str
+        The directory containing the graph models to use.
+    metric : str, optional
+        The distance metric to use for computing the pairwise distances
+        between diagrams. Default is "bottleneck".
+    coverage : float, optional
+        The minimum proportion of items in a mapper cluster required for its
+        corresponding diagram to be included in the analysis. Default is 0.6.
+
+    Returns:
+    --------
+    tuple
+        A tuple containing two arrays: the trimmed diagram keys
+        (i.e., the hyperparameters used to generate each diagram)
+        and the corresponding trimmed pairwise distance matrix.
+    """
     diagrams = get_diagrams(files, coverage)
     assert len(diagrams) > 0, "Coverage parameter is too strict"
     curvature_dgms = convert_to_gtda(diagrams.values())
@@ -31,12 +52,31 @@ def topology_metric(
     all_distances = distance_metric.transform(curvature_dgms)
 
     keys = np.array(list(diagrams.keys()), dtype=object)
-    trimmed_keys, trimmed_distances = collapse_eq_classes(keys, all_distances)
+    trimmed_keys, trimmed_distances = collapse_equivalent_models(keys, all_distances)
 
     return trimmed_keys, trimmed_distances
 
 
-def collapse_eq_classes(keys, distance_matrix):
+def collapse_equivalent_models(keys, distance_matrix):
+    """
+    Collapse diagrams with identical curvature profiles
+    into a single representative diagram.
+
+    Parameters:
+    -----------
+    keys : array-like
+        A list of the keys for each diagram in the distance matrix.
+    distance_matrix : array-like
+        The pairwise distance matrix between the diagrams.
+
+    Returns:
+    --------
+    tuple
+        A tuple containing two arrays: the trimmed diagram keys
+        (i.e., the hyperparameters used to generate each diagram)
+        and the corresponding trimmed pairwise distance matrix.
+    """
+
     equivalent_items = np.argwhere(distance_matrix == 0)
     drops = set()
     for pair in equivalent_items:
@@ -53,6 +93,27 @@ def collapse_eq_classes(keys, distance_matrix):
 
 
 def get_diagrams(dir, coverage):
+    """
+    Load the persistence diagrams from fitted models
+    and return them as a dictionary. This function only
+    returns diagrams for models that satisfy the coverage constraint.
+
+    Parameters:
+    -----------
+    dir : str
+        The directory containing the models,
+        from which diagrams can be extracted.
+    coverage : float
+        The minimum proportion of items in a mapper cluster required
+        for its corresponding diagram to be included in the analysis.
+
+    Returns:
+    --------
+    dict
+        A dictionary mapping the hyperparameters used to generate each diagram
+        to the corresponding persistence diagram object.
+    """
+
     assert os.path.isdir(
         dir
     ), "Please first compute mapper objects using `coal_mapper_generator.py`"
@@ -78,7 +139,25 @@ def get_diagrams(dir, coverage):
 
 
 def convert_to_gtda(diagrams):
-    """Pad a set of persistence diagrams so they are compatible with Giotto-TDA."""
+    """
+    Converts a list of persistence diagrams to the format expected
+    by Giotto-TDA's `gtda.homology.VietorisRipsPersistence` transformer.
+    This function pads persistence diagrams.
+
+    Parameters:
+    -----------
+        diagrams : list
+        A list of persistence diagrams, where each diagram is a list of tuples
+        representing the birth and death values of each persistence point.
+
+    Returns:
+    -----------
+        Xt_padded: numpy.ndarray
+        A 3D numpy array of shape (n_samples, n_features, 3).
+            * `n_samples` is the number of persistence diagrams,
+            * `n_features` is the total number of persistence points in all diagrams padded with zeros
+            * (birth, death, homology_dimension) of points in the diagrams.
+    """
     diagrams = [
         [
             np.asarray(diagram[0]._pairs),
