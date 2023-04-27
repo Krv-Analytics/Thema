@@ -14,8 +14,8 @@ $ git clone git@github.com:sgathrid/coal_mapper.git
 ## Make
 To execute the makefile, run:
 ```
-cd coal_mapper
-make
+$ cd coal_mapper
+$ make
 ```
 ### Poetry
 We use the [`poetry`](https://python-poetry.org) package manager to handle our dependencies. 
