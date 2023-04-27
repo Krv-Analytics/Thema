@@ -2,12 +2,10 @@
 
 import argparse
 import os
-import numpy as np
-from dotenv import load_dotenv
 
-from mongo import Mongo
 from data_helper import get_raw_data
-
+from dotenv import load_dotenv
+from mongo import Mongo
 
 if __name__ == "__main__":
 
@@ -62,7 +60,7 @@ if __name__ == "__main__":
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
     if args.Verbose:
         print(
-            "-------------------------------------------------------------------------------- \n\n"
+            "\n\n-------------------------------------------------------------------------------- \n\n"
         )
         print(
             f"Successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
@@ -70,5 +68,5 @@ if __name__ == "__main__":
         print(f"Written to {out_dir_message}.pkl")
 
         print(
-            "\n\n -------------------------------------------------------------------------------- "
+            "\n\n-------------------------------------------------------------------------------- "
         )

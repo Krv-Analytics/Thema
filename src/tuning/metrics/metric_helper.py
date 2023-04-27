@@ -116,7 +116,7 @@ def get_diagrams(dir, coverage):
 
     assert os.path.isdir(
         dir
-    ), "Please first compute mapper objects using `coal_mapper_generator.py`"
+    ), "Please first compute mapper objects using `model_generator.py`"
 
     # TODO: add a filter here for `unlcustered` plants
     diagrams = {}

@@ -181,9 +181,24 @@ if __name__ == "__main__":
                     print(
                         "\n\n -------------------------------------------------------------------------------------- "
                     )
-        except val not in results.keys():
+
+        except KeyError:
             if args.Verbose:
                 print(
                     "These parameters resulted in an \
                     empty Mapper representation."
                 )
+                print(f"n_cubes: {n}, perc_overlap: {p}")
+                print(f"(UMAP) n_neighbors: {nbors}, min_distance: {d}")
+                print(f"(HDBSCAN) min_cluster_size: {args.min_cluster_size}")
+                print()
+        finally:
+            if args.Verbose:
+                print(
+                    "These parameters resulted in an \
+                    empty Mapper representation."
+                )
+                print(f"n_cubes: {n}, perc_overlap: {p}")
+                print(f"(UMAP) n_neighbors: {nbors}, min_distance: {d}")
+                print(f"(HDBSCAN) min_cluster_size: {args.min_cluster_size}")
+                print()

@@ -108,8 +108,9 @@ def get_model_file(key, n):
     """
     # Unpack key
     n_cubes, p, n_neighbors, min_dist, hdbscan_params, min_intersection = key
-    dir = os.path.join(root, f"data/mappers/{n}_policy_groups/")
-    file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minD{min_dist}_min_int{min_intersection}.pkl"
+    dir = os.path.join(root, f"data/models/{n}_policy_groups/")
+    print(dir)
+    file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
     file = os.path.join(dir, file)
     assert os.path.isfile(file), f"No saved model with these keys: {key}"
     return file
@@ -192,7 +193,7 @@ def get_viable_models(n: int, coverage_filter: float):
         A list of saved model file locations that meet the specified coverage percentage.
     """
 
-    dir = f"data/mappers/{n}_policy_groups/"
+    dir = f"data/models/{n}_policy_groups/"
     dir = os.path.join(root, dir)
     files = os.listdir(dir)
     models = []
@@ -246,7 +247,7 @@ def plot_mapper_histogram(coverage_filter=0.8):
     fig: matplotlib.figure.Figure
         The plotted figure object.
     """
-    mappers = os.path.join(root, "data/mappers/")
+    mappers = os.path.join(root, "data/models/")
     # Get list of folder names in the directory
     policy_groups = os.listdir(mappers)
     # Initialize counting dictionary
