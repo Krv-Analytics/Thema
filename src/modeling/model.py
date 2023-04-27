@@ -312,7 +312,11 @@ class Model:
     # TODO: 1) Fix Color Scale and match with visualize_model
     # 2) plot each component seperately and label in legend
     def visualize_projection(self):
-
+        """
+        Visualize the clustering on the projection point cloud.
+        This function plots the projection used to fit JMapper
+        and colors points according to their cluster.
+        """
         projection, parameters = (
             self.tupper.projection,
             self.tupper.get_projection_parameters(),

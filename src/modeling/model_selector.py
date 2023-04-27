@@ -1,4 +1,4 @@
-"Select models for analysis from structural equivalency classes of Mapper graphs based on best coverage."
+"Select models for analysis from structural equivalency classes of Graph Models based on best coverage."
 
 
 import argparse
@@ -67,9 +67,12 @@ if __name__ == "__main__":
     # Read in Keys and distances from pickle file
     n = args.num_policy_groups
 
+    # Visualize Model Distribution
     if args.histogram:
         plot_mapper_histogram(args.coverage_filter)
 
+    # Choose ~best~ models from curvature equivalency classes.
+    # Current implementation chooses Model with the best coverage.
     else:
 
         keys, clustering, distance_threshold = read_graph_clustering(
