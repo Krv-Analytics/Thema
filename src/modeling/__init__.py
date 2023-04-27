@@ -1,2 +1,2 @@
 from .nammu import topology, curvature
-from .jmapper import CoalMapper
+from .jmapper import JMapper

@@ -20,7 +20,8 @@ def model_generator(
     min_intersection_vals,
     verbose=False,
 ):
-    """Generate a Graph Clustering Model by fitting a JMapper.
+    """
+    Generate a Graph Clustering Model by fitting a JMapper.
 
     Parameters
     -----------
