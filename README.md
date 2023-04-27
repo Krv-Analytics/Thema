@@ -15,8 +15,6 @@ $ git clone git@github.com:sgathrid/coal_mapper.git
 To execute the makefile, run:
 ```
 cd coal_mapper
-```
-```
 make
 ```
 ### Poetry
