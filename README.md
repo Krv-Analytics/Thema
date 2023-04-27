@@ -3,8 +3,6 @@
 ## Description 
 An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorithm to analyze various energy datasets. 
 
-
-
 ## Installation
 
 To clone the coal_mapper repo, run in your favorite bash shell (eg. terminal)
@@ -65,6 +63,50 @@ cp .dvc/config.SAMPLE .dvc/config
 ```
 and populate the `gdrive_client_id` and `gdrive_client_secret` fields in .dvc/config with your provided google drive access credentials. 
 
+
+
+## Source Code File Structure
+├── modeling
+│   ├── __init__.py
+│   ├── jmapper.py
+│   ├── model.py
+│   ├── model_generator.py
+│   ├── model_helper.py
+│   ├── model_selector.py
+│   ├── model_selector_helper.py
+│   ├── nammu
+│   │   ├── __init__.py
+│   │   ├── curvature.py
+│   │   ├── topology.py
+│   │   └── utils.py
+│   └── tupper.py
+├── processing
+│   ├── __init__.py
+│   ├── cleaning
+│   │   ├── cleaner.py
+│   │   └── cleaner_helper.py
+│   ├── projecting
+│   │   ├── projector.py
+│   │   └── projector_helper.py
+│   └── pulling
+│       ├── data_generator.py
+│       ├── data_helper.py
+│       └── mongo.py
+└── tuning
+    ├── graph_clustering
+    │   ├── model_clusterer.py
+    │   └── model_clusterer_helper.py
+    └── metrics
+        ├── __init__.py
+        ├── metric_generator.py
+        └── metric_helper.py
+└── visualizing
+    ├── __init__.py
+    ├── visualization_generator.py
+    └── visualization_helper.py
+
+
+
 ## Work Flow 
 
 Once you have have configured your local environment, you're all set to start using our functionality! As an overview, we provide functionality for loading data, cleaning data, projecting data, modeling data, and comparing models. For each stage of our pipeline, we provide a python driver file to perform the desired operation and save the output in an corresponding `data` directory. 
@@ -113,20 +155,19 @@ to script iteratively calls the `projection.py` over a parameter grid to populat
 ### Modeling
 Here are the most relevant files for our modeling pipeline:
 ```
-├── coal_mapper.py
-├── coal_mapper_helper.py
+├── jmapper.py
 ├── model.py
 ├── model_generator.py
 ├── model_helper.py
 ├── model_selector.py
 ├── model_selector_helper.py
 ```
-We provide two classes `CoalMapper` and `Model`. `CoalMapper` is essentially a wrapper for [scikit-tda's](https://kepler-mapper.scikit-tda.org/en/latest/) `KepplerMapper` with a few extra bells and whistles. Our `Model` uses the graph structure of the Mapper output as a clustering interpretation: namely each connected component we consider to be a cluster and provide functionality for analyzing a density based description of each cluster. 
+We provide two classes `JMapper` and `Model`. `JMapper` adds some new functionality to [scikit-tda's](https://kepler-mapper.scikit-tda.org/en/latest/) `KepplerMapper` . Our `Model` uses the graph structure of the Mapper output as a clustering interpretation: namely each connected component we consider to be a cluster and provide functionality for analyzing a density based description of each cluster. 
 
 #### 4. Model Generation
 You can generate a specific model by running:
 ```
-$ python src/modeling/model_generator.py --projection path/to/projection
+$ python src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
 ``` 
 
 
