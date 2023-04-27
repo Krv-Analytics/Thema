@@ -144,7 +144,7 @@ To produce a single projection, of your `clean` data run:
 $ python src/processing/projecting/projector.py -n 10 -d 0
 ``` 
 
-Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and run the following command:
+Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and **within a poetry shell** run the following command:
 
 ```
 $ ./projection_grid_search.sh
@@ -175,9 +175,13 @@ $ python src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean
 As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. First `cd` into the `scripts/` directory and then run the following command to execute a grid search:
 
 ```
-$ ./model_grid_search.sh
+$ ./model_grid_search.sh path/to/raw path/to/clean path/to/all/projection/files
 ``` 
-The models are grouped into subdirectories based on their number of connected components. Given the scope of our project, we have named these `policy_groups` as each connected component should have similarities that can be whittled into a policy.  
+Heres an example script run over the command line assuming our default naming scheme:
+```
+$ ./model_grid_search.sh ../data/raw/coal_plant_data_raw.pkl ../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl ../data/projections/UMAP/*
+```
+Here we pass the grid search a directory of projections, as well as the cleaned dataset. Upon output, the models are grouped into subdirectories based on their number of connected components. Given the scope of our project, we have named these `policy_groups` as each connected component should have similarities that can be whittled into a policy.  
 
 
 ### Tuning
@@ -206,12 +210,12 @@ This saves a distance matrix to pickle in the `data` directory.
 Assuming we have pairwise distances between the models' graphs, we can now visualize a dendrogram by fitting an [Agglomerative Clustering Model](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html). This visualization will elucidate the structural equivalencey classes of the graphs. To generate this visualization, run:
 
 ```
-$ python tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold 0.5  -p 10 
+$ python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold 0.5  -p 10 
 ``` 
 to visualize a dendrogram with 10 levels and labels determined by a distance threshold of 0.5. We encourage you to tweak `distance_threshold` until you are satisfied with the courseness of the grouping, which can be checked visually by each group in the dendrogram being colored as you wish. Once an ideal threshold `D` has been found, run:
 
 ```
-$ python tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold D -s -v
+$ python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold D -s -v
 ``` 
 
 to save the information on graph equivalency classes to pickle. 
@@ -229,9 +233,39 @@ $ python src/modeling/model_selector.py --num_policy_groups 10 -v
 
 this populates a pickle file with your equivalence class representatives! 
 
+Now you can read in these models, and analyze the clustering. For example, in a notebook you can read in each of the structurally distinct models using the following code:
+
+```
+selection = "root/data/model_analysis/models/11_policy_groups/equivalence_class_candidates_landscape_*.pkl"
+with open(selection,"rb") as s:
+    models = pickle.load(s)
+reference = {}
+for i,model in enumerate(models):
+    reference[f"model_{i}"] = Model(model)
+```
+
+To understand what attributes connect your each policy group, try running this next:
+
+```
+example_model = referece["model_0"]
+example_model.cluster_descriptions
+```
+
+You can also visualize properties of your models using built in methods. For example, try running:
+
+```
+example_model.visualize_model()
+```
+```
+example_model.visualize_projection()
+```
+
+
 ### Visualizing
 **work in progress**
 This subdirectory contains various visualization functions to help inform stages of the pipeline. Most of the functionality for visualizing properties of models are methods of the `Model` class. However, there are other interesting summary visualizations that we hope to support in this section that will populate the corresponding visualizations subdirectory in `data`.
+
+
 
 
 
