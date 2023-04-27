@@ -66,6 +66,7 @@ and populate the `gdrive_client_id` and `gdrive_client_secret` fields in .dvc/co
 
 
 ## Source Code File Structure
+```
 ├── modeling
 │   ├── __init__.py
 │   ├── jmapper.py
@@ -104,7 +105,7 @@ and populate the `gdrive_client_id` and `gdrive_client_secret` fields in .dvc/co
     ├── __init__.py
     ├── visualization_generator.py
     └── visualization_helper.py
-
+```
 
 
 ## Work Flow 
