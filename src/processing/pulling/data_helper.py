@@ -1,21 +1,40 @@
 import os
 
 
-def get_data(
+def get_raw_data(
     mongo_object,
     out_dir,
     data_base,
     col,
 ):
-    """This function creates a local file containing the specified dataset
+    """
+    Pull raw data from MongoDB and create a local file
+    storing the specified dataset.
 
-    database - name of the database you are accessing \n
-    col - name of collection within database \n
+    Parameters
+    ----------
+    mongo_object : Mongo
+        A Mongo object instance connected to a MongoDB database.
+    out_dir : str
+        The path to the output directory where the file will be saved.
+    data_base : str
+        The name of the MongoDB database where the dataset is located.
+    col : str
+        The name of the collection within the specified MongoDB database.
 
-    DATASET OPTIONS: \n
-    – coal_mapper is a complied dataset of all information \n
-    – eGrid_coal is a compiled dataset of a yearly instance of every US coal plant since 2009"""
+    Returns
+    -------
+    str
+        The name of the saved file.
 
+    Dataset Options
+    ---------------
+    coal_mapper : pd.DataFrame
+        A compiled dataset of all information.
+    eGrid_coal : pd.DataFrame
+        A compiled dataset of a yearly instance of every
+        US coal plant since 2009.
+    """
     df = mongo_object.pull(data_base, col)
 
     file = "coal_plant_data_raw"

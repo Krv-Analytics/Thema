@@ -1,4 +1,4 @@
-"Clean your data using our very own dishwasher"
+"Preprocess your data before applying JMapper."
 import argparse
 import os
 import pickle
@@ -78,6 +78,7 @@ if __name__ == "__main__":
     ), "Currently we only support `StandardScaler`"
     scaler = StandardScaler()
 
+    # Clean
     clean_data = data_cleaner(
         data=df,
         scaler=scaler,
@@ -101,6 +102,7 @@ if __name__ == "__main__":
     out_dir_message = "/".join(output_file.split("/")[-2:])
 
     output = {"clean_data": clean_data, "dropped_columns": args.remove_columns}
+    # Write to pickle
     with open(output_file, "wb") as f:
         pickle.dump(output, f)
 

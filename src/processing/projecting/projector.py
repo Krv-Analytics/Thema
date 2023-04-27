@@ -74,7 +74,7 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
 
     if args.umap:
-        # GENERATE PROJECTION
+        # Generate Projection
         results = projection_driver(
             df, n=args.n_neighbors, d=args.min_dist, dimensions=args.dim
         )
