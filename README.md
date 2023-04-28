@@ -86,13 +86,14 @@ To produce a single projection, of your `clean` data run:
 $ python src/processing/projecting/projector.py -n 10 -d 0
 ``` 
 
-Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run UMAP grid search, `cd` into the `scripts/` directory and **within a poetry shell** run the following command:
+Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run a UMAP grid search, navigate to the `scripts` directory and **within a poetry shell** execute the script as follows: 
 
 ```
+$ cd scripts/
 $ ./projection_grid_search.sh
 ``` 
 
-to script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP/` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like in the bash file.
+to script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like in the bash file.
  
 
 #### Modeling
@@ -108,14 +109,14 @@ Here are the most relevant files for our modeling pipeline:
 We provide two classes `JMapper` and `Model`. `JMapper` adds some new functionality to [scikit-tda's](https://kepler-mapper.scikit-tda.org/en/latest/) `KepplerMapper` . Our `Model` uses the graph structure of the Mapper output as a clustering interpretation: namely each connected component we consider to be a cluster and provide functionality for analyzing a density based description of each cluster. 
 
 ##### 4. Model Generation
-You can generate a specific model by running:
+You can generate a specific model by running `model_generator.py`. From the `scripts` directory, you can run
 ```
-$ python src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
+$ python ../src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
 ``` 
 
+As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. 
 
-As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. First `cd` into the `scripts/` directory and then run the following command to execute a grid search:
-
+Once again, make sure you navigate to the `scripts` directory. You can then execute a grid search by running:
 ```
 $ ./model_grid_search.sh path/to/raw path/to/clean path/to/all/projection/files
 ``` 
@@ -233,6 +234,10 @@ See below, the tree structure of the `data` directory, generated by running thro
 ├── data
 │   ├── clean
 │   ├── models
+│   │   ├── {n}_policy_groups
+        .
+        .
+        .
 │   ├── model_analysis
 │   │   ├── distance_matrices
 │   │   ├── graph_clustering
@@ -244,7 +249,7 @@ See below, the tree structure of the `data` directory, generated by running thro
 │       └── mapper_htmls
 ```
 
-
+where the `n` in `n_policy_groups` is determined by the number of clusters in the model. If you run sufficiently large grid searches, you should populate many models over a range of `n`, indicated by the ellipses in the file tree.
 
 
 
