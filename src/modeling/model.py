@@ -273,7 +273,18 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
-    def unpack(self):
+    def get_cluster_dfs(self):
+        """
+        Generate a DataFrame for each policy group.
+        Note: unclustered items are given their own DataFrame.
+
+        Returns
+        -------
+        subframes: dict
+            A dictionary where each key is a policy group (cluster) ID
+            and the corresponding value is a DataFrame containing
+            the items in that policy group.
+        """
         # Load Model
         clean = self.tupper.clean
         # Assign cluster labels
