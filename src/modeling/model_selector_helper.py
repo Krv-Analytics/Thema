@@ -1,13 +1,10 @@
 import os
 import pickle
-import sys
-import numpy as np
 
-from dotenv import load_dotenv
-from model import Model
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
-
+from model import Model
 from model_helper import env
 
 # Configure paths
@@ -109,7 +106,6 @@ def get_model_file(key, n):
     # Unpack key
     n_cubes, p, n_neighbors, min_dist, hdbscan_params, min_intersection = key
     dir = os.path.join(root, f"data/models/{n}_policy_groups/")
-    print(dir)
     file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
     file = os.path.join(dir, file)
     assert os.path.isfile(file), f"No saved model with these keys: {key}"

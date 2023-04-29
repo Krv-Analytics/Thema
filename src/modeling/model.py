@@ -3,6 +3,7 @@ import pickle
 from os.path import isfile
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import networkx as nx
 import numpy as np
 import seaborn as sns
@@ -272,6 +273,42 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
+    def get_cluster_dfs(self):
+        """
+        Generate a DataFrame for each policy group.
+        Note: unclustered items are given their own DataFrame.
+
+        Returns
+        -------
+        subframes: dict
+            A dictionary where each key is a policy group (cluster) ID
+            and the corresponding value is a DataFrame containing
+            the items in that policy group.
+        """
+        # Load Model
+        clean = self.tupper.clean
+        # Assign cluster labels
+        clean.insert(
+            loc=0,
+            column="cluster_labels",
+            value=self.cluster_ids,
+        )
+        subframes = {}
+        for label in np.unique(self.cluster_ids):
+            sub_frame = clean[clean["cluster_labels"] == label]
+            # Merge with Raw
+            raw_subframe = pd.merge(
+                sub_frame["cluster_labels"],
+                self.tupper.raw,
+                right_index=True,
+                left_index=True,
+            )
+            df_label = f"policy_group_{int(label)}"
+            if label == -1:
+                df_label = "unclustered"
+            subframes[df_label] = raw_subframe
+        return subframes
+
     def visualize_model(self):
         """
         Visualize the clustering as a network. This function plots
@@ -310,25 +347,33 @@ class Model:
         plt.axis("off")
 
     # TODO: 1) Fix Color Scale and match with visualize_model
-    # 2) plot each component seperately and label in legend
     def visualize_projection(self):
         """
         Visualize the clustering on the projection point cloud.
         This function plots the projection used to fit JMapper
         and colors points according to their cluster.
         """
+
         projection, parameters = (
             self.tupper.projection,
             self.tupper.get_projection_parameters(),
         )
-        plt.scatter(
-            projection.T[0],
-            projection.T[1],
-            c=self.cluster_ids,
-        )
-
-        # plt.legend(np.unique(self.cluster_ids))
+        _, ax = plt.subplots(figsize=(6, 6))
+        for g in np.unique(self.cluster_ids):
+            label = f"Policy Group {int(g)}"
+            if g == -1:
+                label = "Unclustered Items"
+            mask = np.where(self.cluster_ids == g, True, False)
+            cluster = projection[mask]
+            ax.scatter(
+                cluster.T[0],
+                cluster.T[1],
+                label=label,
+                s=80,
+            )
+            ax.legend()
         plt.title(f"UMAP: {parameters}")
+        plt.tight_layout()
         plt.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
