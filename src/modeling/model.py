@@ -317,18 +317,27 @@ class Model:
         This function plots the projection used to fit JMapper
         and colors points according to their cluster.
         """
+
         projection, parameters = (
             self.tupper.projection,
             self.tupper.get_projection_parameters(),
         )
-        plt.scatter(
-            projection.T[0],
-            projection.T[1],
-            c=self.cluster_ids,
-        )
-
-        # plt.legend(np.unique(self.cluster_ids))
+        fig, ax = plt.subplots(figsize=(6, 6))
+        for g in np.unique(self.cluster_ids):
+            label = f"Policy Group {g}"
+            if g == -1:
+                label = "Unclustered Items"
+            mask = np.where(self.cluster_ids == g, True, False)
+            cluster = projection[mask]
+            ax.scatter(
+                cluster.T[0],
+                cluster.T[1],
+                label=label,
+                s=80,
+            )
+            ax.legend()
         plt.title(f"UMAP: {parameters}")
+        plt.tight_layout()
         plt.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
