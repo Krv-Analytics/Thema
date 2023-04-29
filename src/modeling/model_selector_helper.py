@@ -1,13 +1,10 @@
 import os
 import pickle
-import sys
-import numpy as np
 
-from dotenv import load_dotenv
-from model import Model
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
-
+from model import Model
 from model_helper import env
 
 # Configure paths
