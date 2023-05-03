@@ -214,7 +214,7 @@ class Model:
 
         As a note, we only consider columns that are:
             1) continuous in the raw data
-            2) used to fit JMapper
+            2) used to fit JMapper, i.e. appear in clean data
 
         Returns
         -------
@@ -325,18 +325,26 @@ class Model:
             subframes[df_label] = raw_subframe
         return subframes
 
-    def visualize_model(self):
+    def visualize_model(self, k=None):
         """
         Visualize the clustering as a network. This function plots
         the JMapper's graph in a matplotlib figure, coloring the nodes
         by their respective policy group.
+
+        Parameters
+        -------
+        k : float, default is None
+            Optimal distance between nodes. If None the distance is set to
+            1/sqrt(n) where n is the number of nodes. Increase this value to
+            move nodes farther apart.
+
         """
         # Config Pyplot
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot()
         color_scale = np.array(custom_color_scale()).T[1]
         # Get Node Coords
-        pos = nx.spring_layout(self.mapper.graph)
+        pos = nx.spring_layout(self.mapper.graph, k=k)
 
         # Plot and color components
         components, labels = zip(*self.mapper.components.items())
@@ -358,11 +366,11 @@ class Model:
                 width=2,
                 ax=ax,
                 label=None,
+                alpha=0.6,
             )
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
 
-    # TODO: 1) Fix Color Scale and match with visualize_model
     def visualize_projection(self):
         """
         Visualize the clustering on the projection point cloud.
