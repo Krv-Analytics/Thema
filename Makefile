@@ -1,6 +1,6 @@
 # Makefile 
 
-all: fetch-coal-data clean-coal-data 
+all: fetch-coal-data coal-data-cleaner 
 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
@@ -16,17 +16,25 @@ uninstall: clean
 	sudo pip uninstall poetry 
 	rm -f .env 
 
-
 check-poetry:
 	@which poetry || (echo "Poetry is not installed. Installing..."; sudo pip install poetry; poetry install;)
-
 
 fetch-coal-data:
 	python src/processing/pulling/data_generator.py -v
 
-clean-coal-data:
+coal-data-cleaner:
 	python src/processing/cleaning/cleaner.py -v
 
-clean: 
+clean-raw: 
+	rm -f data/raw/* 
+
+clean-cleaned: 
+	rm -f data/clean/*
+
+clean-projections:
+	rm -f -r data/projections/*
+
+clean: clean-raw clean-cleaned clean-projections 
 	rm -f -r data/
-	
+
+
