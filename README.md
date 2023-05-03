@@ -8,7 +8,7 @@ An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorith
 To clone the coal_mapper repo, run in your favorite bash shell (eg. terminal)
 
 ```
-$ git clone git@github.com:sgathrid/coal_mapper.git
+git clone git@github.com:sgathrid/coal_mapper.git
 ```
 
 ## Make
