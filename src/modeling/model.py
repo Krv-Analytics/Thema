@@ -353,6 +353,7 @@ class Model:
         This function plots the projection used to fit JMapper
         and colors points according to their cluster.
         """
+        color_scale = np.array(custom_color_scale()).T[1]
 
         projection, parameters = (
             self.tupper.projection,
@@ -369,6 +370,7 @@ class Model:
                 cluster.T[0],
                 cluster.T[1],
                 label=label,
+                color = color_scale[int(g)],
                 s=80,
             )
             ax.legend()
