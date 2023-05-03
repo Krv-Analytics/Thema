@@ -212,6 +212,10 @@ class Model:
         the dataframe that admits the smallest (normalized)
         standard deviation amongst items in the node.
 
+        As a note, we only consider columns that are:
+            1) continuous in the raw data
+            2) used to fit JMapper
+
         Returns
         -------
         self._node_description : dict
@@ -219,12 +223,17 @@ class Model:
             description as value.
         """
         nodes = self.complex["nodes"]
+        cols = np.intersect1d(
+            self.tupper.raw.select_dtypes(include=["number"]).columns,
+            self.tupper.clean.columns,
+        )
         self._node_description = {}
         for node in nodes.keys():
             mask = nodes[node]
             label = get_minimal_std(
                 df=self.tupper.clean,
                 mask=mask,
+                density_cols=cols,
             )
             size = len(mask)
             self._node_description[node] = {"label": label, "size": size}
@@ -265,8 +274,15 @@ class Model:
                 "size": self.cluster_sizes[cluster_id],
             }
 
+        # Desnity of Unclustered Items
+        cols = np.intersect1d(
+            self.tupper.raw.select_dtypes(include=["number"]).columns,
+            self.tupper.clean.columns,
+        )
         unclustered_label = get_minimal_std(
-            df=self.tupper.clean, mask=self.unclustered_items
+            df=self.tupper.clean,
+            mask=self.unclustered_items,
+            density_cols=cols,
         )
         self._cluster_descriptions[-1] = {
             "density": {unclustered_label: 1.0},
@@ -370,7 +386,7 @@ class Model:
                 cluster.T[0],
                 cluster.T[1],
                 label=label,
-                color = color_scale[int(g)],
+                color=color_scale[int(g)],
                 s=80,
             )
             ax.legend()
