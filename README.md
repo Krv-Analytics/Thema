@@ -8,29 +8,27 @@ An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorith
 To clone the coal_mapper repo, run in your favorite bash shell (eg. terminal)
 
 ```
-$ git clone git@github.com:sgathrid/coal_mapper.git
+git clone git@github.com:sgathrid/coal_mapper.git
 ```
 
 ## Make
 To execute the makefile, run:
 ```
-$ cd coal_mapper
-$ make
+cd coal_mapper && make install 
 ```
 ### Poetry
 We use the [`poetry`](https://python-poetry.org) package manager to handle our dependencies. 
 The Makefile will install poetry, and then load all dependencies needed for this project.
 You can access this virtual environment (before running any of the provided files) by running 
 ```
-$ poetry shell 
+poetry shell 
 ```  
 ### Environment Configuration
 The Makefile will also write a `.env` file for you, and configure some paths to `coal_mapper` and it's source code on your machine.
 It will also create an empty variable called  `mongo_client`. You will need to copy an API access token into this field to use any
-of our MongoDB functionality. If you would like to access our dataset specifically to analyze Coal Plants across the US, please
-email __coalmapper.TDA@gmail.com__. 
+of our MongoDB functionality. If you would like to access our dataset specifically to analyze Coal Plants across the US, please fill out the following request form: 
 
-** coming soon will be HTML request form for read-only MongoDB access **
+[MONGO ACCESS REQUEST FORM](https://sgathrid.github.io/coal_mapper/mongo_request_form.html)
 
 Note: If you do not configure `mongo_client` in your .env, you will not be able to pull data using the data_generator.py file. 
 
@@ -65,7 +63,7 @@ This subdirectory handles all data processing. Our project interfaces directly w
 We provide a `Mongo` class that handles the interface with MongoDB. If you have configured your `.env` file as specified above, you can execute the driver file to generate a local copy of our dataset:
 
 ```
-$ python src/processing/pulling/data_generator.py -v
+python src/processing/pulling/data_generator.py -v
 ```  
 
 This creates a local `data` directory and adds a pickle file to `data/raw` by pulling from the `CoalMapper` database.  
@@ -73,27 +71,26 @@ This creates a local `data` directory and adds a pickle file to `data/raw` by pu
 ##### 2: Cleaning
 Now that you have a local copy of your `raw` data, you can run:
 ```
-$ python src/processing/cleaning/cleaner.py -v
+python src/processing/cleaning/cleaner.py -v
 ``` 
 
-to clean your data, adding a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defualted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
+to clean your data, adding a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defaulted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
 
 
 ##### 3: Projecting
 To produce a single projection, of your `clean` data run:
 
 ```
-$ python src/processing/projecting/projector.py -n 10 -d 0
+python src/processing/projecting/projector.py -n 10 -d 0
 ``` 
 
-Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite signigicantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run a UMAP grid search, navigate to the `scripts` directory and **within a poetry shell** execute the script as follows: 
+Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite significantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run a UMAP grid search, navigate to the `scripts` directory and **within a poetry shell** execute the `projection_grid_search.sh` script. From the root directory, run:
 
 ```
-$ cd scripts/
-$ ./projection_grid_search.sh
+cd scripts/ && ./projection_grid_search.sh
 ``` 
 
-to script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like in the bash file.
+This script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like.
  
 
 #### Modeling
@@ -111,18 +108,18 @@ We provide two classes `JMapper` and `Model`. `JMapper` adds some new functional
 ##### 4. Model Generation
 You can generate a specific model by running `model_generator.py`. From the `scripts` directory, you can run
 ```
-$ python ../src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
+python ../src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
 ``` 
 
 As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. 
 
 Once again, make sure you navigate to the `scripts` directory. You can then execute a grid search by running:
 ```
-$ ./model_grid_search.sh path/to/raw path/to/clean path/to/all/projection/files
+./model_grid_search.sh path/to/raw path/to/clean path/to/all/projection/files/*
 ``` 
-Heres an example script run over the command line assuming our default naming scheme:
+Heres an example script run over the command line assuming our default naming scheme. From the scripts directory, run:
 ```
-$ ./model_grid_search.sh ../data/raw/coal_plant_data_raw.pkl ../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl ../data/projections/UMAP/*
+./model_grid_search.sh ../data/raw/coal_plant_data_raw.pkl ../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl ../data/projections/UMAP/*
 ```
 Here we pass the grid search a directory of projections, as well as the cleaned dataset. Upon output, the models are grouped into subdirectories based on their number of connected components. Given the scope of our project, we have named these `policy_groups` as each connected component should have similarities that can be whittled into a policy.  
 
@@ -135,7 +132,7 @@ This step of the pipeline allows you to "tune" a large set of potential models, 
 Since we are binnning (and interpreting) models based on their number of connected components, we find it very informative to visualize the results of our grid search by counting the number of models per policy group. To produce this plot, run the following command:
 
 ```
-$ python src/modeling/model_selector.py -H --coverage_filter 0.9
+python src/modeling/model_selector.py -H --coverage_filter 0.9
 ``` 
 
 where again, `coverage_filter` can take any value of interest. This bar plot gives insight to the structure of our dataset at various scales, and can point to the most popular policy group resolution. We encourage that you use this information to tweak the model grid search to your liking, and select a frequent `num_policy_groups` that suits your goals for downstream analysis. 
@@ -144,7 +141,7 @@ where again, `coverage_filter` can take any value of interest. This bar plot giv
 At this step we assume that we have selected a set of models, based on a desirable choice of `num_policy_groups` (e.g. 10) and `coverage_filter` (e.g. 0.9). We can now execute the driver file to generate pairwise distances between each of the models by running:
 
 ```
-$ python src/tuning/metrics/metric_generator.py --num_policy_groups 10 --coverage_filter 0.9 -v
+python src/tuning/metrics/metric_generator.py --num_policy_groups 10 --coverage_filter 0.9 -v
 ``` 
 
 This saves a distance matrix to pickle in the `data` directory. 
@@ -153,12 +150,12 @@ This saves a distance matrix to pickle in the `data` directory.
 Assuming we have pairwise distances between the models' graphs, we can now visualize a dendrogram by fitting an [Agglomerative Clustering Model](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html). This visualization will elucidate the structural equivalencey classes of the graphs. To generate this visualization, run:
 
 ```
-$ python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold 0.5  -p 10 
+python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold 0.5  -p 10 
 ``` 
 to visualize a dendrogram with 10 levels and labels determined by a distance threshold of 0.5. We encourage you to tweak `distance_threshold` until you are satisfied with the courseness of the grouping, which can be checked visually by each group in the dendrogram being colored as you wish. Once an ideal threshold `D` has been found, run:
 
 ```
-$ python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold D -s -v
+python src/tuning/graph_clustering/model_clusterer.py --num_policy_groups 10 --distance_threshold D -s -v
 ``` 
 
 to save the information on graph equivalency classes to pickle. 
@@ -170,7 +167,7 @@ For the time being, this is the final step of our pipeline! Here we provide func
 
 
 ```
-$ python src/modeling/model_selector.py --num_policy_groups 10 -v
+python src/modeling/model_selector.py --num_policy_groups 10 -v
 ``` 
 
 this populates a pickle file with your equivalence class representatives! 
@@ -251,6 +248,11 @@ See below, the tree structure of the `data` directory, generated by running thro
 
 where the `n` in `n_policy_groups` is determined by the number of clusters in the model. If you run sufficiently large grid searches, you should populate many models over a range of `n`, indicated by the ellipses in the file tree.
 
+
+## Contributing 
+
+Find a bug? ** Bug report coming soon **
+Want to request a new feature? ** feature request coming soon** 
 
 
 

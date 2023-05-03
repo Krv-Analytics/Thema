@@ -78,7 +78,8 @@ def model_generator(
                 coal_mapper.curvature = ollivier_ricci_curvature
                 coal_mapper.calculate_homology()
                 results[val] = coal_mapper
-            except coal_mapper.complex == dict():
+            except:
+                coal_mapper.complex == dict()
                 if verbose:
                     print("Empty Mapper!")
         return results

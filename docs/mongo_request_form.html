@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mongo Access Request Form</title>
+    <style>
+      /* Basic styling for the form */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+
+      form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      input,
+      textarea {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+        font-size: 16px;
+      }
+
+      textarea {
+        height: 150px;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #3e8e41;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form action="https://formspree.io/f/xqkonblr" method="POST">
+      <h1>Access Request Form</h1>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="Name" placeholder="Your name" required>
+      
+      <label for="email">Email</label>
+      <input type="text" id="email" name="Email" placeholder="Your Email" required>
+
+      <label for="affiliation">Company/University Affiliation</label>
+      <input type="text" id="affiliation" name="Affiliation" placeholder="Your company/university" required>
+
+      <label for="reason">Reason for Access</label>
+      <textarea id="reason" name="Reason" placeholder="Briefly explain why you need access" required></textarea>
+      
+       <input type="hidden" name="_subject" value="Mongo Access Request">
+
+      <button type="submit">Submit Request</button>
+    </form>
+  </body>
+</html>
+
