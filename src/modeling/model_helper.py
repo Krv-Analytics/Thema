@@ -136,7 +136,7 @@ def generate_model_filename(args, n_neighbors, min_dist, min_intersection):
     return output_file
 
 
-def get_minimal_std(df: pd.DataFrame, mask: np.array):
+def get_minimal_std(df: pd.DataFrame, mask: np.array, density_cols=None):
     """Find the column with the minimal standard deviation
     within a subset of a Dataframe.
 
@@ -155,8 +155,10 @@ def get_minimal_std(df: pd.DataFrame, mask: np.array):
         The index idenitfier for the column in the dataframe with minimal std.
 
     """
-    subset = df.iloc[mask]
-    col_label = subset.columns[subset.std(axis=0).argmin()]
+    if density_cols is None:
+        density_cols = df.columns
+    sub_df = df.iloc[mask][density_cols]
+    col_label = sub_df.columns[sub_df.std(axis=0).argmin()]
     return col_label
 
 
@@ -236,7 +238,7 @@ def custom_color_scale():
         [0.8, "#ae2012"],
         [0.9, "#9b2226"],
         [0.95, "#a50026"],
-        [1.0, "#f5d225"]
+        [1.0, "#f5d225"],
     ]
     return colorscale
 
