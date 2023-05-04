@@ -53,7 +53,7 @@ class Mongo:
             print("Failed MongoDB access!")
             print("Please check that MongoDB is properly configured in your .env file.")
 
-    def pull(self, database="cleaned", col="coal_mapper") -> pd.DataFrame:
+    def pull(self, database="cleaned", col="comprehensive_coal_data") -> pd.DataFrame:
         """Returns a complete DataFrame with readable values (not scaled, projected, or encoded).
 
         Parameters

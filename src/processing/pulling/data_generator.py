@@ -25,7 +25,7 @@ if __name__ == "__main__":
         "-c",
         "--col",
         type=str,
-        default="coal_mapper",
+        default="comprehensive_coal_data",
         help="Select collection to pull from within `--database`.",
     )
     parser.add_argument(

@@ -7,6 +7,8 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import seaborn as sns
+import plotly.express as px
+import plotly.graph_objs as go
 from jmapper import JMapper
 from model_helper import (
     config_plot_data,
@@ -383,24 +385,39 @@ class Model:
             self.tupper.projection,
             self.tupper.get_projection_parameters(),
         )
-        _, ax = plt.subplots(figsize=(6, 6))
+
+        fig = px.scatter()
         for g in np.unique(self.cluster_ids):
             label = f"Policy Group {int(g)}"
             if g == -1:
                 label = "Unclustered Items"
             mask = np.where(self.cluster_ids == g, True, False)
             cluster = projection[mask]
-            ax.scatter(
-                cluster.T[0],
-                cluster.T[1],
-                label=label,
-                color=color_scale[int(g)],
-                s=80,
+            fig.add_trace(
+                go.Scatter(
+                    x=cluster.T[0],
+                    y=cluster.T[1],
+                    mode='markers',
+                    marker=dict(
+                        size=8,
+                        color=color_scale[int(g)]
+                    ),
+                    name=label
+                )
             )
-            ax.legend()
-        plt.title(f"UMAP: {parameters}")
-        plt.tight_layout()
-        plt.show()
+
+        fig.update_layout(
+            title=f"UMAP: {parameters}",
+            legend=dict(
+                title="",
+                bordercolor="black",
+                borderwidth=1,
+            ),
+            width=800,
+            height=600
+        )
+        fig.update_layout(template='simple_white')
+        fig.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.
