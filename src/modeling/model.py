@@ -372,6 +372,7 @@ class Model:
             )
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
+        return plt
 
     def visualize_projection(self):
         """
