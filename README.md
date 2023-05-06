@@ -12,7 +12,7 @@ git clone git@github.com:sgathrid/coal_mapper.git
 ```
 
 ## Make
-To execute the makefile, run:
+To install, run:
 ```
 cd coal_mapper && make install 
 ```
