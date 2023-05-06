@@ -251,7 +251,7 @@ where the `n` in `n_policy_groups` is determined by the number of clusters in th
 
 ## Contributing 
 
-Find a bug? ** Bug report coming soon **
+Find a bug? [File a Bug Report](https://github.com/sgathrid/coal_mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
 Want to request a new feature? ** feature request coming soon** 
 
 
