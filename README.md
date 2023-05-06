@@ -1,7 +1,7 @@
 # coal_mapper
 
 ## Description 
-An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorithm to analyze various energy datasets. 
+An topolgical clustering pipeline that combines `UMAP` and the `Mapper` algorithm to analyze various energy datasets. For a more detailed description, check out our [Pages](https://sgathrid.github.io/coal_mapper/). 
 
 ## Installation
 
