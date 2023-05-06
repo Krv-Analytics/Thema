@@ -4,8 +4,8 @@
 #Run from root/scripts/
 
 
-N_NEIGHBORS=(3 6 9 12 15 18 21 24 27 30)
-MIN_DISTS=(0 0.01 0.05 0.1 0.5 1)
+N_NEIGHBORS=(1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 30)
+MIN_DISTS=(0 0.01 0.025 0.05 0.1 0.2 0.3 0.4 0.5 0.7 0.9 1)
 
 
 poetry shell
