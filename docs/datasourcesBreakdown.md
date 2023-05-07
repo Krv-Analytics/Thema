@@ -19,3 +19,4 @@ Our dataset includes all US plants with an active coal fueled generator in 2021 
  |Coal Cost Crossover   |Energy Innovation|2021|coal plant forward costs|207 |includes plants running mostly coal (excluding wood waste and petroleum coke burning units) operated by utilities and independent power-producers, and excludes plants used for combined heat and power    |95.9% |
  |Climate Opinion Map   |YCOM        |2021     |county public opinion  |n/a               |                       |                          |
  |Coal Plant Health Impacts |CATF    |2019     |health impacts & costs |218               |unknown                |97.2%                     |
+ |Coal Plant DAC Impacts|EPA/CATF    |2019     |DAC health impacts     |218               |unknown                |97.2%|
