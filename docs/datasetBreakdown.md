@@ -5,9 +5,9 @@ A breakdown of all variables included in our dataset, their source, and which va
 |variable       |meaning                      |source         |raw or calculated|calculation                 |pipeline variable?  |
 |---------------|-----------------------------|---------------|-----------------|----------------------------|--------------------|
 ORISPL          |EIA ORIS Plant/Facility Code |EIA eGRID      |raw              |                            |no                  |
-NAMEPCAP        |Plant nameplate capacity (MW)|EIA eGRID      |raw              |                            |<span style="color: red">This text is red</span>|
-GENNTAN
-weighted_coal_CAPFAC
+NAMEPCAP        |Plant nameplate capacity (MW)|EIA eGRID      |raw              |                            |yes                 |
+GENNTAN         |Generator annual net generation (MWh)|EIA eGRID|raw            |                            |yes                 |
+weighted_coal_CAPFAC|Weighted powerplant coal capacity factor - weighted by generator size and only includes coal generating units at a powerplant|EIA eGRID|calculated|generator capacity factor weighted by 
 weighted_coal_AGE	coal_FUELS
 num_coal_GENS
 NONcoal_FUELS
