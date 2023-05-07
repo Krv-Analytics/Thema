@@ -1,5 +1,11 @@
-ORISPL
-NAMEPCAP
+### **Dataset Information**
+A breakdown of all variables included in our dataset, their source, and which variables are being passed into the pipeline.
+
+### **Dataset**
+|variable       |meaning                      |source         |raw or calculated|calculation                 |pipeline variable?  |
+|---------------|-----------------------------|---------------|-----------------|----------------------------|--------------------|
+ORISPL          |EIA ORIS Plant/Facility Code |EIA eGRID      |raw              |                            |no                  |
+NAMEPCAP        |Plant nameplate capacity (MW)|EIA eGRID      |raw              |                            |<span style="background-color: lightgreen">Yes</span>|
 GENNTAN
 weighted_coal_CAPFAC
 weighted_coal_AGE	coal_FUELS
