@@ -374,7 +374,7 @@ class Model:
         plt.axis("off")
         return plt
 
-    def visualize_projection(self):
+    def visualize_projection(self, show_color=True):
         """
         Visualize the clustering on the projection point cloud.
         This function plots the projection used to fit JMapper
@@ -386,26 +386,46 @@ class Model:
             self.tupper.projection,
             self.tupper.get_projection_parameters(),
         )
-
-        fig = px.scatter()
-        for g in np.unique(self.cluster_ids):
-            label = f"Policy Group {int(g)}"
-            if g == -1:
-                label = "Unclustered Items"
-            mask = np.where(self.cluster_ids == g, True, False)
-            cluster = projection[mask]
-            fig.add_trace(
-                go.Scatter(
-                    x=cluster.T[0],
-                    y=cluster.T[1],
-                    mode='markers',
-                    marker=dict(
-                        size=8,
-                        color=color_scale[int(g)]
-                    ),
-                    name=label
+        if show_color:
+            fig = go.Figure()
+            for g in np.unique(self.cluster_ids):
+                label = f"Policy Group {int(g)}"
+                if g == -1:
+                    label = "Unclustered Items"
+                mask = np.where(self.cluster_ids == g, True, False)
+                cluster = projection[mask]
+                fig.add_trace(
+                    go.Scatter(
+                        x=cluster.T[0],
+                        y=cluster.T[1],
+                        mode='markers',
+                        marker=dict(
+                            size=8,
+                            color=color_scale[int(g)]
+                        ),
+                        name=label
+                    )
                 )
-            )
+        else:
+            fig = go.Figure()
+            for g in np.unique(self.cluster_ids):
+                label = f"Policy Group {int(g)}"
+                if g == -1:
+                    label = "Unclustered Items"
+                mask = np.where(self.cluster_ids == g, True, False)
+                cluster = projection[mask]
+                fig.add_trace(
+                    go.Scatter(
+                        x=cluster.T[0],
+                        y=cluster.T[1],
+                        mode='markers',
+                        marker=dict(
+                            size=8,
+                            color='grey'
+                        ),
+                        showlegend=False
+                    )
+                )
 
         fig.update_layout(
             title=f"UMAP: {parameters}",
