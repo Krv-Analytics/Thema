@@ -38,6 +38,13 @@ class Model_viz:
         return self.zscore_df.groupby(['cluster_IDs']).mean().reset_index()
     
     @property
+    def std_summary(self):
+        std = self.aves.groupby(['cluster_IDs']).std().reset_index()
+        std = abs(self.aves.groupby(['cluster_IDs']).std() / self.aves.groupby('cluster_IDs').mean()).reset_index()
+        #std = pd.melt(std, var_name='column', id_vars='cluster_IDs')
+        return std.fillna(0)
+    
+    @property
     def encoding_info(self):
         print(self.print_info)
 
@@ -58,7 +65,7 @@ class Model_viz:
                 if abs(value) >= 1:
 
                     ### only add to policy_group_columns if within 2 stds from global mean ###
-                    if self.zscore_df[self.zscore_df['cluster_IDs']==self.zscore_summary['cluster_IDs'][row_index]][i].std()<=2:
+                    if self.std_summary[self.std_summary['cluster_IDs']==self.std_summary['cluster_IDs'][row_index]][i].iloc[0]<=2:
 
                         columns_to_include.append(i)
 
@@ -167,12 +174,8 @@ class Model_viz:
         fig.show()
 
     def visualize_pg_scores_std(self):
-        # group
-        std = self.aves.groupby(['cluster_IDs']).std().reset_index()
-        # calulate the coefficient of variation - used instead of std as it is standardized across variables
-        std = abs(self.aves.groupby(['cluster_IDs']).std() / self.aves.groupby('cluster_IDs').mean()).reset_index()
         # pivot the df (makes plotting easier)
-        std = pd.melt(std, var_name='column', id_vars='cluster_IDs')
+        std = pd.melt(self.std_summary, var_name='column', id_vars='cluster_IDs')
         # plot
         fig = px.strip(std, x='column', y='value', facet_col='cluster_IDs', color='cluster_IDs', color_discrete_map=self._color_mapping)
         fig.add_hrect(y0=2, y1=std['value'].max(), line_width=0, fillcolor="red", opacity=0.1)
