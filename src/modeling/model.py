@@ -400,7 +400,6 @@ class Model:
                         y=cluster.T[1],
                         mode='markers',
                         marker=dict(
-                            size=8,
                             color=color_scale[int(g)]
                         ),
                         name=label
@@ -420,7 +419,6 @@ class Model:
                         y=cluster.T[1],
                         mode='markers',
                         marker=dict(
-                            size=8,
                             color='grey'
                         ),
                         showlegend=False

@@ -161,7 +161,8 @@ class Model_viz:
         zscore_group = pd.melt(self.zscore_summary, var_name='column', id_vars='cluster_IDs')
         # plot
         fig = px.strip(zscore_group, x='column', y='value', facet_col='cluster_IDs', color='cluster_IDs', color_discrete_map=self._color_mapping)
-        fig.update_layout(template='plotly_white', yaxis_range = [-3,3])
+        fig.add_hrect(y0=-1, y1=1, line_width=0, fillcolor="grey", opacity=0.1)
+        fig.update_layout(template='plotly_white')
         fig.update_xaxes(dict(tickfont = dict(size=4)))
         fig.show()
 
