@@ -36,7 +36,7 @@ securitization_policy|Status of Securitization Legislation for Coal Plant Retire
 governor_party  |Govenor Party in 2021        |RMI            |raw              |                            |yes                 |
 legislation_majority_party|Legislation Majority Party in 2021|RMI|raw           |                            |yes                 |
 CO2limitsOppose |Estimated percentage who somewhat/strongly oppose setting strict limits on existing coal-fire power plants|YCOM|raw| |yes|
-2018to2021change_CO2opposition|Change in CO2limitsOppose from 2018 to 2021|semi-calculated|2018 values subtracted from 2021 values. Positive values represent an increase in opposition to setting strict limits on existing coal-fire power plants|yes|
+2018to2021change_CO2opposition|Change in CO2limitsOppose from 2018 to 2021|YCOM|semi-calculated|2018 values subtracted from 2021 values. Positive values represent an increase in opposition to setting strict limits on existing coal-fire power plants|yes|
 Mortality (high estimate)
 Mortality (high estimate) DAC
 Hospital Admits, All Respiratory
