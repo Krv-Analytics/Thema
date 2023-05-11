@@ -26,7 +26,7 @@ LON             |Plant Longitude              |EIA eGRID      |raw              
 STCLPR          |State Coal Generation Percent (resource mix)|EIA eGRID|raw     |                            |no                  |
 STGSPR          |State Gas Generation Percent (resource mix) |EIA eGRID|raw     |                            |no                  |
 2020_netCashflow|2020 Net Cash Flow           |RMI            |semi-calculated  |Summed monthly cash flows throughout 2020|yes    |
-aveCashFlow     |Ave Cash Flow since 2012     |RMI            |sem-calculated   |Average of net montly cash flow per plant|yes    |
+aveCashFlow     |Ave Cash Flow since 2012     |RMI            |semi-calculated  |Average of net montly cash flow per plant|yes    |
 forwardCosts    |Total Coal Cost Going Forward ($/MWh)|Energy Innovation|raw    |see [Coal Cost Crossover 3.0](https://energyinnovation.org/publication/the-coal-cost-crossover-3-0/) for detailed methodology explanation|yes|
 PLSO2AN         |Plant Annual SO2 Emissions (tons)|EIA eGRID  |raw              |                            |yes                 |
 SECTOR          |Plant-level Sector           |EIA eGRID      |raw              |                            |no                  |
@@ -34,9 +34,9 @@ Utility ID      |Utility ID Number            |EIA 860        |raw              
 Entity Type     |Utility Entity Type          |EIA 860        |raw              |                            |no                  |
 securitization_policy|Status of Securitization Legislation for Coal Plant Retirements (State-level Utility Policy in 2021)|RMI|raw| |yes  |
 governor_party  |Govenor Party in 2021        |RMI            |raw              |                            |yes                 |
-legislation_majority_party
-CO2limitsOppose
-2018to2021change_CO2opposition
+legislation_majority_party|Legislation Majority Party in 2021|RMI|raw           |                            |yes                 |
+CO2limitsOppose |Estimated percentage who somewhat/strongly oppose setting strict limits on existing coal-fire power plants|YCOM|raw| |yes|
+2018to2021change_CO2opposition|Change in CO2limitsOppose from 2018 to 2021|semi-calculated|2018 values subtracted from 2021 values. Positive values represent an increase in opposition to setting strict limits on existing coal-fire power plants|yes|
 Mortality (high estimate)
 Mortality (high estimate) DAC
 Hospital Admits, All Respiratory
