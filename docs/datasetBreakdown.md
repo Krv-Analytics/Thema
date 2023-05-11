@@ -2,7 +2,7 @@
 A breakdown of all variables included in our dataset, their source, and which variables are being passed into the pipeline.
 
 ### **Dataset**
-|variable       |meaning                      |source         |raw or calculated|calculation                 |pipeline variable?  |
+|variable       |meaning/info                 |source         |raw or calculated|calculation                 |pipeline variable?  |
 |---------------|-----------------------------|---------------|-----------------|----------------------------|--------------------|
 ORISPL          |EIA ORIS Plant/Facility Code |EIA eGRID      |raw              |                            |no                  |
 NAMEPCAP        |Plant Nameplate Capacity (MW)|EIA eGRID      |raw              |                            |yes                 |
@@ -12,7 +12,8 @@ weighted_coal_AGE|Weighted Average Age of Coal Plant (years)|EIA eGRID|calculate
 coal_FUELS      |Type of coal fuel burned by each coal generator within a plant |EIA eGRID|raw|              |no                  |
 num_coal_GENS   |Number of Coal Generators per Plant|EIA eGRID|raw              |                            |yes                 |
 NONcoal_FUELS   |Non-coal used Fuels at a Plant with Coal Generators|EIA eGRID|raw|                          |no                  |
-ret_STATUS      |Coal Retirement Status (Full Retirement Announced, Partial Retirement Announced, No Retirement Announced -- fuel transitions/conversions are considered retirements)|Sierra Club    |raw  |                                        |yes|
+ret_STATUS      |Coal Retirement Status  
+(Full Retirement Announced, Partial Retirement Announced, No Retirement Announced -- fuel transitions/conversions are considered retirements)|Sierra Club    |raw  |                                        |yes|
 ret_DATE        |Date of Announced Retirement (partial or full)|Sierra Club|raw |                            |no                  |  
 Retrofit Costs  |Total Cost of Emissions Control Equiptment Retrofits Installed since 2012 ($)|EIA 860|semi-calculated|Costs summed across all coal generators within a plant|yes|
 PNAME           |Plant Name                   |EIA eGRID      |raw              |                            |no                  |
