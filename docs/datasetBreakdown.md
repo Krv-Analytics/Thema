@@ -5,13 +5,14 @@ A breakdown of all variables included in our dataset, their source, and which va
 |variable       |meaning                      |source         |raw or calculated|calculation                 |pipeline variable?  |
 |---------------|-----------------------------|---------------|-----------------|----------------------------|--------------------|
 ORISPL          |EIA ORIS Plant/Facility Code |EIA eGRID      |raw              |                            |no                  |
-NAMEPCAP        |Plant nameplate capacity (MW)|EIA eGRID      |raw              |                            |yes                 |
-GENNTAN         |Generator annual net generation (MWh)|EIA eGRID|raw            |                            |yes                 |
-weighted_coal_CAPFAC|Weighted powerplant coal capacity factor - weighted by generator size and only includes coal generating units at a powerplant|EIA eGRID|calculated|generator capacity factor weighted by 
-weighted_coal_AGE	coal_FUELS
-num_coal_GENS
-NONcoal_FUELS
-ret_STATUS
+NAMEPCAP        |Plant Nameplate Capacity (MW)|EIA eGRID      |raw              |                            |yes                 |
+GENNTAN         |Generator Annual Net Generation (MWh)|EIA eGRID|raw            |                            |yes                 |
+weighted_coal_CAPFAC|Weighted Coal Capacity Factor|EIA eGRID|calculated|Capacity factor of each generator within a plant, weighted by its 2020 net generation, averaged across a plant|yes|
+weighted_coal_AGE|Weighted Average Age of Coal Plant|EIA eGRID|calculated|Age of each coal generator within a plant, weighted by its nameplate capacity, averaged across a plant|yes|
+coal_FUELS      |Type of coal fuel burned by each coal generator within a plant |EIA eGRID|raw|              |no                  |
+num_coal_GENS   |Number of Coal Generators per Plant|EIA eGRID|raw              |EIA eGRID|raw|              |yes                 |
+NONcoal_FUELS   |Non-coal used Fuels at a Plant with Coal Generators|EIA eGRID|raw|                          |no                  |
+ret_STATUS      |Coal Retirement Status       |Sierra Club    |semi-calculated  |No proposed retirements endoced with 0, Entire Plant Proposed Retirement encoded with 1, Patrial Plant Proposed Retirement encoded with 2 -- Fuel replacement/conversion counted as retirement|yes|
 ret_DATE
 Retrofit Costs
 PNAME	PLGENACL
