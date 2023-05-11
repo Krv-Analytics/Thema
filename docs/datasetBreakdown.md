@@ -12,7 +12,7 @@ weighted_coal_AGE|Weighted Average Age of Coal Plant (years)|EIA eGRID|calculate
 coal_FUELS      |Type of coal fuel burned by each coal generator within a plant |EIA eGRID|raw|              |no                  |
 num_coal_GENS   |Number of Coal Generators per Plant|EIA eGRID|raw              |                            |yes                 |
 NONcoal_FUELS   |Non-coal used Fuels at a Plant with Coal Generators|EIA eGRID|raw|                          |no                  |
-ret_STATUS      |Coal Retirement Status       |Sierra Club    |semi-calculated  |No proposed retirements endoced with 0, Entire Plant Proposed Retirement encoded with 1, Patrial Plant Proposed Retirement encoded with 2 -- Fuel replacement/conversion counted as retirement|yes|
+ret_STATUS      |Coal Retirement Status (Full Retirement Announced, Partial Retirement Announced, No Retirement Announced)|Sierra Club    |raw  |                                        |yes|
 ret_DATE        |Date of Announced Retirement (partial or full)|Sierra Club|raw |                            |no                  |  
 Retrofit Costs  |Total Cost of Emissions Control Equiptment Retrofits Installed since 2012 ($)|EIA 860|semi-calculated|Costs summed across all coal generators within a plant|yes|
 PNAME           |Plant Name                   |EIA eGRID      |raw              |                            |no                  |
