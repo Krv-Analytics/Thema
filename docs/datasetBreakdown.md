@@ -6,7 +6,7 @@ A breakdown of all variables included in our dataset, their source, and which va
 |---------------|-----------------------------|---------------|-----------------|----------------------------|--------------------|
 ORISPL          |EIA ORIS Plant/Facility Code |EIA eGRID      |raw              |                            |no                  |
 NAMEPCAP        |Plant Nameplate Capacity (MW)|EIA eGRID      |raw              |                            |yes                 |
-GENNTAN         |Generator Annual Net Generation (MWh)|EIA eGRID|semi-calculated|Summed for all coal generators within a plant|yes|
+GENNTAN         |Coal Generator Annual Net Generation (MWh)|EIA eGRID|semi-calculated|Summed for all coal generators within a plant|yes|
 weighted_coal_CAPFAC|Weighted Coal Capacity Factor (%)|EIA eGRID|calculated|Capacity factor of each generator within a plant, weighted by its 2020 net generation, averaged across a plant|yes|
 weighted_coal_AGE|Weighted Average Age of Coal Plant (years)|EIA eGRID|calculated|Age of each coal generator within a plant, weighted by its nameplate capacity, averaged across a plant|yes|
 coal_FUELS      |Type of coal fuel burned by each coal generator within a plant |EIA eGRID|raw|              |no                  |
