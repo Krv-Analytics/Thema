@@ -18,15 +18,15 @@ MIN_INTERSECTION=(1 2 3 4)
 
 poetry shell
 echo "Initializing Poetry Shell"
-echo "Would you like to clean out existing mapper objects? yes or no"
+# echo "Would you like to clean out existing mapper objects? yes or no"
 
-read clean
+# read clean
 
-if [ $clean == "yes" ];then
-    echo "Cleaning..."
-    echo -e 
-    rm -r ../data/models/
-fi
+# if [ $clean == "yes" ];then
+#     echo "Cleaning..."
+#     echo -e 
+#     rm -r ../data/models/
+# fi
 
 
 echo "Computing Mapper Parameter Grid Search, over all available projections!"
@@ -40,9 +40,9 @@ for PROJECTION in $PROJECTIONS; do
 for MIN_CLUSTER_SIZE in "${MIN_CLUSTER_SIZES[@]}"; do
     for N in "${N_CUBES[@]}"; do
         for P in "${PERC_OVERLAP[@]}"; do
-            # echo -e 
-            # echo -e "Computing mapper with $N cubes and $P% overlap."
-            python ../src/modeling/model_generator.py                                          \
+             # echo -e 
+             # echo -e "Computing mapper with $N cubes and $P% overlap."
+             python ../src/modeling/model_generator.py                                          \
                                     --raw ${RAW}                                               \
                                     --clean ${CLEAN}                                           \
                                     --projection ${PROJECTION}                                 \
