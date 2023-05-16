@@ -4,6 +4,19 @@ import argparse
 import os
 import pickle
 import sys
+import time
+
+
+
+######################################################################
+# Silencing UMAP Warnings 
+import warnings 
+from numba import NumbaDeprecationWarning
+warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="umap")
+
+
+######################################################################
 
 from projector_helper import env, projection_driver, projection_file_name
 
@@ -17,7 +30,7 @@ if __name__ == "__main__":
         "--path",
         type=str,
         default=os.path.join(
-            root, "data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl"
+            root, "data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
         ),
         help="Select location of local data set, as pulled from Mongo.",
     )
@@ -53,6 +66,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--random",
+        default=False,
+        action='store_true',
+        help="If set, will generate projections with a random seed (if applicable)",
+    )
+
+    parser.add_argument(
         "-v",
         "--Verbose",
         default=False,
@@ -73,14 +93,18 @@ if __name__ == "__main__":
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
+    random_seed = 42
+    if args.random:
+        random_seed = int(time.time())
+
     if args.umap:
         # Generate Projection
         results = projection_driver(
-            df, n=args.n_neighbors, d=args.min_dist, dimensions=args.dim
+            df, n=args.n_neighbors, d=args.min_dist, dimensions=args.dim, seed=random_seed,
         )
 
         output_file = projection_file_name(
-            projector="UMAP", n=args.n_neighbors, d=args.min_dist, dimensions=2
+            projector="UMAP", n=args.n_neighbors, d=args.min_dist, dimensions=2, seed = random_seed
         )
         output_file = os.path.join(output_dir, output_file)
 
