@@ -122,4 +122,4 @@ def clean_data_filename(scaler=None, encoding="integer", filter: bool = True):
     else:
         filter = ""
 
-    return f"clean_data_{scaler}_{encoding}-encdoding_{filter}.pkl"
+    return f"clean_data_{scaler}_{encoding}-encoding_{filter}.pkl"
