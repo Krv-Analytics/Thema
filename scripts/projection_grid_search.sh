@@ -12,13 +12,13 @@ poetry shell
 echo "Initializing Poetry Shell"
 echo "Would you like to clean out existing projections? yes or no"
 
-read clean
+# read clean
 
-if [ $clean == "yes" ];then
-    echo "Cleaning..."
-    echo -e 
-    rm -r ../data/projections/UMAP/
-fi
+# if [ $clean == "yes" ];then
+#     echo "Cleaning..."
+#     echo -e 
+#     rm -r ../data/projections/UMAP/
+# fi
 
 
 echo "Computing UMAP Projection Grid Search!"
@@ -28,7 +28,7 @@ echo "Computing UMAP Projection Grid Search!"
             echo "--------------------------------------------------------------------------------"
 for N in "${N_NEIGHBORS[@]}"; do
     for D in "${MIN_DISTS[@]}"; do
-        python ../src/processing/projecting/projector.py                                    \
+        python ../src/processing/projecting/projector.py                                 \
                                 -n ${N}                                                    \
                                 -d ${D}                                                    \
     
