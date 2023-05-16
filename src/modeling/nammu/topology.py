@@ -7,8 +7,7 @@ import collections.abc
 import networkx as nx
 import numpy as np
 
-from nammu.utils import UnionFind
-
+from modeling.nammu.utils import UnionFind
 
 class PersistenceDiagram(collections.abc.Sequence):
     """Persistence diagram class.

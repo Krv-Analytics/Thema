@@ -5,13 +5,28 @@ import os
 import pickle
 import sys
 
-from model_helper import (
+
+########################################################################################################################
+# Update path to find modeling module 
+# TODO: Find a work around to not update path here 
+# Trouble is model module cannot be loaded with module/__init__ when calling this file, which is where paths are sorted for 
+# the remaining files for this module
+#  
+from dotenv import load_dotenv 
+load_dotenv() 
+src = os.getenv("src")
+sys.path.append(src)
+
+# imports from modeling module 
+from modeling.model_helper import (
     generate_model_filename,
     model_generator,
     env,
     script_paths,
 )
-from tupper import Tupper
+from modeling.tupper import Tupper
+
+########################################################################################################################
 
 
 if __name__ == "__main__":
