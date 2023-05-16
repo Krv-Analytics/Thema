@@ -15,16 +15,16 @@ import sys
 from dotenv import load_dotenv 
 load_dotenv() 
 src = os.getenv("src")
-sys.path.append(src)
+sys.path.append(src + "/modeling/")
 
 # imports from modeling module 
-from modeling.model_helper import (
+from model_helper import (
     generate_model_filename,
     model_generator,
     env,
     script_paths,
 )
-from modeling.tupper import Tupper
+from tupper import Tupper
 
 ########################################################################################################################
 

@@ -4,7 +4,8 @@ import sys
 from dotenv import load_dotenv
 load_dotenv()
 src = os.getenv("src")
+sys.path.append(src + "/modeling/nammu")
 
-from modeling.nammu.utils import make_node_filtration, UnionFind
-from modeling.nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from modeling.nammu.curvature import ollivier_ricci_curvature
+from utils import make_node_filtration, UnionFind
+from topology import PersistenceDiagram, calculate_persistence_diagrams
+from curvature import ollivier_ricci_curvature

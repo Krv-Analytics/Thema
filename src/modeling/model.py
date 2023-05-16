@@ -15,8 +15,8 @@ import plotly.express as px
 import plotly.graph_objs as go
 
 
-from modeling.jmapper import JMapper
-from modeling.model_helper import (
+from jmapper import JMapper
+from model_helper import (
     config_plot_data,
     custom_color_scale,
     get_minimal_std,

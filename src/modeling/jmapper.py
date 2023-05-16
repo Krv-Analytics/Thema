@@ -5,10 +5,10 @@ import numpy as np
 from hdbscan import HDBSCAN
 from kmapper import KeplerMapper
 
-from modeling.nammu.curvature import ollivier_ricci_curvature
-from modeling.nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from modeling.nammu.utils import make_node_filtration 
-from modeling.tupper import Tupper
+from nammu.curvature import ollivier_ricci_curvature
+from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
+from nammu.utils import make_node_filtration 
+from tupper import Tupper
 
 
 class JMapper:

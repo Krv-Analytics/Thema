@@ -8,9 +8,9 @@ import pandas as pd
 from dotenv import load_dotenv
 from hdbscan import HDBSCAN
 
-from modeling.jmapper import JMapper
-from modeling.tupper import Tupper
-from modeling.nammu.curvature import ollivier_ricci_curvature
+from jmapper import JMapper
+from tupper import Tupper
+from nammu.curvature import ollivier_ricci_curvature
 
 
 def model_generator(

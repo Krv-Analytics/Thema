@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv() 
 src = os.getenv("src")
 sys.path.append(src)
+sys.path.append(src + "modeling/")
 
 from modeling.jmapper import JMapper
 from modeling.model import Model
