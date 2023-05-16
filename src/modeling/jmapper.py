@@ -4,10 +4,11 @@ import networkx as nx
 import numpy as np
 from hdbscan import HDBSCAN
 from kmapper import KeplerMapper
-from nammu.curvature import ollivier_ricci_curvature
-from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from nammu.utils import make_node_filtration
-from tupper import Tupper
+
+from modeling.nammu.curvature import ollivier_ricci_curvature
+from modeling.nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
+from modeling.nammu.utils import make_node_filtration 
+from modeling.tupper import Tupper
 
 
 class JMapper:
@@ -97,11 +98,11 @@ class JMapper:
         if len(self._graph.nodes()) == 0:
             try:
                 self.to_networkx(self.min_intersection)
-            except self._complex == dict():
+            except:
+                self._complex == dict()
                 print("Your simplicial complex is empty!")
                 print(
-                    "Note: some parameters may produce a trivial\
-                    mapper representation. \n"
+                    "Note: some parameters may produce a trivial mapper representation. \n"
                 )
         return self._graph
 
