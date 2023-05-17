@@ -32,7 +32,7 @@ class Tupper:
         # If files exist, set members
         if isfile(raw):
             self._raw = raw
-        if isfile(raw):
+        if isfile(clean):
             self._clean = clean
         if isfile(projection):
             self._projection = projection

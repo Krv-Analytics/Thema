@@ -1,3 +1,7 @@
+# model.py 
+
+import os
+import sys
 import itertools
 import pickle
 from os.path import isfile
@@ -9,6 +13,8 @@ import numpy as np
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objs as go
+
+
 from jmapper import JMapper
 from model_helper import (
     config_plot_data,
@@ -355,7 +361,7 @@ class Model:
                 g,
                 pos=pos,
                 node_color=color_scale[i],
-                node_size=100,
+                node_size=25,
                 font_size=6,
                 with_labels=False,
                 ax=ax,
@@ -365,14 +371,14 @@ class Model:
             nx.draw_networkx_edges(
                 g,
                 pos=pos,
-                width=2,
+                width=1,
                 ax=ax,
                 label=None,
-                alpha=0.6,
+                alpha=0.4,
             )
-        ax.legend(loc="best", prop={"size": 8})
+        #ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
-        return plt
+        return fig
 
     def visualize_projection(self, show_color=True, show_axis=False):
         """
@@ -436,15 +442,10 @@ class Model:
                 height=600)
         else:
             fig.update_layout(
-                title=f"UMAP: {parameters}",
-                legend=dict(
-                    title="",
-                    bordercolor="black",
-                    borderwidth=1,
-                ),
+                # title=f"UMAP: {parameters}",
                 width=800,
                 height=600,
-
+                showlegend=False,
                 xaxis=dict(
                     tickcolor='white',
                     showticklabels=False,
@@ -462,7 +463,7 @@ class Model:
         )
             
         fig.update_layout(template='simple_white')
-        fig.show()
+        return fig
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.

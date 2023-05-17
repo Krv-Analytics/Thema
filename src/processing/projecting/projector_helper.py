@@ -4,8 +4,19 @@ import os
 import sys
 
 import pandas as pd
+import numpy as np
+
 from dotenv import load_dotenv
 from umap import UMAP
+
+
+######################################################################
+# Silencing UMAP Warnings 
+import warnings 
+from numba import NumbaDeprecationWarning
+warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="umap")
+######################################################################
 
 
 def projection_driver(
@@ -14,6 +25,7 @@ def projection_driver(
     d: float,
     dimensions: int = 2,
     projector: str = "UMAP",
+    seed : int = 42,
 ):
     """
     This function performs a projection of a DataFrame.
@@ -46,7 +58,7 @@ def projection_driver(
         n_neighbors=n,
         n_components=dimensions,
         init="random",
-        random_state=0,
+        random_state= seed,
     )
 
     projection = umap_2d.fit_transform(data)
@@ -56,7 +68,7 @@ def projection_driver(
     return results
 
 
-def projection_file_name(projector, n, d, dimensions=2):
+def projection_file_name(projector, n, d, dimensions=2, seed=42):
     """
     This function generates a filename for a projected dataset.
 
@@ -76,7 +88,7 @@ def projection_file_name(projector, n, d, dimensions=2):
     str
         The filename for the projected dataset.
     """
-    output_file = f"{projector}_Nbors{n}_minDist_{d}_{dimensions}D.pkl"
+    output_file = f"{projector}_Nbors{n}_minDist_{d}_{dimensions}D_rs_{seed}.pkl"
     return output_file
 
 

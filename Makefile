@@ -1,6 +1,6 @@
-# Makefile 
+# Makefile
 
-all: fetch-coal-data coal-data-cleaner 
+all: fetch-raw-data fetch-processed-data 
 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
@@ -19,22 +19,41 @@ uninstall: clean
 check-poetry:
 	@which poetry || (echo "Poetry is not installed. Installing..."; sudo pip install poetry; poetry install;)
 
-fetch-coal-data:
+fetch: fetch-raw-data fetch-processed-data
+
+fetch-raw-data:
 	python src/processing/pulling/data_generator.py -v
 
-coal-data-cleaner:
+fetch-processed-data:
 	python src/processing/cleaning/cleaner.py -v
 
-clean-raw: 
+projections: 
+	cd scripts && ./projection_grid_search.sh
+
+##########################################################################################################################
+# Relative paths to data files from the scripts directory 
+# May consider setting these to be absolute paths 
+path_to_raw = "../data/raw/coal_plant_data_raw.pkl"
+path_to_clean = "../data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
+path_to_umap = "../data/projections/UMAP/*"
+##########################################################################################################################
+
+models: 
+	cd scripts && ./model_grid_search.sh ${path_to_raw} ${path_to_clean} ${path_to_umap}
+
+clean-raw-data: 
 	rm -f data/raw/* 
 
-clean-cleaned: 
+clean-processed-data: 
 	rm -f data/clean/*
 
 clean-projections:
 	rm -f -r data/projections/*
 
-clean: clean-raw clean-cleaned clean-projections 
+clean-models:
+	rm -f -r data/models/*
+
+clean: clean-raw-data clean-processed-data clean-projections 
 	rm -f -r data/
 
 

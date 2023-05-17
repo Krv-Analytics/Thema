@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from hdbscan import HDBSCAN
+
 from jmapper import JMapper
 from tupper import Tupper
 from nammu.curvature import ollivier_ricci_curvature
@@ -239,6 +240,21 @@ def custom_color_scale():
         [0.9, "#9b2226"],
         [1.0, "#a50026"],
     ]
+
+    extended_colorscale = []
+    for i in range(100):
+        t = i / 99.0
+        for j in range(len(colorscale) - 1):
+            if t >= colorscale[j][0] and t <= colorscale[j + 1][0]:
+                r1, g1, b1 = colorscale[j][1][1:3], colorscale[j][1][3:5], colorscale[j][1][5:]
+                r2, g2, b2 = colorscale[j + 1][1][1:3], colorscale[j + 1][1][3:5], colorscale[j + 1][1][5:]
+                r = int(r1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(r2, 16) - int(r1, 16)))
+                g = int(g1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(g2, 16) - int(g1, 16)))
+                b = int(b1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(b2, 16) - int(b1, 16)))
+                hex_color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+                extended_colorscale.append([t, hex_color])
+                break
+
     return colorscale
 
 
@@ -249,7 +265,7 @@ def env():
     src = os.getenv("src")
     sys.path.append(root)
     sys.path.append(src)
-    sys.path.append(src + "modeling/nammu/")
+    sys.path.append(src + "modeling/")
     return root
 
 
