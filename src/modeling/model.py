@@ -417,7 +417,7 @@ class Model:
         self._cluster_positions = pos
         return plt
     
-    def visualize_component(self, component):
+    def visualize_component(self, component, cluster_labels=True):
         if self._cluster_positions is None:
             return 'Ensure you have run .visualize_model() before attempting to visualize a component'
             
@@ -434,7 +434,7 @@ class Model:
                             node_color=color_scale[i],
                             node_size=100,
                             font_size=10,
-                            with_labels=True,
+                            with_labels=cluster_labels,
                             ax=ax,
                             label=f"Group {labels[i]}",
                             #font_color = color_scale[i],
