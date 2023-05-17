@@ -299,6 +299,40 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
+    def _get_node_df(self, node:str):
+        '''helper function for get_node_dfs that creates a data frame containing each plant in a specified node'''
+        df = self.tupper.raw
+        return df.loc[list(self.mapper.complex['nodes'][node])]
+
+    def get_node_dfs(self, cc:int):
+
+        """
+        Generate a DataFrame for each node within a policy group.
+        Note: unclustered items are given their own DataFrame.
+
+        Inputs
+        -------
+        cc : int
+            An integer corresponding to the policy group # (cluster #) you wish to examine nodes within.
+
+        Returns
+        -------
+        subframes: dict
+            A dictionary where each key is a node ID
+            and the corresponding value is a DataFrame containing
+            the items in that node.
+        """
+                
+        node_dict = {}
+        graph,key = list(self.mapper.components.items())[cc]
+        graph.nodes()
+        nodes = list(graph.nodes())
+
+        for node in nodes:
+            node_dict[node] = self._get_node_df(node)
+
+        return node_dict
+
     def get_cluster_dfs(self):
         """
         Generate a DataFrame for each policy group.
