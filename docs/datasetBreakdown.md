@@ -21,8 +21,8 @@ PLPRMFL         |Plant Primary Fuel           |EIA eGRID      |raw              
 PLCLPR          |Plant Coal Generation Percent (resource mix)|EIA eGRID|raw     |                            |yes                 |
 FIPSST          |Plant FIPS State Code        |EIA eGRID      |raw              |                            |no                  |
 FIPSCNTY        |Plant FIPS County Code       |EIA eGRID      |raw              |                            |no                  |
-LAT             |Plant Latitude               |EIA eGRID      |raw              |                            |no                  |
-LON             |Plant Longitude              |EIA eGRID      |raw              |                            |no                  |
+LAT             |Plant Latitude               |EIA eGRID      |raw              |                            |yes                 |
+LON             |Plant Longitude              |EIA eGRID      |raw              |                            |yes                 |
 STCLPR          |State Coal Generation Percent (resource mix)|EIA eGRID|raw     |                            |no                  |
 STGSPR          |State Gas Generation Percent (resource mix) |EIA eGRID|raw     |                            |no                  |
 2020_netCashflow|2020 Net Cash Flow           |RMI            |semi-calculated  |Summed monthly cash flows throughout 2020|yes    |
