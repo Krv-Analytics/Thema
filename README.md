@@ -25,6 +25,8 @@ poetry shell
 ```  
 ### Environment Configuration
 The Makefile will also write a `.env` file for you, configuring paths and setting environment variables.
+If you are using a dataset stored on MongoDB, then please configure the following variables: 
+`mongo_client`,`mongo_database`,`mongo_collection`.
 
 
 ## Work Flow 
@@ -44,5 +46,6 @@ Once you have have configured your local environment, you're all set to start us
 │    └── metrics
 └── visualizing
 ```
+
 
 
