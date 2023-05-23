@@ -1,42 +1,55 @@
 # Pipeline Overview & File Descriptions
-Here we will give a brief overview of our provided files in the `src` directory. 
+Here we will give a brief overview of our provided files in the `src` directory, and how to execute our pipeline using `make` commands.
+
 
 ## Processing
-This subdirectory handles all data processing. Our project interfaces directly with MongoDB, as we currently have our custom `CoalMapper` database stored here. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering method only requires `pickle` files that store `raw`, `clean`, and `projected` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, or `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to incorporate other methods. However, hopefully our functionality for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method.
+This subdirectory handles all data processing. Our project supports interfacing directly with MongoDB to fetch raw data. However, we expect this pipeline to be useful to other folks with entirely different data configurations, cleaning methods, and preprocessing techniques. In the end, our clustering method only requires `pickle` files that store `raw`, `clean`, and `projected` versions of your data; as is common practice, we expect cleaned data to be scaled with no missing values, and have categorical variables encoded. We hope that our workflow for pulling data and cleaning is easily customizable and with minimal effort can support the practices of a many domains. The final stage of our preprocessing is dimensionality reduction, or `projecting`. Our pipeline uses `UMAP`, but again we hope that our architechture makes it easy to incorporate other methods. However, hopefully our functionality for __evaluating__ a hyperparameter grid search for `UMAP` projections will convince you to adpot this method.
 
 
-### 1: Pulling 
-We provide a `Mongo` class that handles the interface with MongoDB. If you have configured your `.env` file as specified above, you can execute the driver file to generate a local copy of our dataset:
 
+### 1: Pulling f
+We provide a `Mongo` class that handles the interface with MongoDB. If you are have your data stored on MongoDB and have configured your `.env` file (see `README`), you can use to execute `data_generator.py`, generating a local copy of our dataset:
+
+<!-- We should add ability to read env variables for Mongo colletion/database from make  -->
 ```
-python src/processing/pulling/data_generator.py -v
-```  
-
-This creates a local `data` directory and adds a pickle file to `data/raw` by pulling from the `CoalMapper` database.  
-
-### 2: Cleaning
-Now that you have a local copy of your `raw` data, you can run:
-```
-python src/processing/cleaning/cleaner.py -v
+make fetch-raw-data
 ``` 
 
-to clean your data, adding a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defaulted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
+This creates a local `data` directory and adds a pickle file to `data/raw` by pulling from the specified collection on MongoDB.
+If you are not interfacing with Mongo, run:
+
+```
+make data-dir
+``` 
+to generate the local data directory, and deposit a pickled version of your raw data (csv format) to `data/raw`. 
+
+Going forward, to use our `make` commands out of the box, name your file `raw_values.pkl`. 
+Otherwise, we invite you to edit the `Makefile` to match your own naming conventions.
+
+### 2: Cleaning
+Now that you have a local copy of your `raw` data, you can run the `cleaner.py` driver via:
+```
+make fetch-processed-data
+``` 
+to clean your data. This adds a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defaulted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
+
+
+
 
 
 ### 3: Projecting
-To produce a single projection, of your `clean` data run:
+To produce a single UMAP projection, of your `clean` data run `projector.py`:
 
 ```
-python src/processing/projecting/projector.py -n 10 -d 0
+make projection n=10 d=0
 ``` 
 
-Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite significantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run a UMAP grid search, navigate to the `scripts` directory and **within a poetry shell** execute the `projection_grid_search.sh` script. From the root directory, run:
+Notice, the driver is parameterized by 2 inputs `n_neighbors` or and `min_dist` (n,d respectively). We point you to the UMAP paper and documentation for a full description, but the basic idea is that these parameters change your view of "locality" when conducting a manifold based projection. Though UMAP advertises itself as a stucture preserving dimensionality reduction algorithm, the structure that you preserve can change quite significantly based on these two input parameters. Thus, we *reccomend* that you run a grid search over these input parameters, and explore the structure of your data set at various resolutions. These will allow you to generate a rich class of models, and we provide functionality for grouping these models into equivalency classes to make down stream analysis manageable. To run a UMAP grid search, we run `projection_grid_search.sh` in the `scripts` directory with:
 
 ```
-cd scripts/ && ./projection_grid_search.sh
-``` 
-
-This script iteratively calls the `projection.py` over a parameter grid to populate `data/projections/UMAP` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like.
+make projections
+```
+This executes a script that iteratively calls `projector.py` over a parameter grid to populate `data/projections/UMAP` with pickle files. Once again, our grid is defaulted in the script, but feel free to edit this as you like.
  
 
 ## Modeling
@@ -52,22 +65,19 @@ Here are the most relevant files for our modeling pipeline:
 We provide two classes `JMapper` and `Model`. `JMapper` adds some new functionality to [scikit-tda's](https://kepler-mapper.scikit-tda.org/en/latest/) `KepplerMapper` . Our `Model` uses the graph structure of the Mapper output as a clustering interpretation: namely each connected component we consider to be a cluster and provide functionality for analyzing a density based description of each cluster. 
 
 ### 4. Model Generation
-You can generate a specific model by running `model_generator.py`. From the `scripts` directory, you can run
+You can generate a specific model by running `model_generator.py`:
 ```
 python ../src/modeling/model_generator.py --raw path/to/raw --clean path/to/clean --projection path/to/projection
+make single-model raw= clean= projection= 
+```
+
+As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. To configure your grid search, edit `model_grid_search.sh` (also in `scripts`), and execute with:
+
+```
+make models
 ``` 
 
-As with the UMAP projections, we have discovered huge amounts of variability in the models that the Mapper Algorithm can produce. This is expected from the nature of the Mapper's hyperparameters. In particular, `n_cubes` and `perc_overlap` which define a resolution at which to pull out sturcture of your data. However, thanks to recent advances in graph learning, there now exist well principled metrics to compare graphs based on [discrete curvature](https://arxiv.org/abs/2301.12906). Thus, once again, we encourage that you run a grid search over the hyperparameters needed to generate a `Model`. 
-
-Once again, make sure you navigate to the `scripts` directory. You can then execute a grid search by running:
-```
-./model_grid_search.sh path/to/raw path/to/clean path/to/all/projection/files/*
-``` 
-Heres an example script run over the command line assuming our default naming scheme. From the scripts directory, run:
-```
-./model_grid_search.sh ../data/raw/coal_plant_data_raw.pkl ../data/clean/clean_data_standard_scaled_integer-encdoding_filtered.pkl ../data/projections/UMAP/*
-```
-Here we pass the grid search a directory of projections, as well as the cleaned dataset. Upon output, the models are grouped into subdirectories based on their number of connected components. Given the scope of our project, we have named these `policy_groups` as each connected component should have similarities that can be whittled into a policy.  
+Upon output, the models are grouped into subdirectories based on their number of connected components. We have named these `target_groups` as each connected component should have similarities that can be whittled into a target strategy.  
 
 
 ## Tuning
