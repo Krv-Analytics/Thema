@@ -18,7 +18,7 @@ def model_generator(
     n_cubes,
     perc_overlap,
     hdbscan_params,
-    min_intersection_vals,
+    min_intersection_vals: list,
     verbose=False,
 ):
     """
@@ -65,22 +65,23 @@ def model_generator(
         max_cluster_size=max_cluster_size,
     )
     # Configure JMapper
-    coal_mapper = JMapper(tupper)
-    coal_mapper.fit(n_cubes, perc_overlap, clusterer)
+    j_mapper = JMapper(tupper)
+    j_mapper.fit(n_cubes, perc_overlap, clusterer)
 
     results = {}
-    if len(coal_mapper.complex["links"]) > 0:
+    if len(j_mapper.complex["links"]) > 0:
         for val in min_intersection_vals:
+            print(f"Here is my min_intersection value: {val}")
             # Generate Graph
             try:
-                coal_mapper.to_networkx(min_intersection=val)
-                coal_mapper.connected_components()
+                j_mapper.to_networkx(min_intersection=val)
+                j_mapper.connected_components()
                 # Compute Curvature and Persistence Diagram
-                coal_mapper.curvature = ollivier_ricci_curvature
-                coal_mapper.calculate_homology()
-                results[val] = coal_mapper
+                j_mapper.curvature = ollivier_ricci_curvature
+                j_mapper.calculate_homology()
+                results[val] = j_mapper
             except:
-                coal_mapper.complex == dict()
+                j_mapper.complex == dict()
                 if verbose:
                     print("Empty Mapper!")
         return results
@@ -246,11 +247,31 @@ def custom_color_scale():
         t = i / 99.0
         for j in range(len(colorscale) - 1):
             if t >= colorscale[j][0] and t <= colorscale[j + 1][0]:
-                r1, g1, b1 = colorscale[j][1][1:3], colorscale[j][1][3:5], colorscale[j][1][5:]
-                r2, g2, b2 = colorscale[j + 1][1][1:3], colorscale[j + 1][1][3:5], colorscale[j + 1][1][5:]
-                r = int(r1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(r2, 16) - int(r1, 16)))
-                g = int(g1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(g2, 16) - int(g1, 16)))
-                b = int(b1, 16) + int((t - colorscale[j][0]) / (colorscale[j + 1][0] - colorscale[j][0]) * (int(b2, 16) - int(b1, 16)))
+                r1, g1, b1 = (
+                    colorscale[j][1][1:3],
+                    colorscale[j][1][3:5],
+                    colorscale[j][1][5:],
+                )
+                r2, g2, b2 = (
+                    colorscale[j + 1][1][1:3],
+                    colorscale[j + 1][1][3:5],
+                    colorscale[j + 1][1][5:],
+                )
+                r = int(r1, 16) + int(
+                    (t - colorscale[j][0])
+                    / (colorscale[j + 1][0] - colorscale[j][0])
+                    * (int(r2, 16) - int(r1, 16))
+                )
+                g = int(g1, 16) + int(
+                    (t - colorscale[j][0])
+                    / (colorscale[j + 1][0] - colorscale[j][0])
+                    * (int(g2, 16) - int(g1, 16))
+                )
+                b = int(b1, 16) + int(
+                    (t - colorscale[j][0])
+                    / (colorscale[j + 1][0] - colorscale[j][0])
+                    * (int(b2, 16) - int(b1, 16))
+                )
                 hex_color = "#{:02x}{:02x}{:02x}".format(r, g, b)
                 extended_colorscale.append([t, hex_color])
                 break
