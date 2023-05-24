@@ -75,6 +75,8 @@ class Model:
         self._cluster_sizes = None
         self._unclustered_items = None
 
+        self._cluster_positions = None
+
     @property
     def mapper(self):
         assert self._mapper, "Please Specify a valid path to a mapper object"
@@ -297,6 +299,40 @@ class Model:
             "size": self.cluster_sizes[-1],
         }
 
+    def _get_node_df(self, node:str):
+        '''helper function for get_node_dfs that creates a data frame containing each plant in a specified node'''
+        df = self.tupper.raw
+        return df.loc[list(self.mapper.complex['nodes'][node])]
+
+    def get_node_dfs(self, cc:int):
+
+        """
+        Generate a DataFrame for each node within a policy group.
+        Note: unclustered items are given their own DataFrame.
+
+        Inputs
+        -------
+        cc : int
+            An integer corresponding to the policy group # (cluster #) you wish to examine nodes within.
+
+        Returns
+        -------
+        subframes: dict
+            A dictionary where each key is a node ID
+            and the corresponding value is a DataFrame containing
+            the items in that node.
+        """
+                
+        node_dict = {}
+        graph,key = list(self.mapper.components.items())[cc]
+        graph.nodes()
+        nodes = list(graph.nodes())
+
+        for node in nodes:
+            node_dict[node] = self._get_node_df(node)
+
+        return node_dict
+
     def get_cluster_dfs(self):
         """
         Generate a DataFrame for each policy group.
@@ -348,11 +384,11 @@ class Model:
 
         """
         # Config Pyplot
-        fig = plt.figure(figsize=(8, 8))
+        fig = plt.figure(figsize=(14, 8))
         ax = fig.add_subplot()
         color_scale = np.array(custom_color_scale()).T[1]
         # Get Node Coords
-        pos = nx.spring_layout(self.mapper.graph, k=k)
+        pos = nx.spring_layout(self.mapper.graph, k=k, seed=6)
 
         # Plot and color components
         components, labels = zip(*self.mapper.components.items())
@@ -361,24 +397,60 @@ class Model:
                 g,
                 pos=pos,
                 node_color=color_scale[i],
-                node_size=25,
+                node_size=100,
                 font_size=6,
                 with_labels=False,
                 ax=ax,
-                label=f"Policy Group {labels[i]}",
+                label=f"Group {labels[i]}",
                 edgelist=[],
             )
             nx.draw_networkx_edges(
                 g,
                 pos=pos,
-                width=1,
+                width=2,
                 ax=ax,
                 label=None,
-                alpha=0.4,
+                alpha=0.6,
             )
-        #ax.legend(loc="best", prop={"size": 8})
+        ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
-        return fig
+        self._cluster_positions = pos
+        return plt
+    
+    def visualize_component(self, component, cluster_labels=True):
+        if self._cluster_positions is None:
+            return 'Ensure you have run .visualize_model() before attempting to visualize a component'
+            
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot()
+        
+        color_scale = np.array(custom_color_scale()).T[1]
+        components, labels = zip(*self.mapper.components.items())
+        for i, g in enumerate(components):
+            if i == component:
+                nx.draw_networkx(
+                            g,
+                            pos=self._cluster_positions,
+                            node_color=color_scale[i],
+                            node_size=100,
+                            font_size=10,
+                            with_labels=cluster_labels,
+                            ax=ax,
+                            label=f"Group {labels[i]}",
+                            #font_color = color_scale[i],
+                            edgelist=[],)
+                nx.draw_networkx_edges(
+                            g,
+                            pos=self._cluster_positions,
+                            width=2,
+                            ax=ax,
+                            label=None,
+                            alpha=0.6,
+                        )
+        ax.legend(loc="best", prop={"size": 8})
+        plt.axis("off")
+                
+        #return fig
 
     def visualize_projection(self, show_color=True, show_axis=False):
         """
