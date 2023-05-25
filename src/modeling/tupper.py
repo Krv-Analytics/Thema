@@ -29,48 +29,78 @@ class Tupper:
         self._clean = None
         self._projection = None
 
-        # If files exist, set members
-        if isfile(raw):
-            self._raw = raw
-        if isfile(clean):
-            self._clean = clean
-        if isfile(projection):
-            self._projection = projection
+        # Require Valid file paths
+        assert isfile(raw), f"Invalid raw file path: {raw}"
+        assert isfile(clean), f"Invalid clean file path: {clean}"
+        assert isfile(projection), f"Invalid projection file path: {projection}"
+        
+        self._raw = raw
+        self._clean = clean
+        self._projection = projection
 
     @property
     def raw(self):
-        """Get the raw data in your Tupper."""
+        """returns the raw data in your Tupper."""
         assert self._raw, "Please Specify a valid path to raw data"
-        with open(self._raw, "rb") as raw_file:
-            raw_df = pickle.load(raw_file)
-
-        return raw_df
+        try: 
+            # Loading data from the pickle file  
+            with open(self._raw, "rb") as raw_file:
+                raw_df = pickle.load(raw_file)
+            return raw_df
+        except Exception as e: 
+            print("There was an error opening your raw data. \
+                  Please make sure you have set your raw data reference to the correct pickle file.\n", e)
 
     @property
     def clean(self):
         """Get the clean data in your Tupper."""
         assert self._clean, "Please Specify a valid path to clean data"
-        with open(self._clean, "rb") as clean_file:
-            reference = pickle.load(clean_file)
-        clean_df = reference["clean_data"]
-        # dropped_columns = reference["dropped_columns"]
-        return clean_df
+        try:
+            # Loading clean data from pickle file
+            with open(self._clean, "rb") as clean_file:
+                reference = pickle.load(clean_file)
+            clean_df = reference["clean_data"]
+            print(clean_df)
+            return clean_df
+        except Exception as e:
+            print("There was an error opening your clean data \
+                  Please make sure your have set your clean data reference to the correct pickle file.\n", e)
+    
+    def get_dropped_columns(self):
+        """Returns a list of the dropped columns when creating cleaned data"""
+        assert self._clean, "Please Specify a valid path to projected data"
+        
+        try: 
+            with open(self._clean, "rb") as clean_file:
+                reference = pickle.load(clean_file)
+            dropped_columns = reference["dropped_columns"]
+            return dropped_columns
+        except Exception as e:
+            print("There was an error opening your clean data. \
+                  Please make sure you have set your clean data reference to the correct pickle file.\n", e)
+
 
     @property
     def projection(self):
         """Get the projected data in your Tupper."""
         assert self._projection, "Please Specify a valid path to clean data"
-        with open(self._projection, "rb") as projection_file:
-            reference = pickle.load(projection_file)
+        try: 
+            with open(self._projection, "rb") as projection_file:
+                reference = pickle.load(projection_file)
             projection_array = reference["projection"]
-
-        return projection_array
+            return projection_array
+        except Exception as e:
+           print("There was an error opening your projection data. \
+                 Please make sure you have set your projection data reference to the correct pickle file.\n", e)
 
     def get_projection_parameters(self):
         """Get the parameters used to generate the projected data in your Tupper object."""
-        assert self._projection, "Please Specify a valid path to projected data"
-        with open(self._projection, "rb") as projection_file:
-            reference = pickle.load(projection_file)
+        assert self._projection, "Please Specify a valid path to projected data"   
+        try: 
+            with open(self._projection, "rb") as projection_file:
+                reference = pickle.load(projection_file)
             projection_parameters = reference["hyperparameters"]
-
-        return projection_parameters
+            return projection_parameters
+        except Exception as e:
+            print("There was an error opening your hyperparameters. \
+                   Please make sure you have set your projection data reference to the correct pickle file.\n", e)
