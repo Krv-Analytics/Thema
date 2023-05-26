@@ -37,7 +37,7 @@ governor_party  |Govenor Party in 2021        |RMI            |raw              
 legislation_majority_party|Legislation Majority Party in 2021|RMI|raw           |                            |yes                 |
 CO2limitsOppose |Estimated percentage who somewhat/strongly oppose setting strict limits on existing coal-fire power plants|YCOM|raw| |yes|
 2018to2021change_CO2opposition|Change in CO2limitsOppose from 2018 to 2021|YCOM|semi-calculated|2018 values subtracted from 2021 values. Positive values represent an increase in opposition to setting strict limits on existing coal-fire power plants|yes|
-Mortality (high estimate)||CATF
-Mortality (high estimate) DAC||CATF
-Hospital Admits, All Respiratory||CATF
-Hospital Admits, All Respiratory DAC||CATF
+Mortality (high estimate)||CATF||yes
+Mortality (high estimate) DAC||CATF||yes
+Hospital Admits, All Respiratory||CATF||yes
+Hospital Admits, All Respiratory DAC||CATF||yes
