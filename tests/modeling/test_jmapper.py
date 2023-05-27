@@ -31,9 +31,7 @@ sys.path.append(path_to_src)
 sys.path.append(path_to_src + "/modeling/")
 
 import modeling as md
-from nammu.curvature import ollivier_ricci_curvature
-from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from nammu.utils import make_node_filtration
+from modeling import nammu 
 
 ################################################################################################################################
 #

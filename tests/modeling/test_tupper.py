@@ -3,6 +3,8 @@
 # Description: 
 #   Testing functionality of src/modeling/tupper.py  
 
+
+
 import pytest
 import tempfile
 import os
@@ -14,10 +16,12 @@ import pickle
 
 from dotenv import load_dotenv
 
-# ##############################################################################################################################
+###############################################################################################################################
 #
 # Loading file paths to import modeling/jmapper functionality 
 #
+
+
 load_dotenv()
 path_to_src = os.getenv("src")
 sys.path.append(path_to_src)
@@ -26,7 +30,7 @@ import modeling as md
 
 ################################################################################################################################
 # 
-#   Unit Tests    
+#   Outline of Unit Tests    
 #
 #       1) Empty initialization (invalid paths ) 
 #       2) Unsupported file types (ie non-pickle files) 
@@ -36,7 +40,7 @@ import modeling as md
 
 #
 # Setting Temporary Testing Files 
-#
+# 
 
 @pytest.fixture(scope="class")
 def tmp_files(request, tmp_path_factory):

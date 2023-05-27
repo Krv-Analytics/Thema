@@ -1,4 +1,5 @@
 """Object file for JMapper."""
+
 import kmapper as km
 import networkx as nx
 import numpy as np

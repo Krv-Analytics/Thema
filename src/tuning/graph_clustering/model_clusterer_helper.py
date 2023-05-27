@@ -10,7 +10,7 @@ src = os.getenv("src")
 root = os.getenv("root")
 sys.path.append(src)
 
-from visualizing.visualization_helper import plot_dendrogram
+from summarizing.visualization_helper import plot_dendrogram
 
 
 def cluster_models(

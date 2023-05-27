@@ -8,22 +8,24 @@ import pytest
 import tempfile
 import os
 import sys
-import pandas as pd
-import numpy as np
-import random
-import pickle
 
-import kmapper as km
+import itertools
+import pickle
+from os.path import isfile
+
+import matplotlib.pyplot as plt
+import pandas as pd
 import networkx as nx
 import numpy as np
-from hdbscan import HDBSCAN
-from kmapper import KeplerMapper
+import seaborn as sns
+import plotly.express as px
+import plotly.graph_objs as go
  
 from dotenv import load_dotenv
 
 # ##############################################################################################################################
 #
-# Loading file paths to import modeling/jmapper functionality 
+# Loading file paths to import modeling functionality 
 #
 
 load_dotenv()
@@ -32,9 +34,7 @@ sys.path.append(path_to_src)
 sys.path.append(path_to_src + "/modeling/")
 
 import modeling as md
-from nammu.curvature import ollivier_ricci_curvature
-from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from nammu.utils import make_node_filtration
+from modeling import nammu
 
 ################################################################################################################################
 #
