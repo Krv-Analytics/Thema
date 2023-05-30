@@ -6,7 +6,7 @@
 
 
 import pytest
-import tempfile
+from pathlib import Path
 import os
 import sys
 import pandas as pd
@@ -24,7 +24,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 path_to_src = os.getenv("src")
+root = os.getenv("root")
 sys.path.append(path_to_src)
+
 
 import modeling as md
 
@@ -45,8 +47,11 @@ import modeling as md
 @pytest.fixture(scope="class")
 def tmp_files(request, tmp_path_factory):
     
-    # Setting temporary files handled by pyTest  
-    temp_dir = tmp_path_factory.mktemp("tmp_data_files")
+    # Setting temporary files handled by pyTest 
+    #path_to_root = os.path.normpath(root)
+    temp_dir = Path(root + "temp_testing_dir")
+    os.mkdir(temp_dir)
+
     raw_file = temp_dir / "raw.pkl"
     clean_file = temp_dir / "clean.pkl"
     projection_file = temp_dir / "projection.pkl"
@@ -93,10 +98,10 @@ def tmp_files(request, tmp_path_factory):
         f4.write("This is an invalid file for the tupper container!")
 
     # Provide the paths to the test class
-    request.cls.raw_file = raw_file
-    request.cls.clean_file = clean_file
-    request.cls.projection_file = projection_file
-    request.cls.invalid_file = invalid_file
+    request.cls.raw_file = "temp_testing_dir/raw.pkl"
+    request.cls.clean_file = "temp_testing_dir/clean.pkl"
+    request.cls.projection_file = "temp_testing_dir/projection.pkl"
+    request.cls.invalid_file = "temp_testing_dir/invalid.txt"
 
     yield
 
@@ -112,6 +117,8 @@ def tmp_files(request, tmp_path_factory):
     
     if os.path.exists(invalid_file):
         os.remove(invalid_file)
+    if os.path.exists(temp_dir):
+        os.rmdir(temp_dir)
 
 
 ################################################################################################################################
@@ -147,7 +154,7 @@ class TestTupper:
             test2.raw() 
         
         test3 = md.Tupper(raw = self.raw_file, clean=self.clean_file, projection=self.projection_file)
-        with open(self.raw_file, 'rb') as f1:
+        with open(root + self.raw_file, 'rb') as f1:
             expected_raw_data = pickle.load(f1)
         
         assert isinstance(test3.raw, pd.DataFrame)
@@ -165,7 +172,7 @@ class TestTupper:
         
         test3 = md.Tupper(raw = self.raw_file, clean=self.clean_file, projection=self.projection_file)
 
-        with open(self.clean_file, 'rb') as f2:
+        with open(root + self.clean_file, 'rb') as f2:
             reference = pickle.load(f2)
         
         expected_clean_data = reference["clean_data"]
@@ -187,7 +194,7 @@ class TestTupper:
             test2.projection()
         
         test3 = md.Tupper(raw = self.raw_file, clean=self.clean_file, projection=self.projection_file)
-        with open(self.projection_file, 'rb') as f3:
+        with open(root + self.projection_file, 'rb') as f3:
             reference = pickle.load(f3)
         expected_projection_data = reference["projection"]
         expected_hyperparameters = reference["hyperparameters"]

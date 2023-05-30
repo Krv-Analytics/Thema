@@ -38,17 +38,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--raw",
         type=str,
-        help="Select location of raw data set, as pulled from Mongo.",
+        help="Select location of raw data relative from `root`",
     )
     parser.add_argument(
         "--clean",
         type=str,
-        help="Select location of clean data.",
+        help="Select location of clean data relative from  `root`.",
     )
     parser.add_argument(
         "--projection",
         type=str,
-        help="Select location of projection.",
+        help="Select location of projection relative from `root`.",
     )
 
     parser.add_argument(
