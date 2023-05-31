@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default=os.path.join(root, "data/raw/coal_plant_data_raw.pkl"),
+        default=os.path.join(root, "data/raw/raw_values.pkl"),
         help="Select raw data to clean.",
     )
     parser.add_argument(
