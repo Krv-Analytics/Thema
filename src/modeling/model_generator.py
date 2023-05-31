@@ -7,17 +7,18 @@ import sys
 
 
 ########################################################################################################################
-# Update path to find modeling module 
-# TODO: Find a work around to not update path here 
-# Trouble is model module cannot be loaded with module/__init__ when calling this file, which is where paths are sorted for 
+# Update path to find modeling module
+# TODO: Find a work around to not update path here
+# Trouble is model module cannot be loaded with module/__init__ when calling this file, which is where paths are sorted for
 # the remaining files for this module
-#  
-from dotenv import load_dotenv 
-load_dotenv() 
+#
+from dotenv import load_dotenv
+
+load_dotenv()
 src = os.getenv("src")
 sys.path.append(src + "/modeling/")
 
-# imports from modeling module 
+# imports from modeling module
 from model_helper import (
     generate_model_filename,
     model_generator,
@@ -88,8 +89,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--min_intersection",
-        nargs="+",
-        default=[1],
+        default=1,
         type=int,
         help="Minimum intersection reuired between cluster elements to \
             form an edge in the graph representation.",
@@ -131,89 +131,62 @@ if __name__ == "__main__":
     # Given our hyperparameters, we generate graphs, curvature,
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
-    results = model_generator(
+    mapper = model_generator(
         tupper,
         n_cubes=n,
         perc_overlap=p,
         hdbscan_params=hdbscan_params,
-        min_intersection_vals=min_intersections,
+        min_intersection=args.min_intersection,
         verbose=args.Verbose,
     )
-
     # Unpack each graph (based on min_intersection) into it's own output file.
-    for val in min_intersections:
-        try:
-            mapper = results[val]
-            output = {"mapper": results[val]}
-            num_policy_groups = mapper.num_policy_groups
-            if num_policy_groups > len(mapper.tupper.clean):
-                print("More components than elements!!")
-                sys.exit(1)
-            output_dir = os.path.join(
-                root, f"data/models/{num_policy_groups}_policy_groups/"
+    output = {"mapper": mapper}
+    num_policy_groups = mapper.num_policy_groups
+    if num_policy_groups > len(mapper.tupper.clean):
+        print("More components than elements!!")
+        sys.exit(1)
+    output_dir = os.path.join(root, f"data/models/{num_policy_groups}_policy_groups/")
+    output_file = generate_model_filename(
+        args,
+        nbors,
+        d,
+        min_intersection=args.min_intersection,
+    )
+    # Check if output directory already exists
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
+
+    output["hyperparameters"] = (
+        n,
+        p,
+        nbors,
+        d,
+        hdbscan_params,
+        args.min_intersection,
+    )
+
+    out_dir_message = output_file
+    out_dir_message = "/".join(out_dir_message.split("/")[-2:])
+
+    if len(mapper.complex) > 0:
+        with open(output_file, "wb") as handle:
+            pickle.dump(
+                output,
+                handle,
+                protocol=pickle.HIGHEST_PROTOCOL,
             )
-            output_file = generate_model_filename(
-                args,
-                nbors,
-                d,
-                min_intersection=val,
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------------- \n\n"
             )
-            # Check if output directory already exists
-            if os.path.isdir(output_dir):
-                output_file = os.path.join(output_dir, output_file)
-            else:
-                os.makedirs(output_dir, exist_ok=True)
-                output_file = os.path.join(output_dir, output_file)
+            print("Successfully generated `JMapper`.")
+            print("Written to:")
+            print(out_dir_message)
 
-            output["hyperparameters"] = (
-                n,
-                p,
-                nbors,
-                d,
-                hdbscan_params,
-                val,
+            print(
+                "\n\n -------------------------------------------------------------------------------------- "
             )
-
-            out_dir_message = output_file
-            out_dir_message = "/".join(out_dir_message.split("/")[-2:])
-
-            if len(mapper.complex) > 0:
-                with open(output_file, "wb") as handle:
-                    pickle.dump(
-                        output,
-                        handle,
-                        protocol=pickle.HIGHEST_PROTOCOL,
-                    )
-                if args.Verbose:
-                    print("\n")
-                    print(
-                        "-------------------------------------------------------------------------------------- \n\n"
-                    )
-                    print("Successfully generated `JMapper`.")
-                    print("Written to:")
-                    print(out_dir_message)
-
-                    print(
-                        "\n\n -------------------------------------------------------------------------------------- "
-                    )
-
-        except KeyError:
-            if args.Verbose:
-                print(
-                    "These parameters resulted in an \
-                    empty Mapper representation."
-                )
-                print(f"n_cubes: {n}, perc_overlap: {p}")
-                print(f"(UMAP) n_neighbors: {nbors}, min_distance: {d}")
-                print(f"(HDBSCAN) min_cluster_size: {args.min_cluster_size}")
-                print()
-        finally:
-            if args.Verbose:
-                print(
-                    "These parameters resulted in an \
-                    empty Mapper representation."
-                )
-                print(f"n_cubes: {n}, perc_overlap: {p}")
-                print(f"(UMAP) n_neighbors: {nbors}, min_distance: {d}")
-                print(f"(HDBSCAN) min_cluster_size: {args.min_cluster_size}")
-                print()

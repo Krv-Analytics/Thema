@@ -18,11 +18,11 @@ def model_generator(
     n_cubes,
     perc_overlap,
     hdbscan_params,
-    min_intersection_vals: list,
+    min_intersection,
     verbose=False,
 ):
     """
-    Generate a Graph Clustering Model by fitting a JMapper.
+    Fit a graph model using JMapper.
 
     Parameters
     -----------
@@ -42,19 +42,18 @@ def model_generator(
         (m:int,M:int) where `m` is min_cluster_size
         and `M` is max_cluster_size.
 
-    min_interesection_vals: list
-        List of min_intersection values over which to calculate various
-        graph representations of a given JMapper fit.
+    min_interesection: int
+        Min_intersection value for generating a networkx graph
+        from a simplicial complex.
 
     verbose: bool, default is False
             If True, use kmapper logging levels.
 
     Returns
     -----------
-    results : dict
-        A dictionary with various models.
-        Keys are `min_intersection` parameters
-        Vals are JMappers.
+    j_mapper : <jmapper.JMapper>
+        A jmapper object with precomputed curvature values,
+        connected components, and .
 
     """
 
@@ -70,21 +69,16 @@ def model_generator(
 
     results = {}
     if len(j_mapper.complex["links"]) > 0:
-        for val in min_intersection_vals:
-            print(f"Here is my min_intersection value: {val}")
-            # Generate Graph
-            try:
-                j_mapper.to_networkx(min_intersection=val)
-                j_mapper.connected_components()
-                # Compute Curvature and Persistence Diagram
-                j_mapper.curvature = ollivier_ricci_curvature
-                j_mapper.calculate_homology()
-                results[val] = j_mapper
-            except:
-                j_mapper.complex == dict()
-                if verbose:
-                    print("Empty Mapper!")
-        return results
+        try:
+            j_mapper.to_networkx(min_intersection)
+            j_mapper.connected_components()
+            # Compute Curvature and Persistence Diagram
+            j_mapper.curvature = ollivier_ricci_curvature
+            j_mapper.calculate_homology()
+        except:
+            if verbose:
+                print("Empty Mapper!")
+        return j_mapper
     else:
         if verbose:
             print("\n")
