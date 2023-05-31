@@ -15,7 +15,7 @@
     "projector_random_seed" : 42,
     "path_to_projections" : "data/UMAP/*",
 
-    "model_min_cluster_size" : [6],
+    "model_min_cluster_sizes" : [6],
     "model_max_cluster_size" : 0,
     "model_nCubes" : [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     "model_percOverlap" : [0.3, 0.4, 0.5, 0.6, 0.7],

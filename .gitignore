@@ -10,4 +10,5 @@ data/
 *.html
 .dvc/client_ID.json
 .dvc/config
+params.json
 

@@ -5,7 +5,7 @@ import os
 import pickle
 import sys
 import time
-
+import json
 
 
 ######################################################################
@@ -24,14 +24,20 @@ if __name__ == "__main__":
 
     root = env()
     parser = argparse.ArgumentParser()
+    
+    JSON_PATH = os.getenv("JSON_PATH")
+    try: 
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    except: 
+        print("params.json file note found!")
 
     parser.add_argument(
         "-p",
         "--path",
         type=str,
         default=os.path.join(
-            root, "data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
-        ),
+            root, params_json["clean_data"]),
         help="Select location of local data set, as pulled from Mongo.",
     )
 
@@ -45,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dim",
         type=int,
-        default=2,
+        default=params_json["projector_dimension"],
         help="Set dimension of UMAP projection. ",
     )
 
@@ -109,7 +115,7 @@ if __name__ == "__main__":
         output_file = os.path.join(output_dir, output_file)
 
         # Output Message
-        out_dir_message = "/".join(output_file.split("/")[-2:])
+        rel_outdir = "/".join(output_file.split("/")[-3:])
 
         with open(output_file, "wb") as f:
             pickle.dump(results, f)
@@ -120,7 +126,7 @@ if __name__ == "__main__":
                 "-------------------------------------------------------------------------------------- \n\n"
             )
 
-            print(f"Finished projecting! Written to {out_dir_message}")
+            print(f"Finished projecting! Written to {rel_outdir}")
             print("\n")
             print(
                 "-------------------------------------------------------------------------------------- \n\n"

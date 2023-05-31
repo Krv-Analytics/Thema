@@ -28,13 +28,13 @@ if __name__ == "__main__":
         "-d",
         "--data",
         type=str,
-        default=params_json['raw_data'],
+        default=os.path.join(root, params_json['raw_data']),
         help="Select raw data to clean.",
     )
     parser.add_argument(
         "-s",
         "--scaler",
-        default=params_json['cleaning_scalar'],
+        default=os.path.join(root, params_json['cleaning_scalar']),
         help="Select `sklearn` compatible method to scale data.",
     )
     parser.add_argument(

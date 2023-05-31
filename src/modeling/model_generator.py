@@ -4,6 +4,7 @@ import argparse
 import os
 import pickle
 import sys
+import json
 
 
 ########################################################################################################################
@@ -34,15 +35,24 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     root = env()
+    
+    JSON_PATH = os.getenv("JSON_PATH")
+    try: 
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    except: 
+        print("params.json file note found!")
 
     parser.add_argument(
         "--raw",
         type=str,
+        default = params_json["raw_data"],
         help="Select location of raw data relative from `root`",
     )
     parser.add_argument(
         "--clean",
         type=str,
+        default = params_json["clean_data"],
         help="Select location of clean data relative from  `root`.",
     )
     parser.add_argument(
@@ -117,7 +127,7 @@ if __name__ == "__main__":
         raw, clean, projection = script_paths([args.raw, args.clean, args.projection])
     else:
         raw, clean, projection = args.raw, args.clean, args.projection
-
+    print(clean)
     # Initialize a `Tupper`
     tupper = Tupper(raw, clean, projection)
 

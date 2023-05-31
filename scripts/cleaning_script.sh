@@ -2,7 +2,6 @@
 # Cleaning script to drive src/processing/cleaning/cleaner.py
 # Note: Must be run from scripts/ directory! 
 
-# Load variables from .env file 
 
 # Load the .env file
 if [ -f ../.env ]; then
@@ -11,9 +10,7 @@ fi
 
 # Access Parameter Json file 
 if [ -n "$JSON_PATH" ]; then 
-    params=$(jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' "$JSON_PATH")
-    remove_columns=$(jq -r '.cleaning_remove_columns  | map("\"" + . + "\"") | join(",")' $JSON_PATH)        
-    eval "$params" 
+    params=$(jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' "$JSON_PATH")    eval "$params" 
 fi
 
 if [ ! -d "$root/data/clean" ]; then

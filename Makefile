@@ -1,6 +1,8 @@
 # Makefile
+include .env
+PARAMS_JSON := $(strip $(params))
 
-all: fetch-raw-data fetch-processed-data 
+run: process-data 
 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
@@ -24,27 +26,22 @@ fetch: fetch-raw-data fetch-processed-data
 fetch-raw-data:
 	python src/processing/pulling/data_generator.py -v
 
-fetch-processed-data:
-	python src/processing/cleaning/cleaner.py -v
+process-data:
+	cd scripts && ./cleaning_script.sh
 
 projections: 
 	cd scripts && ./projection_grid_search.sh
 
-##########################################################################################################################
-# Relative paths to data files from the scripts directory 
-# May consider setting these to be absolute paths 
-path_to_raw = "../data/raw/coal_plant_data_raw.pkl"
-path_to_clean = "../data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
-path_to_umap = "../data/projections/UMAP/*"
-##########################################################################################################################
-
 models: 
-	cd scripts && ./model_grid_search.sh ${path_to_raw} ${path_to_clean} ${path_to_umap}
+	cd scripts && ./model_grid_search.sh 
+
+
+# Cleaning commands for data fields 
 
 clean-raw-data: 
 	rm -f data/raw/* 
 
-clean-processed-data: 
+clean-process-data: 
 	rm -f data/clean/*
 
 clean-projections:
@@ -53,7 +50,11 @@ clean-projections:
 clean-models:
 	rm -f -r data/models/*
 
-clean: clean-raw-data clean-processed-data clean-projections 
+clean: clean-processed-data clean-projections 
 	rm -f -r data/
+
+clean_full : clean-raw-data clean-processed-data clean-projections 
+	rm -f -r data/
+
 
 
