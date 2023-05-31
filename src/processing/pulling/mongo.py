@@ -53,15 +53,15 @@ class Mongo:
             print("Failed MongoDB access!")
             print("Please check that MongoDB is properly configured in your .env file.")
 
-    def pull(self, database="cleaned", col="comprehensive_coal_data") -> pd.DataFrame:
+    def pull(self, database, col) -> pd.DataFrame:
         """Returns a complete DataFrame with readable values (not scaled, projected, or encoded).
 
         Parameters
         ----------
         database : str, optional
-            The name of the database on MongoDB (default is 'cleaned').
+            The name of the database on MongoDB.
         col : str, optional
-            The name of the collection in the database (default is 'coal_mapper').
+            The name of the collection in the database.
 
         Returns
         -------
@@ -73,9 +73,10 @@ class Mongo:
             collection = db[col]
             documents = list(collection.find())
             return pd.DataFrame(documents).drop(columns={"_id"})
-        except:
-            print("Failed MongoDB access!")
-            print("Please check that MongoDB is properly configured in your .env file.")
+        # TODO: make this error out gracefully
+        except KeyError:
+            print("Failed MongoDB access! Check your .env file.")
+            raise ValueError("Invalid Database and Collection combination.")
 
     def rename(self, database: str, col: str, new_name: str) -> None:
         """Renames a MongoDB collection (requires admin access to MongoDB).
