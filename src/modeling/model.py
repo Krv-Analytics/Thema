@@ -1,4 +1,4 @@
-# model.py 
+# model.py
 
 import os
 import sys
@@ -376,7 +376,7 @@ class Model:
                 label=None,
                 alpha=0.4,
             )
-        #ax.legend(loc="best", prop={"size": 8})
+        ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
         return fig
 
@@ -404,11 +404,9 @@ class Model:
                     go.Scatter(
                         x=cluster.T[0],
                         y=cluster.T[1],
-                        mode='markers',
-                        marker=dict(
-                            color=color_scale[int(g)]
-                        ),
-                        name=label
+                        mode="markers",
+                        marker=dict(color=color_scale[int(g)]),
+                        name=label,
                     )
                 )
         else:
@@ -423,11 +421,9 @@ class Model:
                     go.Scatter(
                         x=cluster.T[0],
                         y=cluster.T[1],
-                        mode='markers',
-                        marker=dict(
-                            color='grey'
-                        ),
-                        showlegend=False
+                        mode="markers",
+                        marker=dict(color="grey"),
+                        showlegend=False,
                     )
                 )
         if show_axis:
@@ -439,7 +435,8 @@ class Model:
                     borderwidth=1,
                 ),
                 width=800,
-                height=600)
+                height=600,
+            )
         else:
             fig.update_layout(
                 # title=f"UMAP: {parameters}",
@@ -447,22 +444,22 @@ class Model:
                 height=600,
                 showlegend=False,
                 xaxis=dict(
-                    tickcolor='white',
+                    tickcolor="white",
                     showticklabels=False,
                     showgrid=False,
                     zeroline=False,
-                    showline=False
+                    showline=False,
                 ),
                 yaxis=dict(
-                    tickcolor='white',
+                    tickcolor="white",
                     showticklabels=False,
                     showgrid=False,
                     zeroline=False,
-                    showline=False
-                )
-        )
-            
-        fig.update_layout(template='simple_white')
+                    showline=False,
+                ),
+            )
+
+        fig.update_layout(template="simple_white")
         return fig
 
     def visualize_curvature(self, bins="auto", kde=False):

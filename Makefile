@@ -33,7 +33,7 @@ projections:
 ##########################################################################################################################
 # Relative paths to data files from the scripts directory 
 # May consider setting these to be absolute paths 
-path_to_raw = "../data/raw/coal_plant_data_raw.pkl"
+path_to_raw = "../data/raw/esg_raw2017.pkl"
 path_to_clean = "../data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
 path_to_umap = "../data/projections/UMAP/*"
 ##########################################################################################################################
@@ -52,6 +52,9 @@ clean-projections:
 
 clean-models:
 	rm -f -r data/models/*
+
+clean-model-analysis:
+	rm -f -r data/model_analysis/*
 
 clean: clean-raw-data clean-processed-data clean-projections 
 	rm -f -r data/
