@@ -10,4 +10,4 @@ data/
 *.html
 .dvc/client_ID.json
 .dvc/config
-
+*.csv

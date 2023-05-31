@@ -7,7 +7,7 @@ This subdirectory handles all data processing. Our project supports interfacing 
 
 
 
-### 1: Pulling f
+### 1: Pulling
 We provide a `Mongo` class that handles the interface with MongoDB. If you are have your data stored on MongoDB and have configured your `.env` file (see `README`), you can use to execute `data_generator.py`, generating a local copy of our dataset:
 
 <!-- We should add ability to read env variables for Mongo colletion/database from make  -->
