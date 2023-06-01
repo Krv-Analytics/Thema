@@ -1472,6 +1472,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "python-log-indenter"
+version = "0.9"
+description = "A python LoggerAdapter class that provides automatic indenting for logging."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pytz"
 version = "2022.7.1"
 description = "World timezone definitions, modern and historical"
@@ -1977,7 +1985,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "29b5fa3d9c4dd945d398d42f4d9ad3d9054b253f16c9659e50af4819629af0d3"
+content-hash = "b427c0517f4c872f94a52b81c2b6e3eeff9231deb37d4285dd80dda9f1b58ed5"
 
 [metadata.files]
 anyio = [
@@ -3133,6 +3141,11 @@ python-dotenv = [
 python-json-logger = [
     {file = "python-json-logger-2.0.7.tar.gz", hash = "sha256:23e7ec02d34237c5aa1e29a070193a4ea87583bb4e7f8fd06d3de8264c4b2e1c"},
     {file = "python_json_logger-2.0.7-py3-none-any.whl", hash = "sha256:f380b826a991ebbe3de4d897aeec42760035ac760345e57b812938dc8b35e2bd"},
+]
+python-log-indenter = [
+    {file = "python_log_indenter-0.9-py3-none-any.whl", hash = "sha256:25bfdb28dc8eac586ac15d19a0e4374b0deb9cbcf1208c6475388c457c1e1ab4"},
+    {file = "python_log_indenter-0.9.tar.gz", hash = "sha256:7951c05e4564462136bf163a7d1d3406791371aa1fee969cfc6e2c8e906d4b7c"},
+    {file = "python_log_indenter-0.9.zip", hash = "sha256:9d2c0f79f07649b21efce98a3f508a8bd951d933d849fee400f1f958ac0665c9"},
 ]
 pytz = [
     {file = "pytz-2022.7.1-py2.py3-none-any.whl", hash = "sha256:78f4f37d8198e0627c5f1143240bb0206b8691d8d7ac6d78fee88b78733f8c4a"},

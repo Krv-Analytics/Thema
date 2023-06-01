@@ -31,6 +31,7 @@ scikit-learn = "^1.2.1"
 seaborn = "^0.12.2"
 giotto-tda = "^0.6.0"
 hdbscan = "^0.8.29"
+python-log-indenter = "^0.9"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
