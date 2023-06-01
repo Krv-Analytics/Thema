@@ -2,11 +2,11 @@
 include .env
 PARAMS_JSON := $(strip $(params))
 
-run: process-data 
+
 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
-	python scripts/setup.py
+	python scripts/python/setup.py
 	@echo "Installing necessary dependencies..." 
 	poetry run pip install python-dotenv pandas pymongo scikit-learn umap-learn hdbscan kmapper networkx matplotlib seaborn giotto-tda
 
@@ -27,13 +27,23 @@ fetch-raw-data:
 	python src/processing/pulling/data_generator.py -v
 
 process-data:
-	cd scripts && ./cleaning_script.sh
+	cd scripts/bash && ./cleaner.sh
 
 projections: 
-	cd scripts && ./projection_grid_search.sh
+	cd scripts/bash && ./projector.sh
 
 models: 
-	cd scripts && ./model_grid_search.sh 
+	cd scripts/bash && ./model_generator.sh 
+
+histogram:
+	cd scripts/bash && ./histogram.sh
+dendrogram:
+	cd scripts/bash && ./dendrogram.sh
+model-selection:
+	cd scripts/bash && ./model_selector.sh
+
+
+
 
 
 # Cleaning commands for data fields 
@@ -41,7 +51,7 @@ models:
 clean-raw-data: 
 	rm -f data/raw/* 
 
-clean-process-data: 
+clean-processed-data: 
 	rm -f data/clean/*
 
 clean-projections:
@@ -49,6 +59,9 @@ clean-projections:
 
 clean-models:
 	rm -f -r data/models/*
+
+clean-model-analysis:
+	rm -f -r data/model_analysis/
 
 clean: clean-processed-data clean-projections 
 	rm -f -r data/

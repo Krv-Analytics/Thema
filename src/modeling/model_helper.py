@@ -20,6 +20,7 @@ def model_generator(
     hdbscan_params,
     min_intersection,
     verbose=False,
+    # random_seed,
 ):
     """
     Fit a graph model using JMapper.
@@ -64,7 +65,7 @@ def model_generator(
         max_cluster_size=max_cluster_size,
     )
     # Configure JMapper
-    j_mapper = JMapper(tupper)
+    j_mapper = JMapper(tupper)  # TODO: incorporate random seed
     j_mapper.fit(n_cubes, perc_overlap, clusterer)
 
     results = {}
