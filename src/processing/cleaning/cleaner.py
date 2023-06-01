@@ -16,11 +16,11 @@ if __name__ == "__main__":
     load_dotenv()
     root = os.getenv("root")
 
-    JSON_PATH = os.getenv("JSON_PATH")
-    try:
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
         with open(JSON_PATH, "r") as f:
             params_json = json.load(f)
-    except:
+    else:
         print("params.json file note found!")
 
     parser.add_argument(
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--scaler",
-        default=os.path.join(root, params_json["cleaning_scalar"]),
+        default=params_json["cleaning_scalar"],
         help="Select `sklearn` compatible method to scale data.",
     )
     parser.add_argument(
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    raw_data_path = os.path.join(root + args.data)
+    raw_data_path = os.path.join(root, args.data)
     # Read in Raw Data
     assert os.path.isfile(raw_data_path), "Invalid path to Raw Data"
 
