@@ -4,11 +4,10 @@ import os
 import pickle
 from sklearn.preprocessing import StandardScaler
 from dotenv import load_dotenv
-import json 
+import json
 import ast
 
 from cleaner_helper import data_cleaner, clean_data_filename
-
 
 
 if __name__ == "__main__":
@@ -18,30 +17,30 @@ if __name__ == "__main__":
     root = os.getenv("root")
 
     JSON_PATH = os.getenv("JSON_PATH")
-    try: 
+    try:
         with open(JSON_PATH, "r") as f:
             params_json = json.load(f)
-    except: 
+    except:
         print("params.json file note found!")
 
     parser.add_argument(
         "-d",
         "--data",
         type=str,
-        default=os.path.join(root, params_json['raw_data']),
+        default=os.path.join(root, params_json["raw_data"]),
         help="Select raw data to clean.",
     )
     parser.add_argument(
         "-s",
         "--scaler",
-        default=os.path.join(root, params_json['cleaning_scalar']),
+        default=os.path.join(root, params_json["cleaning_scalar"]),
         help="Select `sklearn` compatible method to scale data.",
     )
     parser.add_argument(
         "-e",
         "--encoding",
         type=str,
-        default=params_json['cleaning_encoding'],
+        default=params_json["cleaning_encoding"],
         help="Method for encoding categorical fields.",
     )
 
@@ -49,7 +48,7 @@ if __name__ == "__main__":
         "-r",
         "--remove_columns",
         type=list,
-        default=params_json['cleaning_remove_columns'],
+        default=params_json["cleaning_remove_columns"],
         help="Specify list of columns to drop.",
     )
     parser.add_argument(
@@ -103,18 +102,16 @@ if __name__ == "__main__":
     with open(output_file, "wb") as f:
         pickle.dump(output, f)
 
-    
     # Populating parameter file with location of clean data
-    
-    params_json["clean_data"] = rel_outfile 
 
-    try: 
-        with open(JSON_PATH, "w") as f: 
+    params_json["clean_data"] = rel_outfile
+
+    try:
+        with open(JSON_PATH, "w") as f:
             json.dump(params_json, f, indent=4)
     except:
         print("There was a problem writing to your parameter file!")
-    
-    
+
     if args.Verbose:
         print(
             "\n\n-------------------------------------------------------------------------------- \n\n"

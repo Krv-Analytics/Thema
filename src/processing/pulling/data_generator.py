@@ -9,24 +9,21 @@ from mongo import Mongo
 
 if __name__ == "__main__":
 
+    # Load Mongo Configuration from .env
     load_dotenv()
     client = os.getenv("mongo_client")
     root = os.getenv("root")
+    database = os.getenv("mongo_database")
+    collection = os.getenv("mongo_collection")
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "-d",
-        "--database",
-        type=str,
-        default="cleaned",
-        help="Select database to pull from Mongo.",
-    )
-    parser.add_argument(
-        "-c",
-        "--col",
-        type=str,
-        default="comprehensive_coal_data",
-        help="Select collection to pull from within `--database`.",
+        "-L",
+        "--local",
+        default=False,
+        action="store_true",
+        help="If set, this script only builds an empty data directory.",
     )
     parser.add_argument(
         "-v",
@@ -43,16 +40,24 @@ if __name__ == "__main__":
     if not os.path.isdir(output_dir):
         print("Creating local data directory...")
         os.makedirs(output_dir, exist_ok=True)
+
+    if args.local:
+        exit(1)
     try:
         mongo_object = Mongo(client_id=client)
-    except:
-        print("Failed Connect to Mongo Data Base. Please make sure you have filled in the mongo_client field in .env ")
+
+    # TODO: make this error out gracefully
+    except ValueError:
+        print(
+            "Failed Connect to Mongo Data Base. Please make sure you have filled in the mongo_client field in .env "
+        )
         exit(1)
+
     file = get_raw_data(
         mongo_object=mongo_object,
         out_dir=output_dir,
-        data_base=args.database,
-        col=args.col,
+        data_base=database,
+        col=collection,
     )
 
     output_path = os.path.join(output_dir, file)
@@ -66,7 +71,7 @@ if __name__ == "__main__":
             "\n\n-------------------------------------------------------------------------------- \n\n"
         )
         print(
-            f"Successfully pulled from the `{args.col}` collection in the `{args.database}` Mongo database!"
+            f"Successfully pulled from the `{collection}` collection in the `{database}` Mongo database!"
         )
         print(f"Written to {out_dir_message}.pkl")
 

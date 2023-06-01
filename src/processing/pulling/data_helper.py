@@ -37,7 +37,7 @@ def get_raw_data(
     """
     df = mongo_object.pull(data_base, col)
 
-    file = "coal_plant_data_raw"
+    file = "raw_values"
 
     output_path = os.path.join(out_dir, file)
     # Generate Output Files
