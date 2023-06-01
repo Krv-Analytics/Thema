@@ -29,7 +29,7 @@ Otherwise, we invite you to edit the `Makefile` to match your own naming convent
 ### 2: Cleaning
 Now that you have a local copy of your `raw` data, you can run the `cleaner.py` driver via:
 ```
-make fetch-processed-data
+make process-data
 ``` 
 to clean your data. This adds a `clean` pickle file to `data/clean`. The functionality for cleaning is contained in `cleaner_helper.py`. Our cleaning consists of filtering columns, dropping `NaNs`, scaling, and encoding categorical variables. Our methods for this study are defaulted in `cleaner.py`, but these can be specified as needed using command line arguments and we hope it is easy to expand functionality if need be by adapting the helper functions.
 
