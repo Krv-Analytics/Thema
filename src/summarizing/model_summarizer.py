@@ -14,8 +14,14 @@ from plotly.subplots import make_subplots
 
 from math import ceil
 
-class Model_viz:
+class model_summarizer:
     """A visualization wrapper for the Model class
+
+    Allows for the creation of quick/intuitive summary graphics to help aid in 
+    extracting meaning from models.
+
+    Currently supports analysis on a single mapper, no comparison functionality yet.
+
     """
 
     def __init__(self, model: md.Model):
@@ -181,7 +187,7 @@ class Model_viz:
         # Show the subplot
         return fig
     
-    def visualize_cc(self, pgn:int, show_all=False, col_list = [], raw_data=True):
+    def visualize_cc(self, show_all=True, col_list = [], raw_data=True):
         # column labels for showing boxplots of all columns
         if raw_data:
             if show_all:
