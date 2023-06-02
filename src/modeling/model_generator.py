@@ -4,6 +4,7 @@ import argparse
 import os
 import pickle
 import sys
+import json
 
 
 ########################################################################################################################
@@ -22,7 +23,6 @@ sys.path.append(src + "/modeling/")
 from model_helper import (
     generate_model_filename,
     model_generator,
-    env,
     script_paths,
 )
 from tupper import Tupper
@@ -33,31 +33,43 @@ from tupper import Tupper
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    root = env()
+    root = os.getenv("root")
 
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
     parser.add_argument(
+        "-r",
         "--raw",
-        type=str,
-        help="Select location of raw data set, as pulled from Mongo.",
+        default=params_json["raw_data"],
+        help="Select location of raw data relative from `root`",
     )
     parser.add_argument(
+        "-c",
         "--clean",
         type=str,
-        help="Select location of clean data.",
+        default=params_json["clean_data"],
+        help="Select location of clean data relative from  `root`.",
     )
     parser.add_argument(
+        "-D",
         "--projection",
         type=str,
-        help="Select location of projection.",
+        help="Select location of projection relative from `root`.",
     )
 
     parser.add_argument(
+        "-m",
         "--min_cluster_size",
         default=4,
         type=int,
         help="Sets `min_cluster_size`, a parameter for HDBSCAN.",
     )
     parser.add_argument(
+        "-M",
         "--max_cluster_size",
         default=0,
         type=int,
@@ -88,17 +100,12 @@ if __name__ == "__main__":
         help="Percentage overlap of cubes in the cover.",
     )
     parser.add_argument(
+        "-I",
         "--min_intersection",
         default=1,
         type=int,
         help="Minimum intersection reuired between cluster elements to \
             form an edge in the graph representation.",
-    )
-    parser.add_argument(
-        "--script",
-        default=False,
-        action="store_true",
-        help="If set, we update paths to match the `scripts` dir.",
     )
 
     parser.add_argument(
@@ -111,15 +118,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     this = sys.modules[__name__]
-
-    # Adjust Paths when running model_grid_search.sh
-    if args.script:
-        raw, clean, projection = script_paths([args.raw, args.clean, args.projection])
-    else:
-        raw, clean, projection = args.raw, args.clean, args.projection
-
     # Initialize a `Tupper`
-    tupper = Tupper(raw, clean, projection)
+    tupper = Tupper(args.raw, args.clean, args.projection)
 
     nbors, d, dimension = tupper.get_projection_parameters()
 
@@ -131,6 +131,8 @@ if __name__ == "__main__":
     # Given our hyperparameters, we generate graphs, curvature,
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
+
+    # TODO: incoporate random seed
     mapper = model_generator(
         tupper,
         n_cubes=n,

@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import pickle
+import json
 from dotenv import load_dotenv
 
 from model_clusterer_helper import (
@@ -13,18 +14,24 @@ from model_clusterer_helper import (
 
 load_dotenv()
 src = os.getenv("src")
-root = os.getenv("root")
 sys.path.append(src)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
+    root = os.getenv("root")
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
 
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default="landscape",
+        default=params_json["dendrogram_metric"],
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
 
@@ -40,7 +47,7 @@ if __name__ == "__main__":
         "-d",
         "--distance_threshold",
         type=float,
-        default=0.5,
+        default=params_json["dendrogram_cut"],
         help="Select distance threshold for agglomerative clustering model.",
     )
 
@@ -48,8 +55,8 @@ if __name__ == "__main__":
         "-p",
         "--dendrogram_levels",
         type=int,
-        default=3,
-        help="Numnber of levels to see in dendrogram plot.",
+        default=params_json["dendrogram_levels"],
+        help="Number of levels to see in dendrogram plot.",
     )
 
     parser.add_argument(

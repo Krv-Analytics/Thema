@@ -3,15 +3,17 @@
 import argparse
 import os
 import pickle
+from dotenv import load_dotenv
 import sys
 import time
-
+import json
 
 
 ######################################################################
-# Silencing UMAP Warnings 
-import warnings 
+# Silencing UMAP Warnings
+import warnings
 from numba import NumbaDeprecationWarning
+
 warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 
@@ -22,16 +24,22 @@ from projector_helper import env, projection_driver, projection_file_name
 
 if __name__ == "__main__":
 
-    root = env()
     parser = argparse.ArgumentParser()
+    load_dotenv()
+    root = os.getenv("root")
+
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
 
     parser.add_argument(
-        "-p",
-        "--path",
+        "-c",
+        "--clean_data",
         type=str,
-        default=os.path.join(
-            root, "data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl"
-        ),
+        default=os.path.join(root, params_json["clean_data"]),
         help="Select location of local data set, as pulled from Mongo.",
     )
 
@@ -45,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dim",
         type=int,
-        default=2,
+        default=params_json["projector_dimension"],
         help="Set dimension of UMAP projection. ",
     )
 
@@ -66,9 +74,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--random",
-        default=False,
-        action='store_true',
+        "--random_seed",
+        default=params_json["projector_random_seed"],
+        action="store_true",
         help="If set, will generate projections with a random seed (if applicable)",
     )
 
@@ -83,33 +91,40 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    assert os.path.isfile(args.path), "Invalid Input Data"
+    assert os.path.isfile(args.clean_data), "Invalid Input Data"
     # Load Dataframe
-    with open(args.path, "rb") as f:
-        reference = pickle.load(f)
+    with open(args.clean_data, "rb") as clean:
+        reference = pickle.load(clean)
         df = reference["clean_data"]
     output_dir = os.path.join(root, "data/projections/UMAP/")
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    random_seed = 42
-    if args.random:
-        random_seed = int(time.time())
+    if args.random_seed is None:
+        args.random_seed = int(time.time())
 
     if args.umap:
         # Generate Projection
         results = projection_driver(
-            df, n=args.n_neighbors, d=args.min_dist, dimensions=args.dim, seed=random_seed,
+            df,
+            n=args.n_neighbors,
+            d=args.min_dist,
+            dimensions=args.dim,
+            seed=args.random_seed,
         )
 
         output_file = projection_file_name(
-            projector="UMAP", n=args.n_neighbors, d=args.min_dist, dimensions=2, seed = random_seed
+            projector="UMAP",
+            n=args.n_neighbors,
+            d=args.min_dist,
+            dimensions=2,
+            seed=args.random_seed,
         )
         output_file = os.path.join(output_dir, output_file)
 
         # Output Message
-        out_dir_message = "/".join(output_file.split("/")[-2:])
+        rel_outdir = "/".join(output_file.split("/")[-3:])
 
         with open(output_file, "wb") as f:
             pickle.dump(results, f)
@@ -120,7 +135,7 @@ if __name__ == "__main__":
                 "-------------------------------------------------------------------------------------- \n\n"
             )
 
-            print(f"Finished projecting! Written to {out_dir_message}")
+            print(f"Finished projecting! Written to {rel_outdir}")
             print("\n")
             print(
                 "-------------------------------------------------------------------------------------- \n\n"

@@ -4,8 +4,11 @@ import os
 import pickle
 from sklearn.preprocessing import StandardScaler
 from dotenv import load_dotenv
+import json
+import ast
 
 from cleaner_helper import data_cleaner, clean_data_filename
+
 
 if __name__ == "__main__":
 
@@ -13,24 +16,31 @@ if __name__ == "__main__":
     load_dotenv()
     root = os.getenv("root")
 
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
+
     parser.add_argument(
         "-d",
         "--data",
         type=str,
-        default=os.path.join(root, "data/raw/raw_values.pkl"),
+        default=os.path.join(root, params_json["raw_data"]),
         help="Select raw data to clean.",
     )
     parser.add_argument(
         "-s",
         "--scaler",
-        default="standard_scaler",
+        default=params_json["cleaning_scalar"],
         help="Select `sklearn` compatible method to scale data.",
     )
     parser.add_argument(
         "-e",
         "--encoding",
         type=str,
-        default="integer",
+        default=params_json["cleaning_encoding"],
         help="Method for encoding categorical fields.",
     )
 
@@ -38,23 +48,7 @@ if __name__ == "__main__":
         "-r",
         "--remove_columns",
         type=list,
-        default=[
-            "ORISPL",
-            "coal_FUELS",
-            "NONcoal_FUELS",
-            "ret_DATE",
-            "PNAME",
-            "FIPSST",
-            "PLPRMFL",
-            "FIPSCNTY",
-            "LAT",
-            "LON",
-            "Utility ID",
-            "Entity Type",
-            "STCLPR",
-            "STGSPR",
-            "SECTOR",
-        ],
+        default=params_json["cleaning_remove_columns"],
         help="Specify list of columns to drop.",
     )
     parser.add_argument(
@@ -67,12 +61,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    raw_data_path = os.path.join(root, args.data)
     # Read in Raw Data
-    assert os.path.isfile(args.data), "Invalid path to Raw Data"
+    assert os.path.isfile(raw_data_path), "Invalid path to Raw Data"
 
-    with open(args.data, "rb") as raw_data:
+    with open(raw_data_path, "rb") as raw_data:
         df = pickle.load(raw_data)
-
     assert (
         args.scaler == "standard_scaler"
     ), "Currently we only support `StandardScaler`"
@@ -99,18 +93,30 @@ if __name__ == "__main__":
         os.makedirs(output_dir, exist_ok=True)
 
     output_file = os.path.join(output_dir, output_file)
-    out_dir_message = "/".join(output_file.split("/")[-2:])
+
+    # TODO: WRITE THIS filename to the json file
+    rel_outfile = "/".join(output_file.split("/")[-3:])
 
     output = {"clean_data": clean_data, "dropped_columns": args.remove_columns}
     # Write to pickle
     with open(output_file, "wb") as f:
         pickle.dump(output, f)
 
+    # Populating parameter file with location of clean data
+
+    params_json["clean_data"] = rel_outfile
+
+    try:
+        with open(JSON_PATH, "w") as f:
+            json.dump(params_json, f, indent=4)
+    except:
+        print("There was a problem writing to your parameter file!")
+
     if args.Verbose:
         print(
             "\n\n-------------------------------------------------------------------------------- \n\n"
         )
-        print(f"Finished cleaning data! Written to {out_dir_message}")
+        print(f"Finished cleaning data! Written to {rel_outfile}")
 
         print(
             "\n\n-------------------------------------------------------------------------------- "

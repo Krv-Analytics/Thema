@@ -6,6 +6,7 @@ import sys
 import os
 import pickle
 from dotenv import load_dotenv
+import json
 
 from model_selector_helper import (
     read_graph_clustering,
@@ -15,24 +16,30 @@ from model_selector_helper import (
 
 load_dotenv()
 src = os.getenv("src")
-root = os.getenv("root")
 sys.path.append(src)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
+    root = os.getenv("root")
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
 
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default="landscape",
+        default=params_json["dendrogram_metric"],
         help="Select metric that defines the precomputed agglomerative clustering model.",
     )
 
     parser.add_argument(
         "-n",
-        "--num_policy_groups",
+        "--num_groups",
         type=int,
         default=2,
         help="Select folder of mapper objects to compare,identified by the number of policy groups.",
@@ -49,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--coverage_filter",
         type=float,
-        default=0.9,
+        default=params_json["histogram_coverage"],
         help="A minimum model coverage for visualizing a histogram. Only set when using '-H' tag as well.",
     )
 
@@ -65,7 +72,7 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     # Read in Keys and distances from pickle file
-    n = args.num_policy_groups
+    n = args.num_groups
 
     # Visualize Model Distribution
     if args.histogram:

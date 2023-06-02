@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import pickle
 import sys
@@ -14,19 +15,25 @@ sys.path.append(src)
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-
+    root = os.getenv("root")
+    JSON_PATH = os.getenv("params")
+    if os.path.isfile(JSON_PATH):
+        with open(JSON_PATH, "r") as f:
+            params_json = json.load(f)
+    else:
+        print("params.json file note found!")
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default="landscape",
+        default=params_json["dendrogram_metric"],
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
     parser.add_argument(
         "-f",
         "--coverage_filter",
         type=float,
-        default=0.8,
+        default=params_json["histogram_coverage"],
         help="Select the percentage of unqiue samples that need to be covered by Mapper's fit.",
     )
 
@@ -64,34 +71,33 @@ if __name__ == "__main__":
     )
     results = {"keys": keys, "distances": distances}
 
-    if args.save:
-        distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
+    distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
 
-        out_dir_message = f"{distance_file} successfully written."
+    out_dir_message = f"{distance_file} successfully written."
 
-        output_dir = os.path.join(
-            root,
-            f"data/model_analysis/distance_matrices/{n}_policy_groups/",
+    output_dir = os.path.join(
+        root,
+        f"data/model_analysis/distance_matrices/{n}_policy_groups/",
+    )
+
+    # Check if output directory already exists
+    if os.path.isdir(output_dir):
+        distance_file = os.path.join(output_dir, distance_file)
+
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        distance_file = os.path.join(output_dir, distance_file)
+
+    with open(distance_file, "wb") as handle:
+        pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    if args.Verbose:
+        print("\n")
+        print(
+            "-------------------------------------------------------------------------------- \n\n"
         )
+        print(f"{out_dir_message}")
 
-        # Check if output directory already exists
-        if os.path.isdir(output_dir):
-            distance_file = os.path.join(output_dir, distance_file)
-
-        else:
-            os.makedirs(output_dir, exist_ok=True)
-            distance_file = os.path.join(output_dir, distance_file)
-
-        with open(distance_file, "wb") as handle:
-            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        if args.Verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------- \n\n"
-            )
-            print(f"{out_dir_message}")
-
-            print(
-                "\n\n -------------------------------------------------------------------------------- "
-            )
+        print(
+            "\n\n -------------------------------------------------------------------------------- "
+        )
