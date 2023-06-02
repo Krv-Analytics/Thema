@@ -15,16 +15,13 @@ import plotly.express as px
 from scipy.cluster.hierarchy import dendrogram, linkage
 import seaborn as sns
 
-
 from umap import UMAP
 import hdbscan
-
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics.pairwise import pairwise_distances_argmin
 from sklearn.decomposition import PCA
-
 
 pio.renderers.default = "browser"
 load_dotenv
@@ -67,93 +64,6 @@ def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs)
     return d
 
 
-def connected_component_heatmaps(self):
-    viz = self.mapper.data
-
-    targetCols = [
-        "NAMEPCAP",
-        "GENNTAN",
-        "weighted_coal_CAPFAC",
-        "weighted_coal_AGE",
-        "Retrofit Costs",
-        "forwardCosts",
-        "PLSO2AN",
-    ]
-
-    # mean data
-    viz2 = viz.groupby("cluster_labels", as_index=False).mean()[targetCols]
-    c_labels = viz.groupby("cluster_labels").mean().reset_index()["cluster_labels"]
-    scaler = MinMaxScaler()
-    data = scaler.fit_transform(viz2)
-    df = pd.DataFrame(data, columns=list(viz2.columns)).set_index(c_labels)
-
-    #% of max data
-    # TODO: fix the below to append 'cluster_labels' to targetCols so targetCols can be a user input
-    df2 = viz[
-        [
-            "NAMEPCAP",
-            "GENNTAN",
-            "weighted_coal_CAPFAC",
-            "weighted_coal_AGE",
-            "Retrofit Costs",
-            "forwardCosts",
-            "PLSO2AN",
-            "cluster_labels",
-        ]
-    ]
-    df2 = df2.groupby(["cluster_labels"]).sum() / df2[targetCols].sum()
-
-    fig = make_subplots(
-        rows=1,
-        cols=2,
-        vertical_spacing=0.1,
-        subplot_titles=(
-            "Connected Component Averages",
-            "Connected Component % of Total",
-        ),
-        specs=[[{"type": "Heatmap"}, {"type": "Heatmap"}]],
-        y_title="Cluster Label",
-    )
-
-    col = 1
-    for df in [df, df2]:
-        if col == 1:
-            text = viz2.round(2).values.tolist()
-            texttemplate = "%{text}"
-        else:
-            text = df.round(2).values.tolist()
-            texttemplate = ("%{text}") + "%"
-
-        fig.add_trace(
-            go.Heatmap(
-                x=df.columns.to_list(),
-                y=df.index.to_list(),
-                z=df.values.tolist(),
-                text=text,
-                colorscale="rdylgn_r",
-                xgap=2,
-                ygap=2,
-                texttemplate=texttemplate,
-            ),
-            row=1,
-            col=col,
-        )
-        col = col + 1
-
-    fig.update_xaxes(tickangle=45)
-    fig.update_layout(font=dict(size=10))
-    fig.update_traces(showscale=False)
-    print(
-        "Number of Plants in each Connected Component (-1 indicates not displayed on mapper):\n"
-    )
-    print(
-        viz.groupby("cluster_labels")
-        .count()
-        .rename(columns={"NAMEPCAP": "#CoalPlants"})["#CoalPlants"]
-    )
-    pio.show(fig)
-
-
 def UMAP_grid(df, dists, neighbors):
     """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations
 
@@ -177,21 +87,6 @@ def UMAP_grid(df, dists, neighbors):
     print(
         "-------------------------------------------------------------------------------- \n"
     )
-
-    # define custom color scale
-    map_colors = [
-        [0.0, "#043e4a"],
-        [0.1, "#005f73"],
-        [0.2, "#0a9396"],
-        [0.3, "#94d2bd"],
-        [0.4, "#e9d8a6"],
-        [0.5, "#ee9b00"],
-        [0.6, "#ca6702"],
-        [0.7, "#bb3e03"],
-        [0.8, "#e82f1e"],
-        [0.9, "#a30309"],
-        [1.0, "#780a23"],
-    ]
 
     # generate subplot titles
     fig = make_subplots(
@@ -305,74 +200,6 @@ def UMAP_grid(df, dists, neighbors):
 
     return file_name
 
-
-#### IMPORTANT FUNCTIONS
-def ORISPLmerge(df1, df2):
-    return df1.merge(df2, how="left", left_on="ORISPL", right_on="ORISPL")
-
-
-######
-#### OTHER FUNCTIONS
-######
-
-
-def coal_PCA(df: str):
-    """
-    Graphs a Principle component analysis with 2 principle components
-    df can only consist of numbers, no words/labels. Ensure you supply a subset of the dataset that conforms to this restriction"""
-    x = df
-    y = StandardScaler().fit_transform(x)
-
-    # apply PCA
-    pca = PCA(n_components=2)
-    X = pca.fit_transform(y)
-
-    loadings = pd.DataFrame(
-        pca.components_.T, columns=["PC1", "PC2"], index=list(x.columns)
-    )
-    loadings
-
-    def loading_plot(coeff, labels):
-        n = coeff.shape[0]
-        for i in range(n):
-            plt.arrow(
-                0,
-                0,
-                coeff[i, 0],
-                coeff[i, 1],
-                head_width=0.05,
-                head_length=0.05,
-                color="#21918C",
-                alpha=0.5,
-            )
-            plt.text(
-                coeff[i, 0] * 1.15,
-                coeff[i, 1] * 1.15,
-                labels[i],
-                color="#21918C",
-                ha="center",
-                va="center",
-            )
-        plt.xlim(-1, 1)
-        plt.ylim(-1, 1)
-        plt.xlabel("PC1")
-        plt.ylabel("PC2")
-        plt.grid()
-
-    fig, ax = plt.subplots(figsize=(7, 7))
-    loading_plot(pca.components_.T, list(x.columns))
-
-
-def mapper_labels(df: pd.DataFrame):
-
-    """This function takes in dataframe to use as the data labels for the mapper.
-    Returns a dataframe
-    """
-
-    names = df.to_numpy()
-    return names
-
-
 def view_kmeans(df: str, numclusters: int):
 
     # data
@@ -474,60 +301,3 @@ def view_kmeans(df: str, numclusters: int):
     ax.set_yticks(())
 
     plt.show()
-
-
-def percentCO2reduxMap(mapdf: pd.DataFrame, all: pd.DataFrame):
-    def make_chloropheth(subset: pd.DataFrame, all: pd.DataFrame):
-        state_total = (
-            all[all["decom"] == 0].groupby("PSTATABB")["PLCO2AN"].sum().reset_index()
-        )
-        state_reduction = (
-            subset[subset["decom"] == 0]
-            .groupby("PSTATABB")["PLCO2AN"]
-            .sum()
-            .reset_index()
-        )
-        state_total = state_total.merge(
-            state_reduction, how="left", on="PSTATABB"
-        ).fillna(0)
-        state_total["percentRedux"] = (
-            state_total["PLCO2AN_y"] / state_total["PLCO2AN_x"]
-        )
-        return state_total
-
-    state_total = make_chloropheth(mapdf, all)
-
-    num = len(mapdf)
-    redux = int(
-        100 * (mapdf["PLCO2AN"].sum() / all[all["decom"] == 0]["PLCO2AN"].sum())
-    )
-
-    fig = go.Figure(
-        data=[
-            go.Choropleth(
-                locations=state_total["PSTATABB"],  # Spatial coordinates
-                z=state_total["percentRedux"].astype(float),  # Data to be color-coded
-                locationmode="USA-states",  # set of locations match entries in `locations`
-                colorscale="earth",
-                colorbar_title="% State Reduction",
-            ),
-            go.Scattergeo(
-                lon=mapdf["LON"],
-                lat=mapdf["LAT"],
-                text=mapdf["label"],
-                marker=dict(
-                    color=list(range(0)),
-                    colorscale="viridis",
-                    size=mapdf["PLNGENAN"] / 400000,
-                ),
-                # marker_color = df['CO2limits'],
-            ),
-        ]
-    )
-
-    fig.update_layout(
-        title_text=f"{num} Plant Closures - {redux}% CO2 Reduction Nationwide",
-        geo_scope="usa",  # limite map scope to USA
-    )
-
-    fig.show()
