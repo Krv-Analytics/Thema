@@ -21,7 +21,7 @@ if __name__ == "__main__":
         print("params.json file note found!")
 
     N_neighbors = params_json["projector_Nneighbors"]
-    min_Dists = params_json["projetor_minDists"]
+    min_Dists = params_json["projector_minDists"]
 
     projector = os.path.join(src, "processing/projecting/projector.py")
     log.info("Computing UMAP Projection Grid Search!")
