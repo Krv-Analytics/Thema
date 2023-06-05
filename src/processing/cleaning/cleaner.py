@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    raw_data_path = os.path.join(root, args.data)
+    raw_data_path = root + args.data
     # Read in Raw Data
     assert os.path.isfile(raw_data_path), "Invalid path to Raw Data"
 
