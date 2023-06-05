@@ -143,9 +143,13 @@ if __name__ == "__main__":
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
     output = {"mapper": mapper}
-    num_policy_groups = mapper.num_policy_groups
-    if num_policy_groups > len(mapper.tupper.clean):
-        print("More components than elements!!")
+    try:
+        num_policy_groups = mapper.num_policy_groups
+        if num_policy_groups > len(mapper.tupper.clean):
+            print("More components than elements!!")
+            sys.exit(1)
+    except:
+        print("This configuration resulted in a null mapper")
         sys.exit(1)
     output_dir = os.path.join(root, f"data/models/{num_policy_groups}_policy_groups/")
     output_file = generate_model_filename(
