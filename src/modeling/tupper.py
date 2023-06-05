@@ -33,9 +33,9 @@ class Tupper:
         # Get relative file paths
         load_dotenv()
         root = os.getenv("root")
-        raw_abs = os.path.join(root, raw)
-        clean_abs = os.path.join(root, clean)
-        projection_abs = os.path.join(root, projection)
+        raw_abs = root + raw
+        clean_abs = root + clean
+        projection_abs = root + projection
 
         self._raw = None
         self._clean = None
