@@ -12,6 +12,6 @@ if [ -n "$JSON_PATH" ]; then
 fi
 
 
-# Calling cleaning script from params.json 
+# Calling model_selector script  
 poetry run python ../../src/modeling/model_selector.py -H
 

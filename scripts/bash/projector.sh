@@ -21,8 +21,7 @@ echo -e
 echo "##################################################################################"
 echo -e
 echo -e
-echo "Finished projection grid search!"
-echo "See data/projections/UMAP/ to view the projection pickle files."
+echo "Completed projection grid search!"
 echo -e
 echo -e
 echo "##################################################################################"
