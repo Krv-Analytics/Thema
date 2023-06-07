@@ -73,14 +73,18 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
     n = args.num_groups
-
+    models_dir = "data/"+params_json["Run_Name"] + f"/models/"
     # Visualize Model Distribution
     if args.histogram:
-        plot_mapper_histogram(args.coverage_filter)
+        plot_mapper_histogram(models_dir, args.coverage_filter)
 
     # Choose ~best~ models from curvature equivalency classes.
     # Current implementation chooses Model with the best coverage.
     else:
+
+        rel_outdir = "data/" + params_json["Run_Name"] + f"/model_analysis/token_models/{n}_policy_groups/"
+        output_dir = os.path.join(
+            root, rel_outdir)
 
         keys, clustering, distance_threshold = read_graph_clustering(
             metric=args.metric, n=n
@@ -93,9 +97,9 @@ if __name__ == "__main__":
 
         out_dir_message = f"{model_file} successfully written."
 
+        rel_outdir = "data/" + params_json["Run_Name"] + f"/model_analysis/token_models/{n}_policy_groups/"
         output_dir = os.path.join(
-            root, f"data/model_analysis/token_models/{n}_policy_groups/"
-        )
+            root, rel_outdir)
 
         # Check if output directory already exists
         if os.path.isdir(output_dir):

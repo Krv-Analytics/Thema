@@ -43,7 +43,7 @@ def select_models(keys, clustering, n):
     return selection
 
 
-def read_graph_clustering(metric, n):
+def read_graph_clustering(dir, metric, n):
     """
     Reads in a pre-generated agglomerative clustering model of graphs
     and returns the relevant data.
@@ -69,7 +69,7 @@ def read_graph_clustering(metric, n):
         determine labels (i.e. equivalency classes).
     """
 
-    dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
+    # dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
     assert os.path.isdir(
         dir
     ), f"No model clustering model yet for {n} policy groups! Please run `model_clusterer.py -n {n}` first."
@@ -171,7 +171,7 @@ def get_best_covered_model(models):
     return best_model
 
 
-def get_viable_models(n: int, coverage_filter: float):
+def get_viable_models(dir, n: int, coverage_filter: float):
     """
     Returns a list of saved models that have at least the specified coverage percentage.
 
@@ -189,7 +189,6 @@ def get_viable_models(n: int, coverage_filter: float):
         A list of saved model file locations that meet the specified coverage percentage.
     """
 
-    dir = f"data/models/{n}_policy_groups/"
     dir = os.path.join(root, dir)
     files = os.listdir(dir)
     models = []
@@ -225,7 +224,7 @@ def unpack_policy_group_dir(folder):
     return n
 
 
-def plot_mapper_histogram(coverage_filter=0.8):
+def plot_mapper_histogram(dir,coverage_filter=0.8):
     """
     Plots a histogram of the number of viable models for each rank
     of policy groupings. This function will count the models
@@ -243,14 +242,15 @@ def plot_mapper_histogram(coverage_filter=0.8):
     fig: matplotlib.figure.Figure
         The plotted figure object.
     """
-    mappers = os.path.join(root, "data/models/")
+    mappers = os.path.join(root, dir)
     # Get list of folder names in the directory
     policy_groups = os.listdir(mappers)
     # Initialize counting dictionary
     counts = {}
     for folder in policy_groups:
         n = unpack_policy_group_dir(folder)
-        models = get_viable_models(n, coverage_filter)
+        path_to_models = dir + folder
+        models = get_viable_models(path_to_models, n, coverage_filter)
         counts[n] = len(models)
     keys = list(counts.keys())
     keys.sort()
