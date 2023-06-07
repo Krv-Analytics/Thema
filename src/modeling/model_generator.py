@@ -78,10 +78,10 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-s",
-        "--seed",
+        "--random_seed",
         type=int,
-        default=None,
-        help="Set random seed to ensure reproducibility.",
+        default=params_json["model_random_seed"],
+        help="Set random seed to ensure Mapper/Graph reproducibility.",
     )
 
     parser.add_argument(
@@ -149,9 +149,9 @@ if __name__ == "__main__":
             print("More components than elements!!")
             sys.exit(1)
     except:
-        print("This configuration resulted in a null mapper")
         sys.exit(1)
-    output_dir = os.path.join(root, f"data/models/{num_policy_groups}_policy_groups/")
+    rel_outdir = "data/" + params_json["Run_Name"] + f"/models/{num_policy_groups}_policy_groups/"
+    output_dir = os.path.join(root, rel_outdir)
     output_file = generate_model_filename(
         args,
         nbors,
