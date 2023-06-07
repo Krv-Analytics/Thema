@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import subprocess
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from tqdm import tqdm
 
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     # DATA
     raw = params_json["raw_data"]
     clean = params_json["clean_data"]
-    projections = params_json["path_to_projections"]
+    projections = params_json["projected_data"]
 
     model_generator = os.path.join(src, "modeling/model_generator.py")
     log.info("Computing Model Grid Search!")
@@ -48,6 +50,12 @@ if __name__ == "__main__":
         "--------------------------------------------------------------------------------"
     )
     log.add()
+
+    # Number of loops 
+    num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection) *len(os.listdir(os.path.join(root, projections)))
+    
+    # Running Grid in Parallel 
+    subprocesses = []
     ## GRID SEARCH PROJECTIONS
     for N in n_cubes:
         for P in perc_overlap:
@@ -55,7 +63,7 @@ if __name__ == "__main__":
                 for file in os.listdir(os.path.join(root, projections)):
                     if file.endswith(".pkl"):
                         D = os.path.join(projections, file)
-                        subprocess.run(
+                        subprocesses.append(
                             [
                                 "python",
                                 f"{model_generator}",
@@ -68,3 +76,14 @@ if __name__ == "__main__":
                                 f"-I {I}",
                             ]
                         )
+    
+        # Running processes in Parallel 
+    # TODO: optimize based on max_workers 
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
+        # Setting Progress bar to track number of completed subprocesses 
+        progress_bar = tqdm(total=num_loops, desc='Progress', unit='subprocess')
+        for future in as_completed(futures):
+        # Update the progress bar for each completed subprocess
+            progress_bar.update(1)
+        progress_bar.close()
