@@ -17,7 +17,7 @@ from numba import NumbaDeprecationWarning
 warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 
-
+os.environ['KMP_WARNINGS'] = 'off'
 ######################################################################
 
 from projector_helper import env, projection_driver, projection_file_name
@@ -40,21 +40,21 @@ if __name__ == "__main__":
         "--clean_data",
         type=str,
         default=os.path.join(root, params_json["clean_data"]),
-        help="Select location of local data set, as pulled from Mongo.",
+        help="Location of Cleaned data set",
     )
 
     parser.add_argument(
-        "--umap",
-        type=bool,
-        default=True,
-        help="Use UMAP algorithm to compute projection. ",
+        "--projector",
+        type=str,
+        default='UMAP',
+        help="Set to the name of projector for dimensionality reduction. ",
     )
 
     parser.add_argument(
         "--dim",
         type=int,
         default=params_json["projector_dimension"],
-        help="Set dimension of UMAP projection. ",
+        help="Set dimension of projection. ",
     )
 
     parser.add_argument(
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         "--n_neighbors",
         type=int,
         default=5,
-        help="Set UMAP parameter for `n_neighbors`",
+        help=" (UMAP ONLY:Set UMAP parameter for `n_neighbors`",
     )
 
     parser.add_argument(
@@ -70,14 +70,14 @@ if __name__ == "__main__":
         "--min_dist",
         type=float,
         default=0,
-        help="Set UMAP parameter for `min_dist`",
+        help="UMAP ONLY: Set UMAP parameter for `min_dist`",
     )
 
     parser.add_argument(
         "--random_seed",
         default=params_json["projector_random_seed"],
-        action="store_true",
-        help="If set, will generate projections with a random seed (if applicable)",
+        type = int,
+        help="UMAP ONLY: Projections generated with random seed set in parameters. (set to -1 for random)",
     )
 
     parser.add_argument(
@@ -96,15 +96,16 @@ if __name__ == "__main__":
     with open(args.clean_data, "rb") as clean:
         reference = pickle.load(clean)
         df = reference["clean_data"]
-    output_dir = os.path.join(root, "data/projections/UMAP/")
+    rel_outdir = "data/" + params_json["Run_Name"] + "/projections/" + params_json["projector"] + "/"
+    output_dir = os.path.join(root, rel_outdir)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    if args.random_seed is None:
+    if args.random_seed == -1:
         args.random_seed = int(time.time())
 
-    if args.umap:
+    if args.projector == "UMAP":
         # Generate Projection
         results = projection_driver(
             df,
@@ -115,7 +116,7 @@ if __name__ == "__main__":
         )
 
         output_file = projection_file_name(
-            projector="UMAP",
+            projector=params_json["projector"],
             n=args.n_neighbors,
             d=args.min_dist,
             dimensions=2,
@@ -142,4 +143,4 @@ if __name__ == "__main__":
             )
     else:
         print("UMAP is only dimensionality reduction algorithm supported at this time.")
-        print("Please set `--umap` to True.")
+        print("Please Set your projector choice to UMAP")
