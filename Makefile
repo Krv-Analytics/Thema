@@ -1,7 +1,8 @@
 # Makefile
 include .env
-PARAMS_JSON := $(strip $(params))
-
+PARAMS_FILE := $(strip $(params))
+PARAMS_JSON := $(shell cat $(PARAMS_FILE))
+RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 
 
 install: check-poetry 
@@ -44,30 +45,29 @@ model-selection:
 
 
 
-
-
 # Cleaning commands for data fields 
+
+clean-processed-data: 
+	rm -f data/$(RUN_NAME)/clean/*
+
+clean-projections:
+	rm -f -r data/${RUN_NAME}/projections/*
+
+clean-models:
+	rm -f -r data/${RUN_NAME}/models/*
+
+clean-model-analysis:
+	rm -f -r data/${RUN_NAME}/model_analysis/
+
+clean: clean-processed-data clean-projections 
+	rm -f -r data/${RUN_NAME}/
 
 clean-raw-data: 
 	rm -f data/raw/* 
 
-clean-processed-data: 
-	rm -f data/clean/*
-
-clean-projections:
-	rm -f -r data/projections/*
-
-clean-models:
-	rm -f -r data/models/*
-
-clean-model-analysis:
-	rm -f -r data/model_analysis/
-
-clean: clean-processed-data clean-projections 
+clean-full : clean-raw-data clean-processed-data clean-projections 
 	rm -f -r data/
 
-clean_full : clean-raw-data clean-processed-data clean-projections 
-	rm -f -r data/
 
 
 
