@@ -61,7 +61,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    raw_data_path = root + args.data
+    raw_data_path = os.path.join(root, args.data)
+    print(raw_data_path)
     # Read in Raw Data
     assert os.path.isfile(raw_data_path), "Invalid path to Raw Data"
 
@@ -80,14 +81,15 @@ if __name__ == "__main__":
         encoding=args.encoding,
     )
 
-    output_dir = os.path.join(root, "data/clean/")
+    rel_outdir = "data/" + params_json["Run_Name"] + "/clean/"
+    output_dir = os.path.join(root, rel_outdir)
 
     column_filter = False
     if len(args.remove_columns) > 0:
         column_filter = True
 
     output_file = clean_data_filename(
-        scaler=scaler, encoding=args.encoding, filter=column_filter
+        run_name = params_json["Run_Name"], scaler=scaler, encoding=args.encoding, filter=column_filter
     )
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
@@ -95,7 +97,7 @@ if __name__ == "__main__":
     output_file = os.path.join(output_dir, output_file)
 
     # TODO: WRITE THIS filename to the json file
-    rel_outfile = "/".join(output_file.split("/")[-3:])
+    rel_outfile = "/".join(output_file.split("/")[-4:])
 
     output = {"clean_data": clean_data, "dropped_columns": args.remove_columns}
     # Write to pickle
