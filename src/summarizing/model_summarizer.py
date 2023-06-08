@@ -15,6 +15,8 @@ from plotly.subplots import make_subplots
 from math import ceil
 
 from visualization_helper import _define_zscore_df
+from visualization_helper import reorder_colors
+from visualization_helper import get_subplot_specs
 
 class model_summarizer:
     """A visualization wrapper for the Model class
@@ -80,16 +82,6 @@ class model_summarizer:
         # Define the color map based on the dictionary values
         colors = []
 
-        def reorder_colors(colors):
-            n = len(colors)
-            ordered = []
-            for i in range(n):
-                if i % 2 == 0:
-                    ordered.append(colors[i // 2])
-                else:
-                    ordered.append(colors[n - (i // 2) - 1])
-            return ordered
-
         for i in range(len(custom_color_scale()[:-3])):
             inst = custom_color_scale()[:-3]
             rgb_color = 'rgb' + str(tuple(int(inst[i][1][j:j+2], 16) for j in (1, 3, 5)))
@@ -97,21 +89,6 @@ class model_summarizer:
         
         colors = reorder_colors(colors)
         color_map = {key: colors[i % len(colors)] for i, key in enumerate(set.union(*[set(v['density'].keys()) for v in self.model.cluster_descriptions.values()]))}
-
-        def get_subplot_specs(n):
-            """
-            Returns subplot specs based on the number of subplots.
-            
-            Parameters:
-                n (int): number of subplots
-                
-            Returns:
-                specs (list): 2D list of subplot specs
-            """
-            num_cols = min(3, n)
-            num_rows = math.ceil(n / num_cols)
-            specs = [[{"type": "pie"} for c in range(num_cols)] for r in range(num_rows)]
-            return specs
     
         num_rows = math.ceil(len(self.model.cluster_descriptions) / 3)
         specs = get_subplot_specs(len(self.model.cluster_descriptions))

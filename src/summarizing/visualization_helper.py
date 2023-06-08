@@ -18,6 +18,7 @@ import seaborn as sns
 from umap import UMAP
 import hdbscan
 import pickle
+import math
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -279,3 +280,28 @@ def _define_zscore_df(model):
         zscore0_temp['cluster_IDs'] = group
         df_builder = pd.concat([df_builder,zscore0_temp])
     return df_builder
+
+def reorder_colors(colors):
+    n = len(colors)
+    ordered = []
+    for i in range(n):
+        if i % 2 == 0:
+            ordered.append(colors[i // 2])
+        else:
+            ordered.append(colors[n - (i // 2) - 1])
+    return ordered
+
+def get_subplot_specs(n):
+    """
+    Returns subplot specs based on the number of subplots.
+    
+    Parameters:
+        n (int): number of subplots
+        
+    Returns:
+        specs (list): 2D list of subplot specs
+    """
+    num_cols = min(3, n)
+    num_rows = math.ceil(n / num_cols)
+    specs = [[{"type": "pie"} for c in range(num_cols)] for r in range(num_rows)]
+    return specs
