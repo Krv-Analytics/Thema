@@ -12,17 +12,12 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 import plotly.express as px
-from scipy.cluster.hierarchy import dendrogram, linkage
-import seaborn as sns
+from scipy.cluster.hierarchy import dendrogram
 
-from umap import UMAP
 import hdbscan
 import pickle
-import math
 
-from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.metrics.pairwise import pairwise_distances_argmin
+from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 pio.renderers.default = "browser"
