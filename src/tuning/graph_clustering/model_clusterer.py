@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         out_dir_message = f"{model_file} successfully written."
         
-        rel_outdir = "data/" + params_json["Run_Name"] + f"model_analysis/graph_clustering/{n}_policy_groups/"
+        rel_outdir = "data/" + params_json["Run_Name"] + f"/model_analysis/graph_clustering/{n}_policy_groups/"
         output_dir = os.path.join(
             root, rel_outdir
         )

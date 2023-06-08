@@ -11,7 +11,7 @@ from model_helper import env
 root = env()
 
 
-def select_models(keys, clustering, n):
+def select_models(dir, keys, clustering, n):
     """
     Choose the best covered model from a set of equivalency classes.
     These equivalency classes are based on an Agglomerative clustering
@@ -35,7 +35,7 @@ def select_models(keys, clustering, n):
     selection: list
         A list of saved model file locations.
     """
-    subgroups = get_clustering_subgroups(keys, clustering, n)
+    subgroups = get_clustering_subgroups(dir, keys, clustering, n)
     selection = []
     for subgroup in subgroups.values():
         best_model = get_best_covered_model(subgroup)
@@ -68,7 +68,6 @@ def read_graph_clustering(dir, metric, n):
         The distance threshold used in the clustering model to
         determine labels (i.e. equivalency classes).
     """
-
     # dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
     assert os.path.isdir(
         dir
@@ -86,7 +85,7 @@ def read_graph_clustering(dir, metric, n):
     )
 
 
-def get_model_file(key, n):
+def get_model_file(dir, key, n):
     """
     Returns the file location of a saved model with the given keys.
 
@@ -105,14 +104,14 @@ def get_model_file(key, n):
     """
     # Unpack key
     n_cubes, p, n_neighbors, min_dist, hdbscan_params, min_intersection = key
-    dir = os.path.join(root, f"data/models/{n}_policy_groups/")
+    #dir = os.path.join(root, f"data/models/{n}_policy_groups/")
     file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
     file = os.path.join(dir, file)
     assert os.path.isfile(file), f"No saved model with these keys: {key}"
     return file
 
 
-def get_clustering_subgroups(keys, clustering, n):
+def get_clustering_subgroups(dir,keys, clustering, n):
     """
     Returns a dictionary of subgroups for a graph clustering along
     with the corresponding model identifiers (keys).
@@ -141,7 +140,7 @@ def get_clustering_subgroups(keys, clustering, n):
         subkeys = keys[mask]
         files = []
         for key in subkeys:
-            files.append(get_model_file(key, n))
+            files.append(get_model_file(dir,key, n))
         subgroups[label] = files
 
     return subgroups
