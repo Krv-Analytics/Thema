@@ -2,6 +2,7 @@
 
 import os
 import sys
+import math
 
 import numpy as np
 import pandas as pd
@@ -220,6 +221,29 @@ def config_plot_data(tupper: Tupper):
     labels = list(numeric_data.columns)
     return numeric_data, labels
 
+def _define_zscore_df(model):
+    df_builder = pd.DataFrame()
+    dfs = model.tupper.clean
+
+    column_to_drop = [col for col in dfs.columns if dfs[col].nunique() == 1]
+    dfs = dfs.drop(column_to_drop, axis=1)
+
+    dfs['cluster_IDs']=(list(model.cluster_ids))
+
+    #loop through all policy group dataframes
+    for group in list(dfs['cluster_IDs'].unique()):
+        zscore0 = pd.DataFrame()
+        group0 = dfs[dfs['cluster_IDs']==group].drop(columns={'cluster_IDs'})
+        #loop through all columns in a policy group dataframe
+        for col in group0.columns:
+            if col != "cluster_IDs":
+                mean = dfs[col].mean()
+                std = dfs[col].std()
+                zscore0[col] = group0[col].map(lambda x: (x-mean)/std)
+        zscore0_temp = zscore0.copy()
+        zscore0_temp['cluster_IDs'] = group
+        df_builder = pd.concat([df_builder,zscore0_temp])
+    return df_builder
 
 def custom_color_scale():
     "Our own colorscale, feel free to use!"
@@ -288,6 +312,31 @@ def custom_color_scale():
                 break
 
     return colorscale
+
+def reorder_colors(colors):
+    n = len(colors)
+    ordered = []
+    for i in range(n):
+        if i % 2 == 0:
+            ordered.append(colors[i // 2])
+        else:
+            ordered.append(colors[n - (i // 2) - 1])
+    return ordered
+
+def get_subplot_specs(n):
+    """
+    Returns subplot specs based on the number of subplots.
+    
+    Parameters:
+        n (int): number of subplots
+        
+    Returns:
+        specs (list): 2D list of subplot specs
+    """
+    num_cols = min(3, n)
+    num_rows = math.ceil(n / num_cols)
+    specs = [[{"type": "pie"} for c in range(num_cols)] for r in range(num_rows)]
+    return specs
 
 
 def env():

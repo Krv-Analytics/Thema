@@ -15,8 +15,6 @@ from plotly.subplots import make_subplots
 from math import ceil
 
 from visualization_helper import _define_zscore_df
-from visualization_helper import reorder_colors
-from visualization_helper import get_subplot_specs
 
 class model_summarizer:
     """A visualization wrapper for the Model class
@@ -78,106 +76,4 @@ class model_summarizer:
         fig.update_layout(template='simple_white', width=800, height=600)
         fig.show()
 
-    def visualize_pie_charts(self):
-        # Define the color map based on the dictionary values
-        colors = []
-
-        for i in range(len(custom_color_scale()[:-3])):
-            inst = custom_color_scale()[:-3]
-            rgb_color = 'rgb' + str(tuple(int(inst[i][1][j:j+2], 16) for j in (1, 3, 5)))
-            colors.append(rgb_color)
-        
-        colors = reorder_colors(colors)
-        color_map = {key: colors[i % len(colors)] for i, key in enumerate(set.union(*[set(v['density'].keys()) for v in self.model.cluster_descriptions.values()]))}
     
-        num_rows = math.ceil(len(self.model.cluster_descriptions) / 3)
-        specs = get_subplot_specs(len(self.model.cluster_descriptions))
-
-        dict_2 = {i: f'Group {i}' for i in range(len(self.model.cluster_descriptions))}
-        dict_2 = {-1: 'Outliers', **dict_2}
-
-        fig = make_subplots(rows=num_rows, 
-                            cols=3, 
-                            specs=specs, 
-                            subplot_titles = [f"<b>{dict_2[key]}</b>: {self.model.cluster_descriptions[key]['size']} Members" for key in self.model.cluster_descriptions],
-                            horizontal_spacing=0.1
-        )
-        
-        for i, key in enumerate(self.model.cluster_descriptions):
-            density = self.model.cluster_descriptions[key]['density']
-
-            labels = list(density.keys())
-            sizes = list(density.values())
-
-            #labels_list = [labels.get(item, item) for item in labels]
-
-            row = i // 3 + 1
-            col = i % 3 + 1
-            fig.add_trace(go.Pie(labels=labels, 
-                                textinfo='percent',
-                                values=sizes, 
-                                textposition='outside',
-                                marker_colors=[color_map[l] for l in labels], 
-                                scalegroup=key,
-                                hole=0.5,
-                                ),
-                        row=row, col=col)
-
-        fig.update_layout(template='plotly_white', showlegend=True, height = 600, width = 800)
-
-        fig.update_annotations(yshift=10)
-
-        fig.update_traces( marker=dict(line=dict(color='white', width=3)))
-
-        fig.update_layout(legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=-0.22,
-        xanchor="left",
-        x=0
-    ))
-
-        # Show the subplot
-        return fig
-    
-    def visualize_box_plots(self, col_list = []):
-
-        df = self.model.tupper.raw
-        df['cluster_IDs'] = self.model.cluster_ids
-        
-        if len(col_list)>0:
-            col_list.append('cluster_IDs')
-            df = df.loc[:, df.columns.isin(col_list)]
-
-        fig = make_subplots(
-                rows=math.ceil(len(df.columns.drop('cluster_IDs')) / 3), cols=3,
-                horizontal_spacing=0.1,
-                subplot_titles = df.columns.drop('cluster_IDs'))
-
-        row=1
-        col=1 
-
-        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
-        dict_2 = {-1: 'Outliers', **dict_2}
-
-        for column in df.columns.drop('cluster_IDs'):
-                for pg in list(dict_2.keys()):
-                    fig.add_trace(go.Box(y = df[df['cluster_IDs']==pg][column], name=dict_2[pg], jitter=0.3, showlegend=False,
-                    whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True,
-                    marker=dict(color= custom_color_scale()[int(pg)][1])),
-                    row=row, col=col)
-
-                    try:
-                        pd.to_numeric(df[column])
-                        fig.add_hline(y=df[column].mean(), line_width=0.5, line_dash="dot", line_color="black", col=col, row=row, 
-                        annotation_text='mean', annotation_font_color='gray', annotation_position="top right")
-                    except ValueError:
-                        ''
-
-                col+=1
-                if col == 4:
-                    col=1
-                    row+=1
-
-        fig.update_layout(template='simple_white', height=(math.ceil(len(df.columns) / 3))*300, title_font_size=20)
-        fig.show()

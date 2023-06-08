@@ -13,6 +13,8 @@ import numpy as np
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+import math
 
 
 from jmapper import JMapper
@@ -21,6 +23,9 @@ from model_helper import (
     custom_color_scale,
     get_minimal_std,
     mapper_plot_outfile,
+    reorder_colors,
+    get_subplot_specs,
+    _define_zscore_df,
 )
 from persim import plot_diagrams
 
@@ -76,6 +81,8 @@ class Model:
         self._unclustered_items = None
 
         self._cluster_positions = None
+        self._zscores = None
+        self._group_identifiers =  None
 
     @property
     def mapper(self):
@@ -148,6 +155,30 @@ class Model:
         if self._unclustered_items is None:
             self.label_item_by_node()
         return self._unclustered_items
+    
+    @property
+    def zscores(self):
+        if self._zscores is None:
+            self._zscores = _define_zscore_df(self).groupby(['cluster_IDs']).mean().reset_index()
+        return self._zscores
+
+    @property 
+    def group_identifiers(self):
+        if self._group_identifiers is None:
+            pg_identifiers = {key: [] for key in range(-1, int(self.zscores['cluster_IDs'].max())+1)}
+            for column in self.zscores.columns:
+                counter = -1
+                for value in self.zscores[column]:
+                    if column!='cluster_IDs':
+                        if abs(value) >= 1:
+                            test = _define_zscore_df(self)[_define_zscore_df(self)['cluster_IDs']==counter]
+                            if abs(test[column].std()/test[column].mean()) <= 1:
+                                pg_identifiers[counter].append(column)
+                    counter+=1
+            self._group_identifiers = pg_identifiers
+        return self._group_identifiers
+
+
 
     def label_item_by_node(self):
         """Label each item in the data set according to its corresponding
@@ -536,6 +567,110 @@ class Model:
             
         fig.update_layout(template='simple_white')
         return fig
+    
+    def visualize_piecharts(self):
+        # Define the color map based on the dictionary values
+        colors = []
+
+        for i in range(len(custom_color_scale()[:-3])):
+            inst = custom_color_scale()[:-3]
+            rgb_color = 'rgb' + str(tuple(int(inst[i][1][j:j+2], 16) for j in (1, 3, 5)))
+            colors.append(rgb_color)
+        
+        colors = reorder_colors(colors)
+        color_map = {key: colors[i % len(colors)] for i, key in enumerate(set.union(*[set(v['density'].keys()) for v in self.cluster_descriptions.values()]))}
+    
+        num_rows = math.ceil(len(self.cluster_descriptions) / 3)
+        specs = get_subplot_specs(len(self.cluster_descriptions))
+
+        dict_2 = {i: f'Group {i}' for i in range(len(self.cluster_descriptions))}
+        dict_2 = {-1: 'Outliers', **dict_2}
+
+        fig = make_subplots(rows=num_rows, 
+                            cols=3, 
+                            specs=specs, 
+                            subplot_titles = [f"<b>{dict_2[key]}</b>: {self.cluster_descriptions[key]['size']} Members" for key in self.cluster_descriptions],
+                            horizontal_spacing=0.1
+        )
+        
+        for i, key in enumerate(self.cluster_descriptions):
+            density = self.cluster_descriptions[key]['density']
+
+            labels = list(density.keys())
+            sizes = list(density.values())
+
+            #labels_list = [labels.get(item, item) for item in labels]
+
+            row = i // 3 + 1
+            col = i % 3 + 1
+            fig.add_trace(go.Pie(labels=labels, 
+                                textinfo='percent',
+                                values=sizes, 
+                                textposition='outside',
+                                marker_colors=[color_map[l] for l in labels], 
+                                scalegroup=key,
+                                hole=0.5,
+                                ),
+                        row=row, col=col)
+
+        fig.update_layout(template='plotly_white', showlegend=True, height = 600, width = 800)
+
+        fig.update_annotations(yshift=10)
+
+        fig.update_traces( marker=dict(line=dict(color='white', width=3)))
+
+        fig.update_layout(legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.22,
+        xanchor="left",
+        x=0
+    ))
+
+        # Show the subplot
+        return fig
+    
+    def visualize_boxplots(self, col_list = []):
+
+        df = self.tupper.raw
+        df['cluster_IDs'] = self.cluster_ids
+        
+        if len(col_list)>0:
+            col_list.append('cluster_IDs')
+            df = df.loc[:, df.columns.isin(col_list)]
+
+        fig = make_subplots(
+                rows=math.ceil(len(df.columns.drop('cluster_IDs')) / 3), cols=3,
+                horizontal_spacing=0.1,
+                subplot_titles = df.columns.drop('cluster_IDs'))
+
+        row=1
+        col=1 
+
+        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
+        dict_2 = {-1: 'Outliers', **dict_2}
+
+        for column in df.columns.drop('cluster_IDs'):
+                for pg in list(dict_2.keys()):
+                    fig.add_trace(go.Box(y = df[df['cluster_IDs']==pg][column], name=dict_2[pg], jitter=0.3, showlegend=False,
+                    whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True,
+                    marker=dict(color= custom_color_scale()[int(pg)][1])),
+                    row=row, col=col)
+
+                    try:
+                        pd.to_numeric(df[column])
+                        fig.add_hline(y=df[column].mean(), line_width=0.5, line_dash="dot", line_color="black", col=col, row=row, 
+                        annotation_text='mean', annotation_font_color='gray', annotation_position="top right")
+                    except ValueError:
+                        ''
+
+                col+=1
+                if col == 4:
+                    col=1
+                    row+=1
+
+        fig.update_layout(template='simple_white', height=(math.ceil(len(df.columns) / 3))*300, title_font_size=20)
+        fig.show()
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.
