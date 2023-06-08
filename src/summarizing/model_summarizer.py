@@ -27,12 +27,12 @@ class model_summarizer:
     def __init__(self, model: md.Model):
 
         self.model = model
-        self.zscores = self.define_zscore_df().groupby(['cluster_IDs']).mean().reset_index()
+        self.zscores = self._define_zscore_df().groupby(['cluster_IDs']).mean().reset_index()
 
 
 
 
-    def define_zscore_df(self):
+    def _define_zscore_df(self):
         df_builder = pd.DataFrame()
         dfs = self.model.tupper.clean
 
@@ -63,7 +63,7 @@ class model_summarizer:
             for value in self.zscores[column]:
                 if column!='cluster_IDs':
                     if abs(value) >= 1:
-                        test = self.define_zscore_df()[self.define_zscore_df()['cluster_IDs']==counter]
+                        test = self._define_zscore_df()[self._define_zscore_df()['cluster_IDs']==counter]
                         if abs(test[column].std()/test[column].mean()) <= 1:
                             pg_identifiers[counter].append(column)
                 counter+=1
@@ -73,7 +73,7 @@ class model_summarizer:
     ## VIZ ##
     #########
 
-    def show_PCA(self, colors=True):
+    def visualize_PCA(self, colors=True):
         df=self.model.tupper.clean.copy()
         df['cluster_IDs'] = self.model.cluster_ids
         # Standardize the data
@@ -100,7 +100,7 @@ class model_summarizer:
         fig.update_layout(template='simple_white', width=800, height=600)
         fig.show()
 
-    def create_pie_charts(self):
+    def visualize_pie_charts(self):
         # Define the color map based on the dictionary values
         colors = []
 
@@ -187,7 +187,7 @@ class model_summarizer:
         # Show the subplot
         return fig
     
-    def visualize_cc(self, col_list = []):
+    def visualize_box_plots(self, col_list = []):
 
         df = self.model.tupper.raw
         df['cluster_IDs'] = self.model.cluster_ids
