@@ -155,105 +155,29 @@ def UMAP_grid(dir='../../data/projections/UMAP/'):
 
     pio.show(fig)
 
-def view_kmeans(df: str, numclusters: int):
+def visualize_PCA(model, colors=True):
+        df=model.tupper.clean.copy()
+        df['cluster_IDs'] = model.cluster_ids
+        # Standardize the data
+        X = StandardScaler().fit_transform(df)
+        # Perform PCA
+        pca = PCA(n_components=2)
+        principal_components = pca.fit_transform(X)
+        # Create a DataFrame for the principal components
+        pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
+        # Add the original cluster IDs to the PCA DataFrame
+        pca_df['cluster_IDs'] = df['cluster_IDs'].values
+        # plot with cluster-label based color scheme
+        if colors:
+            fig = go.Figure()
+            cluster_list = list(pca_df['cluster_IDs'].unique())
+            cluster_list.sort()
+            for cluster in cluster_list:
+                plot = pca_df[pca_df['cluster_IDs']==cluster]
+                fig.add_trace(go.Scatter( x=plot['PC1'], y=plot['PC2'], mode='markers', name=cluster, marker=dict(color=custom_color_scale()[cluster_list.index(cluster)][1])))
+        # plot with no colors
+        else:
+            fig = px.scatter(data_frame=pca_df, x='PC1', y='PC2', color_discrete_sequence=['grey'])
 
-    # data
-
-    X = StandardScaler().fit_transform(df)
-
-    # #############################################################################
-    # Clustering with KMeans
-
-    k_means = KMeans(init="k-means++", n_clusters=numclusters, n_init=10)
-    t0 = time.time()
-    k_means.fit(X)
-    t_batch = time.time() - t0
-
-    # #############################################################################
-    # Clustering with MiniBatchKMeans
-
-    mbk = MiniBatchKMeans(
-        init="k-means++",
-        n_clusters=numclusters,
-        batch_size=numclusters,
-        n_init=10,
-        max_no_improvement=10,
-        verbose=0,
-    )
-    t0 = time.time()
-    mbk.fit(X)
-    t_mini_batch = time.time() - t0
-
-    # #############################################################################
-    # Plot result
-
-    fig = plt.figure(figsize=(8, 3))
-    fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.9)
-    colors = ["#4EACC5", "#FF9C34", "#4E9A06", "#3082be"]
-
-    # COLOR MiniBatchKMeans and the KMeans algorithm.
-    k_means_cluster_centers = k_means.cluster_centers_
-    order = pairwise_distances_argmin(k_means.cluster_centers_, mbk.cluster_centers_)
-    mbk_means_cluster_centers = mbk.cluster_centers_[order]
-
-    k_means_labels = pairwise_distances_argmin(X, k_means_cluster_centers)
-    mbk_means_labels = pairwise_distances_argmin(X, mbk_means_cluster_centers)
-
-    # KMeans
-    ax = fig.add_subplot(1, 3, 1)
-    for k, col in zip(range(numclusters), colors):
-        my_members = k_means_labels == k
-        cluster_center = k_means_cluster_centers[k]
-        ax.plot(
-            X[my_members, 0], X[my_members, 1], "w", markerfacecolor=col, marker="."
-        )
-        ax.plot(
-            cluster_center[0],
-            cluster_center[1],
-            "o",
-            markerfacecolor=col,
-            markeredgecolor="k",
-            markersize=6,
-        )
-    ax.set_title("KMeans")
-    ax.set_xticks(())
-    ax.set_yticks(())
-    plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_batch, k_means.inertia_))
-
-    # MiniBatchKMeans
-    ax = fig.add_subplot(1, 3, 2)
-    for k, col in zip(range(numclusters), colors):
-        my_members = mbk_means_labels == k
-        cluster_center = mbk_means_cluster_centers[k]
-        ax.plot(
-            X[my_members, 0], X[my_members, 1], "w", markerfacecolor=col, marker="."
-        )
-        ax.plot(
-            cluster_center[0],
-            cluster_center[1],
-            "o",
-            markerfacecolor=col,
-            markeredgecolor="k",
-            markersize=6,
-        )
-    ax.set_title("MiniBatchKMeans")
-    ax.set_xticks(())
-    ax.set_yticks(())
-    plt.text(-3.5, 1.8, "train time: %.2fs\ninertia: %f" % (t_mini_batch, mbk.inertia_))
-
-    # Initialise the different array to all False
-    different = mbk_means_labels == 4
-    ax = fig.add_subplot(1, 3, 3)
-
-    for k in range(numclusters):
-        different += (k_means_labels == k) != (mbk_means_labels == k)
-
-    identic = np.logical_not(different)
-    ax.plot(X[identic, 0], X[identic, 1], "w", markerfacecolor="#bbbbbb", marker=".")
-    ax.plot(X[different, 0], X[different, 1], "w", markerfacecolor="m", marker=".")
-    ax.set_title("Difference")
-    ax.set_xticks(())
-    ax.set_yticks(())
-
-    plt.show()
-
+        fig.update_layout(template='simple_white', width=800, height=600)
+        fig.show()
