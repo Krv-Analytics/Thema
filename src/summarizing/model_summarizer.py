@@ -14,6 +14,8 @@ from plotly.subplots import make_subplots
 
 from math import ceil
 
+from visualization_helper import _define_zscore_df
+
 class model_summarizer:
     """A visualization wrapper for the Model class
 
@@ -27,34 +29,8 @@ class model_summarizer:
     def __init__(self, model: md.Model):
 
         self.model = model
-        self.zscores = self._define_zscore_df().groupby(['cluster_IDs']).mean().reset_index()
+        self.zscores = _define_zscore_df(self.model).groupby(['cluster_IDs']).mean().reset_index()
 
-
-
-
-    def _define_zscore_df(self):
-        df_builder = pd.DataFrame()
-        dfs = self.model.tupper.clean
-
-        column_to_drop = [col for col in dfs.columns if dfs[col].nunique() == 1]
-        dfs = dfs.drop(column_to_drop, axis=1)
-
-        dfs['cluster_IDs']=(list(self.model.cluster_ids))
-
-        #loop through all policy group dataframes
-        for group in list(dfs['cluster_IDs'].unique()):
-            zscore0 = pd.DataFrame()
-            group0 = dfs[dfs['cluster_IDs']==group].drop(columns={'cluster_IDs'})
-            #loop through all columns in a policy group dataframe
-            for col in group0.columns:
-                if col != "cluster_IDs":
-                    mean = dfs[col].mean()
-                    std = dfs[col].std()
-                    zscore0[col] = group0[col].map(lambda x: (x-mean)/std)
-            zscore0_temp = zscore0.copy()
-            zscore0_temp['cluster_IDs'] = group
-            df_builder = pd.concat([df_builder,zscore0_temp])
-        return df_builder
     
     def get_group_identifiers(self):
         pg_identifiers = {key: [] for key in range(-1, int(self.zscores['cluster_IDs'].max())+1)}
@@ -63,7 +39,7 @@ class model_summarizer:
             for value in self.zscores[column]:
                 if column!='cluster_IDs':
                     if abs(value) >= 1:
-                        test = self._define_zscore_df()[self._define_zscore_df()['cluster_IDs']==counter]
+                        test = _define_zscore_df(self.model)[_define_zscore_df(self.model)['cluster_IDs']==counter]
                         if abs(test[column].std()/test[column].mean()) <= 1:
                             pg_identifiers[counter].append(column)
                 counter+=1
