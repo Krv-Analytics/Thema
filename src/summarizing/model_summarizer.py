@@ -187,62 +187,44 @@ class model_summarizer:
         # Show the subplot
         return fig
     
-    def visualize_cc(self, show_all=True, col_list = [], raw_data=True):
-        # column labels for showing boxplots of all columns
-        if raw_data:
-            if show_all:
-                col_list = self.model.tupper.raw.select_dtypes(include=np.number).columns
-            elif len(col_list)>0:
-                col_list=col_list
-            else:
-                return 'Please enter valid columns or ensure show all is True'
-            aves = self.model.tupper.raw
-            aves = aves.select_dtypes(include=np.number)
-            aves['cluster_IDs'] = self.model.cluster_ids
+    def visualize_cc(self, col_list = []):
 
-        else:
-            if show_all:
-                col_list = self.model.tupper.clean.columns
-            elif len(col_list)>0:
-                col_list=col_list
-            else:
-                return 'Please enter valid columns or ensure show all is True'
-            aves = self.model.tupper.clean
-            aves = aves.select_dtypes(include=np.number)
-            aves['cluster_IDs'] = self.model.cluster_ids
+        df = self.model.tupper.raw
+        df['cluster_IDs'] = self.model.cluster_ids
+        
+        if len(col_list)>0:
+            col_list.append('cluster_IDs')
+            df = df.loc[:, df.columns.isin(col_list)]
 
         fig = make_subplots(
-                rows=math.ceil(len(col_list) / 3), cols=3,
-                #rows=3, cols=3,
-                subplot_titles = col_list)
+                rows=math.ceil(len(df.columns.drop('cluster_IDs')) / 3), cols=3,
+                horizontal_spacing=0.1,
+                subplot_titles = df.columns.drop('cluster_IDs'))
 
         row=1
         col=1 
-        temp = list(set(self.model.cluster_ids))
-        temp.sort()
-        #plot
 
-        dict_2 = {i: str(i) for i in range(len(temp))}
+        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
         dict_2 = {-1: 'Outliers', **dict_2}
 
-        for column in col_list:
-            for pg in temp:
-                fig.add_trace(go.Box(y = aves[aves['cluster_IDs']==pg][column], name = dict_2[pg], jitter=0.3, showlegend=False, #boxpoints='all',
-                whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True,
-                #hovertext=self.location_info[self.location_info['cluster_IDs']==pg]['PNAME'],
-                marker=dict(color= custom_color_scale()[int(pg)][1])),
-                row=row, col=col)
-            # add mean line
-            fig.add_hline(y=aves[column].mean(), line_width=0.5, line_dash="dot", line_color="black", col=col, row=row, 
-            annotation_text='mean', annotation_font_color='gray', annotation_position="top right")
-            # add median line
-            # fig.add_hline(y=self.aves[column].median(), line_width=0.75, line_dash="solid", line_color="grey", col=col, row=row, 
-            # annotation_text='median', annotation_font_color='gray', annotation_position="top right")
+        for column in df.columns.drop('cluster_IDs'):
+                for pg in list(dict_2.keys()):
+                    fig.add_trace(go.Box(y = df[df['cluster_IDs']==pg][column], name=dict_2[pg], jitter=0.3, showlegend=False,
+                    whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True,
+                    marker=dict(color= custom_color_scale()[int(pg)][1])),
+                    row=row, col=col)
 
-            col+=1
-            if col == 4:
-                col=1
-                row+=1
+                    try:
+                        pd.to_numeric(df[column])
+                        fig.add_hline(y=df[column].mean(), line_width=0.5, line_dash="dot", line_color="black", col=col, row=row, 
+                        annotation_text='mean', annotation_font_color='gray', annotation_position="top right")
+                    except ValueError:
+                        ''
 
-        fig.update_layout(template='simple_white', height=(math.ceil(len(col_list) / 3))*300, title_font_size=20)
-        return fig
+                col+=1
+                if col == 4:
+                    col=1
+                    row+=1
+
+        fig.update_layout(template='simple_white', height=(math.ceil(len(df.columns) / 3))*300, title_font_size=20)
+        fig.show()
