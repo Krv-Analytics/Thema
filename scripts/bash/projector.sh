@@ -16,14 +16,5 @@ fi
 
 poetry run python ../python/projection_grid.py
 
-
-echo -e
-echo "##################################################################################"
-echo -e
-echo -e
-echo "Completed projection grid search!"
-echo -e
-echo -e
-echo "##################################################################################"
 echo -e
 exit 0
