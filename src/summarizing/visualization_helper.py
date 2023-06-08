@@ -17,6 +17,7 @@ import seaborn as sns
 
 from umap import UMAP
 import hdbscan
+import pickle
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -64,141 +65,94 @@ def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs)
     return d
 
 
-def UMAP_grid(df, dists, neighbors):
+def UMAP_grid(dir='../../data/projections/UMAP/'):
     """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations
 
     grid search the UMAP parameter space, choose the representations that occur most often in the given parameter space, based on the generated histogram"""
-    # example function inputs
-    # dists = [0, 0.01, 0.05, 0.1, 0.5, 1]
-    # neighbors = [3, 5, 10, 20, 4_0]
+    neighbors, dists = [], []
+    for umap in os.listdir(dir):
+        with open (f"{dir}/{umap}", 'rb') as f:
+            params = pickle.load(f)
+        if params['hyperparameters'][0] in neighbors:
+            ""
+        else:
+            neighbors.append(params['hyperparameters'][0])
+        if params['hyperparameters'][1] in dists:
+            ''
+        else:
+            dists.append(params['hyperparameters'][1])
+        neighbors.sort()
+        dists.sort()
 
-    # TODO
-    # marl outlying points in a different color - check the cluster_distribution output
-    # figure out a way around this .dropna() call that removes all rows with missing data
-    data = df.dropna()
-    assert type(dists) == list, "Not list"
-    assert type(neighbors) == list, "Not list"
-    print(f"Visualizing UMAP Grid Search! ")
-    print(
-        "--------------------------------------------------------------------------------"
-    )
-    print(f"Choices for n_neighbors: {neighbors}")
-    print(f"Choices for m_dist: {dists}")
-    print(
-        "-------------------------------------------------------------------------------- \n"
-    )
-
-    # generate subplot titles
     fig = make_subplots(
-        rows=len(dists),
-        cols=len(neighbors),
-        column_titles=list(map(str, neighbors)),
-        x_title="n_neighbors",
-        row_titles=list(map(str, dists)),
-        y_title="min_dist",
-        vertical_spacing=0.05,
-        horizontal_spacing=0.03,
-        # shared_xaxes=True,
-        # shared_yaxes=True,
-    )
+            rows=len(dists),
+            cols=len(neighbors),
+            column_titles=list(map(str, neighbors)),
+            x_title="n_neighbors",
+            row_titles=list(map(str, dists)),
+            y_title="min_dist",
+            #vertical_spacing=0.05,
+            #horizontal_spacing=0.03,
+            # shared_xaxes=True,
+            # shared_yaxes=True,
+        )
+
     cluster_distribution = []
-    # generate figure
-    for d in range(0, len(dists)):
-        for n in range(0, len(neighbors)):
-            umap_2d = UMAP(
-                min_dist=dists[d],
-                n_neighbors=neighbors[n],
-                n_components=2,
-                init="random",
-                random_state=0,
-            )
-            proj_2d = umap_2d.fit_transform(data)
-            clusterer = hdbscan.HDBSCAN(min_cluster_size=5).fit(proj_2d)
-            outdf = pd.DataFrame(proj_2d, columns=["0", "1"])
-            outdf["labels"] = clusterer.labels_
+    row = 1
+    col = 1
+    for umap in os.listdir(dir):
+        with open (f"{dir}/{umap}", 'rb') as f:
+            params = pickle.load(f)
+        proj_2d = params['projection']
+        clusterer = hdbscan.HDBSCAN(min_cluster_size=5).fit(proj_2d)
+        outdf = pd.DataFrame(proj_2d, columns=["0", "1"])
+        outdf["labels"] = clusterer.labels_
 
-            num_clusters = len(np.unique(clusterer.labels_))
-            cluster_distribution.append(num_clusters)
-            df = outdf[outdf["labels"] != -1]
-            fig.add_trace(
-                go.Scatter(
-                    x=df["0"],
-                    y=df["1"],
-                    mode="markers",
-                    marker=dict(
-                        size=4,
-                        color=df["labels"],
-                        cmid=0.5,
-                        colorscale="Turbo",  # colorscale=map_colors
-                    ),
-                    hovertemplate=df["labels"],
+        num_clusters = len(np.unique(clusterer.labels_))
+        cluster_distribution.append(num_clusters)
+        df = outdf[outdf["labels"] == -1]
+        fig.add_trace(
+            go.Scatter(
+                x=df["0"],
+                y=df["1"],
+                mode="markers",
+                marker=dict(
+                    size=2.3,
+                    color="red",
+                    #line=dict(width=0.2, color="Black"),
                 ),
-                row=d + 1,
-                col=n + 1,
-            )
-
-            df = outdf[outdf["labels"] == -1]
-            fig.add_trace(
-                go.Scatter(
-                    x=df["0"],
-                    y=df["1"],
-                    mode="markers",
-                    marker=dict(
-                        size=4,
-                        color="yellow",
-                        line=dict(width=0.1, color="DarkSlateGrey"),
-                    ),
-                    hovertemplate=df["labels"],
+                hovertemplate=df["labels"],
+            ),
+            row=row, col = col,
+        )
+        df = outdf[outdf["labels"] != -1]
+        fig.add_trace(go.Scatter(
+                x=df["0"],
+                y=df["1"],
+                mode="markers",
+                marker=dict(
+                    size=4,
+                    color= df["labels"],
+                    cmid=0.5,
                 ),
-                row=d + 1,
-                col=n + 1,
-            )
+                hovertemplate=df["labels"],
+            ),
+            row=row, col = col,
+        )
+        row+=1
+        if row == len(dists)+1:
+            row = 1
+            col+=1
 
-    fig.update_layout(
-        template="simple_white", showlegend=False, font=dict(color="black")
+
+    fig.update_layout(height=900,
+        template="simple_white", showlegend=False, font=dict(color="black",)
     )
 
     fig.update_xaxes(showticklabels=False, tickwidth=0, tickcolor="rgba(0,0,0,0)")
     fig.update_yaxes(showticklabels=False, tickwidth=0, tickcolor="rgba(0,0,0,0)")
 
-    file_name = f"figures/UMAPgrid_min_dist({dists[0]}-{dists[len(dists)-1]})_neigh({neighbors[0]}-{neighbors[len(neighbors)-1]}).html"
-    fig.write_html(file_name)
     pio.show(fig)
-
-    # ax = sns.histplot(
-    #     cluster_distribution,
-    #     discrete=True,
-    #     stat="percent",
-    # )
-    # ax.set(xlabel="Num_Clusters based on HDBSCAN", Num_Clusters based on HDBSCAN)
-    # plt.show()
-
-    colors = pd.DataFrame(cluster_distribution, columns=["Num"])
-    fig2 = px.histogram(
-        colors,
-        x="Num",
-        color="Num",
-        nbins=max(cluster_distribution),
-        color_discrete_map={
-            1: "#005f73",
-            2: "#0a9396",
-            3: "#94d2bd",
-            4: "#e9d8a6",
-            5: "#ee9b00",
-            6: "#ca6702",
-            7: "#bb3e03",
-            8: "#e82f1e",
-        },
-    )
-    fig2.update_layout(
-        template="simple_white",
-        showlegend=False,
-        xaxis_title="Num_Clusters based on HDBSCAN",
-        title="Cluster Histogram",
-    )
-    pio.show(fig2)
-
-    return file_name
 
 def view_kmeans(df: str, numclusters: int):
 
