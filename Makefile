@@ -4,6 +4,8 @@ PARAMS_FILE := $(strip $(params))
 PARAMS_JSON := $(shell cat $(PARAMS_FILE))
 RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 
+all: process-data projections models 
+	@echo "Process complete"
 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
