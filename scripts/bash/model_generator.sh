@@ -25,16 +25,5 @@ if [ -n "$JSON_PATH" ]; then
 fi
 
 poetry run python ../python/model_grid.py
-
-
-echo -e
-echo "##################################################################################"
-echo -e
-echo -e
-echo "Finished Model grid search!"
-echo "See data/models/ to view the generated files, subgrouped by number of clusters."
-echo -e
-echo -e
-echo "##################################################################################"
 echo -e
 exit 0

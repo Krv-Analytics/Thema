@@ -1,7 +1,9 @@
 {
-    "raw_data": "data/raw/esg_raw2017.pkl",
-    "clean_data": "data/clean/clean_data_standard_scaled_integer-encoding_filtered.pkl",
-    "projected_data": "updated by projector script",
+    "Run_Name": "My_Sim",
+
+    "raw_data": "***PATH_TO_YOUR_RAW_DATA_HERE***",
+    "clean_data": "updated_by_cleaner",
+    "projected_data": "updated_by_projector",
     "cleaning_scalar": "standard_scaler",
     "cleaning_encoding": "integer",
     "cleaning_remove_columns": [
@@ -9,16 +11,15 @@
         "State",
         "Year"
     ],
-    "projector": "umap",
+    "projector": "UMAP",
     "projector_dimension": 2,
     "projector_Nneighbors": [
         5,10,15,20,25,30
     ],
-    "projetor_minDists": [
+    "projector_minDists": [
         0,0.01,0.05,0.1,0.5,1
     ],
     "projector_random_seed": 42,
-    "path_to_projections": "data/projections/UMAP/",
     "model_min_cluster_size": 6,
     "model_max_cluster_size": 0,
     "model_nCubes": [

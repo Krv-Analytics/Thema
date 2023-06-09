@@ -80,7 +80,11 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
     n = args.num_policy_groups
-    keys, distances = read_distance_matrices(metric=args.metric, n=n)
+    rel_distance_dir = "data/" + params_json["Run_Name"] + f"/model_analysis/distance_matrices/{n}_policy_groups/"
+    distance_dir = os.path.join(
+        root, rel_distance_dir
+    )
+    keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
 
     # Fit Hierarchical Clustering
     model = cluster_models(
@@ -101,9 +105,10 @@ if __name__ == "__main__":
         model_file = f"curvature_{args.metric}_clustering_model.pkl"
 
         out_dir_message = f"{model_file} successfully written."
-
+        
+        rel_outdir = "data/" + params_json["Run_Name"] + f"/model_analysis/graph_clustering/{n}_policy_groups/"
         output_dir = os.path.join(
-            root, f"data/model_analysis/graph_clustering/{n}_policy_groups/"
+            root, rel_outdir
         )
 
         # Check if output directory already exists

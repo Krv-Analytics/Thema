@@ -16,15 +16,5 @@ fi
 
 poetry run python ../python/projection_grid.py
 
-
-echo -e
-echo "##################################################################################"
-echo -e
-echo -e
-echo "Finished projection grid search!"
-echo "See data/projections/UMAP/ to view the projection pickle files."
-echo -e
-echo -e
-echo "##################################################################################"
 echo -e
 exit 0

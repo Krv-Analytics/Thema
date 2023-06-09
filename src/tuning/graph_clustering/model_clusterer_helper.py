@@ -77,7 +77,7 @@ def cluster_models(
     return model
 
 
-def read_distance_matrices(metric, n):
+def read_distance_matrices(dir, metric, n):
     """
     This function reads the pairwise distance matrices stored in the directory,
     given the metric and number of policy groups.
@@ -99,9 +99,7 @@ def read_distance_matrices(metric, n):
         The pairwise distance matrix of the dataset.
     """
 
-    dir = os.path.join(
-        root, f"data/model_analysis/distance_matrices/{n}_policy_groups/"
-    )
+
     assert os.path.isdir(
         dir
     ), f"No pairwise distances yet for {n} policy groups! Please run `metric_generator.py -n {n}` first."
