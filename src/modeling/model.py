@@ -454,11 +454,9 @@ class Model:
         """
         # Config Pyplot
         fig = plt.figure(figsize=(14, 8))
-        fig = plt.figure(figsize=(14, 8))
         ax = fig.add_subplot()
         color_scale = np.array(custom_color_scale()).T[1]
         # Get Node Coords
-        pos = nx.spring_layout(self.mapper.graph, k=k, seed=6)
         pos = nx.spring_layout(self.mapper.graph, k=k, seed=6)
 
         # Plot and color components
@@ -469,11 +467,9 @@ class Model:
                 pos=pos,
                 node_color=color_scale[i],
                 node_size=100,
-                node_size=100,
                 font_size=6,
                 with_labels=False,
                 ax=ax,
-                label=f"Group {labels[i]}",
                 label=f"Group {labels[i]}",
                 edgelist=[],
             )
@@ -481,10 +477,8 @@ class Model:
                 g,
                 pos=pos,
                 width=2,
-                width=2,
                 ax=ax,
                 label=None,
-                alpha=0.6,
                 alpha=0.6,
             )
         ax.legend(loc="best", prop={"size": 8})
