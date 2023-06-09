@@ -7,11 +7,11 @@ import os
 import pickle
 from dotenv import load_dotenv
 import json
+import numpy as np
 
 from model_selector_helper import (
     read_graph_clustering,
     select_models,
-    plot_mapper_histogram,
 )
 
 load_dotenv()
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--coverage_filter",
         type=float,
-        default=params_json["histogram_coverage"],
+        default=params_json["coverage_filter"],
         help="A minimum model coverage for visualizing a histogram. Only set when using '-H' tag as well.",
     )
 
@@ -73,54 +73,83 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
     n = args.num_groups
-    models_dir = "data/"+params_json["Run_Name"] + f"/models/"
-    # Visualize Model Distribution
-    if args.histogram:
-        plot_mapper_histogram(models_dir, args.coverage_filter)
+    coverage = params_json["coverage_filter"]
+    models_dir = "data/" + params_json["Run_Name"] + f"/models/"
 
     # Choose ~best~ models from curvature equivalency classes.
     # Current implementation chooses Model with the best coverage.
+
+    rel_cluster_dir = (
+        "data/"
+        + params_json["Run_Name"]
+        + f"/model_analysis/graph_clustering/{coverage}_perc_coverage/{n}_policy_groups/"
+    )
+    cluster_dir = os.path.join(root, rel_cluster_dir)
+
+    keys, clustering, distance_threshold = read_graph_clustering(
+        cluster_dir, metric=args.metric, n=n
+    )
+
+    rel_model_dir = "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+    model_dir = os.path.join(root, rel_model_dir)
+    selection = select_models(model_dir, keys, clustering, n)
+
+    model_file = (
+        f"equivalence_class_candidates_{args.metric}_{distance_threshold}DT.pkl"
+    )
+
+    out_dir_message1 = f"{model_file} successfully written."
+
+    output_dir1 = (
+        "data/"
+        + params_json["Run_Name"]
+        + f"/model_analysis/token_models/{n}_policy_groups/"
+    )
+    output_dir1 = os.path.join(root, output_dir1)
+    # Check if output directory already exists
+    if os.path.isdir(output_dir1):
+        model_file = os.path.join(output_dir1, model_file)
+
     else:
+        os.makedirs(output_dir1, exist_ok=True)
+        model_file = os.path.join(output_dir1, model_file)
+    # Writing Selected Models
+    with open(model_file, "wb") as handle:
+        pickle.dump(selection, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        rel_cluster_dir = "data/" + params_json["Run_Name"] + f"/model_analysis/graph_clustering/{n}_policy_groups/"
-        cluster_dir = os.path.join(
-            root, rel_cluster_dir)
+    # Stability Selection
+    cluster_sizes = []
+    for key in selection.keys():
+        cluster_sizes.append(selection[key]["cluster_size"])
 
-        keys, clustering, distance_threshold = read_graph_clustering(cluster_dir,
-            metric=args.metric, n=n
+    stable_cluster = np.argmax(cluster_sizes)
+    stable_model = selection[stable_cluster]["model"]
+
+    output_dir2 = "data/" + params_json["Run_Name"] + f"/final_models/"
+    output_dir2 = os.path.join(root, output_dir2)
+    stable_model_file = f"{n}_policy_group_model.pkl"
+    out_dir_message2 = f"{stable_model_file} successfully written."
+
+    # Check if output directory already exists
+    if os.path.isdir(output_dir2):
+        stable_model_file = os.path.join(output_dir2, stable_model_file)
+
+    else:
+        os.makedirs(output_dir2, exist_ok=True)
+        stable_model_file = os.path.join(output_dir2, stable_model_file)
+    # Writing Selected Models
+    with open(stable_model_file, "wb") as handle:
+        pickle.dump(stable_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if args.Verbose:
+        print("\n")
+        print(
+            "-------------------------------------------------------------------------------- \n\n"
         )
+        print(f"Model Selection based on Stability and Coverage complete!")
+        print()
+        print(f"Token Models written to: \n {out_dir_message1}")
+        print(f"Final Model written to: \n {out_dir_message2}")
 
-        rel_model_dir = "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/" 
-        model_dir = os.path.join(
-            root, rel_model_dir
+        print(
+            "\n\n -------------------------------------------------------------------------------- "
         )
-        models = select_models(model_dir, keys, clustering, n)
-
-        model_file = (
-            f"equivalence_class_candidates_{args.metric}_{distance_threshold}DT.pkl"
-        )
-
-        out_dir_message = f"{model_file} successfully written."
-
-        rel_outdir = "data/" + params_json["Run_Name"] + f"/model_analysis/token_models/"
-        output_dir = os.path.join(root, rel_outdir)
-        # Check if output directory already exists
-        if os.path.isdir(output_dir):
-            model_file = os.path.join(output_dir, model_file)
-
-        else:
-            os.makedirs(output_dir, exist_ok=True)
-            model_file = os.path.join(output_dir, model_file)
-        with open(model_file, "wb") as handle:
-            pickle.dump(models, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        if args.Verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------- \n\n"
-            )
-            print(f"{out_dir_message}")
-
-            print(
-                "\n\n -------------------------------------------------------------------------------- "
-            )
