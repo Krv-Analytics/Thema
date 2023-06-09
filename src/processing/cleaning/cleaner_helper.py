@@ -89,7 +89,7 @@ def integer_encoder(column_values: np.array):
     return integer_encoding
 
 
-def clean_data_filename(scaler=None, encoding="integer", filter: bool = True):
+def clean_data_filename(run_name="My_Sim", scaler=None, encoding="integer", filter: bool = True):
     """
     Generate a filename for the cleaned and preprocessed data.
 
@@ -122,4 +122,4 @@ def clean_data_filename(scaler=None, encoding="integer", filter: bool = True):
     else:
         filter = ""
 
-    return f"clean_data_{scaler}_{encoding}-encoding_{filter}.pkl"
+    return f"{run_name}_clean_data_{scaler}_{encoding}-encoding_{filter}.pkl"

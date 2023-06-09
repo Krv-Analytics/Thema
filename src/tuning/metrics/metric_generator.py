@@ -64,7 +64,8 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     n = args.num_policy_groups
-    path_to_mappers = os.path.join(root, f"data/models/{n}_policy_groups")
+    rel_path_to_mappers = "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+    path_to_mappers = os.path.join(root, rel_path_to_mappers)
 
     keys, distances = topology_metric(
         files=path_to_mappers, metric=args.metric, coverage=args.coverage_filter
@@ -75,9 +76,10 @@ if __name__ == "__main__":
 
     out_dir_message = f"{distance_file} successfully written."
 
+    rel_ouput_dir = "data/" + params_json["Run_Name"] + f"/model_analysis/distance_matrices/{n}_policy_groups/"
     output_dir = os.path.join(
         root,
-        f"data/model_analysis/distance_matrices/{n}_policy_groups/",
+        rel_ouput_dir,
     )
 
     # Check if output directory already exists

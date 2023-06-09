@@ -11,7 +11,7 @@ from model_helper import env
 root = env()
 
 
-def select_models(keys, clustering, n):
+def select_models(dir, keys, clustering, n):
     """
     Choose the best covered model from a set of equivalency classes.
     These equivalency classes are based on an Agglomerative clustering
@@ -35,7 +35,7 @@ def select_models(keys, clustering, n):
     selection: list
         A list of saved model file locations.
     """
-    subgroups = get_clustering_subgroups(keys, clustering, n)
+    subgroups = get_clustering_subgroups(dir, keys, clustering, n)
     selection = []
     for subgroup in subgroups.values():
         best_model = get_best_covered_model(subgroup)
@@ -43,7 +43,7 @@ def select_models(keys, clustering, n):
     return selection
 
 
-def read_graph_clustering(metric, n):
+def read_graph_clustering(dir, metric, n):
     """
     Reads in a pre-generated agglomerative clustering model of graphs
     and returns the relevant data.
@@ -68,8 +68,7 @@ def read_graph_clustering(metric, n):
         The distance threshold used in the clustering model to
         determine labels (i.e. equivalency classes).
     """
-
-    dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
+    # dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
     assert os.path.isdir(
         dir
     ), f"No model clustering model yet for {n} policy groups! Please run `model_clusterer.py -n {n}` first."
@@ -86,7 +85,7 @@ def read_graph_clustering(metric, n):
     )
 
 
-def get_model_file(key, n):
+def get_model_file(dir, key, n):
     """
     Returns the file location of a saved model with the given keys.
 
@@ -105,14 +104,14 @@ def get_model_file(key, n):
     """
     # Unpack key
     n_cubes, p, n_neighbors, min_dist, hdbscan_params, min_intersection = key
-    dir = os.path.join(root, f"data/models/{n}_policy_groups/")
+    #dir = os.path.join(root, f"data/models/{n}_policy_groups/")
     file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
     file = os.path.join(dir, file)
     assert os.path.isfile(file), f"No saved model with these keys: {key}"
     return file
 
 
-def get_clustering_subgroups(keys, clustering, n):
+def get_clustering_subgroups(dir,keys, clustering, n):
     """
     Returns a dictionary of subgroups for a graph clustering along
     with the corresponding model identifiers (keys).
@@ -141,7 +140,7 @@ def get_clustering_subgroups(keys, clustering, n):
         subkeys = keys[mask]
         files = []
         for key in subkeys:
-            files.append(get_model_file(key, n))
+            files.append(get_model_file(dir,key, n))
         subgroups[label] = files
 
     return subgroups
@@ -171,7 +170,7 @@ def get_best_covered_model(models):
     return best_model
 
 
-def get_viable_models(n: int, coverage_filter: float):
+def get_viable_models(dir, n: int, coverage_filter: float):
     """
     Returns a list of saved models that have at least the specified coverage percentage.
 
@@ -189,7 +188,6 @@ def get_viable_models(n: int, coverage_filter: float):
         A list of saved model file locations that meet the specified coverage percentage.
     """
 
-    dir = f"data/models/{n}_policy_groups/"
     dir = os.path.join(root, dir)
     files = os.listdir(dir)
     models = []
@@ -225,7 +223,7 @@ def unpack_policy_group_dir(folder):
     return n
 
 
-def plot_mapper_histogram(coverage_filter=0.8):
+def plot_mapper_histogram(dir,coverage_filter=0.8):
     """
     Plots a histogram of the number of viable models for each rank
     of policy groupings. This function will count the models
@@ -243,14 +241,15 @@ def plot_mapper_histogram(coverage_filter=0.8):
     fig: matplotlib.figure.Figure
         The plotted figure object.
     """
-    mappers = os.path.join(root, "data/models/")
+    mappers = os.path.join(root, dir)
     # Get list of folder names in the directory
     policy_groups = os.listdir(mappers)
     # Initialize counting dictionary
     counts = {}
     for folder in policy_groups:
         n = unpack_policy_group_dir(folder)
-        models = get_viable_models(n, coverage_filter)
+        path_to_models = dir + folder
+        models = get_viable_models(path_to_models, n, coverage_filter)
         counts[n] = len(models)
     keys = list(counts.keys())
     keys.sort()
