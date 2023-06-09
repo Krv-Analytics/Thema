@@ -33,7 +33,7 @@ if __name__ == "__main__":
         "-f",
         "--coverage_filter",
         type=float,
-        default=params_json["histogram_coverage"],
+        default=params_json["coverage_filter"],
         help="Select the percentage of unqiue samples that need to be covered by Mapper's fit.",
     )
 
@@ -64,42 +64,55 @@ if __name__ == "__main__":
     this = sys.modules[__name__]
 
     n = args.num_policy_groups
-    rel_path_to_mappers = "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+    coverage = args.coverage_filter
+    rel_path_to_mappers = (
+        "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+    )
     path_to_mappers = os.path.join(root, rel_path_to_mappers)
 
-    keys, distances = topology_metric(
-        files=path_to_mappers, metric=args.metric, coverage=args.coverage_filter
-    )
-    results = {"keys": keys, "distances": distances}
-
-    distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
-
-    out_dir_message = f"{distance_file} successfully written."
-
-    rel_ouput_dir = "data/" + params_json["Run_Name"] + f"/model_analysis/distance_matrices/{n}_policy_groups/"
-    output_dir = os.path.join(
-        root,
-        rel_ouput_dir,
-    )
-
-    # Check if output directory already exists
-    if os.path.isdir(output_dir):
-        distance_file = os.path.join(output_dir, distance_file)
-
-    else:
-        os.makedirs(output_dir, exist_ok=True)
-        distance_file = os.path.join(output_dir, distance_file)
-
-    with open(distance_file, "wb") as handle:
-        pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    if args.Verbose:
-        print("\n")
-        print(
-            "-------------------------------------------------------------------------------- \n\n"
+    try:
+        keys, distances = topology_metric(
+            files=path_to_mappers, metric=args.metric, coverage=coverage
         )
-        print(f"{out_dir_message}")
 
-        print(
-            "\n\n -------------------------------------------------------------------------------- "
+        results = {"keys": keys, "distances": distances}
+
+        distance_file = f"curvature_{args.metric}_pairwise_distances.pkl"
+
+        out_dir_message = f"{distance_file} successfully written."
+
+        rel_ouput_dir = (
+            "data/"
+            + params_json["Run_Name"]
+            + f"/model_analysis/distance_matrices/{coverage}_perc_coverage/{n}_policy_groups/"
         )
+        output_dir = os.path.join(
+            root,
+            rel_ouput_dir,
+        )
+
+        # Check if output directory already exists
+        if os.path.isdir(output_dir):
+            distance_file = os.path.join(output_dir, distance_file)
+
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            distance_file = os.path.join(output_dir, distance_file)
+
+        with open(distance_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
+            )
+            print(f"{out_dir_message}")
+
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )
+
+    except AssertionError:
+        # TODO: Log something here?
+        assert 1 == 1
