@@ -3,6 +3,7 @@ include .env
 PARAMS_FILE := $(strip $(params))
 PARAMS_JSON := $(shell cat $(PARAMS_FILE))
 RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
+COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
 
 
 install: check-poetry 
@@ -36,8 +37,11 @@ projections:
 models: 
 	cd scripts/bash && ./model_generator.sh 
 
-histogram:
-	cd scripts/bash && ./histogram.sh
+model-histogram:
+	cd scripts/python && python model_histogram.py
+
+curvature-histogram:
+	cd scripts/python && python curvature_histogram.py
 dendrogram:
 	cd scripts/bash && ./dendrogram.sh
 model-selection:
@@ -59,6 +63,9 @@ clean-models:
 clean-model-analysis:
 	rm -f -r data/${RUN_NAME}/model_analysis/
 
+clean-final-models:
+	rm -f -r  data/${RUN_NAME}/final_models/
+
 clean: clean-processed-data clean-projections 
 	rm -f -r data/${RUN_NAME}/
 
@@ -67,6 +74,7 @@ clean-raw-data:
 
 clean-full : clean-raw-data clean-processed-data clean-projections 
 	rm -f -r data/
+
 
 
 
