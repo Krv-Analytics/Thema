@@ -19,6 +19,34 @@ sys.path.append(src + "modeling/")
 
 from modeling.model_selector_helper import unpack_policy_group_dir
 
+
+def plot_curvature_histogram(dir):
+    num_curvature_profiles = {}
+    for folder in os.listdir(dir):
+        i = unpack_policy_group_dir(folder)
+        folder = os.path.join(dir, folder)
+        if os.path.isdir(folder):
+            holder = []
+            for file in os.listdir(folder):
+                if file.endswith(".pkl"):
+                    file = os.path.join(folder, file)
+                    with open(file, "rb") as f:
+                        matrix = pickle.load(f)["distances"]
+                holder.append(int(len(matrix)))
+            # For now take the maximum number of unique curvature profiles over different metrics
+            num_curvature_profiles[i] = max(holder)
+
+    fig = plt.figure(figsize=(15, 10))
+    ax = sns.barplot(
+        x=list(num_curvature_profiles.keys()),
+        y=list(num_curvature_profiles.values()),
+    )
+    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Curvature Profiles")
+    ax.set_title(f"{coverage*100} % Coverage Filter")
+    plt.show()
+    return fig
+
+
 if __name__ == "__main__":
 
     logging.basicConfig(format="%(message)s", level=logging.INFO)
@@ -91,26 +119,4 @@ if __name__ == "__main__":
     )
     distance_matrices = os.path.join(root, distance_matrices)
 
-    num_curvature_profiles = {}
-
-    for i in group_ranks:
-        folder = distance_matrices + f"{i}_policy_groups/"
-        if os.path.isdir(folder):
-            holder = []
-            for file in os.listdir(folder):
-                if file.endswith(".pkl"):
-                    file = os.path.join(folder, file)
-                    with open(file, "rb") as f:
-                        matrix = pickle.load(f)["distances"]
-                holder.append(len(matrix))
-            # For now take the maximum number of unique curvature profiles over different metrics
-            num_curvature_profiles[i] = max(holder)
-
-    fig = plt.figure(figsize=(15, 10))
-    ax = sns.barplot(
-        x=list(num_curvature_profiles.keys()),
-        y=list(num_curvature_profiles.values()),
-    )
-    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Curvature Profiles")
-    ax.set_title(f"{coverage*100} % Coverage Filter")
-    plt.show()
+    curvature_histogram = plot_curvature_histogram(distance_matrices)

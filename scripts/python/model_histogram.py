@@ -58,6 +58,7 @@ def plot_mapper_histogram(dir, coverage_filter=0.8):
         y=list(sorted_counts.values()),
     )
     ax.set(xlabel="Number of Policy Groups", ylabel="Number of Viable Models")
+    ax.set_title(f"{coverage*100} % Coverage Filter")
     plt.show()
     return fig
 
