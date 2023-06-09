@@ -63,8 +63,8 @@ def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs)
 
 def UMAP_grid(dir='../../data/projections/UMAP/'):
     """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations
-
     grid search the UMAP parameter space, choose the representations that occur most often in the given parameter space, based on the generated histogram"""
+    
     neighbors, dists = [], []
     for umap in os.listdir(dir):
         with open (f"{dir}/{umap}", 'rb') as f:
