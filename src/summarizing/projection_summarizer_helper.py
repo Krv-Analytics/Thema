@@ -95,9 +95,10 @@ def create_umap_grid(dir):
                 marker=dict(
                     size=4,
                     color=df["labels"],
-                    colorscale=[color for _, color in md.custom_color_scale()],
+                    #colorscale=[color for _, color in md.custom_color_scale()],
+                    colorscale = md.custom_color_scale()
                     #line=dict(width=0.05, color="Black"),
-                    cmid=0.8,
+                    #cmid=0.8,
                 ),
                 hovertemplate=df["labels"],
                 hoverinfo=['all'],
@@ -147,12 +148,17 @@ def create_cluster_distribution_histogram(dir):
         num_clusters = len(np.unique(clusterer.labels_))
         cluster_distribution.append(num_clusters)
 
-    unique_values = list(set(cluster_distribution))
+    unique_values, value_counts = np.unique(cluster_distribution, return_counts=True)
 
-    fig = px.histogram(cluster_distribution, nbins=len(unique_values),
-                       color_discrete_sequence=[color for _, color in md.custom_color_scale()],
-                       color=cluster_distribution,
-                       text_auto=True)
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        x=unique_values,
+        y=value_counts,
+        marker_color=[color for _, color in md.custom_color_scale()],
+        text=value_counts,
+        hoverinfo='text'
+    ))
 
     fig.update_layout(
         xaxis=dict(
@@ -160,6 +166,7 @@ def create_cluster_distribution_histogram(dir):
             tickvals=unique_values,
             ticktext=unique_values
         ),
+        bargap=0.05,
         #yaxis=dict(autorange="reversed"),
         template="simple_white",
         showlegend=False,
