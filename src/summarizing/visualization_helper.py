@@ -1,6 +1,5 @@
 "Helper functions for visualizing CoalMappers"
 
-import time
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
@@ -59,96 +58,6 @@ def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs)
     plt.ylabel(f"{distance} distance between persistence diagrams")
     plt.show()
     return d
-
-
-def UMAP_grid(dir='../../data/projections/UMAP/'):
-    """function reads in a df, outputs a grid visualization with n by n UMAP projected dataset visualizations
-    grid search the UMAP parameter space, choose the representations that occur most often in the given parameter space, based on the generated histogram"""
-    
-    neighbors, dists = [], []
-    for umap in os.listdir(dir):
-        with open (f"{dir}/{umap}", 'rb') as f:
-            params = pickle.load(f)
-        if params['hyperparameters'][0] in neighbors:
-            ""
-        else:
-            neighbors.append(params['hyperparameters'][0])
-        if params['hyperparameters'][1] in dists:
-            ''
-        else:
-            dists.append(params['hyperparameters'][1])
-        neighbors.sort()
-        dists.sort()
-
-    fig = make_subplots(
-            rows=len(dists),
-            cols=len(neighbors),
-            column_titles=list(map(str, neighbors)),
-            x_title="n_neighbors",
-            row_titles=list(map(str, dists)),
-            y_title="min_dist",
-            #vertical_spacing=0.05,
-            #horizontal_spacing=0.03,
-            # shared_xaxes=True,
-            # shared_yaxes=True,
-        )
-
-    cluster_distribution = []
-    row = 1
-    col = 1
-    for umap in os.listdir(dir):
-        with open (f"{dir}/{umap}", 'rb') as f:
-            params = pickle.load(f)
-        proj_2d = params['projection']
-        clusterer = hdbscan.HDBSCAN(min_cluster_size=5).fit(proj_2d)
-        outdf = pd.DataFrame(proj_2d, columns=["0", "1"])
-        outdf["labels"] = clusterer.labels_
-
-        num_clusters = len(np.unique(clusterer.labels_))
-        cluster_distribution.append(num_clusters)
-        df = outdf[outdf["labels"] == -1]
-        fig.add_trace(
-            go.Scatter(
-                x=df["0"],
-                y=df["1"],
-                mode="markers",
-                marker=dict(
-                    size=2.3,
-                    color="red",
-                    #line=dict(width=0.2, color="Black"),
-                ),
-                hovertemplate=df["labels"],
-            ),
-            row=row, col = col,
-        )
-        df = outdf[outdf["labels"] != -1]
-        fig.add_trace(go.Scatter(
-                x=df["0"],
-                y=df["1"],
-                mode="markers",
-                marker=dict(
-                    size=4,
-                    color= df["labels"],
-                    cmid=0.5,
-                ),
-                hovertemplate=df["labels"],
-            ),
-            row=row, col = col,
-        )
-        row+=1
-        if row == len(dists)+1:
-            row = 1
-            col+=1
-
-
-    fig.update_layout(height=900,
-        template="simple_white", showlegend=False, font=dict(color="black",)
-    )
-
-    fig.update_xaxes(showticklabels=False, tickwidth=0, tickcolor="rgba(0,0,0,0)")
-    fig.update_yaxes(showticklabels=False, tickwidth=0, tickcolor="rgba(0,0,0,0)")
-
-    pio.show(fig)
 
 def visualize_PCA(model, colors=True):
         df=model.tupper.clean.copy()
