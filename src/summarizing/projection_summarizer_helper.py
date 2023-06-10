@@ -96,9 +96,9 @@ def create_umap_grid(dir):
                     size=4,
                     color=df["labels"],
                     #colorscale=[color for _, color in md.custom_color_scale()],
-                    colorscale = md.custom_color_scale()
+                    colorscale = md.custom_color_scale(),
                     #line=dict(width=0.05, color="Black"),
-                    #cmid=0.8,
+                    cmid=0.3,
                 ),
                 hovertemplate=df["labels"],
                 hoverinfo=['all'],
