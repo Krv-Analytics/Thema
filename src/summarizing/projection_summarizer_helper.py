@@ -23,10 +23,14 @@ def create_umap_grid(dir):
     Create a grid visualization of UMAP projections.
 
     Parameters:
-    - dir (str): The directory containing the UMAP projections.
+    -----------
+    dir : str
+        The directory containing the UMAP projections.
 
     Returns:
-    - fig: The Plotly figure object representing the UMAP grid visualization.
+    --------
+    fig : plotly.graph_objects.Figure
+        The Plotly figure object representing the UMAP grid visualization.
     """
 
     neighbors, dists = [], []
@@ -124,10 +128,14 @@ def create_cluster_distribution_histogram(dir):
     Create a histogram of the cluster distribution.
 
     Parameters:
-    - dir (str): The directory containing the projections.
+    -----------
+    dir : str
+        The directory containing the projections.
 
     Returns:
-    - fig: The Plotly figure object representing the histogram.
+    --------
+    fig : plotly.graph_objects.Figure
+        The Plotly figure object representing the histogram.
     """
 
     cluster_distribution = []
@@ -167,16 +175,24 @@ def find_min_max_values(data, buffer_percent=5):
     """
     Find the minimum and maximum values for each column (first and second number) in a list of sublists and apply a buffer.
 
-    Args:
-        data (list): List of sublists containing numeric values.
-        buffer_percent (float): Percentage value for the buffer/padding. Default is 5%.
+    Parameters:
+    -----------
+    data : list
+        List of sublists containing numeric values.
+    buffer_percent : float, optional
+        Percentage value for the buffer/padding. Default is 5%.
 
     Returns:
-        tuple: Two lists, each with two values representing the minimum and maximum values of each column including the buffer.
+    --------
+    tuple
+        Two lists, each with two values representing the minimum and maximum values of each column including the buffer.
 
     Raises:
-        ValueError: If the input data is empty.
-        TypeError: If the input data is not a list of sublists or the sublists do not have two elements.
+    -------
+    ValueError
+        If the input data is empty.
+    TypeError
+        If the input data is not a list of sublists or the sublists do not have two elements.
     """
 
     if not data:
@@ -207,19 +223,24 @@ def find_min_max_values(data, buffer_percent=5):
 
 
 
-
 def analyze_umap_projections(dir):
     """
     Analyze UMAP projections in a directory and visualize the results.
 
-    Args:
-        dir (str): The directory path containing UMAP projections.
+    Parameters:
+    -----------
+    dir : str
+        The directory path containing UMAP projections.
 
     Returns:
-        None: Displays a scatter plot of UMAP projections with corresponding badness scores.
+    --------
+    fig : plotly.graph_objects.Figure
+        The Plotly figure object representing the scatter plot of UMAP projections with corresponding badness scores.
 
     Raises:
-        FileNotFoundError: If the specified directory does not exist.
+    -------
+    FileNotFoundError
+        If the specified directory does not exist.
     """
 
     # Create an empty list to store badness scores
@@ -252,17 +273,28 @@ def analyze_umap_projections(dir):
         if UMAP_goodness[UMAP_goodness['labels'] != -1]['0'].sum() < UMAP_goodness[UMAP_goodness['labels'] == -1]['0'].sum():
             badness.append((tuple(params['hyperparameters'][:2]), UMAP_goodness[UMAP_goodness['labels'] == -1]['0'].sum()))
 
+    fig = go.Figure()
+    x = [item[0] for item in params_list]
+    y = [item[1] for item in params_list]
+    fig.add_trace(go.Scatter(x=x,
+        y=y,
+        mode='markers',
+        marker=dict(
+            color='white',
+            line = dict(width = 0.3, color = 'black')),
+            name='All Parameters'))
+
     # Extract data for plotting
     data = badness
     x = [item[0][0] for item in data]
     y = [item[0][1] for item in data]
     colors = [item[1] for item in data]
 
-    # Create a scatter plot of UMAP projections with badness scores
-    fig = go.Figure(data=go.Scatter(
+    fig.add_trace(go.Scatter(
         x=x,
         y=y,
         mode='markers',
+        name = 'Unclustered UMAP parameters',
         hovertemplate=colors,
         marker=dict(
             color=colors,
@@ -270,10 +302,14 @@ def analyze_umap_projections(dir):
             cmin=min(colors),
             cmax=max(colors),
             colorbar=dict(
-                title='Number of Unclustered Items\nper Projection'
+                title='Number of Unclustered Items<br>per Projection',
+                len=0.4,  # Adjust the length of the colorbar
+                y=0.65,  # Adjust the position of the colorbar
+                yanchor='middle'
             )
         )
     ))
+
 
     # Customize the plot layout
     fig.update_layout(
@@ -291,13 +327,17 @@ def analyze_umap_projections(dir):
 
 
 def save_visualizations_as_html(visualizations, output_file):
-    '''
+    """
     Saves a list of Plotly visualizations as an HTML file.
 
-    Args:
-        visualizations (list): A list of Plotly visualizations (plotly.graph_objects.Figure).
-        output_file (str): The path to the output HTML file.
-    '''
+    Parameters:
+    -----------
+    visualizations : list
+        A list of Plotly visualizations (plotly.graph_objects.Figure).
+    output_file : str
+        The path to the output HTML file.
+    """
+
     # Create the HTML file and save the visualizations
     with open(output_file, 'w') as f:
         f.write('<html>\n<head>\n</head>\n<body>\n')
