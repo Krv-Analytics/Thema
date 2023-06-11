@@ -517,42 +517,6 @@ class Model:
                             alpha=0.6,
                         )
         ax.legend(loc="best", prop={"size": 8})
-        ax.legend(loc="best", prop={"size": 8})
-        plt.axis("off")
-        self._cluster_positions = pos
-        return plt
-    
-    def visualize_component(self, component, cluster_labels=True):
-        if self._cluster_positions is None:
-            return 'Ensure you have run .visualize_model() before attempting to visualize a component'
-            
-        fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot()
-        
-        color_scale = np.array(custom_color_scale()).T[1]
-        components, labels = zip(*self.mapper.components.items())
-        for i, g in enumerate(components):
-            if i == component:
-                nx.draw_networkx(
-                            g,
-                            pos=self._cluster_positions,
-                            node_color=color_scale[i],
-                            node_size=100,
-                            font_size=10,
-                            with_labels=cluster_labels,
-                            ax=ax,
-                            label=f"Group {labels[i]}",
-                            #font_color = color_scale[i],
-                            edgelist=[],)
-                nx.draw_networkx_edges(
-                            g,
-                            pos=self._cluster_positions,
-                            width=2,
-                            ax=ax,
-                            label=None,
-                            alpha=0.6,
-                        )
-        ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
                 
         #return fig
