@@ -693,7 +693,7 @@ class Model:
         for column in df.columns.drop('cluster_IDs'):
                 for pg in list(dict_2.keys()):
                     fig.add_trace(go.Box(y = df[df['cluster_IDs']==pg][column], name=dict_2[pg], jitter=0.3, showlegend=False,
-                    whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True,
+                    whiskerwidth=0.6, marker_size=3, line_width=1, boxmean=True, hovertext = df['companyName'],
                     marker=dict(color= custom_color_scale()[int(pg)][1])),
                     row=row, col=col)
 
