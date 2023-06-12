@@ -39,7 +39,7 @@
         1,2,3,4
     ],
     "model_random_seed": 42,
-    "histogram_coverage": 0.75,
+    "coverage_filter": 0.75,
     "dendrogram_metric": "landscape",
     "dendrogram_cut": 0.3,
     "dendrogram_levels": 10
