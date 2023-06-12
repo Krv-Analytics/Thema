@@ -5,7 +5,7 @@ PARAMS_JSON := $(shell cat $(PARAMS_FILE))
 RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
 
-all: process-data projections models model-selection model-selection
+all: process-data projections models model-selection 
 	@echo "Process complete"
 
 install: check-poetry 
@@ -28,7 +28,7 @@ check-poetry:
 fetch: fetch-raw-data fetch-processed-data
 
 fetch-raw-data:
-	python src/processing/pulling/data_generator.py -v
+	poetry run python src/processing/pulling/data_generator.py -v
 
 process-data:
 	cd scripts/bash && ./cleaner.sh
@@ -37,31 +37,31 @@ projections:
 	cd scripts/bash && ./projector.sh
 
 summarize-projections:
-	python src/summarizing/projection_summarizer.py
+	poetry run python src/summarizing/projection_summarizer.py
 
 models: 
 	cd scripts/bash && ./model_generator.sh 
 
 model-histogram:
-	cd scripts/python && python model_histogram.py
+	cd scripts/python && poetry run python model_histogram.py
 
 curvature-distances:
-	cd scripts/python && python curvature_distance_generator.py
+	cd scripts/python && poetry run python curvature_distance_generator.py
 
 curvature-histogram: curvature-distances
-	cd scripts/python && python curvature_histogram.py
+	cd scripts/python && poetry run python curvature_histogram.py
 
 stability-histogram:
-	cd scripts/python && python stability_histogram.py
+	cd scripts/python && poetry run python stability_histogram.py
 
 dendrogram:
 	cd scripts/bash && ./dendrogram.sh
 
 model-clustering: curvature-distances
-	cd scripts/python && python clusterer.py
+	cd scripts/python && poetry run python clusterer.py
 
 model-selection: model-clustering
-	cd scripts/python && python selector.py
+	cd scripts/python && poetry run python selector.py
 
 
 

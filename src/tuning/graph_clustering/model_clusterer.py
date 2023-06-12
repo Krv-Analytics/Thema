@@ -92,7 +92,9 @@ if __name__ == "__main__":
     distance_dir = os.path.join(root, rel_distance_dir)
     try:
         keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
-
+        
+        assert len(distances)>1
+            
         # Fit Hierarchical Clustering
         model = cluster_models(
             distances,

@@ -56,7 +56,7 @@ if __name__ == "__main__":
     log.add()
 
     # Number of loops
-    num_loops = 2 * len(group_ranks)
+    num_loops = len(group_ranks)
     # Running Grid in Parallel
     subprocesses = []
     ## GRID SEARCH PROJECTIONS
