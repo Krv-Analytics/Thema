@@ -53,8 +53,10 @@ model-selection:
 
 clean-processed-data: 
 	rm -f data/$(RUN_NAME)/clean/*
+	rm -f data/$(RUN_NAME)/clean/*
 
 clean-projections:
+	rm -f -r data/${RUN_NAME}/projections/*
 	rm -f -r data/${RUN_NAME}/projections/*
 
 clean-models:
@@ -67,6 +69,10 @@ clean-final-models:
 	rm -f -r  data/${RUN_NAME}/final_models/
 
 clean: clean-processed-data clean-projections 
+	rm -f -r data/${RUN_NAME}/
+
+clean-raw-data: 
+	rm -f data/raw/* 
 	rm -f -r data/${RUN_NAME}/
 
 clean-raw-data: 

@@ -78,6 +78,7 @@ def cluster_models(
 
 
 def read_distance_matrices(dir, metric, n):
+def read_distance_matrices(dir, metric, n):
     """
     This function reads the pairwise distance matrices stored in the directory,
     given the metric and number of policy groups.

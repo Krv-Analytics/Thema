@@ -45,6 +45,7 @@ def select_models(dir, keys, clustering, n):
 
 
 def read_graph_clustering(dir, metric, n):
+def read_graph_clustering(dir, metric, n):
     """
     Reads in a pre-generated agglomerative clustering model of graphs
     and returns the relevant data.
@@ -86,6 +87,7 @@ def read_graph_clustering(dir, metric, n):
     )
 
 
+def get_model_file(dir, key, n):
 def get_model_file(dir, key, n):
     """
     Returns the file location of a saved model with the given keys.
@@ -171,6 +173,7 @@ def get_best_covered_model(models):
     return best_model
 
 
+def get_viable_models(dir, n: int, coverage_filter: float):
 def get_viable_models(dir, n: int, coverage_filter: float):
     """
     Returns a list of saved models that have at least the specified coverage percentage.
