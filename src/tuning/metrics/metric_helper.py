@@ -77,7 +77,7 @@ def collapse_equivalent_models(keys, distance_matrix):
         and the corresponding trimmed pairwise distance matrix.
     """
 
-    equivalent_items = np.argwhere(distance_matrix == 0)
+    equivalent_items = np.argwhere(distance_matrix < 1e-8)
     drops = set()
     for pair in equivalent_items:
         if pair[0] != pair[1]:  # non-diagonal elements
