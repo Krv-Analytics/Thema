@@ -664,14 +664,20 @@ class Model:
         # Show the subplot
         return fig
     
-    def visualize_boxplots(self, col_list = []):
+    def visualize_boxplots(self, cols = [], benchmark = pd.DataFrame()):
+
+        show_benchmarks = False
+        if len(benchmark)==1:
+            numeric_cols = benchmark.select_dtypes(include=['number']).columns
+            benchmark = benchmark[numeric_cols]
+            show_benchmarks = True
 
         df = self.tupper.raw
         df['cluster_IDs'] = self.cluster_ids
         
-        if len(col_list)>0:
-            col_list.append('cluster_IDs')
-            df = df.loc[:, df.columns.isin(col_list)]
+        if len(cols)>0:
+            cols.append('cluster_IDs')
+            df = df.loc[:, df.columns.isin(cols)]
 
         fig = make_subplots(
                 rows=math.ceil(len(df.columns.drop('cluster_IDs')) / 3), cols=3,
@@ -691,9 +697,14 @@ class Model:
                     marker=dict(color= custom_color_scale()[int(pg)][1])),
                     row=row, col=col)
 
+                    if show_benchmarks:
+                        if column in benchmark.columns:
+                            fig.add_hline(y=benchmark[column].mean(), line_width=1, line_dash="solid", line_color="red", col=col, row=row, 
+                            annotation_text='benchmark', annotation_font_color='red', annotation_position="top left")
+
                     try:
                         pd.to_numeric(df[column])
-                        fig.add_hline(y=df[column].mean(), line_width=0.5, line_dash="dot", line_color="black", col=col, row=row, 
+                        fig.add_hline(y=df[column].mean(), line_width=1, line_dash="dash", line_color="black", col=col, row=row, 
                         annotation_text='mean', annotation_font_color='gray', annotation_position="top right")
                     except ValueError:
                         ''
