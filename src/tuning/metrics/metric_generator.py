@@ -84,7 +84,7 @@ if __name__ == "__main__":
         rel_ouput_dir = (
             "data/"
             + params_json["Run_Name"]
-            + f"/model_analysis/distance_matrices/{coverage}_perc_coverage/{n}_policy_groups/"
+            + f"/model_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir = os.path.join(
             root,

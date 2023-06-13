@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 import os
 import sys
@@ -11,7 +10,7 @@ from projection_summarizer_helper import (
     create_cluster_distribution_histogram,
     save_visualizations_as_html,
     create_umap_grid,
-    analyze_umap_projections
+    analyze_umap_projections,
 )
 
 pio.renderers.default = "browser"
@@ -63,7 +62,7 @@ if __name__ == "__main__":
         default=True,
         help="Specify if you want a metric of projection coverage included in your outfile",
     )
-   
+
     parser.add_argument(
         "-v",
         "--Verbose",
@@ -87,8 +86,16 @@ if __name__ == "__main__":
     if args.projection_evaluation:
         fig_list.append(analyze_umap_projections(dir))
 
-    output_file = 'ProjectionSummary.html'
-    
+    output_file = "ProjectionSummary.html"
+    output_dir = "data/" + params_json["Run_Name"] + "/plots/"
+
+    if os.path.isdir(output_dir):
+        output_file = os.path.join(output_dir, output_file)
+
+    else:
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, output_file)
+
     save_visualizations_as_html(fig_list, output_file)
 
     if args.Verbose:

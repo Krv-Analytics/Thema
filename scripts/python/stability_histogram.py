@@ -14,14 +14,35 @@ src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "modeling/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir
+from modeling.model_selector_helper import unpack_policy_group_dir, get_viable_models
+from curvature_histogram import plot_curvature_histogram
 
 
-def plot_curvature_histogram(dir):
-    num_curvature_profiles = {}
-    for folder in os.listdir(dir):
+def plot_histogram(root, coverage_filter):
+
+    dir = "data/" + params_json["Run_Name"] + "/"
+    dir = os.path.join(root, dir)
+    model_dir = os.path.join(dir, "models/")
+    metric_files = os.path.join(
+        root,
+        "data/"
+        + params_json["Run_Name"]
+        + f"/model_analysis/distance_matrices/{coverage}_coverage/",
+    )
+
+    num_models = {}
+    for folder in os.listdir(model_dir):
         i = unpack_policy_group_dir(folder)
-        folder = os.path.join(dir, folder)
+        folder = os.path.join(model_dir, folder)
+        models = get_viable_models(folder, i, coverage_filter=coverage_filter)
+        num_models[i] = len(models)
+
+    num_curvature_profiles = {}
+    assert os.path.isdir(metric_files), "Not a valid directory"
+    for folder in os.listdir(metric_files):
+        i = unpack_policy_group_dir(folder)
+        folder = os.path.join(metric_files, folder)
+        print(folder)
         if os.path.isdir(folder):
             holder = []
             for file in os.listdir(folder):
@@ -29,17 +50,22 @@ def plot_curvature_histogram(dir):
                     file = os.path.join(folder, file)
                     with open(file, "rb") as f:
                         matrix = pickle.load(f)["distances"]
+                    print(len(matrix))
                 holder.append(int(len(matrix)))
             # For now take the maximum number of unique curvature profiles over different metrics
             num_curvature_profiles[i] = max(holder)
-
-    fig = plt.figure(figsize=(15, 10))
-    ax = sns.barplot(
-        x=list(num_curvature_profiles.keys()),
-        y=list(num_curvature_profiles.values()),
+    stability_ratio = {}
+    for key in num_curvature_profiles.keys():
+        stability_ratio[key] = num_models[key] / num_curvature_profiles[key]
+    fig, ax = plt.subplots(1, 1, sharex=True, sharey=True, figsize=(15, 20))
+    fig.suptitle(f"{coverage*100}% Coverage Filter")
+    sns.barplot(
+        x=list(stability_ratio.keys()),
+        y=list(stability_ratio.values()),
+        ax=ax,
     )
-    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Curvature Profiles")
-    ax.set_title(f"{coverage*100} % Coverage Filter")
+    ax.set(xlabel="Number of Policy Groups", ylabel="Stability Ratio")
+
     plt.show()
     return fig
 
@@ -69,7 +95,7 @@ if __name__ == "__main__":
     coverage = params_json["coverage_filter"]
 
     # LOGGING
-    log.info("Computing Curvature Histogram!")
+    log.info("Computing Two Layer Histogram!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
@@ -82,11 +108,4 @@ if __name__ == "__main__":
     # Counting Length of updated file
 
     coverage = params_json["coverage_filter"]
-    distance_matrices = (
-        "data/"
-        + params_json["Run_Name"]
-        + f"/model_analysis/distance_matrices/{coverage}_coverage/"
-    )
-    distance_matrices = os.path.join(root, distance_matrices)
-
-    curvature_histogram = plot_curvature_histogram(distance_matrices)
+    histogram = plot_histogram(root=root, coverage_filter=coverage)
