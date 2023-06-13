@@ -87,7 +87,6 @@ class Model:
 
         self._cluster_positions = None
         self._zscores = None
-        self._group_identifiers = None
 
     @property
     def mapper(self):
@@ -169,24 +168,26 @@ class Model:
             )
         return self._zscores
 
-    @property
-    def group_identifiers(self):
-        if self._group_identifiers is None:
-            pg_identifiers = {
-                key: [] for key in range(-1, int(self.zscores["cluster_IDs"].max()) + 1)
-            }
-            for column in self.zscores.columns:
-                counter = -1
-                for value in self.zscores[column]:
-                    if column != "cluster_IDs":
-                        if abs(value) >= 1:
-                            test = _define_zscore_df(self)[
-                                _define_zscore_df(self)["cluster_IDs"] == counter
-                            ]
-                            if abs(test[column].std() / test[column].mean()) <= 1:
-                                pg_identifiers[counter].append(column)
-                    counter += 1
-            self._group_identifiers = pg_identifiers
+    def group_identifiers(self, zscore_threshold=1, std_threshold=1):
+
+        pg_identifiers = {
+            key: [] for key in range(-1, int(self.zscores["cluster_IDs"].max()) + 1)
+        }
+        for column in self.zscores.columns:
+            counter = -1
+            for value in self.zscores[column]:
+                if column != "cluster_IDs":
+                    if abs(value) >= zscore_threshold:
+                        test = _define_zscore_df(self)[
+                            _define_zscore_df(self)["cluster_IDs"] == counter
+                        ]
+                        if (
+                            abs(test[column].std() / test[column].mean())
+                            <= std_threshold
+                        ):
+                            pg_identifiers[counter].append(column)
+                counter += 1
+        self._group_identifiers = pg_identifiers
         return self._group_identifiers
 
     def label_item_by_node(self):
@@ -443,6 +444,43 @@ class Model:
             subframes[df_label] = raw_subframe
         return subframes
 
+    def benchmark_matching(
+        self,
+        benchmark: pd.DataFrame,
+        remove_unclustered: bool = True,
+        col_filter: list = None,
+    ):
+
+        groups = self.get_cluster_dfs()
+        # Remove Unclustered? -> at least for demo
+        if remove_unclustered and len(self.unclustered_items) > 0:
+            groups.pop("unclustered")
+
+        benchmark_cols = (
+            benchmark.select_dtypes(include=np.number).dropna(axis=1).columns
+        )
+        if col_filter:
+            raw_cols = col_filter
+        else:
+            raw_cols = self.tupper.raw.select_dtypes(include=np.number).columns
+
+        def error(x, mu):
+            return abs((x - mu) / mu)
+
+        scores = {}
+        for group in groups:
+            group_data = groups[group]
+            score = 0
+            for col in benchmark_cols:
+                if col in raw_cols:
+                    x = benchmark[col][0]
+                    mu = group_data[col].mean()
+                    score += error(x, mu)
+            scores[group] = score
+
+        min_index = min(scores, key=scores.get)
+        return scores, min_index
+
     def visualize_model(self, k=None):
         """
         Visualize the clustering as a network. This function plots
@@ -686,20 +724,22 @@ class Model:
 
         # Show the subplot
         return fig
-    
-    def visualize_boxplots(self, cols = [], benchmark = pd.DataFrame()):
+
+    def visualize_boxplots(self, cols=[], benchmark=pd.DataFrame()):
 
         show_benchmarks = False
-        if len(benchmark)==1:
-            numeric_cols = benchmark.select_dtypes(include=['number']).columns
+        if len(benchmark) == 1:
+            numeric_cols = (
+                benchmark.select_dtypes(include=["number"]).dropna(axis=1).columns
+            )
             benchmark = benchmark[numeric_cols]
             show_benchmarks = True
 
         df = self.tupper.raw
-        df['cluster_IDs'] = self.cluster_ids
-        
-        if len(cols)>0:
-            cols.append('cluster_IDs')
+        df["cluster_IDs"] = self.cluster_ids
+
+        if len(cols) > 0:
+            cols.append("cluster_IDs")
             df = df.loc[:, df.columns.isin(cols)]
 
         fig = make_subplots(
@@ -727,6 +767,7 @@ class Model:
                         marker_size=3,
                         line_width=1,
                         boxmean=True,
+                        hovertext=df["companyName"],
                         marker=dict(color=custom_color_scale()[int(pg)][1]),
                     ),
                     row=row,
@@ -735,8 +776,17 @@ class Model:
 
                 if show_benchmarks:
                     if column in benchmark.columns:
-                        fig.add_hline(y=benchmark[column].mean(), line_width=1, line_dash="solid", line_color="red", col=col, row=row, 
-                        annotation_text='benchmark', annotation_font_color='red', annotation_position="top left")
+                        fig.add_hline(
+                            y=benchmark[column].mean(),
+                            line_width=1,
+                            line_dash="solid",
+                            line_color="red",
+                            col=col,
+                            row=row,
+                            annotation_text="benchmark",
+                            annotation_font_color="red",
+                            annotation_position="top left",
+                        )
 
                 try:
                     pd.to_numeric(df[column])
