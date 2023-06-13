@@ -6,12 +6,15 @@ import os
 import pickle
 import json
 from dotenv import load_dotenv
+import warnings
 
 from model_clusterer_helper import (
     cluster_models,
     read_distance_matrices,
 )
 
+
+warnings.simplefilter("ignore")
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
@@ -84,55 +87,60 @@ if __name__ == "__main__":
     rel_distance_dir = (
         "data/"
         + params_json["Run_Name"]
-        + f"/model_analysis/distance_matrices/{coverage}_perc_coverage/{n}_policy_groups/"
+        + f"/model_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
     )
     distance_dir = os.path.join(root, rel_distance_dir)
-    keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
-
-    # Fit Hierarchical Clustering
-    model = cluster_models(
-        distances,
-        p=args.dendrogram_levels,
-        metric=args.metric,
-        num_policy_groups=n,
-        distance_threshold=args.distance_threshold,
-        plot=not args.save,
-    )
-
-    results = {
-        "keys": keys,
-        "model": model,
-        "distance_threshold": args.distance_threshold,
-    }
-    if args.save:
-        model_file = f"curvature_{args.metric}_clustering_model.pkl"
-
-        out_dir_message = f"{model_file} successfully written."
-
-        rel_outdir = (
-            "data/"
-            + params_json["Run_Name"]
-            + f"/model_analysis/graph_clustering/{coverage}_perc_coverage/{n}_policy_groups/"
+    try:
+        keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
+        
+        assert len(distances)>1
+            
+        # Fit Hierarchical Clustering
+        model = cluster_models(
+            distances,
+            p=args.dendrogram_levels,
+            metric=args.metric,
+            num_policy_groups=n,
+            distance_threshold=args.distance_threshold,
+            plot=not args.save,
         )
-        output_dir = os.path.join(root, rel_outdir)
 
-        # Check if output directory already exists
-        if os.path.isdir(output_dir):
-            model_file = os.path.join(output_dir, model_file)
+        results = {
+            "keys": keys,
+            "model": model,
+            "distance_threshold": args.distance_threshold,
+        }
+        if args.save:
+            model_file = f"curvature_{args.metric}_clustering_model.pkl"
 
-        else:
-            os.makedirs(output_dir, exist_ok=True)
-            model_file = os.path.join(output_dir, model_file)
-        with open(model_file, "wb") as handle:
-            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            out_dir_message = f"{model_file} successfully written."
 
-        if args.Verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------- \n\n"
+            rel_outdir = (
+                "data/"
+                + params_json["Run_Name"]
+                + f"/model_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
             )
-            print(f"{out_dir_message}")
+            output_dir = os.path.join(root, rel_outdir)
 
-            print(
-                "\n\n -------------------------------------------------------------------------------- "
-            )
+            # Check if output directory already exists
+            if os.path.isdir(output_dir):
+                model_file = os.path.join(output_dir, model_file)
+
+            else:
+                os.makedirs(output_dir, exist_ok=True)
+                model_file = os.path.join(output_dir, model_file)
+            with open(model_file, "wb") as handle:
+                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+            if args.Verbose:
+                print("\n")
+                print(
+                    "-------------------------------------------------------------------------------- \n\n"
+                )
+                print(f"{out_dir_message}")
+
+                print(
+                    "\n\n -------------------------------------------------------------------------------- "
+                )
+    except AssertionError:
+        assert 1 == 1

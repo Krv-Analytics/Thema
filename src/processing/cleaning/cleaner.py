@@ -88,7 +88,10 @@ if __name__ == "__main__":
         column_filter = True
 
     output_file = clean_data_filename(
-        run_name = params_json["Run_Name"], scaler=scaler, encoding=args.encoding, filter=column_filter
+        run_name=params_json["Run_Name"],
+        scaler=scaler,
+        encoding=args.encoding,
+        filter=column_filter,
     )
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)

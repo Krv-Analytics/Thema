@@ -2,12 +2,15 @@ import json
 import logging
 import os
 import pickle
+import subprocess
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
+from tqdm import tqdm
 
 load_dotenv()
 src = os.getenv("src")
@@ -56,7 +59,6 @@ if __name__ == "__main__":
             params_json = json.load(f)
     else:
         print("params.json file note found!")
-
     dir = "data/" + params_json["Run_Name"] + f"/models/"
     dir = os.path.join(root, dir)
     group_ranks = []
@@ -79,14 +81,29 @@ if __name__ == "__main__":
         "--------------------------------------------------------------------------------"
     )
     log.add()
-    # Counting Length of updated file
 
-    coverage = params_json["coverage_filter"]
-    distance_matrices = (
-        "data/"
-        + params_json["Run_Name"]
-        + f"/model_analysis/distance_matrices/{coverage}_coverage/"
-    )
-    distance_matrices = os.path.join(root, distance_matrices)
+    # Number of loops
+    num_loops = len(group_ranks)
+    # Running Grid in Parallel
+    subprocesses = []
+    ## GRID SEARCH PROJECTIONS
+    for i in group_ranks:
+        subprocesses.append(
+            [
+                "python",
+                f"{metric_generator}",
+                f"-n{i}",
+                f"-f{coverage}",
+            ]
+        )
 
-    curvature_histogram = plot_curvature_histogram(distance_matrices)
+    # Running processes in Parallel
+    # TODO: optimize based on max_workers
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
+        # Setting Progress bar to track number of completed subprocesses
+        progress_bar = tqdm(total=num_loops, desc="Progress", unit="subprocess")
+        for future in as_completed(futures):
+            # Update the progress bar for each completed subprocess
+            progress_bar.update(1)
+        progress_bar.close()
