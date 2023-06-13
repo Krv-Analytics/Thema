@@ -87,7 +87,6 @@ class Model:
 
         self._cluster_positions = None
         self._zscores = None
-        self._group_identifiers = None
 
     @property
     def mapper(self):
@@ -169,24 +168,26 @@ class Model:
             )
         return self._zscores
 
-    @property
-    def group_identifiers(self):
-        if self._group_identifiers is None:
-            pg_identifiers = {
-                key: [] for key in range(-1, int(self.zscores["cluster_IDs"].max()) + 1)
-            }
-            for column in self.zscores.columns:
-                counter = -1
-                for value in self.zscores[column]:
-                    if column != "cluster_IDs":
-                        if abs(value) >= 1:
-                            test = _define_zscore_df(self)[
-                                _define_zscore_df(self)["cluster_IDs"] == counter
-                            ]
-                            if abs(test[column].std() / test[column].mean()) <= 1:
-                                pg_identifiers[counter].append(column)
-                    counter += 1
-            self._group_identifiers = pg_identifiers
+    def group_identifiers(self, zscore_threshold=1, std_threshold=1):
+
+        pg_identifiers = {
+            key: [] for key in range(-1, int(self.zscores["cluster_IDs"].max()) + 1)
+        }
+        for column in self.zscores.columns:
+            counter = -1
+            for value in self.zscores[column]:
+                if column != "cluster_IDs":
+                    if abs(value) >= zscore_threshold:
+                        test = _define_zscore_df(self)[
+                            _define_zscore_df(self)["cluster_IDs"] == counter
+                        ]
+                        if (
+                            abs(test[column].std() / test[column].mean())
+                            <= std_threshold
+                        ):
+                            pg_identifiers[counter].append(column)
+                counter += 1
+        self._group_identifiers = pg_identifiers
         return self._group_identifiers
 
     def label_item_by_node(self):
