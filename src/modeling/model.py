@@ -444,7 +444,10 @@ class Model:
         return subframes
 
     def benchmark_matching(
-        self, benchmark: pd.DataFrame, remove_unclustered: bool = True
+        self,
+        benchmark: pd.DataFrame,
+        remove_unclustered: bool = True,
+        col_filter: list = None,
     ):
 
         groups = self.get_cluster_dfs()
@@ -455,7 +458,10 @@ class Model:
         benchmark_cols = (
             benchmark.select_dtypes(include=np.number).dropna(axis=1).columns
         )
-        raw_cols = self.tupper.raw.select_dtypes(include=np.number).columns
+        if col_filter:
+            raw_cols = col_filter
+        else:
+            raw_cols = self.tupper.raw.select_dtypes(include=np.number).columns
 
         def error(x, mu):
             return abs((x - mu) / mu)
