@@ -87,7 +87,7 @@ class Model:
 
         self._cluster_positions = None
         self._zscores = None
-        self._index_dict = None
+        self._items_dict = None
 
     @property
     def mapper(self):
@@ -162,10 +162,10 @@ class Model:
         return self._unclustered_items
     
     @property
-    def index_dict(self):
-        if self._index_dict is None:
+    def items_dict(self):
+        if self._items_dict is None:
             self.label_item_by_cluster()
-        return self._index_dict
+        return self._items_dict
 
     @property
     def zscores(self):
@@ -244,7 +244,7 @@ class Model:
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
 
         self._cluster_sizes = {}
-        self._index_dict = {}
+        self._items_dict = {}
 
         labels = -np.ones(len(self.tupper.clean))
         components = self.mapper.components
@@ -257,28 +257,28 @@ class Model:
                 elements.append(self.complex["nodes"][node])
 
             indices = set(itertools.chain(*elements))
-            self._index_dict[cluster_id] = list(indices)
+            self._items_dict[cluster_id] = list(indices)
             size = len(indices)
             labels[list(indices)] = cluster_id
             self._cluster_sizes[cluster_id] = size
 
         self._cluster_ids = labels
         self._cluster_sizes[-1] = len(self.unclustered_items)
-        self.index_dict[-1] = self.unclustered_items
+        self.items_dict[-1] = self.unclustered_items
 
     def find_overlapping_values(self):
         overlapping_values = {}
 
         # Count the occurrences of each value across the self.index_dict
         value_counts = {}
-        for values in self.index_dict.values():
+        for values in self.items_dict.values():
             for value in values:
                 value_counts[value] = value_counts.get(value, 0) + 1
 
         # Filter the overlapping values that appear in more than one group
         for value, count in value_counts.items():
             if count > 1:
-                overlapping_values[value] = [key for key, values in self.index_dict.items() if value in values]
+                overlapping_values[value] = [key for key, values in self.items_dict.items() if value in values]
 
         return overlapping_values
     
