@@ -775,14 +775,14 @@ class Model:
         row = 1
         col = 1
 
-        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
+        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique()))-1)}
         dict_2 = {-1: "Outliers", **dict_2}
 
         for column in df.columns.drop("cluster_IDs"):
             for pg in list(dict_2.keys()):
                 fig.add_trace(
                     go.Box(
-                        y=df[df["cluster_IDs"] == pg][column],
+                        y=self.get_cluster_dfs()[f"group_{pg}"][column],
                         name=dict_2[pg],
                         jitter=0.3,
                         showlegend=False,
