@@ -327,8 +327,8 @@ def analyze_umap_projections(dir):
             marker=dict(
                 color=colors,
                 colorscale="Bluered",
-                cmin=min(colors),
-                cmax=max(colors),
+                #cmin=min(colors),
+                #cmax=max(colors),
                 colorbar=dict(
                     title="Number of Unclustered Items<br>per Projection",
                     len=0.4,  # Adjust the length of the colorbar
