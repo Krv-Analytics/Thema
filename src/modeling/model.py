@@ -266,7 +266,15 @@ class Model:
         self._cluster_sizes[-1] = len(self.unclustered_items)
         self.items_dict[-1] = self.unclustered_items
 
-    def find_overlapping_values(self):
+    def get_items_in_multiple_groups(self):
+        """
+        Get a dictionary of overlapping values that appear in more than one group.
+
+        Returns
+        -------
+            overlapping_values: A dictionary where keys are the overlapping values and values are lists
+                of groups (keys) in which the value appears.
+        """
         overlapping_values = {}
 
         # Count the occurrences of each value across the self.index_dict
@@ -281,6 +289,7 @@ class Model:
                 overlapping_values[value] = [key for key, values in self.items_dict.items() if value in values]
 
         return overlapping_values
+
     
     def compute_node_descriptions(self):
         """
