@@ -447,29 +447,25 @@ class Model:
             and the corresponding value is a DataFrame containing
             the items in that policy group.
         """
-        # Load Model
-        clean = self.tupper.clean
-        # Assign cluster labels
-        clean.insert(
-            loc=0,
-            column="cluster_labels",
-            value=self.cluster_ids,
-        )
-        subframes = {}
-        for label in np.unique(self.cluster_ids):
-            sub_frame = clean[clean["cluster_labels"] == label]
+
+        group_dataframes = {}
+
+        for group_label, indexes in self.items_dict.items():
+            df = self.tupper.clean.copy()
+            df.loc[indexes, 'group'] = group_label
+            
+            sub_frame = df[df["group"] == group_label]
             # Merge with Raw
             raw_subframe = pd.merge(
-                sub_frame["cluster_labels"],
+                sub_frame["group"],
                 self.tupper.raw,
                 right_index=True,
                 left_index=True,
             )
-            df_label = f"policy_group_{int(label)}"
-            if label == -1:
-                df_label = "unclustered"
-            subframes[df_label] = raw_subframe
-        return subframes
+            
+            group_dataframes[f"group_{group_label}"] = raw_subframe 
+
+        return group_dataframes
 
     def target_matching(
         self,
