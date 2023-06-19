@@ -75,6 +75,11 @@ def create_umap_grid(dir):
             badness.append(params["hyperparameters"])
 
         num_clusters = len(np.unique([x for x in clusterer.labels_ if x != -1]))
+
+        colorscale = md.custom_color_scale()
+        if num_clusters > len(colorscale)-1:
+            colorscale = px.colors.diverging.Spectral
+
         cluster_distribution.append(num_clusters)
         df = outdf[outdf["labels"] == -1]
         fig.add_trace(

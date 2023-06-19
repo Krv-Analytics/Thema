@@ -42,9 +42,9 @@ class Model:
     This class interprets the graph representation of a JMapper
     as a clustering:
     Connected Components of the graph are the clusters which we call
-    "Policy Groups" for our project. We provide functionality
-    for analyzing nodes (or subgroups),
-    as well as the policy groups themselves.
+    "Policy self.index_dict" for our project. We provide functionality
+    for analyzing nodes (or subself.index_dict),
+    as well as the policy self.index_dict themselves.
 
     Most notably, we provide functionality for understanding the structural
     equivalency classes of an arbitrary number of different models. Different
@@ -87,6 +87,7 @@ class Model:
 
         self._cluster_positions = None
         self._zscores = None
+        self._index_dict = None
 
     @property
     def mapper(self):
@@ -159,6 +160,12 @@ class Model:
         if self._unclustered_items is None:
             self.label_item_by_node()
         return self._unclustered_items
+    
+    @property
+    def index_dict(self):
+        if self._index_dict is None:
+            self.label_item_by_cluster()
+        return self._index_dict
 
     @property
     def zscores(self):
@@ -237,6 +244,8 @@ class Model:
         ), "You must first generate a Simplicial Complex with `fit()` before you perform clustering."
 
         self._cluster_sizes = {}
+        self._index_dict = {}
+
         labels = -np.ones(len(self.tupper.clean))
         components = self.mapper.components
         for component in components.keys():
@@ -248,13 +257,31 @@ class Model:
                 elements.append(self.complex["nodes"][node])
 
             indices = set(itertools.chain(*elements))
+            self._index_dict[cluster_id] = list(indices)
             size = len(indices)
             labels[list(indices)] = cluster_id
             self._cluster_sizes[cluster_id] = size
 
         self._cluster_ids = labels
         self._cluster_sizes[-1] = len(self.unclustered_items)
+        self.index_dict[-1] = self.unclustered_items
 
+    def find_overlapping_values(self):
+        overlapping_values = {}
+
+        # Count the occurrences of each value across the self.index_dict
+        value_counts = {}
+        for values in self.index_dict.values():
+            for value in values:
+                value_counts[value] = value_counts.get(value, 0) + 1
+
+        # Filter the overlapping values that appear in more than one group
+        for value, count in value_counts.items():
+            if count > 1:
+                overlapping_values[value] = [key for key, values in self.index_dict.items() if value in values]
+
+        return overlapping_values
+    
     def compute_node_descriptions(self):
         """
         Compute a simple description of each node in the graph.
@@ -444,20 +471,20 @@ class Model:
             subframes[df_label] = raw_subframe
         return subframes
 
-    def benchmark_matching(
+    def target_matching(
         self,
-        benchmark: pd.DataFrame,
+        target: pd.DataFrame,
         remove_unclustered: bool = True,
         col_filter: list = None,
     ):
 
-        groups = self.get_cluster_dfs()
+        self.index_dict = self.get_cluster_dfs()
         # Remove Unclustered? -> at least for demo
         if remove_unclustered and len(self.unclustered_items) > 0:
-            groups.pop("unclustered")
+            self.index_dict.pop("unclustered")
 
-        benchmark_cols = (
-            benchmark.select_dtypes(include=np.number).dropna(axis=1).columns
+        target_cols = (
+            target.select_dtypes(include=np.number).dropna(axis=1).columns
         )
         if col_filter:
             raw_cols = col_filter
@@ -468,12 +495,12 @@ class Model:
             return abs((x - mu) / mu)
 
         scores = {}
-        for group in groups:
-            group_data = groups[group]
+        for group in self.index_dict:
+            group_data = self.index_dict[group]
             score = 0
-            for col in benchmark_cols:
+            for col in target_cols:
                 if col in raw_cols:
-                    x = benchmark[col][0]
+                    x = target[col][0]
                     mu = group_data[col].mean()
                     score += error(x, mu)
             scores[group] = score
@@ -725,15 +752,15 @@ class Model:
         # Show the subplot
         return fig
 
-    def visualize_boxplots(self, cols=[], benchmark=pd.DataFrame()):
+    def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
 
-        show_benchmarks = False
-        if len(benchmark) == 1:
+        show_targets = False
+        if len(target) == 1:
             numeric_cols = (
-                benchmark.select_dtypes(include=["number"]).dropna(axis=1).columns
+                target.select_dtypes(include=["number"]).dropna(axis=1).columns
             )
-            benchmark = benchmark[numeric_cols]
-            show_benchmarks = True
+            target = target[numeric_cols]
+            show_targets = True
 
         df = self.tupper.raw
         df["cluster_IDs"] = self.cluster_ids
@@ -767,23 +794,23 @@ class Model:
                         marker_size=3,
                         line_width=1,
                         boxmean=True,
-                        hovertext=df["companyName"],
+                        #hovertext=df["companyName"],
                         marker=dict(color=custom_color_scale()[int(pg)][1]),
                     ),
                     row=row,
                     col=col,
                 )
 
-                if show_benchmarks:
-                    if column in benchmark.columns:
+                if show_targets:
+                    if column in target.columns:
                         fig.add_hline(
-                            y=benchmark[column].mean(),
+                            y=target[column].mean(),
                             line_width=1,
                             line_dash="solid",
                             line_color="red",
                             col=col,
                             row=row,
-                            annotation_text="benchmark",
+                            annotation_text="target",
                             annotation_font_color="red",
                             annotation_position="top left",
                         )
@@ -814,7 +841,18 @@ class Model:
             height=(math.ceil(len(df.columns) / 3)) * 300,
             title_font_size=20,
         )
-        fig.show()
+
+        config = {
+            'toImageButtonOptions': {
+                'format': 'svg', # one of png, svg, jpeg, webp
+                'filename': 'custom_image',
+                'height': 900,
+                'width': 1000,
+                'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
+            }
+        }
+
+        fig.show(config = config)
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.
