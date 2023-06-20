@@ -486,7 +486,7 @@ class Model:
         self.index_dict = self.get_cluster_dfs()
         # Remove Unclustered? -> at least for demo
         if remove_unclustered and len(self.unclustered_items) > 0:
-            self.index_dict.pop("unclustered")
+            self.index_dict.pop("group_-1")
 
         target_cols = (
             target.select_dtypes(include=np.number).dropna(axis=1).columns
