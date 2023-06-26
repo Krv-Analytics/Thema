@@ -754,8 +754,16 @@ class Model:
             legend=dict(orientation="h", yanchor="bottom", y=-0.22, xanchor="left", x=0)
         )
 
+        config = {
+            'toImageButtonOptions': {
+                'format': 'svg', # one of png, svg, jpeg, webp
+                'filename': 'custom_image',
+                'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
+            }
+        }
+
         # Show the subplot
-        return fig
+        fig.show(config = config)
 
     def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
 
