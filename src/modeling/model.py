@@ -512,8 +512,11 @@ class Model:
 
         min_index = min(scores, key=scores.get)
         return scores, min_index
+    
+    def fib(self, i, g, colorscale):
+        return colorscale[i]
 
-    def visualize_model(self, k=None):
+    def visualize_model(self, k=None, seed=6):
         """
         Visualize the clustering as a network. This function plots
         the JMapper's graph in a matplotlib figure, coloring the nodes
@@ -532,7 +535,7 @@ class Model:
         ax = fig.add_subplot()
         color_scale = np.array(custom_color_scale()).T[1]
         # Get Node Coords
-        pos = nx.spring_layout(self.mapper.graph, k=k, seed=6)
+        pos = nx.spring_layout(self.mapper.graph, k=k, seed=seed)
 
         # Plot and color components
         components, labels = zip(*self.mapper.components.items())
@@ -540,7 +543,8 @@ class Model:
             nx.draw_networkx(
                 g,
                 pos=pos,
-                node_color=color_scale[i],
+                #node_color=color_scale[i],
+                node_color = self.fib(i, g, color_scale),
                 node_size=100,
                 font_size=6,
                 with_labels=False,
@@ -559,6 +563,7 @@ class Model:
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
         self._cluster_positions = pos
+        return plt
 
     def visualize_component(self, component, cluster_labels=True):
         if self._cluster_positions is None:
@@ -684,7 +689,7 @@ class Model:
         for i in range(len(custom_color_scale()[:-3])):
             inst = custom_color_scale()[:-3]
             rgb_color = "rgb" + str(
-                tuple(int(inst[i][1][j : j + 2], 16) for j in (1, 3, 5))
+                tuple(int(inst[i][1][j : j + 2], 16) for j in (2, 3, 5))
             )
             colors.append(rgb_color)
 
@@ -743,7 +748,10 @@ class Model:
             )
 
         fig.update_layout(
-            template="plotly_white", showlegend=True, height=600, width=800
+            template="plotly_white", showlegend=True, 
+            #height=600, 
+            height = num_rows * 300,
+            width=800
         )
 
         fig.update_annotations(yshift=10)
@@ -751,11 +759,19 @@ class Model:
         fig.update_traces(marker=dict(line=dict(color="white", width=3)))
 
         fig.update_layout(
-            legend=dict(orientation="h", yanchor="bottom", y=-0.22, xanchor="left", x=0)
+            legend=dict(orientation="h", yanchor="bottom", y=-0.35, xanchor="left", x=0)
         )
 
+        config = {
+        'toImageButtonOptions': {
+            'format': 'svg', # one of png, svg, jpeg, webp
+            'filename': 'custom_image',
+            'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
+        }
+        }
+
         # Show the subplot
-        return fig
+        fig.show(config=config)
 
     def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
 
@@ -784,7 +800,10 @@ class Model:
         row = 1
         col = 1
 
-        dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique()))-1)}
+        if -1.0 not in list(df.cluster_IDs.unique()):
+            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
+        else:
+            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique()))-1)}
         dict_2 = {-1: "Outliers", **dict_2}
 
         for column in df.columns.drop("cluster_IDs"):
@@ -851,7 +870,7 @@ class Model:
             'toImageButtonOptions': {
                 'format': 'svg', # one of png, svg, jpeg, webp
                 'filename': 'custom_image',
-                'height': 900,
+                'height': 1200,
                 'width': 1000,
                 'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
             }

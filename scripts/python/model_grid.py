@@ -60,22 +60,23 @@ if __name__ == "__main__":
     for N in n_cubes:
         for P in perc_overlap:
             for I in min_intersection:
-                for file in os.listdir(os.path.join(root, projections)):
-                    if file.endswith(".pkl"):
-                        D = os.path.join(projections, file)
-                        subprocesses.append(
-                            [
-                                "python",
-                                f"{model_generator}",
-                                f"-n{N}",
-                                f"-r{raw}",
-                                f"-c{clean}",
-                                f"-D{D}",
-                                f"-m{min_cluster_size}",
-                                f"-p {P}",
-                                f"-I {I}",
-                            ]
-                        )
+                for C in min_cluster_size:
+                    for file in os.listdir(os.path.join(root, projections)):
+                        if file.endswith(".pkl"):
+                            D = os.path.join(projections, file)
+                            subprocesses.append(
+                                [
+                                    "python",
+                                    f"{model_generator}",
+                                    f"-n{N}",
+                                    f"-r{raw}",
+                                    f"-c{clean}",
+                                    f"-D{D}",
+                                    f"-m{C}",
+                                    f"-p {P}",
+                                    f"-I {I}",
+                                ]
+                            )
     
         # Running processes in Parallel 
     # TODO: optimize based on max_workers 
