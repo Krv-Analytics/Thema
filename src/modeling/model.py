@@ -763,6 +763,7 @@ class Model:
         )
 
         config = {
+<<<<<<< HEAD
         'toImageButtonOptions': {
             'format': 'svg', # one of png, svg, jpeg, webp
             'filename': 'custom_image',
@@ -772,6 +773,17 @@ class Model:
 
         # Show the subplot
         fig.show(config=config)
+=======
+            'toImageButtonOptions': {
+                'format': 'svg', # one of png, svg, jpeg, webp
+                'filename': 'custom_image',
+                'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
+            }
+        }
+
+        # Show the subplot
+        fig.show(config = config)
+>>>>>>> f03021ea6520a54238c1f8d09266da44bfd05678
 
     def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
 
