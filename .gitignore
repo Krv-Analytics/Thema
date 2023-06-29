@@ -11,4 +11,4 @@ data/
 .dvc/client_ID.json
 .dvc/config
 params.json
-
+notebooks/
