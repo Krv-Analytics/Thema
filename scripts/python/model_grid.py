@@ -52,7 +52,7 @@ if __name__ == "__main__":
     log.add()
 
     # Number of loops 
-    num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection) *len(os.listdir(os.path.join(root, projections)))
+    num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection)*len(min_cluster_size) *len(os.listdir(os.path.join(root, projections)))
     
     # Running Grid in Parallel 
     subprocesses = []
