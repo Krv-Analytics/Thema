@@ -869,9 +869,9 @@ class Model:
         config = {
             'toImageButtonOptions': {
                 'format': 'svg', # one of png, svg, jpeg, webp
-                'filename': 'custom_image',
-                'height': 1200,
-                'width': 1000,
+                'filename': 'boxplots',
+                #'height': 1200,
+                #'width': 1000,
                 'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
             }
         }
