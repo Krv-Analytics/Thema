@@ -347,8 +347,8 @@ def get_subplot_specs(n):
     Returns:
         specs (list): 2D list of subplot specs
     """
-    num_cols = min(3, n)
-    num_rows = math.ceil(n / num_cols)
+    num_cols = 3
+    num_rows = max(math.ceil(n / num_cols), 1)
     specs = [[{"type": "pie"} for c in range(num_cols)] for r in range(num_rows)]
     return specs
 

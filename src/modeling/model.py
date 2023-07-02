@@ -704,21 +704,17 @@ class Model:
                     ]
                 )
             )
-        }
-        if(self.cluster_descriptions[-1]['size'] == 0):
-            cluster_descriptions = self.cluster_descriptions
+        }        
+        cluster_descriptions = self.cluster_descriptions
+        if cluster_descriptions[-1]['size'] == 0:
             cluster_descriptions.pop(-1)
-        else:
-            cluster_descriptions = self.cluster_descriptions
 
-        num_rows = math.ceil(len(cluster_descriptions) / 3)
+        num_rows = math.ceil(max(len(cluster_descriptions) / 3, 1))
+        print(len(cluster_descriptions))
         specs = get_subplot_specs(len(cluster_descriptions))
 
         dict_2 = {i: f"Group {i}" for i in range(len(cluster_descriptions))}
-        
-        if -1 in cluster_descriptions.keys():
-            dict_2 = {-1: "Outliers", **dict_2}
-
+        dict_2 = {-1: "Outliers", **dict_2}
         fig = make_subplots(
             rows=num_rows,
             cols=3,
@@ -765,8 +761,11 @@ class Model:
 
         fig.update_traces(marker=dict(line=dict(color="white", width=3)))
 
+        # TODO: Base this yshift on the number of descriptors 
+        y_shift = -2 
+
         fig.update_layout(
-            legend=dict(orientation="h", yanchor="bottom", y=-0.35, xanchor="left", x=0)
+            legend=dict(orientation="h", yanchor="bottom", y=y_shift, xanchor="left", x=0)
         )
 
         config = {
