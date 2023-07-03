@@ -994,7 +994,7 @@ class Model:
         return [out_list, color_dict]
 
 
-    def visualize_model_pieNodes(self, col = 'cluster', seed=16, k=0.5, scaling_factor=0.2, scaling_metric='log', size = (10,5), edge_width = 1):
+    def visualize_model_pieNodes(self, col = 'cluster', seed=16, k=0.5, scaling_factor=0.2, scaling_metric='log', size = (10,5), edge_width = 1, dpi = 300):
 
         """
         Visualizes the model using pie charts for node clusters.
@@ -1016,7 +1016,7 @@ class Model:
             if is_continuous(self.tupper.raw[col]):
                 return 'We only support visualizations of non-continuous variables at this time. Please enter a different col parameter'
 
-        fig = plt.figure(figsize=size, dpi=300)
+        fig = plt.figure(figsize=size, dpi=dpi)
         ax = plt.axes([0, 0, 1, 1])
         color_scale = np.array(custom_color_scale()).T[1]
         components, labels = zip(*self.mapper.components.items())
@@ -1053,9 +1053,7 @@ class Model:
                 a.set_aspect('auto')
                 a.pie(node_sizes, colors=self._order_color_scheme(col, color_scale, temp)[0], startangle=90, counterclock=False,
                     wedgeprops={'edgecolor': 'white', 'linewidth': 0.5})
-            
-                # Adjust pie chart position
-                #a.set_position([xa - p2, ya - p2, piesize, piesize])
+
         
         plt.axis('off')
         ax.spines['top'].set_visible(False)
