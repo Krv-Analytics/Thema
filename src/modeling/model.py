@@ -866,12 +866,17 @@ class Model:
             title_font_size=20,
         )
 
+        if math.ceil(len(df.columns.drop("cluster_IDs")) / 3) ==1:
+            height = 335
+        else:
+            height = 285*math.ceil(len(df.columns.drop("cluster_IDs")) / 3)
+
         config = {
             'toImageButtonOptions': {
                 'format': 'svg', # one of png, svg, jpeg, webp
-                'filename': 'custom_image',
-                'height': 1200,
-                'width': 1000,
+                'filename': 'boxplots',
+                'height': height,
+                'width': 1200,
                 'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
             }
         }

@@ -32,6 +32,7 @@ seaborn = "^0.12.2"
 giotto-tda = "^0.6.0"
 hdbscan = "^0.8.29"
 python-log-indenter = "^0.9"
+krv_dyneusr = { git = "https://github.com/KrV-Analytics/krv_dyneusr.git" }
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
