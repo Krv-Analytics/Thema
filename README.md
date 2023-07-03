@@ -3,6 +3,8 @@
 ## Description 
 A graph generation pipeline that combines `UMAP`, the `Mapper` algorithm, and `Ollivier Ricci Curvature` to model and analyze sparse, high dimensional data sets.
 
+UPDATE
+
 ## Installation
 
 To clone `krv_mapper`, run in your favorite bash shell (eg. terminal)
