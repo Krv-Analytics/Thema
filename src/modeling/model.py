@@ -31,6 +31,7 @@ from model_helper import (
     reorder_colors,
     get_subplot_specs,
     _define_zscore_df,
+    is_continuous
 )
 from persim import plot_diagrams
 
@@ -799,7 +800,12 @@ class Model:
 
         row = 1
         col = 1
-
+        # units_dict = {'GWisReal':'% Of County', 'corporationsShouldAddressGW':'% Of County', 'worriedAboutGW':'% Of County',
+        #               'TotalLiabilitiesNetMinorityInterest':'Dollars ($)', 'OperatingMargin':'Ratio', 'ReturnOnEquity':'Ratio',
+        #               'BasicEPS':'Percent (%)', 'CurrentAssets':'Dollars ($)', 'NetMargin':'Ratio', 'ReturnOnEquity':'Ratio',
+        #                'OperatingIncomePerFTE':'Dollars ($)', 'EBIT-Margin':'Ratio', 'Investment Risk':'Score (0-10)', 
+        #                'Company Management':'Score (0-10)', 'Positivity Outlook':'Score (0-10)', 'CSRhub-esgRating':'Score (0-100)',
+        #                'CapexToAssets':'Ratio', 'CapexToCFI':'Ratio' }
         if -1.0 not in list(df.cluster_IDs.unique()):
             dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
         else:
@@ -819,11 +825,21 @@ class Model:
                         line_width=1,
                         boxmean=True,
                         #hovertext=df["companyName"],
+                        #yaxis_title='Text',
                         marker=dict(color=custom_color_scale()[int(pg)][1]),
                     ),
                     row=row,
                     col=col,
                 )
+                # if column in list(units_dict.keys()):
+                #     title_text = units_dict[column]
+                # else:
+                #     title_text = ''
+                # fig.update_yaxes(
+                #         title=title_text,
+                #     row=row,
+                #     col=col
+                # )
 
                 if show_targets:
                     if column in target.columns:
@@ -939,3 +955,122 @@ class Model:
         )
 
         print(f"Go to {path_html} for a visualization of your JMapper!")
+
+    def _order_color_scheme(self, column, colorscheme, temp_df):
+        color_scale_length = len(colorscheme)
+        if column == 'cluster':
+            num_colors = len(self.cluster_descriptions)
+        else:
+            num_colors = self.tupper.raw[column].nunique()
+        color_indices = []
+        if num_colors <= 1:
+            color_indices.append(0)
+        else:
+            step = (color_scale_length - 1) / (num_colors - 1)
+        for i in range(num_colors):
+            color_index = round(i * step)
+            color_indices.append(color_index)
+        hexes = colorscheme[color_indices]
+
+        color_dict = {}
+        for i in range(num_colors):
+            if column == 'cluster':
+                # if example.cluster_descriptions[-1]['size']==0:
+                #     temp_list = list(example.cluster_descriptions.keys())
+                #     temp_list.pop()
+                #     color_dict[temp_list[i]] = hexes[i]
+                # else:
+                    color_dict[list(self.cluster_descriptions.keys())[i]] = hexes[i]
+            else:
+                color_dict[list(self.tupper.raw[column].unique())[i]] = hexes[i]
+
+        if temp_df is None:
+            return color_dict
+        
+        out_list = []
+        for val in list(temp_df[column].unique()):
+            out_list.append(color_dict[val])
+
+        return [out_list, color_dict]
+
+
+    def visualize_model_pieNodes(self, col = 'cluster', seed=16, k=0.5, scaling_factor=0.2, scaling_metric='log', size = (10,5), edge_width = 1):
+
+        """
+        Visualizes the model using pie charts for node clusters.
+
+        Parameters:
+            col (str): The column name to use for coloring the pie charts. Default is 'cluster'.
+            k (float): Optimal distance between nodes in the graph layout. Default is 0.2.
+            seed (int): Seed for the random number generator. Default is 5.
+            scaling_factor (float): Scaling factor for adjusting the size of pie charts. Default is 0.001.
+            scaling_metric (str): Scaling metric to use for calculating pie chart sizes. Only supports 'log' and integer scaling currently -- any value not 'log' defaults to integer sizing.
+            size (tuple): Figure size in inches. Default is (10, 5). 
+            edge_width (float): Width of the edges connecting the nodes. Default is 1.
+
+        Shows:
+            A networkx graph with colored nodes
+        """
+
+        if col != 'cluster':
+            if is_continuous(self.tupper.raw[col]):
+                return 'We only support visualizations of non-continuous variables at this time. Please enter a different col parameter'
+
+        fig = plt.figure(figsize=size, dpi=300)
+        ax = plt.axes([0, 0, 1, 1])
+        color_scale = np.array(custom_color_scale()).T[1]
+        components, labels = zip(*self.mapper.components.items())
+
+        pos = nx.spring_layout(self.mapper.graph, k=k, seed=seed)
+
+        for i, g in enumerate(components):
+            for edge in g.edges():
+                nx.draw_networkx_edges(g, pos, edgelist=[edge], ax=ax, alpha=0.5, width=edge_width)
+                ax.set_aspect('auto')
+
+        trans = ax.transData.transform
+        trans2 = fig.transFigure.inverted().transform
+
+        # Update pie chart size calculation
+        for i, g in enumerate(components):
+            for n in g:
+                temp = self.get_node_dfs(i)[n]
+                if col == 'cluster':
+                    cID = self.tupper.raw.copy()
+                    cID['cluster'] = self.cluster_ids
+                    temp = temp.merge(cID[['cluster']], how='left', left_index=True, right_index=True)
+
+                #node_labels = temp[col].unique()
+                node_sizes = temp[col].value_counts().values 
+                xx, yy = trans(pos[n]) 
+                xa, ya = trans2((xx, yy))
+                if scaling_metric != 'log':
+                    piesize =len(temp) * scaling_factor + 0.01
+                else:
+                    piesize = np.log10(len(temp)) * scaling_factor + 0.01
+                p2 = piesize / 2
+                a = plt.axes([xa - p2, ya - p2, piesize, piesize])
+                a.set_aspect('auto')
+                a.pie(node_sizes, colors=self._order_color_scheme(col, color_scale, temp)[0], startangle=90, counterclock=False,
+                    wedgeprops={'edgecolor': 'white', 'linewidth': 0.5})
+            
+                # Adjust pie chart position
+                #a.set_position([xa - p2, ya - p2, piesize, piesize])
+        
+        plt.axis('off')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+
+        legend_dict = self._order_color_scheme(col, color_scale, temp)[1]
+        if col == 'cluster':
+            if self.cluster_descriptions[-1]['size']==0:
+                legend_dict.popitem()
+        legend_handles = [plt.Rectangle((0, 0), 1, 1, color=legend_dict[key]) for key in legend_dict.keys()]
+        legend_labels = [str(key) for key in legend_dict.keys()]
+        ax.legend(legend_handles, legend_labels, loc='best', )
+
+        #cbook.set_box_aspect(ax1, ax2.get_box_aspect())
+        print(legend_dict)
+        plt.show()

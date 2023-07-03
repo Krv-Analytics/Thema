@@ -372,3 +372,12 @@ def script_paths(paths):
         abs_path = os.path.join(scripts_dir, rel_path)
         new_paths.append(abs_path)
     return new_paths
+
+
+def is_continuous(column):
+    if column.dtype == 'int64' or column.dtype == 'float64':
+        unique_values = column.nunique()
+        if unique_values > len(column) * 0.075:  # Arbitrary threshold for continuous variables
+            return True
+    return False
+
