@@ -957,7 +957,10 @@ class Model:
         print(f"Go to {path_html} for a visualization of your JMapper!")
 
     def _order_color_scheme(self, col_name, color_scale):
-        unique_values = self.tupper.raw[col_name].unique()
+        if col_name == 'cluster':
+            unique_values = list(self.cluster_descriptions.keys())
+        else:
+            unique_values = self.tupper.raw[col_name].unique()
         num_values = len(unique_values)
         num_colors = len(color_scale)
         
