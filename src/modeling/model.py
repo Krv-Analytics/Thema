@@ -956,45 +956,21 @@ class Model:
 
         print(f"Go to {path_html} for a visualization of your JMapper!")
 
-    def _order_color_scheme(self, column, colorscheme, temp_df):
-        color_scale_length = len(colorscheme)
-        if column == 'cluster':
-            num_colors = len(self.cluster_descriptions)
-        else:
-            num_colors = self.tupper.raw[column].nunique()
-        color_indices = []
-        if num_colors <= 1:
-            color_indices.append(0)
-        else:
-            step = (color_scale_length - 1) / (num_colors - 1)
-        for i in range(num_colors):
-            color_index = round(i * step)
-            color_indices.append(color_index)
-        hexes = colorscheme[color_indices]
-
-        color_dict = {}
-        for i in range(num_colors):
-            if column == 'cluster':
-                # if example.cluster_descriptions[-1]['size']==0:
-                #     temp_list = list(example.cluster_descriptions.keys())
-                #     temp_list.pop()
-                #     color_dict[temp_list[i]] = hexes[i]
-                # else:
-                    color_dict[list(self.cluster_descriptions.keys())[i]] = hexes[i]
-            else:
-                color_dict[list(self.tupper.raw[column].unique())[i]] = hexes[i]
-
-        if temp_df is None:
-            return color_dict
+    def _order_color_scheme(self, col_name, color_scale):
+        unique_values = self.tupper.raw[col_name].unique()
+        num_values = len(unique_values)
+        num_colors = len(color_scale)
         
-        out_list = []
-        for val in list(temp_df[column].unique()):
-            out_list.append(color_dict[val])
+        if num_values > num_colors:
+            raise ValueError("Number of unique values exceeds the number of colors in the color scale.")
+        
+        indices = np.linspace(0, num_colors - 1, num_values, dtype=int)
+        color_dict = {value: color_scale[index] for value, index in zip(unique_values, indices)}
+        
+        return color_dict
 
-        return [out_list, color_dict]
 
-
-    def visualize_model_pieNodes(self, col = 'cluster', seed=16, k=0.5, scaling_factor=0.2, scaling_metric='log', size = (10,5), edge_width = 1, dpi = 300):
+    def visualize_model_pieNodes(self, col = 'cluster', seed=16, k=0.5, scaling_factor=0.2, scaling_metric='log', size = (10,5), edge_width = 1, dpi = 300, show_legend=True):
 
         """
         Visualizes the model using pie charts for node clusters.
@@ -1031,6 +1007,8 @@ class Model:
         trans = ax.transData.transform
         trans2 = fig.transFigure.inverted().transform
 
+        color_dict = self._order_color_scheme(col, color_scale)
+
         # Update pie chart size calculation
         for i, g in enumerate(components):
             for n in g:
@@ -1051,7 +1029,12 @@ class Model:
                 p2 = piesize / 2
                 a = plt.axes([xa - p2, ya - p2, piesize, piesize])
                 a.set_aspect('auto')
-                a.pie(node_sizes, colors=self._order_color_scheme(col, color_scale, temp)[0], startangle=90, counterclock=False,
+
+                node_labels = temp[col].unique()
+                # Create a list of colors corresponding to unique values
+                colors = [color_dict[label] for label in node_labels]
+
+                a.pie(node_sizes, colors=colors, startangle=90, counterclock=False,
                     wedgeprops={'edgecolor': 'white', 'linewidth': 0.5})
 
         
@@ -1061,13 +1044,14 @@ class Model:
         ax.spines['bottom'].set_visible(False)
         ax.spines['left'].set_visible(False)
 
-        legend_dict = self._order_color_scheme(col, color_scale, temp)[1]
+        legend_dict = color_dict
         if col == 'cluster':
             if self.cluster_descriptions[-1]['size']==0:
                 legend_dict.popitem()
         legend_handles = [plt.Rectangle((0, 0), 1, 1, color=legend_dict[key]) for key in legend_dict.keys()]
         legend_labels = [str(key) for key in legend_dict.keys()]
-        ax.legend(legend_handles, legend_labels, loc='best', )
+        if show_legend:
+            ax.legend(legend_handles, legend_labels, loc='best')
 
         #cbook.set_box_aspect(ax1, ax2.get_box_aspect())
         print(legend_dict)
