@@ -19,7 +19,6 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 import hdbscan
 
-
 def create_umap_grid(dir):
     """
     Create a grid visualization of UMAP projections.
@@ -35,16 +34,16 @@ def create_umap_grid(dir):
         The Plotly figure object representing the UMAP grid visualization.
     """
 
-    neighbors, dists = [], []
+    umap_data = []
     for umap in os.listdir(dir):
         with open(f"{dir}/{umap}", "rb") as f:
             params = pickle.load(f)
-        if params["hyperparameters"][0] not in neighbors:
-            neighbors.append(params["hyperparameters"][0])
-        if params["hyperparameters"][1] not in dists:
-            dists.append(params["hyperparameters"][1])
-        neighbors.sort()
-        dists.sort()
+        umap_data.append((umap, params))
+
+    umap_data.sort(key=lambda x: (x[1]["hyperparameters"][0], x[1]["hyperparameters"][1]))
+
+    neighbors = sorted(list(set([params["hyperparameters"][0] for _, params in umap_data])))
+    dists = sorted(list(set([params["hyperparameters"][1] for _, params in umap_data])))
 
     fig = make_subplots(
         rows=len(dists),
@@ -58,8 +57,9 @@ def create_umap_grid(dir):
     cluster_distribution = []
     row = 1
     col = 1
-    for umap in os.listdir(dir):
-        with open(f"{dir}/{umap}", "rb") as f:
+
+    for umap_file, params in umap_data:
+        with open(f"{dir}/{umap_file}", "rb") as f:
             params = pickle.load(f)
         proj_2d = params["projection"]
         clusterer = hdbscan.HDBSCAN(min_cluster_size=5).fit(proj_2d)
@@ -76,9 +76,9 @@ def create_umap_grid(dir):
 
         num_clusters = len(np.unique([x for x in clusterer.labels_ if x != -1]))
 
-        colorscale = md.custom_color_scale()
-        if num_clusters > len(colorscale)-1:
-            colorscale = px.colors.diverging.Spectral
+        # colorscale = md.custom_color_scale()
+        # if num_clusters > len(colorscale)-1:
+        colorscale = px.colors.qualitative.Alphabet
 
         cluster_distribution.append(num_clusters)
         df = outdf[outdf["labels"] == -1]
@@ -106,8 +106,7 @@ def create_umap_grid(dir):
                 marker=dict(
                     size=4,
                     color=df["labels"],
-                    # colorscale=[color for _, color in md.custom_color_scale()],
-                    colorscale=md.custom_color_scale(),
+                    colorscale=colorscale,
                     # line=dict(width=0.05, color="Black"),
                     cmid=0.3,
                 ),
@@ -168,7 +167,8 @@ def create_cluster_distribution_histogram(dir):
         go.Bar(
             x=unique_values,
             y=value_counts,
-            marker_color=[color for _, color in md.custom_color_scale()],
+            #marker_color=[color for _, color in md.custom_color_scale()],
+            marker_color = px.colors.qualitative.Alphabet,
             text=value_counts,
             hoverinfo="text",
         )
