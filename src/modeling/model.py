@@ -23,6 +23,8 @@ import math
 
 
 from jmapper import JMapper
+from jbottle import JBottle
+
 from model_helper import (
     config_plot_data,
     custom_color_scale,
@@ -57,69 +59,54 @@ class Model():
     of our graph models.
     """
 
-    def __init__(self, jmapper):
+    def __init__(self, jmapper, jbottle):
         """Constructor for Model class.
         Parameters
         -----------
 
         jmapper:str
           Path to a Jmapper object 
-
-        jmapper: <jmapper.JMapper>
-            A Jmapper object 
         """
         
-        
-        if type(jmapper) == str: 
-            try:
-                with open(jmapper, 'rb') as f:
-                    self._jmapper = pickle.load(f)
-            except: 
-                print("There was an error opening your Jmapper Object")
-            
-        elif isinstance(jmapper, JMapper): 
-            self._jmapper = jmapper
-        
-        else: 
-            self._jmapper = JMapper()
+        try:
+            with open(jmapper, 'rb') as f:
+                reference = pickle.load(f)
+            self._jmapper = reference['mapper']
+            self._hyper_parameters = reference['hyperparameters']
+        except: 
+            print("There was an error opening your Jmapper Object")
         
 
-        self._hyper_parameters = None
-
+        self._jbottle = JBottle(self._jmapper.tupper, self._jmapper.jgraph.connected_components)
+        
         # Graph Node Attributes
         self._node_ids = None
         self._node_description = None
 
-        # Graph Cluster Attributes
+        # TODO: Move this to JBOTTLE 
+
+        # As a rule, if it has to do with pure data analysis 
+        # then it belongs in JBottle 
+        # data analysis utility functions on pd.DataFrames will be written into 
+        # data_utils.py 
+
+        # REMOVE! 
         self._cluster_ids = None
-        self._cluster_descriptions = None
         self._cluster_sizes = None
         self._unclustered_items = None
-
-        self._cluster_positions = None
         self._zscores = None
         self._items_dict = None
 
+        # Keep! 
+        self._cluster_descriptions = None
+        self._cluster_positions = None
 
-    # TODO: Move this as a member variable of the JMapper object 
 
     @property
     def hyper_parameters(self):
         """Return the hyperparameters used to fit this model."""
-        if self._hyper_parameters:
-            return self._hyper_parameters
-        assert self._mapper, "Please Specify a valid path to a mapper object"
-        with open(self._mapper, "rb") as mapper_file:
-            reference = pickle.load(mapper_file)
-            self._hyper_parameters = reference["hyperparameters"]
         return self._hyper_parameters
 
-    @property
-    def node_ids(self):
-        """Return the node labels according to the graph clustering."""
-        if self._node_ids is None:
-            self.label_item_by_node()
-        return self._node_ids
 
     @property
     def node_description(self):
@@ -127,14 +114,8 @@ class Model():
         if self._node_description is None:
             self.compute_node_descriptions()
         return self._node_description
-
-    @property
-    def cluster_ids(self):
-        """Return the policy group labels according to the graph clustering."""
-        if self._cluster_ids is None:
-            self.label_item_by_cluster()
-        return self._cluster_ids
-
+    
+    # TODO: RENAME 
     @property
     def cluster_descriptions(self):
         """Return the policy group descriptions according
@@ -142,6 +123,28 @@ class Model():
         if self._cluster_descriptions is None:
             self.compute_cluster_descriptions()
         return self._cluster_descriptions
+    
+
+###################################################################################################
+
+# TODO: Get Rid of the Below
+
+###################################################################################################
+ 
+    @property
+    def node_ids(self):
+        """Return the node labels according to the graph clustering."""
+        if self._node_ids is None:
+            self.label_item_by_node()
+        return self._node_ids
+    
+    # TODO: Move This to JBottle
+    @property
+    def cluster_ids(self):
+        """Return the policy group labels according to the graph clustering."""
+        if self._cluster_ids is None:
+            self.label_item_by_cluster()
+        return self._cluster_ids
 
     @property
     def cluster_sizes(self):
@@ -287,6 +290,14 @@ class Model():
         return overlapping_values
 
     
+
+###################################################################################################
+
+# TODO: Get Rid of the above 
+
+###################################################################################################
+
+
     def compute_node_descriptions(self):
         """
         Compute a simple description of each node in the graph.
@@ -371,7 +382,11 @@ class Model():
             "density": {unclustered_label: 1.0},
             "size": self.cluster_sizes[-1],
         }
+###################################################################################################
 
+# TODO: Git outta here (below)
+
+###################################################################################################
     def _get_node_df(self, node: str):
         """helper function for get_node_dfs that creates a data frame containing each plant in a specified node"""
         df = self.tupper.raw
@@ -471,6 +486,13 @@ class Model():
             group_dataframes[f"group_{group_label}"] = raw_subframe 
 
         return group_dataframes
+    
+
+    ###################################################################################################
+
+# TODO: Git outta here (above)
+
+###################################################################################################
 
     def target_matching(
         self,
@@ -509,6 +531,8 @@ class Model():
         min_index = min(scores, key=scores.get)
         return scores, min_index
     
+
+    # Wut 
     def fib(self, i, g, colorscale):
         return colorscale[i]
 
@@ -885,7 +909,7 @@ class Model():
 
         Parameters
         ----------
-        bins: str, defualt is "auto"
+        bins: str, default is "auto"
             Method for seaborn to assign bins in the histogram.
         kde: bool
             If true then draw a density plot.
@@ -910,6 +934,9 @@ class Model():
             np.asarray(self.mapper.diagram[1]._pairs),
         ]
         return plot_diagrams(persim_diagrams, show=True)
+
+
+    # Maybe its time we let the old ways die? 
 
     @DeprecationWarning
     def visualize_mapper(self):
