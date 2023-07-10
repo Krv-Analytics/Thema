@@ -13,7 +13,7 @@ class Tupper:
         2) clean: data that has been cleaned via dropping features, scaling, removing NaNs, etc.
         3) projected: data that has been collapsed using a dimensionality reduction technique (e.g. PCA, UMAP).
 
-        Note! These paths are the relative paths from the root of this repository!
+        Note! The paths using to intialize these data files are the relative paths from the root of this repository!
     """
 
     def __init__(self, raw: str, clean: str, projection: str):
@@ -21,13 +21,13 @@ class Tupper:
         Parameters
         ===========
         raw: str
-            A path to raw data pickle file.
+            A path to raw data pickle file (relative from root).
 
         clean: str
-            A path to clean data pickle file.
+            A path to clean data pickle file (relative from root).
 
         projection: str
-            A path to projected data pickle file.
+            A path to projected data pickle file (relative from root).
         """
 
         # Get relative file paths
@@ -143,3 +143,22 @@ class Tupper:
                    Please make sure you have set your projection data reference to the correct pickle file.\n",
                 e,
             )
+
+    def get_raw_path(self):
+        return self._raw 
+    
+    def get_clean_path(self):
+        return self._clean 
+    
+    def get_projection_path(self):
+        return self._projection
+    
+    def set_raw_path(self, path):
+        self._raw = path 
+
+    def set_clean_path(self, path):
+        self._clean = path 
+    
+    def set_projection_path(self, path):
+        self._projection = path
+        

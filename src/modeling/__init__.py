@@ -10,6 +10,8 @@ sys.path.append(src + "modeling/")
 from modeling.jmapper import JMapper
 from modeling.model import Model
 from modeling.tupper import Tupper
+from modeling.jbottle import JBottle
+from modeling.jgraph import JGraph
 from modeling.nammu import *
 from modeling.model_helper import *
 

@@ -35,7 +35,7 @@ from model_helper import (
 from persim import plot_diagrams
 
 
-class Model:
+class Model():
     """A clustering model for point cloud data
     based on the Mapper Algorithm.
 
@@ -57,29 +57,40 @@ class Model:
     of our graph models.
     """
 
-    def __init__(self, mapper: str):
+    def __init__(self, jmapper):
         """Constructor for Model class.
         Parameters
         -----------
-        mapper: <jmapper.JMapper>
-            A data container that holds raw, cleaned, and projected
-            versions of user data.
-        """
 
-        self._mapper = None
-        self._tupper = None
-        self._complex = None
+        jmapper:str
+          Path to a Jmapper object 
+
+        jmapper: <jmapper.JMapper>
+            A Jmapper object 
+        """
+        
+        
+        if type(jmapper) == str: 
+            try:
+                with open(jmapper, 'rb') as f:
+                    self._jmapper = pickle.load(f)
+            except: 
+                print("There was an error opening your Jmapper Object")
+            
+        elif isinstance(jmapper, JMapper): 
+            self._jmapper = jmapper
+        
+        else: 
+            self._jmapper = JMapper()
+        
+
         self._hyper_parameters = None
 
-        # Check is valid mapper path
-        if isfile(mapper):
-            self._mapper = mapper
-
-        # Mapper Node Attributes
+        # Graph Node Attributes
         self._node_ids = None
         self._node_description = None
 
-        # Mapper Cluster Attributes
+        # Graph Cluster Attributes
         self._cluster_ids = None
         self._cluster_descriptions = None
         self._cluster_sizes = None
@@ -89,18 +100,8 @@ class Model:
         self._zscores = None
         self._items_dict = None
 
-    @property
-    def mapper(self):
-        assert self._mapper, "Please Specify a valid path to a mapper object"
-        with open(self._mapper, "rb") as mapper_file:
-            reference = pickle.load(mapper_file)
-            mapper = reference["mapper"]
-        return mapper
 
-    @property
-    def tupper(self):
-        """Return the Tupper assocaited with `self.mapper`."""
-        return self.mapper.tupper
+    # TODO: Move this as a member variable of the JMapper object 
 
     @property
     def hyper_parameters(self):
@@ -112,11 +113,6 @@ class Model:
             reference = pickle.load(mapper_file)
             self._hyper_parameters = reference["hyperparameters"]
         return self._hyper_parameters
-
-    @property
-    def complex(self):
-        """Return the complex from a fitted JMapper."""
-        return self.mapper.complex
 
     @property
     def node_ids(self):
