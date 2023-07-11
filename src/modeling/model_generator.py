@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
 
-    mapper = model_generator(
+    jmapper = model_generator(
         tupper,
         n_cubes=n,
         perc_overlap=p,
@@ -137,10 +137,10 @@ if __name__ == "__main__":
         verbose=args.Verbose,
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
-    output = {"mapper": mapper}
+    output = {"mapper": jmapper}
     try:
-        num_policy_groups = mapper.num_policy_groups
-        if num_policy_groups > len(mapper.tupper.clean):
+        num_policy_groups = jmapper.jgraph.num_policy_groups
+        if num_policy_groups > len(jmapper.tupper.clean):
             # TODO: Write out these instances to a Log file 
             print("More components than elements!!")
             sys.exit(1)
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    if len(mapper.complex) > 0:
+    if len(jmapper.complex) > 0:
         with open(output_file, "wb") as handle:
             pickle.dump(
                 output,
