@@ -12,3 +12,5 @@ data/
 .dvc/config
 params.json
 notebooks/
+.pytest_cache
+

@@ -20,8 +20,8 @@ class JGraph():
 
         Parameters: 
         -----------
-        complex: <dict()>
-            A kmapper simplicial complex 
+        nodes: <dict()>
+            The nodes of a simplicial complex  
 
         min-intersection: 
             For the moment, min_intersection value as dictated by graph nerve 
@@ -41,46 +41,30 @@ class JGraph():
         
         self._graph.add_nodes_from(nodes)
         self._graph.add_edges_from(edges)
-        
+        nx.set_node_attributes( self._graph, 
+                               nodes,
+                               "membership"
+        ) 
 
-        self._components = dict(), 
-        self._curvature = np.array([]), 
-        self._diagram = PersistenceDiagram(), 
-        self._num_policy_groups=None
+
+        self._components = dict(
+            [
+                (self._graph.subgraph(c).copy(), i)
+                for i, c in enumerate(nx.connected_components(self._graph))
+            ]
+        )
+        
+        self._num_policy_groups = len(self._components)
+        self._curvature = np.array([])
+        self._diagram = PersistenceDiagram()
         
     
     @property
     def components(self):
-        if len(self._components) == 0:
-            try:
-                self.connected_components()
-            except self._complex == dict():
-                print(
-                    "Connected components could not be obtained \
-                    from this simplicial complex!"
-                )
-                print(
-                    "Note: some parameters may produce a trivial\
-                    mapper representation. \n"
-                )
         return self._components
-    
     
     @property
     def num_policy_groups(self):
-        if self._num_policy_groups is None:
-            try:
-                self.connected_components()
-            except self.complex == dict():
-                print(
-                    "Number of policy groups could not be \
-                        obtained from this simplicial complex!"
-                )
-                print(
-                    "Note: some parameters may produce a trivial\
-                    mapper representation. \n"
-                )
-
         return self._num_policy_groups
     
     @property
@@ -88,7 +72,7 @@ class JGraph():
         """Return the curvature values for the graph of a JMapper object."""
         assert (
             len(self._curvature) > 0
-        ), "You don't have any edge curvatures! Try running `to_networkx`"
+        ), "You don't have any edge curvatures!"
         return self._curvature
     
     @curvature.setter
@@ -102,10 +86,6 @@ class JGraph():
             The default is set to Ollivier-Ricci Curvature.
 
         """
-        assert (
-            len(self._graph.nodes()) > 0
-        ), "First run `to_networkx` to generate a non-empty networkx graph."
-
         try:
             curvature = curvature_fn(self.graph)
             assert len(curvature) == len(self._graph.edges())
@@ -126,31 +106,6 @@ class JGraph():
                     from this simplicial complex!"
                 )
         return self._diagram
-    
-    
-    def connected_components(self):
-        """
-        Compute the connected components of `self._graph`
-
-        Returns
-        -----------
-        components: dict
-            A dictionary labeling the connected components of `self._graph`.
-            Keys are networkX Graphs and items are integer labels.
-
-        """
-        assert (
-            len(self.graph.nodes()) > 0
-        ), "First run `to_networkx` to generate a non-empty networkx graph."
-
-        self._components = dict(
-            [
-                (self.graph.subgraph(c).copy(), i)
-                for i, c in enumerate(nx.connected_components(self.graph))
-            ]
-        )
-        self._num_policy_groups = len(self._components)
-        return self.components
 
     def calculate_homology(
         self,

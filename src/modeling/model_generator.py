@@ -8,11 +8,7 @@ import json
 
 
 ########################################################################################################################
-# Update path to find modeling module
-# TODO: Find a work around to not update path here
-# Trouble is model module cannot be loaded with module/__init__ when calling this file, which is where paths are sorted for
-# the remaining files for this module
-#
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -132,7 +128,6 @@ if __name__ == "__main__":
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
 
-    # TODO: incoporate random seed
     mapper = model_generator(
         tupper,
         n_cubes=n,
@@ -146,6 +141,7 @@ if __name__ == "__main__":
     try:
         num_policy_groups = mapper.num_policy_groups
         if num_policy_groups > len(mapper.tupper.clean):
+            # TODO: Write out these instances to a Log file 
             print("More components than elements!!")
             sys.exit(1)
     except:

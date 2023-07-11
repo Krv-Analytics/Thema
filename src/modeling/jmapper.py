@@ -48,8 +48,8 @@ class JMapper():
     Member Functions
     ----------------
 
-    fit(): 
-        A wrapper function for facilitating kmapper's `map` function. 
+    re_fit(): 
+        A function for refitting a kmapper's `map` function. 
     
     """
 
@@ -61,19 +61,11 @@ class JMapper():
     
     def __init__(
         self, 
-        tupper: Tupper = None,  # Container for user Data
-
-                                # OR 
-                                
-        raw: str = "",          # path to raw data 
-        clean: str = "",        # path to clean data   
-        projection: str = "",   # path to projected data
-            
-        clusterer= dict(),
-        cover = None,       
-        complex = dict(),         
-        min_intersection=None,  
-        mapper: KeplerMapper = KeplerMapper(verbose=0),
+        tupper: Tupper,  # Container for user Data
+        n_cubes: int, 
+        perc_overlap: float, 
+        clusterer,
+        verbose: int = 0
     ):
         """Constructor for JMapper class.
         
@@ -83,58 +75,51 @@ class JMapper():
             A data container that holds raw, cleaned, and projected
             versions of user data.
 
-        OR
-
-        raw: str
-            Path (relative to root) to the users raw data (only pkl supported at this time) 
+        n_cubes: int 
+            The number of cubes used to fit member kepler mapper
         
-        clean: str
-            Path (relative to root) to the users clean data (only pkl supported at this time)
+        perc_overlap: float
+            The percent overlap used to fit member kepler mapper
         
-        projection: str         
-            Path (relative to root) to the users clean data (only pkl supported at this time)
-        
-    Optional Parameters
-    -------------------
-
-        verbose: int, default is 0
-            Logging level passed through to `kmapper`. Levels (0,1,2)
-            are supported.
-
         clusterer: 
-            Scikit-learn API compatible clustering algorithm. Must provide fit and predict. 
-            Default is `HDBSCAN`. 
+            The clusterer used in to fit member kepler mapper
         
-        cover (kmapper.Cover): 
-            Cover scheme for lens. Instance of kmapper.cover providing methods fit and transform.
-        
-        complex (kmapper.simplicial_complex): 
-            A dictionary with “nodes”, “links” and “meta” information. 
-        
-        min_intersection: 
-            The minimum intersection required for an edge to arise. Set to `-1` for 
-            weighted graph representation.
-
-        mapper: <kmapper.KeplerMapper>
-            An instance of kmapper's KeplerMapper  
+        verbose: int, default is 0  
         """
 
     # Intialize inherited Tupper 
-        if tupper is None: 
-            self._tupper = Tupper(tupper.get_raw_path(), 
-                           tupper.get_clean_path(), 
-                           tupper.get_projection_path())
-        else:
-            self._tupper = tupper
+        self._tupper = tupper
+        self._n_cubes = n_cubes
+        self._perc_overlap = perc_overlap
+        self._clusterer= clusterer
+        self._cover = km.Cover(n_cubes, perc_overlap)
+        
+        self._mapper = KeplerMapper(verbose=verbose)
 
-    
-        self._mapper = mapper
-        self._clusterer = clusterer   
-        self._cover = cover
-        self._complex = complex 
-        self._min_intersection = min_intersection
+        # Compute Simplicial Complex
+        try: 
+            self._complex = self._mapper.map(
+            lens=self._tupper.projection,
+            X=self._tupper.projection,
+            cover=self._cover,
+            clusterer=self._clusterer,
+        )
+            self._nodes = convert_keys_to_alphabet(self._complex['nodes'])
+        except: 
+            print("You have produced an Empty Simplicial Complex")
+            self._complex = -1
+            self._nodes == -1
+         
+        
+        # These members will be set in model_helper.py for computational 
+        # efficienty purposes 
 
-        self._jgraph = None
+        self._min_intersection=None,  
+        
+
+        
+        # Public Member
+        self.jgraph = None
 
     
  
@@ -150,7 +135,31 @@ class JMapper():
         Returns the tupper class data container 
         """
         return self._tupper 
+
+    @property
+    def n_cubes(self):
+        """
+        Returns the n_cubes member
+        """
+        return self._n_cubes 
     
+    @property
+    def perc_overlap(self):
+        """
+        Returns the perc_overlap member
+        """
+        return self._perc_overlap   
+    
+    @property
+    def clusterer(self):
+        """Return the clusterer used to fit JMapper."""
+        return self._clusterer
+    
+    @property
+    def cover(self):
+        """Return the cover used to fit JMapper."""
+        return self._cover
+
     @property
     def mapper(self):
         """Returns the scikit-tda object generated when executing
@@ -158,68 +167,44 @@ class JMapper():
         return self._mapper
 
     @property
-    def cover(self):
-        """Return the cover used to fit JMapper."""
-        return self._cover
-
-    @property
-    def clusterer(self):
-        """Return the clusterer used to fit JMapper."""
-        return self._clusterer
-
-    @property
     def complex(self):
         """Return the clusterer used to fit JMapper."""
-        if len(self._complex["nodes"]) == 0:
-            try:
-                self.fit(clusterer=self.clusterer)
-            except self._complex == dict():
-                print("Your simplicial complex is empty!")
-                print(
-                    "Note: some parameters may produce a trivial\
-                    mapper representation. \n"
-                )
         return self._complex
+
+    @property
+    def nodes(self):
+        """Returns a alphabet list of node_ids."""
+        return self._nodes
     
     @property
     def min_intersection(self):
         "Returns the min_intersection value used to initialize the JGraph object"
         if self._min_intersection is None:
-            print(
-                "Please choose a minimum intersection \
-                to generate a networkX graph!"
-            )
-        return self._min_intersection
+            return -1
+        else: 
+            return self._min_intersection
     
-    
-    @property
-    def jgraph(self):
-        "Return the JGraph Object"
-        if self._jgraph is None: 
-            try: 
-                self._jgraph = JGraph(convert_keys_to_alphabet(self._complex),
-                                        self._min_intersection)
-            except: 
-                print("There was an error creating your JGraph Object")
-        else:
-            return self._jgraph
+    @min_intersection.setter
+    def min_intersection(self, min_intersection: int=1): 
+        self._min_intersection = min_intersection
+
 
     
 ##################################################################################################
 #  
-#  KeplerMapper Fitting Function
+#  KeplerMapper Re-Fitting Function
 #
 ##################################################################################################
 
     
-    def fit(
+    def re_fit(
         self,
         n_cubes: int = 6,
         perc_overlap: float = 0.4,
         clusterer=HDBSCAN(min_cluster_size=6),
     ):
         """
-        Apply scikit-tda's implementation of the Mapper algorithm.
+        Used to re-apply scikit-tda's implementation of the Mapper algorithm.
         Returns a dictionary that summarizes the fitted simplicial complex.
 
         Parameters
@@ -244,18 +229,17 @@ class JMapper():
 
         """
         # Log cover and clusterer from most recent fit
-        self.n_cubes = n_cubes
-        self.perc_overlap = perc_overlap
+        self._n_cubes = n_cubes
+        self._perc_overlap = perc_overlap
         self._cover = km.Cover(n_cubes, perc_overlap)
         self._clusterer = clusterer
 
-        projection = self.tupper.projection
         # Compute Simplicial Complex
         self._complex = self._mapper.map(
-            lens=projection,
-            X=projection,
-            cover=self.cover,
-            clusterer=self.clusterer,
+            lens=self._tupper.projection,
+            X=self._tupper.projection,
+            cover=self._cover,
+            clusterer=self._clusterer,
         )
 
         return self._complex

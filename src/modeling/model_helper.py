@@ -11,8 +11,8 @@ from hdbscan import HDBSCAN
 
 from jmapper import JMapper
 from tupper import Tupper
+from jgraph import JGraph
 from nammu.curvature import ollivier_ricci_curvature
-
 
 def model_generator(
     tupper,
@@ -66,17 +66,16 @@ def model_generator(
         max_cluster_size=max_cluster_size,
     )
     # Configure JMapper
-    j_mapper = JMapper(tupper)  # TODO: incorporate random seed
-    j_mapper.fit(n_cubes, perc_overlap, clusterer)
+    j_mapper = JMapper(tupper, n_cubes, perc_overlap, clusterer)  
 
     results = {}
     if len(j_mapper.complex["links"]) > 0:
         try:
-            j_mapper.to_networkx(min_intersection)
-            j_mapper.connected_components()
+            j_mapper.min_intersection = min_intersection
+            j_mapper.jgraph = JGraph(tupper, j_mapper.nodes, min_intersection)
             # Compute Curvature and Persistence Diagram
-            j_mapper.curvature = ollivier_ricci_curvature
-            j_mapper.calculate_homology()
+            j_mapper.jgraph.curvature = ollivier_ricci_curvature
+            j_mapper.jgraph.calculate_homology()
         except:
             if verbose:
                 print("Empty Mapper!")
