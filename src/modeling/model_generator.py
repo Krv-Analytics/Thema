@@ -139,10 +139,11 @@ if __name__ == "__main__":
     # Unpack each graph (based on min_intersection) into it's own output file.
     output = {"mapper": jmapper}
     try:
-        num_policy_groups = jmapper.jgraph.num_policy_groups
+        num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
-            # TODO: Write out these instances to a Log file 
-            print("More components than elements!!")
+            
+            
+            
             sys.exit(1)
     except:
         sys.exit(1)

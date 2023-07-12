@@ -22,6 +22,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
+
     # HDBSCAN
     min_cluster_size = params_json["model_min_cluster_size"]
     max_cluster_size = params_json["model_max_cluster_size"]
@@ -54,6 +55,17 @@ if __name__ == "__main__":
     # Number of loops 
     num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection)*len(min_cluster_size) *len(os.listdir(os.path.join(root, projections)))
     
+    runlog_file_contents = {
+            "data_set" : params_json["RunName"],
+            "start_time" : datetime.now(),
+            "finish_time" : -1,
+            "total_runTime": -1,
+            "size_of_grid" : num_loops,
+
+            # All logging information should be recorded here
+            "num_empty_mappers": 0 
+    }
+
     # Running Grid in Parallel 
     subprocesses = []
     ## GRID SEARCH PROJECTIONS
@@ -74,12 +86,13 @@ if __name__ == "__main__":
                                     f"-D{D}",
                                     f"-m{C}",
                                     f"-p {P}",
-                                    f"-I {I}",
+                                    f"-I {I}"
                                 ]
                             )
     
-        # Running processes in Parallel 
-    # TODO: optimize based on max_workers 
+
+    
+    # Running processes in Parallel 
     with ProcessPoolExecutor(max_workers=4) as executor:
         futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
         # Setting Progress bar to track number of completed subprocesses 

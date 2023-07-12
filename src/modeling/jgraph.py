@@ -30,7 +30,7 @@ class JGraph():
         
         nerve = km.GraphNerve(min_intersection)
         assert (
-            len(self._complex["nodes"]) > 0
+            len(nodes) > 0
         ), "You must first generate a non-empty Simplicial Complex \
         with `fit()` before you can convert to Networkx "
         
@@ -54,7 +54,6 @@ class JGraph():
             ]
         )
         
-        self._num_policy_groups = len(self._components)
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
         
@@ -62,10 +61,6 @@ class JGraph():
     @property
     def components(self):
         return self._components
-    
-    @property
-    def num_policy_groups(self):
-        return self._num_policy_groups
     
     @property
     def curvature(self):

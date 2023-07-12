@@ -128,6 +128,7 @@ def generate_model_filename(args, n_neighbors, min_dist, min_intersection):
         args.perc_overlap,
         args.n_cubes,
     )
+    
     output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
 
     return output_file
