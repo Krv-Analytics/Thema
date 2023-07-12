@@ -34,30 +34,44 @@ class JGraph():
         ), "You must first generate a non-empty Simplicial Complex \
         with `fit()` before you can convert to Networkx "
         
-        self._graph = nx.Graph()
+        self.graph = nx.Graph()
         
         _, simplices = nerve.compute(nodes)
         edges = [edge for edge in simplices if len(edge) == 2]
         
-        self._graph.add_nodes_from(nodes)
-        self._graph.add_edges_from(edges)
-        nx.set_node_attributes( self._graph, 
+        if len(edges) == 0:
+            self._is_Edgeless = True 
+        else:
+            self._is_Edgeless = False
+            self.graph.add_nodes_from(nodes)
+            self.graph.add_edges_from(edges)
+            nx.set_node_attributes( self.graph, 
                                nodes,
                                "membership"
-        ) 
+            ) 
 
 
         self._components = dict(
             [
-                (self._graph.subgraph(c).copy(), i)
-                for i, c in enumerate(nx.connected_components(self._graph))
+                (self.graph.subgraph(c).copy(), i)
+                for i, c in enumerate(nx.connected_components(self.graph))
             ]
         )
         
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
-        
-    
+
+
+####################################################################################################
+#   
+#   Properties
+#    
+####################################################################################################
+     
+    @property
+    def is_EdgeLess(self):
+        return self._is_Edgeless
+  
     @property
     def components(self):
         return self._components
@@ -83,16 +97,16 @@ class JGraph():
         """
         try:
             curvature = curvature_fn(self.graph)
-            assert len(curvature) == len(self._graph.edges())
+            assert len(curvature) == len(self.graph.edges())
             self._curvature = curvature
-        except len(curvature) != len(self._graph.edges()):
+        except len(curvature) != len(self.graph.edges()):
             print("Invalid Curvature function")
             
     @property
     def diagram(self):
         """Return the persistence diagram based on curvature filtrations
         associated with JMapper graph."""
-        if self._diagram is None:
+        if self._diagram is None: # TODO: Change! diagram is never initialized to none
             try:
                 self.calculate_homology()
             except self.complex == dict():
@@ -102,13 +116,20 @@ class JGraph():
                 )
         return self._diagram
 
+    
+####################################################################################################
+#   
+#   Member Functions
+#    
+####################################################################################################
+    
     def calculate_homology(
         self,
         filter_fn=ollivier_ricci_curvature,
         use_min=True,
     ):
         """Compute Persistent Diagrams based on a curvature
-        filtration of `self._graph`.
+        filtration of `self.graph`.
 
         Parameters
         -----------

@@ -11,9 +11,9 @@ from python_log_indenter import IndentedLoggerAdapter
 
 load_dotenv()
 root = os.getenv("root")
-sys.path.append(root + "logging/")
+sys.path.append(root + "/run_logging/")
 
-from logging.run_log import Run_Log
+#from run_log import Run_Log
 
 
 if __name__ == "__main__":
@@ -64,9 +64,10 @@ if __name__ == "__main__":
     num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection)*len(min_cluster_size) *len(os.listdir(os.path.join(root, projections)))
     
     # Instantiate a Run Log
-    runlog = Run_Log() 
-
-    runlog.log_model_startTime() # Logging Model grid search start time
+    #runlog = Run_Log() 
+    #runlog.start_model_log() 
+    #runlog.set_model_gridSize(num_loops)
+    #runlog.log_model_startTime() 
 
     # Running Grid in Parallel 
     subprocesses = []
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                                 ]
                             )
     
-    runlog.log_model_finishTime() # Logs finish time and sets total run time
+    #runlog.log_model_finishTime() # Logs finish time and sets total run time
     
     # Running processes in Parallel 
     with ProcessPoolExecutor(max_workers=4) as executor:

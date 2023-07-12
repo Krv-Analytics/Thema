@@ -26,7 +26,7 @@ from tupper import Tupper
 
 sys.path.append(root + "logging/")
 
-from logging.run_log import Run_Log
+#from run_log import Run_Log
 
 ########################################################################################################################
 
@@ -37,8 +37,9 @@ if __name__ == "__main__":
     root = os.getenv("root")
 
     # Initalize a runlog Manager 
+    #runlog = Run_Log()
 
-    runlog = Run_Log()
+
 
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
@@ -140,19 +141,21 @@ if __name__ == "__main__":
         n_cubes=n,
         perc_overlap=p,
         hdbscan_params=hdbscan_params,
-        min_intersection=args.min_intersection,
-        verbose=args.Verbose,
+        min_intersection=args.min_intersection
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
-    output = {"mapper": jmapper}
+    output = {"jmapper": jmapper}
     try:
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
-            runlog.log_overPopulatedMapper_EVENT()
+            # Runlog Event Tracking
+            #runlog.log_overPopulatedMapper_EVENT() 
             sys.exit(1)
     except:
-        runlog.log_unkownError_EVENT()
+         # Runlog Event Tracking
+        #runlog.log_unkownError_EVENT()
         sys.exit(1)
+
     rel_outdir = "data/" + params_json["Run_Name"] + f"/models/{num_policy_groups}_policy_groups/"
     output_dir = os.path.join(root, rel_outdir)
     output_file = generate_model_filename(
@@ -180,7 +183,18 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    if len(jmapper.complex) > 0:
+    # Check for error codes from model_generator 
+    if jmapper == -1: 
+        print('hurt')
+        #runlog.log_emptyGraph_EVENT() 
+        # TODO: Write out to a different log the hyperparameter culprits
+    
+    elif jmapper == -2: 
+        print('hurt')
+        #runlog.log_emptyComplex_EVENT() 
+        # TODO: Write out to a different log the hyperparameter culprits
+
+    else:
         with open(output_file, "wb") as handle:
             pickle.dump(
                 output,

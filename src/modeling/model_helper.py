@@ -1,4 +1,4 @@
-"Helper functions for Mapper Policy Models"
+"Helper functions for Mapping Policy Models"
 
 import os
 import sys
@@ -14,14 +14,15 @@ from tupper import Tupper
 from jgraph import JGraph
 from nammu.curvature import ollivier_ricci_curvature
 
+
+
+
 def model_generator(
     tupper,
     n_cubes,
     perc_overlap,
     hdbscan_params,
     min_intersection,
-    verbose=False,
-    # random_seed,
 ):
     """
     Fit a graph model using JMapper.
@@ -53,11 +54,19 @@ def model_generator(
 
     Returns
     -----------
-    j_mapper : <jmapper.JMapper>
-        A jmapper object with precomputed curvature values,
-        connected components, and .
+    jmapper : <jmapper.JMapper>
+        A jmapper object if associated simplicial complex and jgraph is non-empty 
+    --
+   
+    -1: Empty graph error code 
+        The min intersection value resulted in an edgeless graph 
+    
+    --
 
+    -2: Empty simplicial complex error code 
+        The parameters for the kmapper fitting resulted in an empty simplicial complex
     """
+    # 
 
     # HDBSCAN
     min_cluster_size, max_cluster_size = hdbscan_params
@@ -66,32 +75,20 @@ def model_generator(
         max_cluster_size=max_cluster_size,
     )
     # Configure JMapper
-    j_mapper = JMapper(tupper, n_cubes, perc_overlap, clusterer)  
+    jmapper = JMapper(tupper, n_cubes, perc_overlap, clusterer)  
 
-    results = {}
-    if len(j_mapper.complex["links"]) > 0:
-        try:
-            j_mapper.min_intersection = min_intersection
-            j_mapper.jgraph = JGraph(tupper, j_mapper.nodes, min_intersection)
+    if len(jmapper.complex["links"]) > 0:
+        jmapper.min_intersection = min_intersection
+        jmapper.jgraph = JGraph(jmapper.nodes, min_intersection)
             # Compute Curvature and Persistence Diagram
-            j_mapper.jgraph.curvature = ollivier_ricci_curvature
-            j_mapper.jgraph.calculate_homology()
-        except:
-            if verbose:
-                print("Empty Mapper!")
-        return j_mapper
+        if(jmapper.jgraph.is_EdgeLess):  
+            return -1 # Empty Graph error code 
+        else:
+            jmapper.jgraph.curvature = ollivier_ricci_curvature
+            jmapper.jgraph.calculate_homology()
+            return jmapper
     else:
-        if verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------------- \n\n"
-            )
-            print("Empty Simplicial Complex. No file written")
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------------- \n\n"
-            )
-        return results
+        return -2 # Empty Simplicial Complex Code 
 
 
 def generate_model_filename(args, n_neighbors, min_dist, min_intersection):
