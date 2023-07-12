@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "coal-mapper"
+name = "krv_analytics"
 version = "0.1.0"
 description = ""
-authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>"]
+authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>", "stuart.wayland <swayland@ucsc.edu>", "sid.gathrid <sgathrid@yahoo.com>"]
 readme = "README.md"
-packages = [{ include = "coal_mapper" }]
+packages = [{ include = "krv_mapper" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
