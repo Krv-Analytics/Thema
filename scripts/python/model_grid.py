@@ -2,11 +2,19 @@ import json
 import logging
 import os
 import subprocess
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
+
+load_dotenv()
+root = os.getenv("root")
+sys.path.append(root + "logging/")
+
+from logging.run_log import Run_Log
+
 
 if __name__ == "__main__":
 
@@ -55,16 +63,10 @@ if __name__ == "__main__":
     # Number of loops 
     num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection)*len(min_cluster_size) *len(os.listdir(os.path.join(root, projections)))
     
-    runlog_file_contents = {
-            "data_set" : params_json["RunName"],
-            "start_time" : datetime.now(),
-            "finish_time" : -1,
-            "total_runTime": -1,
-            "size_of_grid" : num_loops,
+    # Instantiate a Run Log
+    runlog = Run_Log() 
 
-            # All logging information should be recorded here
-            "num_empty_mappers": 0 
-    }
+    runlog.log_model_startTime() # Logging Model grid search start time
 
     # Running Grid in Parallel 
     subprocesses = []
@@ -90,7 +92,7 @@ if __name__ == "__main__":
                                 ]
                             )
     
-
+    runlog.log_model_finishTime() # Logs finish time and sets total run time
     
     # Running processes in Parallel 
     with ProcessPoolExecutor(max_workers=4) as executor:

@@ -29,7 +29,7 @@ def get_default_runlog_dir():
     return params_json["runlog_dir"]
 
 
-class Grid_RunLog():
+class Run_Log():
     """
     A Class to faciliate the tracking,logging, and display of events for a gridsearch run.
 
@@ -39,6 +39,7 @@ class Grid_RunLog():
 
    projection_runlog
         Path to projector runlog
+    
     model_runlog: 
         Path to the model generator's runlog 
     
@@ -83,8 +84,8 @@ class Grid_RunLog():
 
                 # All model logging information should be set here
                 "num_overPopulated_mappers": 0,
-                "num_empty_mappers": 0 
-
+                "num_empty_mappers": 0,
+                "unknown_errors" : 0
             }
 
             if os.path.isdir(self._runlog_dir):
@@ -105,7 +106,8 @@ class Grid_RunLog():
                 "size_of_grid" : -1,
 
                 # All desired projector logging information should be set here
-
+        
+                "unknown_errors": 0 # TODO: Improve error info 
             }
             
             if os.path.isdir(self._runlog_dir):
@@ -165,4 +167,9 @@ class Grid_RunLog():
     def log_emptyComplex_EVENT(self): 
         model_log = self._open_model_runlog() 
         model_log['num_empty_mappers'] = model_log['num_empty_mappers'] + 1 
+        self._write_model_runlog(model_log)
+    
+    def log_unkownError_EVENT(self): 
+        model_log = self._open_model_runlog() 
+        model_log['unknown_errors'] = model_log['unknown_errors'] + 1 
         self._write_model_runlog(model_log)

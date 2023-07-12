@@ -12,6 +12,7 @@ import json
 from dotenv import load_dotenv
 
 load_dotenv()
+root = os.getenv("root")
 src = os.getenv("src")
 sys.path.append(src + "/modeling/")
 
@@ -23,6 +24,10 @@ from model_helper import (
 )
 from tupper import Tupper
 
+sys.path.append(root + "logging/")
+
+from logging.run_log import Run_Log
+
 ########################################################################################################################
 
 
@@ -30,6 +35,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     root = os.getenv("root")
+
+    # Initalize a runlog Manager 
+
+    runlog = Run_Log()
 
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
@@ -111,12 +120,10 @@ if __name__ == "__main__":
         action="store_true",
         help="If set, will print messages detailing computation and output.",
     )
-
     args = parser.parse_args()
     this = sys.modules[__name__]
     # Initialize a `Tupper`
     tupper = Tupper(args.raw, args.clean, args.projection)
-
     nbors, d, dimension = tupper.get_projection_parameters()
 
     n, p = args.n_cubes, args.perc_overlap
@@ -141,11 +148,10 @@ if __name__ == "__main__":
     try:
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
-            
-            
-            
+            runlog.log_overPopulatedMapper_EVENT()
             sys.exit(1)
     except:
+        runlog.log_unkownError_EVENT()
         sys.exit(1)
     rel_outdir = "data/" + params_json["Run_Name"] + f"/models/{num_policy_groups}_policy_groups/"
     output_dir = os.path.join(root, rel_outdir)
