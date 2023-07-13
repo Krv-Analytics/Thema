@@ -7,26 +7,33 @@ from datetime import datetime
 from os.path import isfile 
 
 
+
+#####################################################################################
+#
+#  Functions to interact with parmater json file 
+#
+#####################################################################################
+
 def get_default_model_log():
     load_dotenv()
     JSON_PATH = os.getenv("params")
     with open(JSON_PATH, "r") as f:
         params_json = json.load(f)
-    return params_json["model_runlog"]
+    return os.getenv("root") + params_json["model_runlog"]
 
 def get_default_projection_log():
     load_dotenv()
     JSON_PATH = os.getenv("params")
     with open(JSON_PATH, "r") as f:
         params_json = json.load(f)
-    return params_json["projection_runlog"]
+    return os.getenv("root")+ params_json["projection_runlog"]
 
 def get_default_runlog_dir():
     load_dotenv()
     JSON_PATH = os.getenv("params")
     with open(JSON_PATH, "r") as f:
         params_json = json.load(f)
-    return params_json["runlog_dir"]
+    return os.getenv("root") + params_json["runlog_dir"]
 
 
 class Run_Log():
@@ -80,24 +87,24 @@ class Run_Log():
     
 ###########################################################################################
 #
-#   Helper Functions 
+#   Member Helper Functions 
 #
 ###########################################################################################
 
     def _open_model_runlog(self):
-        with open(self._model_runlog) as f:
+        with open(self._model_runlog, 'r') as f:
             return json.load(f)
     
     def _open_projection_runlog(self):
-        with open(self._projection_runlog) as f:
+        with open(self._projection_runlog, 'r') as f:
             return json.load(f)
         
     def _write_model_runlog(self, updated_log:dict):
-        with open(self._model_runlog) as f:
+        with open(self._model_runlog, 'w') as f:
             json.dump(updated_log, f)
     
     def _write_projection_runlog(self, updated_log:dict):
-        with open(self._projection_runlog) as f:
+        with open(self._projection_runlog, 'w') as f:
             json.dump(updated_log, f)
 
 ###########################################################################################
@@ -110,8 +117,8 @@ class Run_Log():
              
             model_runlog_contents = {
                 "name" : "Model Grid Run Log",
-                "start_time" : -1,
-                "finish_time" : -1,
+                "startTime" : -1,
+                "finishTime" : -1,
                 "total_runTime": -1,
                 "gridSize" : -1,
 
@@ -139,13 +146,16 @@ class Run_Log():
     
     def log_model_startTime(self): 
         log = self._open_model_runlog() 
-        log['startTime'] = datetime.now()
+        log['startTime'] = str(datetime.now().time())
         self._write_model_runlog(log)
     
     def log_model_finishTime(self): 
         log = self._open_model_runlog() 
-        log['finishTime'] = datetime.now()
-        log['total_runTime'] = log['finishTime'] = log['startTime']
+        start_time = datetime.strptime(log['startTime'], "%Y-%m-%d %H:%M:%S")
+        finish_time = datetime.now()
+        log['finishTime'] = finish_time
+        log['total_runTime'] = finish_time - start_time
+
         self._write_model_runlog(log)
     
 
@@ -181,10 +191,10 @@ class Run_Log():
         if not isfile(self._projection_runlog):
             projection_runlog_contents = {
                 "name": "Projector Run Log",
-                "start_time" : -1,
-                "finish_time" : -1,
+                "startTime" : -1,
+                "finishTime" : -1,
                 "total_runTime": -1,
-                "grid_size" : -1,
+                "gridSize" : -1,
 
                 # All desired projector logging information should be set here
         

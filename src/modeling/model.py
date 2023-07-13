@@ -196,6 +196,8 @@ class Model():
         self._group_identifiers = pg_identifiers
         return self._group_identifiers
 
+    # Moved to Jmapper
+    
     def label_item_by_node(self):
         """Label each item in the data set according to its corresponding
         node in the graph.

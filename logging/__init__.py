@@ -4,6 +4,6 @@ import sys
 from dotenv import load_dotenv
 load_dotenv() 
 root = os.getenv("root")
-sys.path.append(root + "/run_logging/")
+sys.path.append(root + "/logging/")
 
-from run_logging.run_log import Run_Log
+from logging.run_log import Run_Log

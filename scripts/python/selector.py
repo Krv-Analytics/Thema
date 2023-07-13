@@ -71,7 +71,6 @@ if __name__ == "__main__":
         )
 
     # Running processes in Parallel
-    # TODO: optimize based on max_workers
     with ProcessPoolExecutor(max_workers=4) as executor:
         futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
         # Setting Progress bar to track number of completed subprocesses

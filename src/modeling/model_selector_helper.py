@@ -4,7 +4,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from model import Model
+from jmapper import JMapper
 from model_helper import env
 
 # Configure paths
@@ -164,8 +164,10 @@ def get_best_covered_model(models):
 
     coverages = []
     for file in models:
-        model = Model(file)
-        coverages.append(len(model.unclustered_items))
+        with open(file, 'rb') as f:
+            reference = pickle.load(f)
+        jmapper = reference['jmapper']
+        coverages.append(len(jmapper.get_unclustered_items()))
     assert len(coverages) == len(models)
     best_model = models[np.argmin(coverages)]
     return best_model
@@ -194,9 +196,11 @@ def get_viable_models(dir, n: int, coverage_filter: float):
     models = []
     for file in files:
         file = os.path.join(dir, file)
-        model = Model(file)
-        N = len(model.tupper.clean)
-        num_unclustered_items = len(model.unclustered_items)
+        with open(file, 'rb') as f:
+            reference = pickle.load(f)
+        jmapper = reference['jmapper']
+        N = len(jmapper.tupper.clean)
+        num_unclustered_items = len(jmapper.get_unclustered_items())
         if num_unclustered_items / N <= 1 - coverage_filter:
             models.append(file)
     print(

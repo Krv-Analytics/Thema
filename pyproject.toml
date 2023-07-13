@@ -32,6 +32,10 @@ seaborn = "^0.12.2"
 giotto-tda = "^0.6.0"
 hdbscan = "^0.8.29"
 python-log-indenter = "^0.9"
+numba = "^0.57.1"
+tqdm = "^4.65.0"
+umap = "^0.1.1"
+umap-learn = "^0.5.3"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"

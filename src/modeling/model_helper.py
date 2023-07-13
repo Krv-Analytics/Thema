@@ -16,7 +16,6 @@ from nammu.curvature import ollivier_ricci_curvature
 
 
 
-
 def model_generator(
     tupper,
     n_cubes,

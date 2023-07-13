@@ -1,6 +1,7 @@
 import os
 import sys
 
+import pickle
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ modeling = os.path.join(src, "modeling/")
 sys.path.append(modeling)
 
 
-from modeling.model import Model
+from modeling.jmapper import JMapper
 
 
 def topology_metric(
@@ -118,18 +119,18 @@ def get_diagrams(dir, coverage):
         dir
     ), "Please first compute mapper objects using `model_generator.py`"
 
-    # TODO: add a filter here for `unlcustered` plants
     diagrams = {}
     cwd = os.path.dirname(__file__)
     dir = os.path.join(cwd, dir)
     for file in os.listdir(dir):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
-            model = Model(mapper_file)
-            if len(model.unclustered_items) / len(model.tupper.clean) < 1 - coverage:
-                mapper = model.mapper
-                hyper_params = model.hyper_parameters
-                diagrams[hyper_params] = mapper.diagram
+            with open (mapper_file, 'rb') as f:
+                reference = pickle.load(f)
+            jmapper = reference['jmapper']
+            if len(jmapper.get_unclustered_items()) / len(jmapper.tupper.clean) < 1 - coverage:
+                hyper_params = reference['hyperparameters']
+                diagrams[hyper_params] = jmapper.jgraph.diagram
 
     keys = list(diagrams.keys())
     keys.sort()

@@ -93,8 +93,10 @@ class JMapper():
         self._perc_overlap = perc_overlap
         self._clusterer= clusterer
         self._cover = km.Cover(n_cubes, perc_overlap)
-        
+        # self._unclustered_items = None
         self._mapper = KeplerMapper(verbose=verbose)
+        
+        self._unclustered_items = None 
 
         # Compute Simplicial Complex
         try: 
@@ -109,13 +111,12 @@ class JMapper():
             print("You have produced an Empty Simplicial Complex")
             self._complex = -1
             self._nodes == -1
-         
         
-        # These members will be set in model_helper.py for computational 
+        # These members will be set in model_helper and model_selector_helper for computational 
         # efficienty purposes 
 
-        self._min_intersection=None,  
-        
+        self._min_intersection=None
+
 
         
         # Public Member
@@ -192,9 +193,37 @@ class JMapper():
     
 ##################################################################################################
 #  
-#  KeplerMapper Re-Fitting Function
+#  Member Functions 
 #
 ##################################################################################################
+
+    def get_unclustered_items(self):
+        """Returns the list of items that were not clustered in the mapper fitting.
+
+        Returns
+        -------
+        self._unclustered_item : list
+           A list of unclustered item ids
+        """
+        if self._unclustered_items is None: 
+
+            N = len(self.tupper.clean)
+            labels = dict()
+            unclustered_items = []
+            for idx in range(N):
+                place_holder = []
+                for node_id in self._nodes.keys():
+                    if idx in self._nodes[node_id]:
+                        place_holder.append(node_id)
+
+                if len(place_holder) == 0:
+                    place_holder = -1
+                    unclustered_items.append(idx)
+                labels[idx] = place_holder
+
+        self._unclustered_items = unclustered_items
+    
+        return unclustered_items
 
     
     def re_fit(

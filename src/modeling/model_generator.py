@@ -26,7 +26,7 @@ from tupper import Tupper
 
 sys.path.append(root + "logging/")
 
-#from run_log import Run_Log
+from run_log import Run_Log 
 
 ########################################################################################################################
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     root = os.getenv("root")
 
     # Initalize a runlog Manager 
-    #runlog = Run_Log()
+    runlog = Run_Log()
 
 
 
@@ -149,11 +149,11 @@ if __name__ == "__main__":
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
             # Runlog Event Tracking
-            #runlog.log_overPopulatedMapper_EVENT() 
+            runlog.log_overPopulatedMapper_EVENT() 
             sys.exit(1)
     except:
          # Runlog Event Tracking
-        #runlog.log_unkownError_EVENT()
+        runlog.log_unkownError_EVENT()
         sys.exit(1)
 
     rel_outdir = "data/" + params_json["Run_Name"] + f"/models/{num_policy_groups}_policy_groups/"
@@ -185,14 +185,12 @@ if __name__ == "__main__":
 
     # Check for error codes from model_generator 
     if jmapper == -1: 
-        print('hurt')
-        #runlog.log_emptyGraph_EVENT() 
-        # TODO: Write out to a different log the hyperparameter culprits
+        runlog.log_emptyGraph_EVENT() 
+        # TODO: Write out the hyperparameter culprits
     
     elif jmapper == -2: 
-        print('hurt')
-        #runlog.log_emptyComplex_EVENT() 
-        # TODO: Write out to a different log the hyperparameter culprits
+        runlog.log_emptyComplex_EVENT() 
+        # TODO: Write out the hyperparameter culprits
 
     else:
         with open(output_file, "wb") as handle:
