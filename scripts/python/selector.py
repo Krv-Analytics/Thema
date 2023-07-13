@@ -14,9 +14,9 @@ from tqdm import tqdm
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "modeling/")
+sys.path.append(src + "jmapping/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir
+from jmapping.jmap_selector_helper import unpack_policy_group_dir
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(message)s", level=logging.INFO)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/models/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):
@@ -39,17 +39,17 @@ if __name__ == "__main__":
         group_ranks.append(i)
 
     # Metric Generator Configuratiosn
-    model_selector = os.path.join(src, "modeling/model_selector.py")
-    model_clusterer = os.path.join(src, "tuning/graph_clustering/model_clusterer.py")
+    jmap_selector = os.path.join(src, "jmapping/jmap_selector.py")
+    jmap_clusterer = os.path.join(src, "tuning/graph_clustering/jmap_clusterer.py")
     coverage = params_json["coverage_filter"]
 
     # LOGGING
-    log.info("Selecting Models!")
+    log.info("Selecting jmaps!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
     log.info(f"Policy Groups in consideration: {group_ranks}")
-    log.info(f"Model Coverage Filter: {coverage}")
+    log.info(f"jmap Coverage Filter: {coverage}")
     log.info(
         "--------------------------------------------------------------------------------"
     )
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         subprocesses.append(
             [
                 "python",
-                f"{model_selector}",
+                f"{jmap_selector}",
                 f"-n{i}",
                 f"-f{coverage}",
             ]

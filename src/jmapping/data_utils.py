@@ -1,3 +1,5 @@
+"Helper Functions for data analysis in JBottle"
+
 
 def convert_keys_to_alphabet(dictionary):
     base = 26  # Number of letters in the alphabet

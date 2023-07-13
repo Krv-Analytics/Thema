@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-import modeling as md
+import jmapping as md
 
 import pickle
 import pandas as pd

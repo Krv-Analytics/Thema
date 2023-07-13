@@ -1,4 +1,4 @@
-# test_model_helper.py
+# test_jmap_helper.py
 
 # Description: 
 #   Testing functionality of src/modeling/model_selector_helper.py 
@@ -25,8 +25,8 @@ path_to_src = os.getenv("src")
 sys.path.append(path_to_src)
 sys.path.append(path_to_src + "/modeling/")
 
-import modeling as md
-from modeling.model_selector_helper import (
+import jmapping as md
+from jmapping.jmap_selector_helper import (
     read_graph_clustering,
     select_models,
     plot_mapper_histogram,

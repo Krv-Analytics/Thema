@@ -23,7 +23,7 @@ root = os.getenv("root")
 sys.path.append(path_to_src)
 
 
-import modeling as md
+import jmapping as md
 
 
 ###############################################################################################################################

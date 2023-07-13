@@ -1,4 +1,4 @@
-"Helper functions for Mapping Policy Models"
+"Helper functions for Mapping Policy jmaps"
 
 import os
 import sys
@@ -16,7 +16,7 @@ from nammu.curvature import ollivier_ricci_curvature
 
 
 
-def model_generator(
+def jmap_generator(
     tupper,
     n_cubes,
     perc_overlap,
@@ -24,7 +24,7 @@ def model_generator(
     min_intersection,
 ):
     """
-    Fit a graph model using JMapper.
+    Fit a graph jmap using JMapper.
 
     Parameters
     -----------
@@ -90,14 +90,14 @@ def model_generator(
         return -2 # Empty Simplicial Complex Code 
 
 
-def generate_model_filename(args, n_neighbors, min_dist, min_intersection):
+def generate_jmap_filename(args, n_neighbors, min_dist, min_intersection):
     """Generate output filename string from CLI arguments.
-    A helper function for the `model_generator` script.
+    A helper function for the `jmap_generator` script.
 
     Parameters
     -----------
     args: argparse.ArgumentParser
-        CLI arguments from the `model_generator` script.
+        CLI arguments from the `jmap_generator` script.
 
     n_neighbors: int
         Number of neighbors used in the UMAP projection used
@@ -217,14 +217,14 @@ def config_plot_data(tupper: Tupper):
     labels = list(numeric_data.columns)
     return numeric_data, labels
 
-def _define_zscore_df(model):
+def _define_zscore_df(jmap):
     df_builder = pd.DataFrame()
-    dfs = model.tupper.clean
+    dfs = jmap.tupper.clean
 
     column_to_drop = [col for col in dfs.columns if dfs[col].nunique() == 1]
     dfs = dfs.drop(column_to_drop, axis=1)
 
-    dfs['cluster_IDs']=(list(model.cluster_ids))
+    dfs['cluster_IDs']=(list(jmap.cluster_ids))
 
     #loop through all policy group dataframes
     for group in list(dfs['cluster_IDs'].unique()):
@@ -356,7 +356,7 @@ def env():
     src = os.getenv("src")
     sys.path.append(root)
     sys.path.append(src)
-    sys.path.append(src + "modeling/")
+    sys.path.append(src + "jmapping/")
     return root
 
 
@@ -368,3 +368,4 @@ def script_paths(paths):
         abs_path = os.path.join(scripts_dir, rel_path)
         new_paths.append(abs_path)
     return new_paths
+

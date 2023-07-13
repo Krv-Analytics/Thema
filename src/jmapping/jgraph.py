@@ -53,7 +53,7 @@ class JGraph():
 
         self._components = dict(
             [
-                (self.graph.subgraph(c).copy(), i)
+                (i, self.graph.subgraph(c).copy())
                 for i, c in enumerate(nx.connected_components(self.graph))
             ]
         )
@@ -145,7 +145,7 @@ class JGraph():
 
         Returns
         -----------
-        persistence_diagram: src.modeling.nammu.topology.PersistenceDiagram
+        persistence_diagram: src.jmapping.nammu.topology.PersistenceDiagram
             An array of tuples (b,d) that represent the birth and death of
             homological features in your graph according to the provided
             filtration function.

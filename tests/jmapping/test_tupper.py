@@ -1,7 +1,7 @@
 # test_tupper.py 
 # 
 # Description: 
-#   Testing functionality of src/modeling/tupper.py  
+#   Testing functionality of src/jmapping/tupper.py  
 
 
 
@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 ###############################################################################################################################
 #
-# Loading file paths to import modeling/jmapper functionality 
+# Loading file paths to importing jmapping/jmapper functionality 
 #
 
 
@@ -28,7 +28,7 @@ root = os.getenv("root")
 sys.path.append(path_to_src)
 
 
-import modeling as md
+import jmapping as md
 
 ################################################################################################################################
 # 

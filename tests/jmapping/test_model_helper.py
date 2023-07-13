@@ -1,7 +1,7 @@
-# test_model_helper.py
+# test_jmap_helper.py
 
 # Description: 
-#   Testing functionality of src/modeling/model_helper.py 
+#   Testing functionality of src/jmapping/jmap_helper.py 
 
 import pytest
 import tempfile
@@ -22,18 +22,18 @@ from dotenv import load_dotenv
 
 # ##############################################################################################################################
 #
-# Loading file paths to import modeling functionality 
+# Loading file paths to import jmapping functionality 
 #
 
 load_dotenv()
 path_to_src = os.getenv("src")
 sys.path.append(path_to_src)
-sys.path.append(path_to_src + "/modeling/")
+sys.path.append(path_to_src + "/jmapping/")
 
-import modeling as md
-from modeling.model_helper import (
-    generate_model_filename,
-    model_generator,
+import jmapping as md
+from jmapping.jmap_helper import (
+    generate_jmap_filename,
+    jmap_generator,
     env,
     script_paths,
 )
@@ -45,7 +45,7 @@ from modeling.model_helper import (
 #       1) Edge case handling for HDBSCAN and min_intersection
 #       2) Testing Correctness of file name generation 
 #       3) Testing correctness of min standard deviation 
-#       4) Test model_generator.py script 
+#       4) Test jmap_generator.py script 
 #
 ################################################################################################################################
 
@@ -61,12 +61,12 @@ from modeling.model_helper import (
 ################################################################################################################################
 
 
-class TestModel_helper: 
+class Testjmap_helper: 
 
-    def test_model_generator(self):
+    def test_jmap_generator(self):
         # STUB!
         assert 1 == 1 
-    def test_generate_model_filename(self): 
+    def test_generate_jmap_filename(self): 
         # STUB! 
         assert 1 == 1
     def test_mapper_plot_outfile(self):
@@ -75,7 +75,7 @@ class TestModel_helper:
     def test_get_minimal_std(self): 
         # STUB! 
         assert 1 == 1
-    def test_model_generator_script(self):
+    def test_jmap_generator_script(self):
         # STUB! 
         assert 1==1 
 

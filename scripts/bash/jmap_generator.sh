@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MODEL GRID SEARCH
+# jmap GRID SEARCH
 
 #Run from root/scripts/
 
@@ -24,6 +24,6 @@ if [ -n "$JSON_PATH" ]; then
     eval "$params" 
 fi
 
-poetry run python ../python/model_grid.py
+poetry run python ../python/jmap_grid.py
 echo -e
 exit 0

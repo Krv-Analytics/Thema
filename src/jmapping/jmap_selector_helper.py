@@ -5,27 +5,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from jmapper import JMapper
-from model_helper import env
+from jmap_helper import env
 
 # Configure paths
 root = env()
 
 
-def select_models(dir, keys, clustering, n):
+def select_jmaps(dir, keys, clustering, n):
     """
-    Choose the best covered model from a set of equivalency classes.
+    Choose the best covered jmap from a set of equivalency classes.
     These equivalency classes are based on an Agglomerative clustering
-    of graphs (models) using a curvature filtration metric.
+    of graphs (jmaps) using a curvature filtration metric.
 
-    This function will return a single model for each equivalency class.
+    This function will return a single jmap for each equivalency class.
 
     Parameters:
     -----------
     keys: np.ndarray
-        An array of keys used to fit the clustering model.
+        An array of keys used to fit the clustering jmap.
 
     clustering: sklearn.cluster.DBSCAN
-        A clustering model object.
+        A clustering jmap object.
 
     n: int
         The number of policy groups.
@@ -33,29 +33,29 @@ def select_models(dir, keys, clustering, n):
     Returns:
     --------
     selection: list
-        A list of saved model file locations.
+        A list of saved jmap file locations.
     """
     subgroups = get_clustering_subgroups(dir, keys, clustering, n)
     selection = {}
     for key in subgroups.keys():
         subgroup = subgroups[key]
-        best_model = get_best_covered_model(subgroup)
-        selection[key] = {"model": best_model, "cluster_size": len(subgroup)}
+        best_jmap = get_best_covered_jmap(subgroup)
+        selection[key] = {"jmap": best_jmap, "cluster_size": len(subgroup)}
     return selection
 
 
 def read_graph_clustering(dir, metric, n):
     """
-    Reads in a pre-generated agglomerative clustering model of graphs
+    Reads in a pre-generated agglomerative clustering jmap of graphs
     and returns the relevant data.
 
     Parameters:
     -----------
     metric: str
-        The metric used in the clustering model.
+        The metric used in the clustering jmap.
 
     n: int
-        The number of policy groups in the graph clustering model.
+        The number of policy groups in the graph clustering jmap.
 
     Returns:
     --------
@@ -63,17 +63,17 @@ def read_graph_clustering(dir, metric, n):
         An array of identifiers for the graphs.
 
     clustering: sklearn.cluster.AgglomerativeClustering
-        Hierarchical clustering model fitted to graphs.
+        Hierarchical clustering jmap fitted to graphs.
 
     distance_threshold: float
-        The distance threshold used in the clustering model to
+        The distance threshold used in the clustering jmap to
         determine labels (i.e. equivalency classes).
     """
-    # dir = os.path.join(root, f"data/model_analysis/graph_clustering/{n}_policy_groups/")
+    # dir = os.path.join(root, f"data/jmap_analysis/graph_clustering/{n}_policy_groups/")
     assert os.path.isdir(
         dir
-    ), f"No model clustering model yet for {n} policy groups! Please run `model_clusterer.py -n {n}` first."
-    file = os.path.join(dir, f"curvature_{metric}_clustering_model.pkl")
+    ), f"No jmap clustering jmap yet for {n} policy groups! Please run `jmap_clusterer.py -n {n}` first."
+    file = os.path.join(dir, f"curvature_{metric}_clustering_jmap.pkl")
 
     assert os.path.isfile(file)
     with open(file, "rb") as f:
@@ -81,19 +81,19 @@ def read_graph_clustering(dir, metric, n):
 
     return (
         np.array(reference["keys"]),
-        reference["model"],
+        reference["jmap"],
         reference["distance_threshold"],
     )
 
 
-def get_model_file(dir, key, n):
+def get_jmap_file(dir, key, n):
     """
-    Returns the file location of a saved model with the given keys.
+    Returns the file location of a saved jmap with the given keys.
 
     Parameters:
     -----------
     key: tuple
-        A tuple of keys that identify a specific model.
+        A tuple of keys that identify a specific jmap.
 
     n: int
         The number of policy groups.
@@ -101,29 +101,29 @@ def get_model_file(dir, key, n):
     Returns:
     --------
     file: str
-        The file location of the saved model.
+        The file location of the saved jmap.
     """
     # Unpack key
     n_cubes, p, n_neighbors, min_dist, hdbscan_params, min_intersection = key
-    # dir = os.path.join(root, f"data/models/{n}_policy_groups/")
+    # dir = os.path.join(root, f"data/jmaps/{n}_policy_groups/")
     file = f"mapper_ncubes{n_cubes}_{int(p*100)}perc_hdbscan{hdbscan_params[0]}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
     file = os.path.join(dir, file)
-    assert os.path.isfile(file), f"No saved model with these keys: {key}"
+    assert os.path.isfile(file), f"No saved jmap with these keys: {key}"
     return file
 
 
 def get_clustering_subgroups(dir, keys, clustering, n):
     """
     Returns a dictionary of subgroups for a graph clustering along
-    with the corresponding model identifiers (keys).
+    with the corresponding jmap identifiers (keys).
 
     Parameters:
     -----------
     keys: np.ndarray
-        An array of keys used to fit the clustering model.
+        An array of keys used to fit the clustering jmap.
 
     clustering: sklearn.cluster.AgglomerativeClustering
-        Hierarchical clustering model fitted to graphs.
+        Hierarchical clustering jmap fitted to graphs.
 
     n: int
         The number of policy groups.
@@ -132,7 +132,7 @@ def get_clustering_subgroups(dir, keys, clustering, n):
     --------
     subgroups: dict
         A dictionary of subgroups: keys are subgroup labels
-        and values are a list of models in each subgroup.
+        and values are a list of jmaps in each subgroup.
     """
     labels = clustering.labels_
     subgroups = {}
@@ -141,41 +141,41 @@ def get_clustering_subgroups(dir, keys, clustering, n):
         subkeys = keys[mask]
         files = []
         for key in subkeys:
-            files.append(get_model_file(dir, key, n))
+            files.append(get_jmap_file(dir, key, n))
         subgroups[label] = files
 
     return subgroups
 
 
-def get_best_covered_model(models):
+def get_best_covered_jmap(jmaps):
     """
-    Returns the saved model with the highest coverage percentage.
+    Returns the saved jmap with the highest coverage percentage.
 
     Parameters:
     -----------
-    models: list
-        A list of saved model file locations.
+    jmaps: list
+        A list of saved jmap file locations.
 
     Returns:
     --------
-    best_model: str
-        The file location of the saved model with the highest coverage percentage.
+    best_jmap: str
+        The file location of the saved jmap with the highest coverage percentage.
     """
 
     coverages = []
-    for file in models:
+    for file in jmaps:
         with open(file, 'rb') as f:
             reference = pickle.load(f)
         jmapper = reference['jmapper']
         coverages.append(len(jmapper.get_unclustered_items()))
-    assert len(coverages) == len(models)
-    best_model = models[np.argmin(coverages)]
-    return best_model
+    assert len(coverages) == len(jmaps)
+    best_jmap = jmaps[np.argmin(coverages)]
+    return best_jmap
 
 
-def get_viable_models(dir, n: int, coverage_filter: float):
+def get_viable_jmaps(dir, n: int, coverage_filter: float):
     """
-    Returns a list of saved models that have at least the specified coverage percentage.
+    Returns a list of saved jmaps that have at least the specified coverage percentage.
 
     Parameters:
     -----------
@@ -183,17 +183,17 @@ def get_viable_models(dir, n: int, coverage_filter: float):
         The number of policy groups.
 
     coverage_filter: float
-        The minimum coverage percentage required for a model to be considered viable.
+        The minimum coverage percentage required for a jmap to be considered viable.
 
     Returns:
     --------
-    models: list
-        A list of saved model file locations that meet the specified coverage percentage.
+    jmaps: list
+        A list of saved jmap file locations that meet the specified coverage percentage.
     """
 
     dir = os.path.join(root, dir)
     files = os.listdir(dir)
-    models = []
+    jmaps = []
     for file in files:
         file = os.path.join(dir, file)
         with open(file, 'rb') as f:
@@ -202,11 +202,11 @@ def get_viable_models(dir, n: int, coverage_filter: float):
         N = len(jmapper.tupper.clean)
         num_unclustered_items = len(jmapper.get_unclustered_items())
         if num_unclustered_items / N <= 1 - coverage_filter:
-            models.append(file)
+            jmaps.append(file)
     print(
-        f"{n}_policy_groups: {np.round(len(models)/len(files)*100,1)}% of models had at least {coverage_filter*100}% coverage."
+        f"{n}_policy_groups: {np.round(len(jmaps)/len(files)*100,1)}% of jmaps had at least {coverage_filter*100}% coverage."
     )
-    return models
+    return jmaps
 
 
 def unpack_policy_group_dir(folder):
@@ -216,7 +216,7 @@ def unpack_policy_group_dir(folder):
     Parameters:
     -----------
     folder: str
-        The name of a folder containing models for a certain number of policy groups.
+        The name of a folder containing jmaps for a certain number of policy groups.
 
     Returns:
     --------

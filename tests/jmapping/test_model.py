@@ -1,7 +1,7 @@
-# test_model.py
+# test_jmap.py
 # 
 # Description: 
-#   Testing functionality of src/modeling/model.py  
+#   Testing functionality of src/jmapping/model.py  
 
 
 import pytest
@@ -33,8 +33,8 @@ path_to_src = os.getenv("src")
 sys.path.append(path_to_src)
 sys.path.append(path_to_src + "/modeling/")
 
-import modeling as md
-from modeling import nammu
+import jmapping as md
+from jmapping import nammu
 
 ################################################################################################################################
 #

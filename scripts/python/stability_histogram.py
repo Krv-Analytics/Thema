@@ -12,9 +12,9 @@ from python_log_indenter import IndentedLoggerAdapter
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "modeling/")
+sys.path.append(src + "jmapping/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir, get_viable_models
+from jmapping.jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
 from curvature_histogram import plot_curvature_histogram
 
 
@@ -22,20 +22,20 @@ def plot_histogram(root, coverage_filter):
 
     dir = "data/" + params_json["Run_Name"] + "/"
     dir = os.path.join(root, dir)
-    model_dir = os.path.join(dir, "models/")
+    jmap_dir = os.path.join(dir, "jmaps/")
     metric_files = os.path.join(
         root,
         "data/"
         + params_json["Run_Name"]
-        + f"/model_analysis/distance_matrices/{coverage}_coverage/",
+        + f"/jmap_analysis/distance_matrices/{coverage}_coverage/",
     )
 
-    num_models = {}
-    for folder in os.listdir(model_dir):
+    num_jmaps = {}
+    for folder in os.listdir(jmap_dir):
         i = unpack_policy_group_dir(folder)
-        folder = os.path.join(model_dir, folder)
-        models = get_viable_models(folder, i, coverage_filter=coverage_filter)
-        num_models[i] = len(models)
+        folder = os.path.join(jmap_dir, folder)
+        jmaps = get_viable_jmaps(folder, i, coverage_filter=coverage_filter)
+        num_jmaps[i] = len(jmaps)
 
     num_curvature_profiles = {}
     assert os.path.isdir(metric_files), "Not a valid directory"
@@ -56,7 +56,7 @@ def plot_histogram(root, coverage_filter):
             num_curvature_profiles[i] = max(holder)
     stability_ratio = {}
     for key in num_curvature_profiles.keys():
-        stability_ratio[key] = num_models[key] / num_curvature_profiles[key]
+        stability_ratio[key] = num_jmaps[key] / num_curvature_profiles[key]
     fig, ax = plt.subplots(1, 1, sharex=True, sharey=True, figsize=(15, 20))
     fig.suptitle(f"{coverage*100}% Coverage Filter")
     sns.barplot(
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/models/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         "--------------------------------------------------------------------------------"
     )
     log.info(f"Policy Groups in consideration: {group_ranks}")
-    log.info(f"Model Coverage Filter: {coverage}")
+    log.info(f"jmap Coverage Filter: {coverage}")
     log.info(
         "--------------------------------------------------------------------------------"
     )

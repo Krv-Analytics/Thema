@@ -1,7 +1,7 @@
 # test_jmapper.py 
 # 
 # Description: 
-#   Testing functionality of src/modeling/jmapper.py  
+#   Testing functionality of src/jmapping/jmapper.py  
 
 import pytest
 import tempfile
@@ -23,15 +23,15 @@ from dotenv import load_dotenv
 
 # ##############################################################################################################################
 #
-# Loading file paths to import modeling/jmapper functionality 
+# Loading file paths to import jmapping/jmapper functionality 
 #
 load_dotenv()
 path_to_src = os.getenv("src")
 sys.path.append(path_to_src)
-sys.path.append(path_to_src + "/modeling/")
+sys.path.append(path_to_src + "/jmapping/")
 
-import modeling as md
-from modeling import nammu 
+import jmapping as md
+from jmapping import nammu 
 
 ################################################################################################################################
 #

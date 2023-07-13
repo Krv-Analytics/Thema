@@ -18,9 +18,9 @@ warnings.simplefilter("ignore")
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "modeling/")
+sys.path.append(src + "jmapping/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir
+from jmapping.jmap_selector_helper import unpack_policy_group_dir
 
 if __name__ == "__main__":
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/models/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):
@@ -44,16 +44,16 @@ if __name__ == "__main__":
         group_ranks.append(i)
 
     # Metric Generator Configuratiosn
-    model_clusterer = os.path.join(src, "tuning/graph_clustering/model_clusterer.py")
+    jmap_clusterer = os.path.join(src, "tuning/graph_clustering/jmap_clusterer.py")
     coverage = params_json["coverage_filter"]
 
     # LOGGING
-    log.info("Clustering Graph Models!")
+    log.info("Clustering Graph jmaps!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
     log.info(f"Policy Groups in consideration: {group_ranks}")
-    log.info(f"Model Coverage Filter: {coverage}")
+    log.info(f"jmap Coverage Filter: {coverage}")
     log.info(
         "--------------------------------------------------------------------------------"
     )
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         subprocesses.append(
             [
                 "python",
-                f"{model_clusterer}",
+                f"{jmap_clusterer}",
                 f"-n{i}",
                 "-s",
             ]

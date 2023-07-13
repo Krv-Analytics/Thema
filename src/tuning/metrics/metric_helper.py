@@ -12,11 +12,11 @@ src = os.getenv("src")
 root = os.getenv("root")
 sys.path.append(src)
 
-modeling = os.path.join(src, "modeling/")
-sys.path.append(modeling)
+jmapping = os.path.join(src, "jmapping/")
+sys.path.append(jmapping)
 
 
-from modeling.jmapper import JMapper
+from jmapping.jmapper import JMapper
 
 
 def topology_metric(
@@ -30,7 +30,7 @@ def topology_metric(
     Parameters:
     -----------
     files : str
-        The directory containing the graph models to use.
+        The directory containing the graph jmaps to use.
     metric : str, optional
         The distance metric to use for computing the pairwise distances
         between diagrams. Default is "bottleneck".
@@ -53,12 +53,12 @@ def topology_metric(
     all_distances = distance_metric.transform(curvature_dgms)
 
     keys = np.array(list(diagrams.keys()), dtype=object)
-    trimmed_keys, trimmed_distances = collapse_equivalent_models(keys, all_distances)
+    trimmed_keys, trimmed_distances = collapse_equivalent_jmaps(keys, all_distances)
 
     return trimmed_keys, trimmed_distances
 
 
-def collapse_equivalent_models(keys, distance_matrix):
+def collapse_equivalent_jmaps(keys, distance_matrix):
     """
     Collapse diagrams with identical curvature profiles
     into a single representative diagram.
@@ -95,14 +95,14 @@ def collapse_equivalent_models(keys, distance_matrix):
 
 def get_diagrams(dir, coverage):
     """
-    Load the persistence diagrams from fitted models
+    Load the persistence diagrams from fitted jmaps
     and return them as a dictionary. This function only
-    returns diagrams for models that satisfy the coverage constraint.
+    returns diagrams for jmaps that satisfy the coverage constraint.
 
     Parameters:
     -----------
     dir : str
-        The directory containing the models,
+        The directory containing the jmaps,
         from which diagrams can be extracted.
     coverage : float
         The minimum proportion of items in a mapper cluster required
@@ -117,7 +117,7 @@ def get_diagrams(dir, coverage):
 
     assert os.path.isdir(
         dir
-    ), "Please first compute mapper objects using `model_generator.py`"
+    ), "Please first compute mapper objects using `jmap_generator.py`"
 
     diagrams = {}
     cwd = os.path.dirname(__file__)

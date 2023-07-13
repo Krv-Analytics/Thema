@@ -15,22 +15,22 @@ from tqdm import tqdm
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "modeling/")
+sys.path.append(src + "jmapping/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir, get_viable_models
+from jmapping.jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
 
 
 def plot_mapper_histogram(dir, coverage_filter=0.8):
     """
-    Plots a histogram of the number of viable models for each rank
-    of policy groupings. This function will count the models
+    Plots a histogram of the number of viable jmappers for each rank
+    of policy groupings. This function will count the jmappers
     (per `num_policy_groups`) that have been generated
     according to a hyperparameter grid search.
 
     Parameters:
     -----------
     coverage_filter: float
-        The minimum coverage percentage required for a model
+        The minimum coverage percentage required for a jmap
         to be considered viable.
 
     Returns:
@@ -45,9 +45,9 @@ def plot_mapper_histogram(dir, coverage_filter=0.8):
     counts = {}
     for folder in policy_groups:
         n = unpack_policy_group_dir(folder)
-        path_to_models = dir + folder
-        models = get_viable_models(path_to_models, n, coverage_filter)
-        counts[n] = len(models)
+        path_to_jmaps = dir + folder
+        jmaps = get_viable_jmaps(path_to_jmaps, n, coverage_filter)
+        counts[n] = len(jmaps)
     keys = list(counts.keys())
     keys.sort()
     sorted_counts = {i: counts[i] for i in keys}
@@ -57,7 +57,7 @@ def plot_mapper_histogram(dir, coverage_filter=0.8):
         x=list(sorted_counts.keys()),
         y=list(sorted_counts.values()),
     )
-    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Viable Models")
+    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Viable jmaps")
     ax.set_title(f"{coverage*100} % Coverage Filter")
     plt.show()
     return fig
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/models/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmappers/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):
@@ -88,12 +88,12 @@ if __name__ == "__main__":
     coverage = params_json["coverage_filter"]
 
     # LOGGING
-    log.info("Computing Model Histogram!")
+    log.info("Computing jmap Histogram!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
     log.info(f"Policy Groups in consideration: {group_ranks}")
-    log.info(f"Model Coverage Filter: {coverage}")
+    log.info(f"jmap Coverage Filter: {coverage}")
     log.info(
         "--------------------------------------------------------------------------------"
     )

@@ -1,4 +1,4 @@
-"Select models for analysis from structural equivalency classes of Graph Models based on best coverage."
+"Select jmaps for analysis from structural equivalency classes of Graph jmaps based on best coverage."
 
 
 import argparse
@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 import json
 import numpy as np
 
-from model_selector_helper import (
+from jmap_selector_helper import (
     read_graph_clustering,
-    select_models,
+    select_jmaps,
 )
 
 load_dotenv()
@@ -34,7 +34,7 @@ if __name__ == "__main__":
         "--metric",
         type=str,
         default=params_json["dendrogram_metric"],
-        help="Select metric that defines the precomputed agglomerative clustering model.",
+        help="Select metric that defines the precomputed agglomerative clustering jmap.",
     )
 
     parser.add_argument(
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         "--coverage_filter",
         type=float,
         default=params_json["coverage_filter"],
-        help="A minimum model coverage for visualizing a histogram. Only set when using '-H' tag as well.",
+        help="A minimum jmap coverage for visualizing a histogram. Only set when using '-H' tag as well.",
     )
 
     parser.add_argument(
@@ -67,15 +67,15 @@ if __name__ == "__main__":
     # Read in Keys and distances from pickle file
     n = args.num_groups
     coverage = params_json["coverage_filter"]
-    models_dir = "data/" + params_json["Run_Name"] + f"/models/"
+    jmaps_dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
 
-    # Choose ~best~ models from curvature equivalency classes.
-    # Current implementation chooses Model with the best coverage.
+    # Choose ~best~ jmaps from curvature equivalency classes.
+    # Current implementation chooses jmap with the best coverage.
 
     rel_cluster_dir = (
         "data/"
         + params_json["Run_Name"]
-        + f"/model_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
+        + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
     )
     cluster_dir = os.path.join(root, rel_cluster_dir)
     try:
@@ -83,33 +83,33 @@ if __name__ == "__main__":
             cluster_dir, metric=args.metric, n=n
         )
 
-        rel_model_dir = (
-            "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+        rel_jmap_dir = (
+            "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
         )
-        model_dir = os.path.join(root, rel_model_dir)
-        selection = select_models(model_dir, keys, clustering, n)
+        jmap_dir = os.path.join(root, rel_jmap_dir)
+        selection = select_jmaps(jmap_dir, keys, clustering, n)
 
-        model_file = (
+        jmap_file = (
             f"equivalence_class_candidates_{args.metric}_{distance_threshold}DT.pkl"
         )
 
-        out_dir_message1 = f"{model_file} successfully written."
+        out_dir_message1 = f"{jmap_file} successfully written."
 
         output_dir1 = (
             "data/"
             + params_json["Run_Name"]
-            + f"/model_analysis/token_models/{coverage}_coverage/{n}_policy_groups/"
+            + f"/jmap_analysis/token_jmaps/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir1 = os.path.join(root, output_dir1)
         # Check if output directory already exists
         if os.path.isdir(output_dir1):
-            model_file = os.path.join(output_dir1, model_file)
+            jmap_file = os.path.join(output_dir1, jmap_file)
 
         else:
             os.makedirs(output_dir1, exist_ok=True)
-            model_file = os.path.join(output_dir1, model_file)
-        # Writing Selected Models
-        with open(model_file, "wb") as handle:
+            jmap_file = os.path.join(output_dir1, jmap_file)
+        # Writing Selected jmaps
+        with open(jmap_file, "wb") as handle:
             pickle.dump(selection, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Stability Selection
@@ -118,36 +118,36 @@ if __name__ == "__main__":
             cluster_sizes.append(selection[key]["cluster_size"])
 
         stable_cluster = np.argmax(cluster_sizes)
-        stable_model = selection[stable_cluster]["model"]
+        stable_jmap = selection[stable_cluster]["jmap"]
 
         output_dir2 = (
-            "data/" + params_json["Run_Name"] + f"/final_models/{coverage}_coverage/"
+            "data/" + params_json["Run_Name"] + f"/final_jmaps/{coverage}_coverage/"
         )
         output_dir2 = os.path.join(root, output_dir2)
-        stable_model_file = f"{n}_policy_group_model.pkl"
-        out_dir_message2 = f"{stable_model_file} successfully written."
+        stable_jmap_file = f"{n}_policy_group_jmap.pkl"
+        out_dir_message2 = f"{stable_jmap_file} successfully written."
 
         # Check if output directory already exists
         if os.path.isdir(output_dir2):
-            stable_model_file = os.path.join(output_dir2, stable_model_file)
+            stable_jmap_file = os.path.join(output_dir2, stable_jmap_file)
 
         else:
             os.makedirs(output_dir2, exist_ok=True)
-            stable_model_file = os.path.join(output_dir2, stable_model_file)
-        # Writing Selected Models
-        with open(stable_model_file, "wb") as handle:
-            with open(stable_model, "rb") as f:
-                model = pickle.load(f)
-            pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            stable_jmap_file = os.path.join(output_dir2, stable_jmap_file)
+        # Writing Selected jmaps
+        with open(stable_jmap_file, "wb") as handle:
+            with open(stable_jmap, "rb") as f:
+                jmap = pickle.load(f)
+            pickle.dump(jmap, handle, protocol=pickle.HIGHEST_PROTOCOL)
         if args.Verbose:
             print("\n")
             print(
                 "-------------------------------------------------------------------------------- \n\n"
             )
-            print(f"Model Selection based on Stability and Coverage complete!")
+            print(f"jmap Selection based on Stability and Coverage complete!")
             print()
-            print(f"Token Models written to: \n {out_dir_message1}")
-            print(f"Final Model written to: \n {out_dir_message2}")
+            print(f"Token jmaps written to: \n {out_dir_message1}")
+            print(f"Final jmap written to: \n {out_dir_message2}")
 
             print(
                 "\n\n -------------------------------------------------------------------------------- "

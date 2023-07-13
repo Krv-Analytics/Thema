@@ -5,7 +5,7 @@ PARAMS_JSON := $(shell cat $(PARAMS_FILE))
 RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
 
-all: process-data projections models model-selection 
+all: process-data projections jmaps jmap-selection 
 	@echo "Process complete"
 
 install: check-poetry 
@@ -39,11 +39,11 @@ projections:
 summarize-projections:
 	poetry run python src/summarizing/projection_summarizer.py
 
-models: 
-	cd scripts/bash && ./model_generator.sh 
+jmaps: 
+	cd scripts/bash && ./jmap_generator.sh 
 
-model-histogram:
-	cd scripts/python && poetry run python model_histogram.py
+jmap-histogram:
+	cd scripts/python && poetry run python jmap_histogram.py
 
 curvature-distances:
 	cd scripts/python && poetry run python curvature_distance_generator.py
@@ -57,17 +57,17 @@ stability-histogram:
 dendrogram:
 	cd scripts/bash && ./dendrogram.sh
 
-model-clustering: curvature-distances
+jmap-clustering: curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
-model-selection: model-clustering
+jmap-selection: jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
 
 
 # Cleaning commands for data fields 
 
-clean: clean-processed-data clean-projections clean-models clean-model-analysis clean-final-models
+clean: clean-processed-data clean-projections clean-jmaps clean-jmap-analysis clean-final-jmaps
 	rm -f -r data/$(RUN_NAME)/
 
 clean-processed-data: 
@@ -76,14 +76,14 @@ clean-processed-data:
 clean-projections:
 	rm -f -r data/${RUN_NAME}/projections/*
 
-clean-models:
-	rm -f -r data/${RUN_NAME}/models/*
+clean-jmaps:
+	rm -f -r data/${RUN_NAME}/jmaps/*
 
-clean-model-analysis:
-	rm -f -r data/${RUN_NAME}/model_analysis/
+clean-jmap-analysis:
+	rm -f -r data/${RUN_NAME}/jmap_analysis/
 
-clean-final-models:
-	rm -f -r  data/${RUN_NAME}/final_models/
+clean-final-jmaps:
+	rm -f -r  data/${RUN_NAME}/final_jmaps/
 
 clean-raw-data: 
 	rm -f -r data/${RUN_NAME}/

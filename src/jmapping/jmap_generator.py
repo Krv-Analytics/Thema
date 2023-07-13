@@ -1,4 +1,4 @@
-"""Generate Graph Models using JMapper."""
+"""Generate Graph jmaps using JMapper."""
 
 import argparse
 import os
@@ -14,12 +14,12 @@ from dotenv import load_dotenv
 load_dotenv()
 root = os.getenv("root")
 src = os.getenv("src")
-sys.path.append(src + "/modeling/")
+sys.path.append(src + "/jmapping/")
 
-# imports from modeling module
-from model_helper import (
-    generate_model_filename,
-    model_generator,
+# imports from jmapping module
+from jmap_helper import (
+    generate_jmap_filename,
+    jmap_generator,
     script_paths,
 )
 from tupper import Tupper
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         "-s",
         "--random_seed",
         type=int,
-        default=params_json["model_random_seed"],
+        default=params_json["jmap_random_seed"],
         help="Set random seed to ensure Mapper/Graph reproducibility.",
     )
 
@@ -131,12 +131,12 @@ if __name__ == "__main__":
     min_intersections = args.min_intersection
     hdbscan_params = args.min_cluster_size, args.max_cluster_size
 
-    # GENERATE MODELS
+    # GENERATE jmapS
     # Given our hyperparameters, we generate graphs, curvature,
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
 
-    jmapper = model_generator(
+    jmapper = jmap_generator(
         tupper,
         n_cubes=n,
         perc_overlap=p,
@@ -156,9 +156,9 @@ if __name__ == "__main__":
         runlog.log_unkownError_EVENT()
         sys.exit(1)
 
-    rel_outdir = "data/" + params_json["Run_Name"] + f"/models/{num_policy_groups}_policy_groups/"
+    rel_outdir = "data/" + params_json["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
     output_dir = os.path.join(root, rel_outdir)
-    output_file = generate_model_filename(
+    output_file = generate_jmap_filename(
         args,
         nbors,
         d,
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    # Check for error codes from model_generator 
+    # Check for error codes from jmap_generator 
     if jmapper == -1: 
         runlog.log_emptyGraph_EVENT() 
         # TODO: Write out the hyperparameter culprits

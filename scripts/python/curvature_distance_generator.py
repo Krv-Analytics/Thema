@@ -15,9 +15,9 @@ from tqdm import tqdm
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "modeling/")
+sys.path.append(src + "jmapping/")
 
-from modeling.model_selector_helper import unpack_policy_group_dir
+from jmapping.jmap_selector_helper import unpack_policy_group_dir
 
 
 def plot_curvature_histogram(dir):
@@ -59,7 +59,7 @@ if __name__ == "__main__":
             params_json = json.load(f)
     else:
         print("params.json file note found!")
-    dir = "data/" + params_json["Run_Name"] + f"/models/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         "--------------------------------------------------------------------------------"
     )
     log.info(f"Policy Groups in consideration: {group_ranks}")
-    log.info(f"Model Coverage Filter: {coverage}")
+    log.info(f"jmap Coverage Filter: {coverage}")
     log.info(
         "--------------------------------------------------------------------------------"
     )

@@ -2,10 +2,11 @@
 
 import networkx as nx
 import pandas as pd
+from tupper import Tupper
 
 class JBottle():
     """
-    A bottle containing all of your data analysis needs. 
+    A bottle for all of your data analysis needs. 
 
     This class is designed to faciliate the interaction of a graph representation 
     arising from a JMapper fitting with the user's original data (whether it be raw, 
@@ -22,19 +23,20 @@ class JBottle():
 
     """
     def __init__(self,
-                raw: pd.DataFrame,
-                clean: pd.DataFrame, 
-                projection: pd.DataFrame, 
+                 tupper: Tupper(), 
                 node_members: dict(), 
-                connected_components: list,
+                connected_components: list
                  ): 
-        self._raw = raw 
-        self._clean = clean 
-        self._projection = projection
+        """
+        Initialization of a JBottle object 
+        """
+        self._raw = tupper.raw
+        self._clean = tupper.clean
+        self._projection = tupper.projection
 
     # Dictionaries to aid in group decomposition and item lookup 
-        self._group_lookuptable = {key:[] for key in raw.index}
-        self._node_lookuptable = {key:[] for key in raw.index}        
+        self._group_lookuptable = {key:[] for key in self._raw.index}
+        self._node_lookuptable = {key:[] for key in self._raw.index}        
         self._group_directory = {}
 
         for i in connected_components: 
@@ -44,7 +46,7 @@ class JBottle():
                 for item in node_members[node]:
                     self._node_lookuptable[item] = self._node_lookuptable[item] + [node]
                     self._group_lookuptable[item] = list(set(self._group_lookuptable[item] + [i]))
-            self._group_directory[i] = self._cluster_members
+            self._group_directory[i] = cluster_members
         
     
     @property 
@@ -106,7 +108,7 @@ class JBottle():
         A list of member items 
 
         """
-        return self._group_members[self.get_nodes_groupID(node_id)][node_id]
+        return self._group_directory[self.get_nodes_groupID(node_id)][node_id]
     
     def get_groups_members(self, group_id: int):
         """
@@ -122,11 +124,14 @@ class JBottle():
         A list of the item members for the specified group
 
         """
-        return list(set([node.items() for node in self._group_directory[group_id].keys()]))
+        member_list = []
+        for node in self._group_directory[group_id].keys():
+            member_list = member_list + self._group_directory[group_id][node]   
+        return list(set(member_list))
     
     def get_groups_member_nodes(self, group_id: int):
         """
-        LookUp Function to get nodes within a connected component
+        Look up Function to get nodes within a connected component
 
         Parameters: 
         -----------
@@ -145,10 +150,15 @@ class JBottle():
         Returns the group that a node is a member of 
     
         """
-        for group in self._group_members.keys():
-            for node in self._group_members[group].keys():
+        for group in self._group_directory.keys():
+            for node in self._group_directory[group].keys():
                 if node == node_id:
                     return group
         return None
+    
+
+    def get_items_in_multiple_groups(self):
+        # STUB! 
+        return -1 
     
     

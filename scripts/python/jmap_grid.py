@@ -31,22 +31,22 @@ if __name__ == "__main__":
 
 
     # HDBSCAN
-    min_cluster_size = params_json["model_min_cluster_size"]
-    max_cluster_size = params_json["model_max_cluster_size"]
+    min_cluster_size = params_json["jmap_min_cluster_size"]
+    max_cluster_size = params_json["jmap_max_cluster_size"]
 
     # MAPPER
-    n_cubes = params_json["model_nCubes"]
-    perc_overlap = params_json["model_percOverlap"]
-    min_intersection = params_json["model_minIntersection"]
-    random_seed = params_json["model_random_seed"]
+    n_cubes = params_json["jmap_nCubes"]
+    perc_overlap = params_json["jmap_percOverlap"]
+    min_intersection = params_json["jmap_minIntersection"]
+    random_seed = params_json["jmap_random_seed"]
 
     # DATA
     raw = params_json["raw_data"]
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
 
-    model_generator = os.path.join(src, "modeling/model_generator.py")
-    log.info("Computing Model Grid Search!")
+    jmap_generator = os.path.join(src, "jmapping/jmap_generator.py")
+    log.info("Computing jmap Grid Search!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
@@ -64,9 +64,9 @@ if __name__ == "__main__":
     
     # Instantiate a Run Log
     runlog = Run_Log() 
-    runlog.start_model_log() 
-    runlog.set_model_gridSize(num_loops)
-    runlog.log_model_startTime() 
+    runlog.start_jmap_log() 
+    runlog.set_jmap_gridSize(num_loops)
+    runlog.log_jmap_startTime() 
 
     # Running Grid in Parallel 
     subprocesses = []
@@ -81,7 +81,7 @@ if __name__ == "__main__":
                             subprocesses.append(
                                 [
                                     "python",
-                                    f"{model_generator}",
+                                    f"{jmap_generator}",
                                     f"-n{N}",
                                     f"-r{raw}",
                                     f"-c{clean}",
@@ -103,4 +103,4 @@ if __name__ == "__main__":
             progress_bar.update(1)
         progress_bar.close()
         
-    runlog.log_model_finishTime() # Logs finish time and sets total run time
+    runlog.log_jmap_finishTime() # Logs finish time and sets total run time

@@ -15,8 +15,8 @@ echo "Please enter a policy_group size:"
 read NUM_GROUPS
 
 # Calling cleaning script from params.json 
-poetry run python ../../src/tuning/graph_clustering/model_clusterer.py -n ${NUM_GROUPS} -s
-poetry run python ../../src/modeling/model_selector.py -n ${NUM_GROUPS} -v
+poetry run python ../../src/tuning/graph_clustering/jmap_clusterer.py -n ${NUM_GROUPS} -s
+poetry run python ../../src/jmapping/jmap_selector.py -n ${NUM_GROUPS} -v
 
 
 
