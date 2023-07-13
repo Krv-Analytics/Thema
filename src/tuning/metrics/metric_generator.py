@@ -49,7 +49,7 @@ if __name__ == "__main__":
         "-s",
         "--save",
         default=True,
-        help="If True, save the clustering model and distances as pickle files.",
+        help="If True, save the clustering jmap and distances as pickle files.",
     )
 
     parser.add_argument(
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     n = args.num_policy_groups
     coverage = args.coverage_filter
     rel_path_to_mappers = (
-        "data/" + params_json["Run_Name"] + f"/models/{n}_policy_groups/"
+        "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
     )
     path_to_mappers = os.path.join(root, rel_path_to_mappers)
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         rel_ouput_dir = (
             "data/"
             + params_json["Run_Name"]
-            + f"/model_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
+            + f"/jmap_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir = os.path.join(
             root,

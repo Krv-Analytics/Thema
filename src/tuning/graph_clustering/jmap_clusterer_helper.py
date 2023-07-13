@@ -13,7 +13,7 @@ sys.path.append(src)
 from summarizing.visualization_helper import plot_dendrogram
 
 
-def cluster_models(
+def cluster_jmaps(
     distances,
     metric,
     num_policy_groups,
@@ -25,7 +25,7 @@ def cluster_models(
     """This function performs agglomerative clustering on the given
     pairwise distances using the average linkage method.
     These pairwise distances are between the persistence diagrams,
-    gererated using curvature filtrations of the model graphs.
+    gererated using curvature filtrations of the jmap graphs.
 
     Parameters:
     -----------
@@ -93,7 +93,7 @@ def read_distance_matrices(dir, metric, n):
     Returns:
     --------
     keys: list
-        The list of keys (model IDs) used to generate the pairwise distances.
+        The list of keys (jmap IDs) used to generate the pairwise distances.
 
     distances: numpy array
         The pairwise distance matrix of the dataset.

@@ -1,4 +1,4 @@
-"Group Models based on their graph structure via curvature filtrations."
+"Group jmaps based on their graph structure via curvature filtrations."
 
 import argparse
 import sys
@@ -8,8 +8,8 @@ import json
 from dotenv import load_dotenv
 import warnings
 
-from model_clusterer_helper import (
-    cluster_models,
+from jmap_clusterer_helper import (
+    cluster_jmaps,
     read_distance_matrices,
 )
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         "--distance_threshold",
         type=float,
         default=params_json["dendrogram_cut"],
-        help="Select distance threshold for agglomerative clustering model.",
+        help="Select distance threshold for agglomerative clustering jmap.",
     )
 
     parser.add_argument(
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         "--save",
         default=False,
         action="store_true",
-        help="If tagged, save the clustering model as a pickle files.",
+        help="If tagged, save the clustering jmap as a pickle files.",
     )
 
     parser.add_argument(
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     rel_distance_dir = (
         "data/"
         + params_json["Run_Name"]
-        + f"/model_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
+        + f"/jmap_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
     )
     distance_dir = os.path.join(root, rel_distance_dir)
     try:
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         assert len(distances)>1
             
         # Fit Hierarchical Clustering
-        model = cluster_models(
+        jmap = cluster_jmaps(
             distances,
             p=args.dendrogram_levels,
             metric=args.metric,
@@ -107,29 +107,29 @@ if __name__ == "__main__":
 
         results = {
             "keys": keys,
-            "model": model,
+            "jmap": jmap,
             "distance_threshold": args.distance_threshold,
         }
         if args.save:
-            model_file = f"curvature_{args.metric}_clustering_model.pkl"
+            jmap_file = f"curvature_{args.metric}_clustering_jmap.pkl"
 
-            out_dir_message = f"{model_file} successfully written."
+            out_dir_message = f"{jmap_file} successfully written."
 
             rel_outdir = (
                 "data/"
                 + params_json["Run_Name"]
-                + f"/model_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
+                + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
             )
             output_dir = os.path.join(root, rel_outdir)
 
             # Check if output directory already exists
             if os.path.isdir(output_dir):
-                model_file = os.path.join(output_dir, model_file)
+                jmap_file = os.path.join(output_dir, jmap_file)
 
             else:
                 os.makedirs(output_dir, exist_ok=True)
-                model_file = os.path.join(output_dir, model_file)
-            with open(model_file, "wb") as handle:
+                jmap_file = os.path.join(output_dir, jmap_file)
+            with open(jmap_file, "wb") as handle:
                 pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             if args.Verbose:
