@@ -146,15 +146,15 @@ class Run_Log():
     
     def log_model_startTime(self): 
         log = self._open_model_runlog() 
-        log['startTime'] = str(datetime.now().time())
+        log['startTime'] = str(datetime.now())
         self._write_model_runlog(log)
     
     def log_model_finishTime(self): 
         log = self._open_model_runlog() 
-        start_time = datetime.strptime(log['startTime'], "%Y-%m-%d %H:%M:%S")
+        start_time = datetime.strptime(log['startTime'], "%Y-%m-%d %H:%M:%S.%f")
         finish_time = datetime.now()
-        log['finishTime'] = finish_time
-        log['total_runTime'] = finish_time - start_time
+        log['finishTime'] = str(finish_time)
+        log['total_runTime'] = str(finish_time - start_time)
 
         self._write_model_runlog(log)
     
