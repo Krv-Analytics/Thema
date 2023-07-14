@@ -67,19 +67,17 @@ class Model():
         jmapper:str
           Path to a Jmapper/hyerparameter file 
         """
-        
-        try:
-            with open(jmapper, 'rb') as f:
+        assert isfile(jmapper)
+
+        with open(jmapper, 'rb') as f:
                 reference = pickle.load(f)
-            self._jmapper = reference['mapper']
-            self._hyper_parameters = reference['hyperparameters']
-        except: 
-            print("There was an error opening your Jmapper Object")
+        self._jmapper = reference['jmapper']
+        self._hyper_parameters = reference['hyperparameters']
         
 
         # Initialize Inherited JBottle
-        self._jbottle = JBottle(raw=self._jmapper.tupper, nodes_members = self._jmapper.nodes, 
-                        connected_components=self._jmapper.jgraph.connected_components)
+        self.jbottle = JBottle(tupper=self._jmapper.tupper, node_members = self._jmapper.nodes, 
+                        connected_components=self._jmapper.jgraph.components)
         
         # Average analysis => move to Jbottle 
         self._node_description = None
