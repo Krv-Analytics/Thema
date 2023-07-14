@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-import jmapping as md
+
+import jmapping as jm
 
 import pickle
 import pandas as pd
@@ -76,7 +77,7 @@ def create_umap_grid(dir):
 
         num_clusters = len(np.unique([x for x in clusterer.labels_ if x != -1]))
 
-        colorscale = md.custom_color_scale()
+        colorscale = jm.custom_color_scale()
         if num_clusters > len(colorscale)-1:
             colorscale = px.colors.diverging.Spectral
 
@@ -107,7 +108,7 @@ def create_umap_grid(dir):
                     size=4,
                     color=df["labels"],
                     # colorscale=[color for _, color in md.custom_color_scale()],
-                    colorscale=md.custom_color_scale(),
+                    colorscale=jm.custom_color_scale(),
                     # line=dict(width=0.05, color="Black"),
                     cmid=0.3,
                 ),
@@ -168,7 +169,7 @@ def create_cluster_distribution_histogram(dir):
         go.Bar(
             x=unique_values,
             y=value_counts,
-            marker_color=[color for _, color in md.custom_color_scale()],
+            marker_color=[color for _, color in jm.custom_color_scale()],
             text=value_counts,
             hoverinfo="text",
         )

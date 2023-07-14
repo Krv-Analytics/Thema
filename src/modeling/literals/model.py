@@ -2,9 +2,10 @@
 
 import os
 import sys
-import itertools
+import math
 import pickle
 from os.path import isfile
+from dotenv import load_env
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -19,16 +20,17 @@ import plotly.io as pio
 
 
 #TODO: Move this to a defaulted argument for the viz functions 
-
 pio.renderers.default = "browser"
 
-import math
+root = os.getenv("root")
+sys.path.append(root + "jmapping/fitting/")
+
 from jmapper import JMapper
 from jbottle import JBottle
 
 
-# TODO: Move These out of jmap helper 
-
+# TODO: Move these things out of jmap helper 
+#  
 from jmap_helper import (
     config_plot_data,
     custom_color_scale,
@@ -41,7 +43,7 @@ from jmap_helper import (
 from persim import plot_diagrams
 
 
-class Model(JBottle):
+class Model():
     """
     A class designed for easy to use and interpret visualizations of JGraphs and JMapper 
     objects. Inherits from JBottle.
@@ -76,7 +78,7 @@ class Model(JBottle):
         
 
         # Initialize Inherited JBottle
-        super.__init__(raw=self._jmapper.tupper, nodes_members = self._jmapper.nodes, 
+        self._jbottle = JBottle(raw=self._jmapper.tupper, nodes_members = self._jmapper.nodes, 
                         connected_components=self._jmapper.jgraph.connected_components)
         
         # Average analysis => move to Jbottle 
