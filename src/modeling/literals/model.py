@@ -5,7 +5,7 @@ import sys
 import math
 import pickle
 from os.path import isfile
-from dotenv import load_env
+from dotenv import load_dotenv
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -21,7 +21,7 @@ import plotly.io as pio
 
 #TODO: Move this to a defaulted argument for the viz functions 
 pio.renderers.default = "browser"
-
+load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "jmapping/fitting/")
 

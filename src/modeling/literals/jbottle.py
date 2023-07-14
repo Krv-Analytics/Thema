@@ -2,6 +2,14 @@
 
 import networkx as nx
 import pandas as pd
+import os 
+import sys 
+from dotenv import load_dotenv
+
+load_dotenv()
+root = os.getenv("root")
+sys.path.append(root + "jmapping/")
+
 from tupper import Tupper
 
 class JBottle():
@@ -23,7 +31,7 @@ class JBottle():
 
     """
     def __init__(self,
-                 tupper: Tupper(), 
+                tupper, 
                 node_members: dict(), 
                 connected_components: list
                  ): 
