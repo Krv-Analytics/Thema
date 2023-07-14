@@ -14,13 +14,29 @@ import numpy as np
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objs as go
+
 from plotly.subplots import make_subplots
-
+from persim import plot_diagrams
 import plotly.io as pio
-
 
 #TODO: Move this to a defaulted argument for the viz functions 
 pio.renderers.default = "browser"
+
+########################################################################################
+# 
+#   Handling Local Imports
+# 
+########################################################################################
+
+
+from visual_utils import (
+    config_plot_data,
+    custom_color_scale,
+    mapper_plot_outfile,
+    reorder_colors,
+    get_subplot_specs
+)
+
 load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "jmapping/fitting/")
@@ -29,18 +45,11 @@ from jmapper import JMapper
 from jbottle import JBottle
 
 
-# TODO: Move these things out of jmap helper 
-#  
-from jmap_helper import (
-    config_plot_data,
-    custom_color_scale,
-    get_minimal_std,
-    mapper_plot_outfile,
-    reorder_colors,
-    get_subplot_specs,
-    _define_zscore_df,
-)
-from persim import plot_diagrams
+########################################################################################
+# 
+#   Model class Implementation
+# 
+########################################################################################
 
 
 class Model():
@@ -76,8 +85,7 @@ class Model():
         
 
         # Initialize Inherited JBottle
-        self.jbottle = JBottle(tupper=self._jmapper.tupper, node_members = self._jmapper.nodes, 
-                        connected_components=self._jmapper.jgraph.components)
+        self.jbottle = JBottle(self._jmapper)
         
         # Average analysis => move to Jbottle 
         self._node_description = None
@@ -116,131 +124,6 @@ class Model():
         if self._cluster_descriptions is None:
             self.compute_cluster_descriptions()
         return self._cluster_descriptions
-    
-
-###################################################################################################
-
-# TODO: Get Rid of the Below
-
-###################################################################################################
-    
-
-    @property
-    def zscores(self):
-        if self._zscores is None:
-            self._zscores = (
-                _define_zscore_df(self).groupby(["cluster_IDs"]).mean().reset_index()
-            )
-        return self._zscores
-
-    def group_identifiers(self, zscore_threshold=1, std_threshold=1):
-
-        pg_identifiers = {
-            key: [] for key in range(-1, int(self.zscores["cluster_IDs"].max()) + 1)
-        }
-        for column in self.zscores.columns:
-            counter = -1
-            for value in self.zscores[column]:
-                if column != "cluster_IDs":
-                    if abs(value) >= zscore_threshold:
-                        test = _define_zscore_df(self)[
-                            _define_zscore_df(self)["cluster_IDs"] == counter
-                        ]
-                        if (
-                            abs(test[column].std() / test[column].mean())
-                            <= std_threshold
-                        ):
-                            pg_identifiers[counter].append(column)
-                counter += 1
-        self._group_identifiers = pg_identifiers
-        return self._group_identifiers
-
-    # def compute_node_descriptions(self):
-    #     """
-    #     Compute a simple description of each node in the graph.
-
-    #     This function labels each node based on the column in
-    #     the dataframe that admits the smallest (normalized)
-    #     standard deviation amongst items in the node.
-
-    #     As a note, we only consider columns that are:
-    #         1) continuous in the raw data
-    #         2) used to fit JMapper, i.e. appear in clean data
-
-    #     Returns
-    #     -------
-    #     self._node_description : dict
-    #         Dictionary with node ID as key and a string with the node
-    #         description as value.
-    #     """
-    #     nodes = self.complex["nodes"]
-    #     cols = np.intersect1d(
-    #         self.tupper.raw.select_dtypes(include=["number"]).columns,
-    #         self.tupper.clean.columns,
-    #     )
-    #     self._node_description = {}
-    #     for node in nodes.keys():
-    #         mask = nodes[node]
-    #         label = get_minimal_std(
-    #             df=self.tupper.clean,
-    #             mask=mask,
-    #             density_cols=cols,
-    #         )
-    #         size = len(mask)
-    #         self._node_description[node] = {"label": label, "size": size}
-
-    # def compute_cluster_descriptions(self):
-    #     """
-    #     Compute a simple description of each cluster (policy group).
-
-    #     This function creates a density description based on each of
-    #     the node lables in the policy group.
-
-    #     Returns
-    #     -------
-    #     self._cluster_descriptions : dict
-    #         Dictionary with cluster ID as key and a dictionary with the
-    #         labeled density descriptions as values.
-    #     """
-    #     self._cluster_descriptions = {}
-    #     components = self.mapper.components
-    #     # View cluster as networkX graph
-    #     for G in components.keys():
-    #         cluster_id = components[G]
-    #         nodes = G.nodes()
-    #         holder = {}
-    #         N = 0
-    #         for node in nodes:
-    #             label = self.node_description[node]["label"]
-    #             size = self.node_description[node]["size"]
-
-    #             N += size
-    #             # If multiple nodes have same identifying column
-    #             if label in holder.keys():
-    #                 size += holder[label]
-    #             holder[label] = size
-    #         density = {label: np.round(size / N, 2) for label, size in holder.items()}
-    #         self._cluster_descriptions[cluster_id] = {
-    #             "density": density,
-    #             "size": self.cluster_sizes[cluster_id],
-    #         }
-
-    #     # Desnity of Unclustered Items
-    #     cols = np.intersect1d(
-    #         self.tupper.raw.select_dtypes(include=["number"]).columns,
-    #         self.tupper.clean.columns,
-    #     )
-    #     unclustered_label = get_minimal_std(
-    #         df=self.tupper.clean,
-    #         mask=self.unclustered_items,
-    #         density_cols=cols,
-    #     )
-    #     self._cluster_descriptions[-1] = {
-    #         "density": {unclustered_label: 1.0},
-    #         "size": self.cluster_sizes[-1],
-    #     }
-###################################################################################################
-
 
     def target_matching(
         self,
@@ -691,29 +574,31 @@ class Model():
 #   Unsupported Member functions 
 #
 ##########################################################################################
+
+
 #    # Maybe its time we let the old ways die?
-    @DeprecationWarning
-    def visualize_mapper(self):
-        """
-        Plot using the Keppler Mapper html functionality.
+#     @DeprecationWarning
+#     def visualize_mapper(self):
+#         """
+#         Plot using the Keppler Mapper html functionality.
 
-        NOTE: These visualizations are no longer maintained by KepplerMapper
-        and we do not reccomend using them.
-        """
-        assert len(self.complex) > 0, "Model needs a `fitted` mapper."
-        kepler = self.mapper.mapper
-        path_html = mapper_plot_outfile(self.hyper_parameters)
-        numeric_data, labels = config_plot_data(self.tupper)
+#         NOTE: These visualizations are no longer maintained by KepplerMapper
+#         and we do not reccomend using them.
+#         """
+#         assert len(self.complex) > 0, "Model needs a `fitted` mapper."
+#         kepler = self.mapper.mapper
+#         path_html = mapper_plot_outfile(self.hyper_parameters)
+#         numeric_data, labels = config_plot_data(self.tupper)
 
-        colorscale = custom_color_scale()
-        # Use Kmapper Visualization
-        kepler.visualize(
-            self.mapper.complex,
-            node_color_function=["mean", "median", "std", "min", "max"],
-            color_values=numeric_data,
-            color_function_name=labels,
-            colorscale=colorscale,
-            path_html=path_html,
-        )
+#         colorscale = custom_color_scale()
+#         # Use Kmapper Visualization
+#         kepler.visualize(
+#             self.mapper.complex,
+#             node_color_function=["mean", "median", "std", "min", "max"],
+#             color_values=numeric_data,
+#             color_function_name=labels,
+#             colorscale=colorscale,
+#             path_html=path_html,
+#         )
 
-        print(f"Go to {path_html} for a visualization of your JMapper!")
+#         print(f"Go to {path_html} for a visualization of your JMapper!")
