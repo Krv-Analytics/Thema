@@ -45,7 +45,7 @@ if __name__ == "__main__":
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
 
-    jmap_generator = os.path.join(src, "jmapping/jmap_generator.py")
+    jmap_generator = os.path.join(src, "jmapping/fitting/jmap_generator.py")
     log.info("Computing jmap Grid Search!")
     log.info(
         "--------------------------------------------------------------------------------"

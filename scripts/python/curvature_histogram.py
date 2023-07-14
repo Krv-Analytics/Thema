@@ -12,9 +12,9 @@ from python_log_indenter import IndentedLoggerAdapter
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "jmapping/")
+sys.path.append(src + "jmapping/fitting")
 
-from jmapping.jmap_selector_helper import unpack_policy_group_dir
+from fitting.jmap_selector_helper import unpack_policy_group_dir
 
 
 def plot_curvature_histogram(dir):

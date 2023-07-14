@@ -1,4 +1,4 @@
-"Helper functions for visualizing CoalMappers"
+"Helper functions for visualizing and evaluating jmap runs "
 
 import numpy as np
 import pandas as pd
@@ -78,10 +78,9 @@ def visualize_PCA(model, colors=True):
             cluster_list.sort()
             for cluster in cluster_list:
                 plot = pca_df[pca_df['cluster_IDs']==cluster]
-                fig.add_trace(go.Scatter( x=plot['PC1'], y=plot['PC2'], mode='markers', name=cluster, marker=dict(color=custom_color_scale()[cluster_list.index(cluster)][1])))
+               # fig.add_trace(go.Scatter( x=plot['PC1'], y=plot['PC2'], mode='markers', name=cluster, marker=dict(color=custom_color_scale()[cluster_list.index(cluster)][1])))
         # plot with no colors
         else:
             fig = px.scatter(data_frame=pca_df, x='PC1', y='PC2', color_discrete_sequence=['grey'])
-
         fig.update_layout(template='simple_white', width=800, height=600)
         fig.show()

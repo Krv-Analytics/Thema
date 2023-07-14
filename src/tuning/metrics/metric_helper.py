@@ -11,12 +11,9 @@ load_dotenv()
 src = os.getenv("src")
 root = os.getenv("root")
 sys.path.append(src)
+sys.path.append(src + "jmapping/fitting/")
 
-jmapping = os.path.join(src, "jmapping/")
-sys.path.append(jmapping)
-
-
-from jmapping.jmapper import JMapper
+from jmapper import JMapper
 
 
 def topology_metric(

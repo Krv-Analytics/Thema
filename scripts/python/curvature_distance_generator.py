@@ -17,7 +17,7 @@ src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "jmapping/")
 
-from jmapping.jmap_selector_helper import unpack_policy_group_dir
+from jmapping.selecting.jmap_selector_helper import unpack_policy_group_dir
 
 
 def plot_curvature_histogram(dir):

@@ -16,7 +16,7 @@ from jmap_selector_helper import (
 
 load_dotenv()
 src = os.getenv("src")
-sys.path.append(src)
+sys.path.append(src + "jmapping/selecting/")
 
 if __name__ == "__main__":
 

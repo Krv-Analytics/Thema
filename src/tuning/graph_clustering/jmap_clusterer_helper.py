@@ -9,8 +9,9 @@ load_dotenv()
 src = os.getenv("src")
 root = os.getenv("root")
 sys.path.append(src)
+sys.path.append(src+"modeling/synopsis/")
 
-from summarizing.visualization_helper import plot_dendrogram
+from meta_utils import plot_dendrogram
 
 
 def cluster_jmaps(

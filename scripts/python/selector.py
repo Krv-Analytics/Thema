@@ -14,9 +14,9 @@ from tqdm import tqdm
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "jmapping/")
+sys.path.append(src + "jmapping/selecting/")
 
-from jmapping.jmap_selector_helper import unpack_policy_group_dir
+from jmap_selector_helper import unpack_policy_group_dir
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(message)s", level=logging.INFO)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         group_ranks.append(i)
 
     # Metric Generator Configuratiosn
-    jmap_selector = os.path.join(src, "jmapping/jmap_selector.py")
+    jmap_selector = os.path.join(src, "jmapping/selecting/jmap_selector.py")
     jmap_clusterer = os.path.join(src, "tuning/graph_clustering/jmap_clusterer.py")
     coverage = params_json["coverage_filter"]
 

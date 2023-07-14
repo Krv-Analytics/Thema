@@ -3,6 +3,8 @@ import kmapper as km
 import numpy as np
 
 from tupper import Tupper
+
+
 from nammu.curvature import ollivier_ricci_curvature
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
 from nammu.utils import make_node_filtration 

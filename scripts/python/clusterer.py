@@ -18,9 +18,9 @@ warnings.simplefilter("ignore")
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
-sys.path.append(src + "jmapping/")
+sys.path.append(src + "jmapping/selecting/")
 
-from jmapping.jmap_selector_helper import unpack_policy_group_dir
+from jmap_selector_helper import unpack_policy_group_dir
 
 if __name__ == "__main__":
 

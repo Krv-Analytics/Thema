@@ -4,7 +4,7 @@ import sys
 from dotenv import load_dotenv
 load_dotenv()
 src = os.getenv("src")
-sys.path.append(src + "/jmapping/nammu")
+sys.path.append(src + "/jmapping/fitting/nammu")
 
 from utils import make_node_filtration, UnionFind
 from topology import PersistenceDiagram, calculate_persistence_diagrams

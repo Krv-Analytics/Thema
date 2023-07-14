@@ -10,7 +10,7 @@ from kmapper import KeplerMapper
 # Local Imports 
 from tupper import Tupper
 from jgraph import JGraph
-from data_utils import convert_keys_to_alphabet
+from fitting_utils import convert_keys_to_alphabet
 
 class JMapper():
     """A wrapper and expansion for scikit-tda's `KMapper`.
