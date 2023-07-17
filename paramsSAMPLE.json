@@ -20,31 +20,31 @@
         0,0.01,0.05,0.1,0.5,1
     ],
     "projector_random_seed": 42,
-    "model_min_cluster_size": 6,
-    "model_max_cluster_size": 0,
-    "model_nCubes": [
+    "jmap_min_cluster_size": 6,
+    "jmap_max_cluster_size": 0,
+    "jmap_nCubes": [
         5,
         10,
         15,
         20
     ],
-    "model_percOverlap": [
+    "jmap_percOverlap": [
         0.3,
         0.4,
         0.5,
         0.6,
         0.7
     ],
-    "model_minIntersection": [
+    "jmap_minIntersection": [
         1,2,3,4
     ],
-    "model_random_seed": 42,
+    "jmap_random_seed": 42,
     "coverage_filter": 0.75,
     "dendrogram_metric": "landscape",
     "dendrogram_cut": 0.3,
     "dendrogram_levels": 10,
 
     "runlog_dir": "**PATH_TO_YOUR_RUN**/logs/",
-    "model_runlog": "**PATH_TO_YOUR_RUN**/logs/model_runlog.json",
+    "jmap_runlog": "**PATH_TO_YOUR_RUN**/logs/jmap_runlog.json",
     "projector_runlog": "**PATH_TO_YOUR_RUN**/logs/projector_runlog.json"
 }
