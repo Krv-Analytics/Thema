@@ -1,4 +1,4 @@
-import networkx as nx 
+import networkx as nx
 import kmapper as km
 import numpy as np
 
@@ -7,51 +7,47 @@ from tupper import Tupper
 
 from nammu.curvature import ollivier_ricci_curvature
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from nammu.utils import make_node_filtration 
+from nammu.utils import make_node_filtration
 
 
-class JGraph(): 
-    """ 
-    A Graph Class to Handle all of your Curvature, Homology and Graph learning needs! 
-    
+class JGraph:
+    """
+    A Graph Class to Handle all of your Curvature, Homology and Graph learning needs!
+
     """
 
-    def __init__(self, nodes: dict(), min_intersection = 1):
+    def __init__(self, nodes: dict(), min_intersection=1):
         """
-        Constructor for the JGraph Class. 
+        Constructor for the JGraph Class.
 
-        Parameters: 
+        Parameters:
         -----------
         nodes: <dict()>
-            The nodes of a simplicial complex  
+            The nodes of a simplicial complex
 
-        min-intersection: 
-            For the moment, min_intersection value as dictated by graph nerve 
-        
+        min-intersection:
+            For the moment, min_intersection value as dictated by graph nerve
+
         """
-        
+
         nerve = km.GraphNerve(min_intersection)
         assert (
             len(nodes) > 0
         ), "You must first generate a non-empty Simplicial Complex \
         with `fit()` before you can convert to Networkx "
-        
+
         self.graph = nx.Graph()
-        
+
         _, simplices = nerve.compute(nodes)
         edges = [edge for edge in simplices if len(edge) == 2]
-        
+
         if len(edges) == 0:
-            self._is_Edgeless = True 
+            self._is_Edgeless = True
         else:
             self._is_Edgeless = False
             self.graph.add_nodes_from(nodes)
             self.graph.add_edges_from(edges)
-            nx.set_node_attributes( self.graph, 
-                               nodes,
-                               "membership"
-            ) 
-
+            nx.set_node_attributes(self.graph, nodes, "membership")
 
         self._components = dict(
             [
@@ -59,33 +55,30 @@ class JGraph():
                 for i, c in enumerate(nx.connected_components(self.graph))
             ]
         )
-        
+
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
+    ####################################################################################################
+    #
+    #   Properties
+    #
+    ####################################################################################################
 
-####################################################################################################
-#   
-#   Properties
-#    
-####################################################################################################
-     
     @property
     def is_EdgeLess(self):
         return self._is_Edgeless
-  
+
     @property
     def components(self):
         return self._components
-    
+
     @property
     def curvature(self):
         """Return the curvature values for the graph of a JMapper object."""
-        assert (
-            len(self._curvature) > 0
-        ), "You don't have any edge curvatures!"
+        assert len(self._curvature) > 0, "You don't have any edge curvatures!"
         return self._curvature
-    
+
     @curvature.setter
     def curvature(self, curvature_fn=ollivier_ricci_curvature):
         """Setter function for curvature.
@@ -103,12 +96,12 @@ class JGraph():
             self._curvature = curvature
         except len(curvature) != len(self.graph.edges()):
             print("Invalid Curvature function")
-            
+
     @property
     def diagram(self):
         """Return the persistence diagram based on curvature filtrations
         associated with JMapper graph."""
-        if self._diagram is None: # TODO: Change! diagram is never initialized to none
+        if self._diagram is None:  # TODO: Change! diagram is never initialized to none
             try:
                 self.calculate_homology()
             except self.complex == dict():
@@ -118,13 +111,12 @@ class JGraph():
                 )
         return self._diagram
 
-    
-####################################################################################################
-#   
-#   Member Functions
-#    
-####################################################################################################
-    
+    ####################################################################################################
+    #
+    #   Member Functions
+    #
+    ####################################################################################################
+
     def calculate_homology(
         self,
         filter_fn=ollivier_ricci_curvature,
@@ -174,8 +166,3 @@ class JGraph():
         )
         self._diagram = pd
         return self.diagram
-    
-
-        
-
-    

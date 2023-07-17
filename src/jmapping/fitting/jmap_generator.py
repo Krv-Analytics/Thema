@@ -26,7 +26,7 @@ from tupper import Tupper
 
 sys.path.append(root + "logging/")
 
-from run_log import Run_Log 
+from run_log import Run_Log
 
 ########################################################################################################################
 
@@ -36,10 +36,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     root = os.getenv("root")
 
-    # Initalize a runlog Manager 
+    # Initalize a runlog Manager
     runlog = Run_Log()
-
-
 
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
@@ -141,7 +139,7 @@ if __name__ == "__main__":
         n_cubes=n,
         perc_overlap=p,
         hdbscan_params=hdbscan_params,
-        min_intersection=args.min_intersection
+        min_intersection=args.min_intersection,
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
     output = {"jmapper": jmapper}
@@ -149,14 +147,16 @@ if __name__ == "__main__":
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
             # Runlog Event Tracking
-            runlog.log_overPopulatedMapper_EVENT() 
+            runlog.log_overPopulatedMapper_EVENT()
             sys.exit(1)
     except:
-         # Runlog Event Tracking
+        # Runlog Event Tracking
         runlog.log_unkownError_EVENT()
         sys.exit(1)
 
-    rel_outdir = "data/" + params_json["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
+    rel_outdir = (
+        "data/" + params_json["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
+    )
     output_dir = os.path.join(root, rel_outdir)
     output_file = generate_jmap_filename(
         args,
@@ -183,13 +183,13 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    # Check for error codes from jmap_generator 
-    if jmapper == -1: 
-        runlog.log_emptyGraph_EVENT() 
+    # Check for error codes from jmap_generator
+    if jmapper == -1:
+        runlog.log_emptyGraph_EVENT()
         # TODO: Write out the hyperparameter culprits
-    
-    elif jmapper == -2: 
-        runlog.log_emptyComplex_EVENT() 
+
+    elif jmapper == -2:
+        runlog.log_emptyComplex_EVENT()
         # TODO: Write out the hyperparameter culprits
 
     else:

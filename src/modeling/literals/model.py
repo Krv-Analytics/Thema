@@ -19,21 +19,17 @@ from plotly.subplots import make_subplots
 from persim import plot_diagrams
 import plotly.io as pio
 
-#TODO: Move this to a defaulted argument for the viz functions 
+# TODO: Move this to a defaulted argument for the viz functions
 pio.renderers.default = "browser"
 
 ########################################################################################
-# 
+#
 #   Handling Local Imports
-# 
+#
 ########################################################################################
 
 
-from visual_utils import (
-    custom_color_scale,
-    reorder_colors,
-    get_subplot_specs
-)
+from visual_utils import custom_color_scale, reorder_colors, get_subplot_specs
 
 load_dotenv()
 root = os.getenv("root")
@@ -44,79 +40,59 @@ from jbottle import JBottle
 
 
 ########################################################################################
-# 
+#
 #   Model class Implementation
-# 
+#
 ########################################################################################
 
 
-class Model():
+class THEMA(JBottle):
     """
-    A class designed for easy to use and interpret visualizations of JGraphs and JMapper 
-    objects. 
-
-    
-    Members 
-    ------- 
+    A class designed for easy to use and interpret visualizations of JGraphs and JMapper
+    objects.
 
 
+    Members
+    -------
 
-    Member Functions 
+
+
+    Member Functions
     ----------------
 
     """
 
-    def __init__(self, jmapper:str):
+    def __init__(self, jmapper: str):
         """Constructor for Model class.
 
         Parameters
         -----------
         jmapper:str
-          Path to a Jmapper/hyerparameter file 
-        
+          Path to a Jmapper/hyerparameter file
+
         """
-        
+
         assert isfile(jmapper)
-        with open(jmapper, 'rb') as f:
-                reference = pickle.load(f)
-        self._jmapper = reference['jmapper']
-        self._hyper_parameters = reference['hyperparameters']
-        
+        with open(jmapper, "rb") as f:
+            reference = pickle.load(f)
+        self._jmapper = reference["jmapper"]
+        self._hyper_parameters = reference["hyperparameters"]
 
         # Initialize Inherited JBottle
-        self.jbottle = JBottle(self._jmapper)
+        super().__init__(reference["jmapper"])
 
-        # As a rule, if it has to do with pure data analysis 
-        # then it belongs in JBottle 
-        # data analysis utility functions on pd.DataFrames will be written into 
-        # data_utils.py 
+        # As a rule, if it has to do with pure data analysis
+        # then it belongs in JBottle
+        # data analysis utility functions on pd.DataFrames will be written into
+        # data_utils.py
 
-
-        # Plotting member for visualization  
+        # Plotting member for visualization
         self._cluster_positions = None
-
 
     @property
     def hyper_parameters(self):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
-
-
-    @property
-    def node_description(self):
-        """Return the node descriptions according to the graph clustering."""
-        if self._node_description is None:
-            self.compute_node_descriptions()
-        return self._node_description
-    
-    # TODO: RENAME 
-    @property
-    def cluster_descriptions(self):
-        """Return the policy group descriptions according
-        to the graph clustering."""
-        if self._cluster_descriptions is None:
-            self.compute_cluster_descriptions()
-        return self._cluster_descriptions
 
     def target_matching(
         self,
@@ -130,9 +106,7 @@ class Model():
         if remove_unclustered and len(self.unclustered_items) > 0:
             self.index_dict.pop("group_-1")
 
-        target_cols = (
-            target.select_dtypes(include=np.number).dropna(axis=1).columns
-        )
+        target_cols = target.select_dtypes(include=np.number).dropna(axis=1).columns
         if col_filter:
             raw_cols = col_filter
         else:
@@ -154,9 +128,8 @@ class Model():
 
         min_index = min(scores, key=scores.get)
         return scores, min_index
-    
 
-    # Wut 
+    # Wut
     def fib(self, i, g, colorscale):
         return colorscale[i]
 
@@ -187,8 +160,8 @@ class Model():
             nx.draw_networkx(
                 g,
                 pos=pos,
-                #node_color=color_scale[i],
-                node_color = self.fib(i, g, color_scale),
+                # node_color=color_scale[i],
+                node_color=self.fib(i, g, color_scale),
                 node_size=100,
                 font_size=6,
                 with_labels=False,
@@ -239,7 +212,7 @@ class Model():
                 )
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
-        # return fig
+        return fig
 
     def visualize_projection(self, show_color=True, show_axis=False):
         """
@@ -345,9 +318,9 @@ class Model():
                     ]
                 )
             )
-        }        
+        }
         cluster_descriptions = self.cluster_descriptions
-        if cluster_descriptions[-1]['size'] == 0:
+        if cluster_descriptions[-1]["size"] == 0:
             cluster_descriptions.pop(-1)
 
         num_rows = math.ceil(max(len(cluster_descriptions) / 3, 1))
@@ -392,29 +365,32 @@ class Model():
             )
 
         fig.update_layout(
-            template="plotly_white", showlegend=True, 
-            #height=600, 
-            height = num_rows * 300,
-            width=800
+            template="plotly_white",
+            showlegend=True,
+            # height=600,
+            height=num_rows * 300,
+            width=800,
         )
 
         fig.update_annotations(yshift=10)
 
         fig.update_traces(marker=dict(line=dict(color="white", width=3)))
 
-        # TODO: Base this yshift on the number of descriptors 
-        y_shift = -2 
+        # TODO: Base this yshift on the number of descriptors
+        y_shift = -2
 
         fig.update_layout(
-            legend=dict(orientation="h", yanchor="bottom", y=y_shift, xanchor="left", x=0)
+            legend=dict(
+                orientation="h", yanchor="bottom", y=y_shift, xanchor="left", x=0
+            )
         )
 
         config = {
-        'toImageButtonOptions': {
-            'format': 'svg', # one of png, svg, jpeg, webp
-            'filename': 'custom_image',
-            'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
-        }
+            "toImageButtonOptions": {
+                "format": "svg",  # one of png, svg, jpeg, webp
+                "filename": "custom_image",
+                "scale": 5,  # Multiply title/legend/axis/canvas sizes by this factor
+            }
         }
 
         # Show the subplot
@@ -450,7 +426,7 @@ class Model():
         if -1.0 not in list(df.cluster_IDs.unique()):
             dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
         else:
-            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique()))-1)}
+            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())) - 1)}
         dict_2 = {-1: "Outliers", **dict_2}
 
         for column in df.columns.drop("cluster_IDs"):
@@ -465,7 +441,7 @@ class Model():
                         marker_size=3,
                         line_width=1,
                         boxmean=True,
-                        #hovertext=df["companyName"],
+                        # hovertext=df["companyName"],
                         marker=dict(color=custom_color_scale()[int(pg)][1]),
                     ),
                     row=row,
@@ -514,16 +490,17 @@ class Model():
         )
 
         config = {
-            'toImageButtonOptions': {
-                'format': 'svg', # one of png, svg, jpeg, webp
-                'filename': 'custom_image',
-                'height': 1200,
-                'width': 1000,
-                'scale':5 # Multiply title/legend/axis/canvas sizes by this factor
+            "toImageButtonOptions": {
+                "format": "svg",  # one of png, svg, jpeg, webp
+                "filename": "custom_image",
+                "height": 1200,
+                "width": 1000,
+                "scale": 5,  # Multiply title/legend/axis/canvas sizes by this factor
             }
         }
 
-        fig.show(config = config)
+        fig.show(config=config)
+        return fig
 
     def visualize_curvature(self, bins="auto", kde=False):
         """Visualize th curvature of a graph graph as a histogram.
@@ -545,9 +522,8 @@ class Model():
         )
         ax.set(xlabel="Ollivier Ricci Edge Curvatures")
         plt.show()
+        return ax
 
-    
-    
     def visualize_persistence_diagram(self):
         """Visualize persistence diagrams of a mapper graph
         using functionality from Persim."""
@@ -561,7 +537,7 @@ class Model():
 
 ##########################################################################################
 #
-#   Unsupported Member functions 
+#   Unsupported Member functions
 #
 ##########################################################################################
 
