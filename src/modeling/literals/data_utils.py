@@ -45,26 +45,37 @@ def get_minimal_std(df: pd.DataFrame, mask: np.array, density_cols=None):
 ####################################################################################
 
 
-def std_zscore_threshold_filter(std_threshold = 1, zscore_threshold = 1): 
-    """
-    TODO: Fill out Doc String
-    """
-    # STUB! 
-    return 
 
-def get_best_std_zscore():
+def std_zscore_threshold_filter(col, global_means:dict(), std_threshold = 1, zscore_threshold = 1): 
     """
     TODO: Fill out Doc String
     """
-    # STUB! 
-    return 
+    std = np.std(col)
+    zscore = (np.mean(col) - global_means[col.name])/std
+    
 
-def get_best_zscore():
+    if zscore > zscore_threshold and std < std_threshold:
+        return 1 
+    else:
+        return 0
+
+
+
+def get_best_std_filter(col, global_means:dict()):
     """
     TODO: Fill out Doc String
     """
-    # STUB! 
-    return
+    std = np.std(col)    
+    return std
+
+
+def get_best_zscore_filter(col, global_means:dict()):
+    """
+    TODO: Fill out Doc String
+    """
+    zscore = (np.mean(col) - global_means[col.name])/np.std(col)
+
+    return zscore
 
 
 ####################################################################################

@@ -30,9 +30,7 @@ pio.renderers.default = "browser"
 
 
 from visual_utils import (
-    config_plot_data,
     custom_color_scale,
-    mapper_plot_outfile,
     reorder_colors,
     get_subplot_specs
 )
@@ -55,7 +53,7 @@ from jbottle import JBottle
 class Model():
     """
     A class designed for easy to use and interpret visualizations of JGraphs and JMapper 
-    objects. Inherits from JBottle.
+    objects. 
 
     
     Members 
@@ -75,9 +73,10 @@ class Model():
         -----------
         jmapper:str
           Path to a Jmapper/hyerparameter file 
+        
         """
+        
         assert isfile(jmapper)
-
         with open(jmapper, 'rb') as f:
                 reference = pickle.load(f)
         self._jmapper = reference['jmapper']
@@ -86,20 +85,14 @@ class Model():
 
         # Initialize Inherited JBottle
         self.jbottle = JBottle(self._jmapper)
-        
-        # Average analysis => move to Jbottle 
-        self._node_description = None
-        # TODO: Move this to JBOTTLE 
 
         # As a rule, if it has to do with pure data analysis 
         # then it belongs in JBottle 
         # data analysis utility functions on pd.DataFrames will be written into 
         # data_utils.py 
 
-        # Summary Statistic => Move to JBottle 
-        self._cluster_descriptions = None
-        
-        # Plotting member for visualization => keep in model 
+
+        # Plotting member for visualization  
         self._cluster_positions = None
 
 
@@ -217,9 +210,6 @@ class Model():
         return plt
 
     def visualize_component(self, component, cluster_labels=True):
-        if self._cluster_positions is None:
-            return "Ensure you have run .visualize_model() before attempting to visualize a component"
-
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot()
 
@@ -577,6 +567,8 @@ class Model():
 
 
 #    # Maybe its time we let the old ways die?
+
+
 #     @DeprecationWarning
 #     def visualize_mapper(self):
 #         """

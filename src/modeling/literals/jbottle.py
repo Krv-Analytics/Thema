@@ -1,7 +1,5 @@
 "Object file for the JBottle class.  "
 
-
-
 import os 
 import sys 
 import networkx as nx
@@ -16,8 +14,7 @@ import numpy as np
 
 from data_utils import (
     get_minimal_std,
-    _define_zscore_df,
-    std_zscore_threshold_filter
+    std_zscore_threshold_filter, 
 )
 
 from dotenv import load_dotenv
@@ -100,6 +97,8 @@ class JBottle():
         self._raw = jmapper.tupper.raw
         self._clean = jmapper.tupper.clean
         self._projection = jmapper.tupper.projection
+        
+        #self._global_means = {col_name: [{'raw':self._raw[0]}] }
         self._unclustered = jmapper.get_unclustered_items()
 
     # Dictionaries to aid in group decomposition and item lookup 
@@ -109,9 +108,9 @@ class JBottle():
         node_members = jmapper.nodes
 
 
-        for i in jmapper.components: 
+        for i in jmapper.jgraph.components: 
             cluster_members = {}
-            for node in jmapper.components[i].nodes:
+            for node in jmapper.jgraph.components[i].nodes:
                 cluster_members[node] = node_members[node] 
                 for item in node_members[node]:
                     self._node_lookuptable[item] = self._node_lookuptable[item] + [node]
@@ -146,7 +145,7 @@ class JBottle():
 
 
     
-    def get_items_groupID(self, item_id):
+    def get_items_groupID(self, item_id:int):
         """
         Look up function for finding an item's connected component (ie group)
 
@@ -235,7 +234,7 @@ class JBottle():
         """
         return [node for node in self._group_directory[group_id].keys()]
 
-    def get_nodes_groupID(self, node_id):
+    def get_nodes_groupID(self, node_id:str):
         """
         Returns the node's group id. 
 
@@ -256,51 +255,51 @@ class JBottle():
         return None
     
 
-    def get_nodes_raw_df(self, node_id): 
+    def get_nodes_raw_df(self, node_id:str): 
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_nodes_members(node_id)
-        return self._raw[self._raw['index'].isin(member_items)]
+        return self._raw.iloc[member_items]
     
-    def get_nodes_clean_df(self, node_id):
+    def get_nodes_clean_df(self, node_id:str):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_nodes_members(node_id)
-        return self._clean[self._clean['index'].isin(member_items)]
+        return self._clean.iloc[member_items]
     
-    def get_nodes_projections(self, node_id): 
+    def get_nodes_projections(self, node_id:str): 
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_nodes_members(node_id)
-        projections = []
+        projections = {}
         for item in member_items:
             projections[item] = self._projection[item]
         return projections
     
-    def get_groups_raw_df(self, group_id):
+    def get_groups_raw_df(self, group_id:int):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_groups_members(group_id)
-        return self._raw[self._raw['index'].isin(member_items)]
+        return self._raw.iloc[member_items]
     
 
-    def get_groups_clean_df(self, group_id):
+    def get_groups_clean_df(self, group_id:int):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_groups_members(group_id)
-        return self._clean[self._clean['index'].isin(member_items)]
+        return self._clean.iloc[member_items]
 
-    def get_groups_projections(self, group_id):
+    def get_groups_projections(self, group_id:int):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_groups_members(group_id)
-        projections = []
+        projections = {}
         for item in member_items:
             projections[item] = self._projection[item]
         return projections
@@ -308,7 +307,7 @@ class JBottle():
    
 #   NOTE: Implementations of description functions can be found in data_utils.py 
 
-    def compute_node_description(self, node_id, description_fn=get_minimal_std):
+    def compute_node_description(self, node_id:str, description_fn=get_minimal_std):
         """
         Compute a simple description of each node in the graph.
 
@@ -342,10 +341,10 @@ class JBottle():
         if node_id == -1:
             mask = self._unclustered
         else:
-            mask = self._get_nodes_items(node_id)
+            mask = self.get_nodes_members(node_id)
         
         label = description_fn(
-            df=self.tupper.clean,
+            df=self.clean,
             mask=mask,
             density_cols=cols,
         )
@@ -354,12 +353,12 @@ class JBottle():
     
 
 
-    def compute_group_description(self, group_id, description_fn=get_minimal_std):
+    def compute_group_description(self, group_id:int, description_fn=get_minimal_std):
         """
         Compute a simple description of a policy group.
 
         This function creates a density description based on its member nodes description 
-        in get_node_description(). 
+        in compute_node_description(). 
 
         Parameters:
         -----------
@@ -367,7 +366,7 @@ class JBottle():
             A group's identifier (-1 to get unclustered group)
         
         description_fn: function 
-            A function to be passed to get_node_description()
+            A function to be passed to compute_node_description()
 
         Returns
         -------
@@ -377,12 +376,12 @@ class JBottle():
         tmp = {}
         group_size = 0
         if group_id == -1:
-            unclustered_density = self.get_node_description(-1, description_fn=description_fn)
+            unclustered_density = self.compute_node_description(-1, description_fn=description_fn)
             return {unclustered_density['label']:1}    
         else: 
             member_nodes = self.get_groups_member_nodes(group_id)
             for node in member_nodes:
-                node_density = self.get_node_description(node, description_fn=description_fn)
+                node_density = self.compute_node_description(node, description_fn=description_fn)
                 label = node_density["label"]
                 size = node_density["size"]
                 group_size += size
@@ -396,9 +395,47 @@ class JBottle():
         
 
 
-    def compute_group_identity(self, group_id, eval_fn=std_zscore_threshold_filter):
+    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter):
         """
         TODO: Fill out Doc String
         """
-        # STUB! 
-        return self._group_identifiers
+        tmp = {}
+        if group_id == -1:
+            mask = self._unclustered
+        else: 
+            mask = self.get_groups_members(group_id)
+        
+        cols = np.intersect1d(
+            self._raw.select_dtypes(include=["number"]).columns,
+            self._clean.columns,
+        )
+
+
+
+        labels = eval_fn(
+            df=self.clean,
+            mask=mask,
+            density_cols=cols,
+        )
+        return labels 
+    
+
+    def get_group_descriptions(self, description_fn=get_minimal_std):
+        """
+        TODO: Fill out Doc String
+        """
+        descriptions = {}
+        for group_id in self._group_directory.keys():
+            descriptions[group_id] = self.compute_group_description(group_id=group_id, description_fn=description_fn)
+
+        return descriptions
+    
+    def get_group_identities(self, eval_fn=std_zscore_threshold_filter):
+        """
+        TODO: Fill out Doc String
+        """
+        identities = {}
+        for group_id in self._group_directory.keys():
+            identities[group_id] = self.compute_group_identity(group_id=group_id, eval_fn=eval_fn)
+
+        return identities
