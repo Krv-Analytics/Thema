@@ -55,9 +55,9 @@ def std_zscore_threshold_filter(col, global_means:dict(), std_threshold = 1, zsc
     
 
     if zscore > zscore_threshold and std < std_threshold:
-        return 1 
+        return 0 
     else:
-        return 0
+        return 1
 
 
 

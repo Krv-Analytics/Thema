@@ -108,6 +108,7 @@ class JBottle():
         node_members = jmapper.nodes
 
 
+
         for i in jmapper.jgraph.components: 
             cluster_members = {}
             for node in jmapper.jgraph.components[i].nodes:
@@ -116,6 +117,13 @@ class JBottle():
                     self._node_lookuptable[item] = self._node_lookuptable[item] + [node]
                     self._group_lookuptable[item] = list(set(self._group_lookuptable[item] + [i]))
             self._group_directory[i] = cluster_members
+        
+        self._group_stats = {} 
+        
+        for id in self._group_directory.keys():
+
+            self._group_stats[id] =  {'raw': raw_stats, 'clean': clean_stats}
+        
         
 ########################################################################################
 # 
@@ -395,11 +403,10 @@ class JBottle():
         
 
 
-    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter):
+    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter, *args):
         """
         TODO: Fill out Doc String
         """
-        tmp = {}
         if group_id == -1:
             mask = self._unclustered
         else: 
@@ -410,14 +417,10 @@ class JBottle():
             self._clean.columns,
         )
 
+        sub_df = self.get_groups_clean_df(group_id)  
+        id_table = sub_df.aggregate(eval_fn, args=self._group_stats + args)
 
-
-        labels = eval_fn(
-            df=self.clean,
-            mask=mask,
-            density_cols=cols,
-        )
-        return labels 
+        return id_table.columns[np.argmin(id_table)]
     
 
     def get_group_descriptions(self, description_fn=get_minimal_std):
