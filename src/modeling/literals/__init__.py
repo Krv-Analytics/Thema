@@ -15,5 +15,12 @@ sys.path.append(src + "modeling/literals")
 from jbottle import JBottle
 from model import Model
 
+from data_utils import (
+    get_minimal_std,
+    std_zscore_threshold_filter, 
+    get_best_std_filter,
+    get_best_zscore_filter
+)
+
 
 

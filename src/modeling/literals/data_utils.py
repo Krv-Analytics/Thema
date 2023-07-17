@@ -44,14 +44,18 @@ def get_minimal_std(df: pd.DataFrame, mask: np.array, density_cols=None):
 # 
 ####################################################################################
 
+# Filter functions that assign a value to columns => minimum is taken to be the most 
+# important columns 
 
-
-def std_zscore_threshold_filter(col, global_means:dict(), std_threshold = 1, zscore_threshold = 1): 
+def std_zscore_threshold_filter(col, global_stats:dict(), std_threshold = 1, zscore_threshold = 1): 
     """
     TODO: Fill out Doc String
     """
     std = np.std(col)
-    zscore = (np.mean(col) - global_means[col.name])/std
+    if std ==0:
+        zscore = np.inf 
+    else:
+        zscore = (np.mean(col) - global_stats['clean']['mean'][col.name])/std
     
 
     if zscore > zscore_threshold and std < std_threshold:
@@ -61,7 +65,7 @@ def std_zscore_threshold_filter(col, global_means:dict(), std_threshold = 1, zsc
 
 
 
-def get_best_std_filter(col, global_means:dict()):
+def get_best_std_filter(col, global_stats:dict()):
     """
     TODO: Fill out Doc String
     """
@@ -69,11 +73,11 @@ def get_best_std_filter(col, global_means:dict()):
     return std
 
 
-def get_best_zscore_filter(col, global_means:dict()):
+def get_best_zscore_filter(col, global_stats:dict()):
     """
     TODO: Fill out Doc String
     """
-    zscore = (np.mean(col) - global_means[col.name])/np.std(col)
+    zscore = (np.mean(col) - global_stats[col.name])/np.std(col)
 
     return zscore
 

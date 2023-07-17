@@ -15,6 +15,8 @@ import numpy as np
 from data_utils import (
     get_minimal_std,
     std_zscore_threshold_filter, 
+    get_best_std_filter,
+    get_best_zscore_filter
 )
 
 from dotenv import load_dotenv
@@ -118,11 +120,6 @@ class JBottle():
                     self._group_lookuptable[item] = list(set(self._group_lookuptable[item] + [i]))
             self._group_directory[i] = cluster_members
         
-        self._group_stats = {} 
-        
-        for id in self._group_directory.keys():
-
-            self._group_stats[id] =  {'raw': raw_stats, 'clean': clean_stats}
         
         
 ########################################################################################
@@ -263,6 +260,25 @@ class JBottle():
         return None
     
 
+    def get_global_stats(self): 
+        """
+        TODO: Fill out Doc String 
+        """
+        group_stats = {}
+        raw_stats = pd.DataFrame()
+        clean_stats = pd.DataFrame()
+        for id in self._group_directory.keys():
+            raw_sub_df = self.get_groups_raw_df(id).select_dtypes(include=np.number)
+            raw_stats["std"] = raw_sub_df.std() 
+            raw_stats["mean"] = raw_sub_df.mean()
+
+            clean_sub_df = self.get_groups_clean_df(id)
+            clean_stats["std"] = clean_sub_df.std() 
+            clean_stats["mean"] = clean_sub_df.mean()
+            group_stats[id] =  {'raw': raw_stats, 'clean': clean_stats}
+
+        return group_stats
+    
     def get_nodes_raw_df(self, node_id:str): 
         """
         TODO: Fill out Doc String
@@ -403,24 +419,18 @@ class JBottle():
         
 
 
-    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter, *args):
+    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter,*args, **kwargs):
         """
         TODO: Fill out Doc String
         """
-        if group_id == -1:
-            mask = self._unclustered
-        else: 
-            mask = self.get_groups_members(group_id)
-        
-        cols = np.intersect1d(
-            self._raw.select_dtypes(include=["number"]).columns,
-            self._clean.columns,
-        )
 
+
+        global_stats = self.get_global_stats()[group_id]
         sub_df = self.get_groups_clean_df(group_id)  
-        id_table = sub_df.aggregate(eval_fn, args=self._group_stats + args)
+        id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
-        return id_table.columns[np.argmin(id_table)]
+        min_val = id_table.min()
+        return id_table[id_table == min_val].index.tolist()
     
 
     def get_group_descriptions(self, description_fn=get_minimal_std):
