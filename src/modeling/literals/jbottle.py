@@ -1,25 +1,26 @@
 "Object file for the JBottle class.  "
 
-import os 
-import sys 
+import os
+import sys
 import networkx as nx
 import pandas as pd
 import numpy as np
 
 ########################################################################################
-# 
+#
 #   Handling Local Imports
-# 
+#
 ########################################################################################
 
 from data_utils import (
     get_minimal_std,
-    std_zscore_threshold_filter, 
+    std_zscore_threshold_filter,
     get_best_std_filter,
-    get_best_zscore_filter
+    get_best_zscore_filter,
 )
 
 from dotenv import load_dotenv
+
 load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "jmapping/fitting")
@@ -29,137 +30,131 @@ from jmapper import JMapper
 
 
 ########################################################################################
-# 
+#
 #   JBottle class Implementation
-# 
+#
 ########################################################################################
 
 
-
-class JBottle():
+class JBottle:
     """
-    A bottle for all of your data analysis needs. 
+    A bottle for all of your data analysis needs.
 
-    This class is designed to faciliate the interaction of a graph representation 
-    arising from a JMapper fitting with the user's original data (whether it be raw, 
+    This class is designed to faciliate the interaction of a graph representation
+    arising from a JMapper fitting with the user's original data (whether it be raw,
     clean, or projected). The hope is that this class will contain all necessary structures
-    and functionality for any and all required data analysis, as well as provide utilities 
-    to simplify the visualizations in Model.py. 
+    and functionality for any and all required data analysis, as well as provide utilities
+    to simplify the visualizations in Model.py.
 
     Members
-    ------- 
-    
+    -------
+
     raw: pd.DataFrame
-        A data frame of the raw data used in jmapping and graph generation 
+        A data frame of the raw data used in jmapping and graph generation
 
     clean: pd.DataFrame
         A data frame of the clean data used in jmapping and graph generation
 
-    projection: 
+    projection:
         An np.array of the projected data used in jmapping and graph generation
 
 
-    Member Functions 
+    Member Functions
     ----------------
 
     get_items_groupID(item):
         Returns the group of the selected item (-1 if unclustered)
-    
+
     get_items_nodeID(item):
         Returns the list of of node_ids an item is a member of (-1 if unclustered)
 
-        
+
     get_nodes_members(node_id):
-        Returns the list of member items in a selected node 
-    
+        Returns the list of member items in a selected node
+
     get_groups_members(group_id):
-        Returns the list of member items in a selected group 
+        Returns the list of member items in a selected group
 
     get_groups_member_nodes(group_id):
-        Returns the list of member nodes in a selected group 
-    
-    get_nodes_groupID(node_id)
-        Returns the group of the selected node. 
+        Returns the list of member nodes in a selected group
 
-    
-    TODO: Complete remaining documentation  
+    get_nodes_groupID(node_id)
+        Returns the group of the selected node.
+
+
+    TODO: Complete remaining documentation
 
     """
-    def __init__(self, jmapper): 
-        """
-        Initialization of a JBottle object. 
 
-        Parameters: 
+    def __init__(self, jmapper):
+        """
+        Initialization of a JBottle object.
+
+        Parameters:
         ----------
 
-        jmapper: <jmapper.JMapper> 
+        jmapper: <jmapper.JMapper>
             A jmapper object
-        
+
         """
         self._raw = jmapper.tupper.raw
         self._clean = jmapper.tupper.clean
         self._projection = jmapper.tupper.projection
-        
-        #self._global_means = {col_name: [{'raw':self._raw[0]}] }
+
+        # self._global_means = {col_name: [{'raw':self._raw[0]}] }
         self._unclustered = jmapper.get_unclustered_items()
 
-    # Dictionaries to aid in group decomposition and item lookup 
-        self._group_lookuptable = {key:[] for key in self._raw.index}
-        self._node_lookuptable = {key:[] for key in self._raw.index}        
+        # Dictionaries to aid in group decomposition and item lookup
+        self._group_lookuptable = {key: [] for key in self._raw.index}
+        self._node_lookuptable = {key: [] for key in self._raw.index}
         self._group_directory = {}
         node_members = jmapper.nodes
 
-
-
-        for i in jmapper.jgraph.components: 
+        for i in jmapper.jgraph.components:
             cluster_members = {}
             for node in jmapper.jgraph.components[i].nodes:
-                cluster_members[node] = node_members[node] 
+                cluster_members[node] = node_members[node]
                 for item in node_members[node]:
                     self._node_lookuptable[item] = self._node_lookuptable[item] + [node]
-                    self._group_lookuptable[item] = list(set(self._group_lookuptable[item] + [i]))
+                    self._group_lookuptable[item] = list(
+                        set(self._group_lookuptable[item] + [i])
+                    )
             self._group_directory[i] = cluster_members
-        
-        
-        
-########################################################################################
-# 
-#   Properties
-# 
-########################################################################################
 
+    ########################################################################################
+    #
+    #   Properties
+    #
+    ########################################################################################
 
-    @property 
+    @property
     def raw(self):
-        return self._raw 
-    
+        return self._raw
+
     @property
     def clean(self):
-        return self._clean 
-    
-    @property 
+        return self._clean
+
+    @property
     def projection(self):
         return self._projection
-    
 
-########################################################################################
-# 
-#   Member Functions
-# 
-########################################################################################
+    ########################################################################################
+    #
+    #   Member Functions
+    #
+    ########################################################################################
 
-
-    
-    def get_items_groupID(self, item_id:int):
+    def get_items_groupID(self, item_id: int):
         """
         Look up function for finding an item's connected component (ie group)
 
         Parameters:
         -----------
-        item_id: int 
-            Index of desired look up item from user's raw data frame 
-        
-        Returns: 
+        item_id: int
+            Index of desired look up item from user's raw data frame
+
+        Returns:
         --------
         A list of group ids that the item is a member of (-1 if unclustered)
 
@@ -168,51 +163,51 @@ class JBottle():
             return -1
         else:
             return self._group_lookuptable[item_id]
-    
-    def get_items_nodeID(self, item_id: int): 
+
+    def get_items_nodeID(self, item_id: int):
         """
-        Look up function for finding item's member node 
+        Look up function for finding item's member node
 
         Parameters:
         -----------
-        item_id: int 
-            Index of desired look up item from user's raw data frame 
-        
-        Returns: 
+        item_id: int
+            Index of desired look up item from user's raw data frame
+
+        Returns:
         --------
-        A list of node ids that the item is a member of 
+        A list of node ids that the item is a member of
 
         """
         if item_id in self._unclustered:
             return -1
         else:
-            return self._node_lookuptable[item_id] 
-    
+            return self._node_lookuptable[item_id]
+
     def get_nodes_members(self, node_id: str):
         """
-        Look up function to get members of a node 
+        Look up function to get members of a node
 
         Parameters:
         -----------
-        node_id: str 
-            String identifier of a node 
-        
-        Returns: 
+        node_id: str
+            String identifier of a node
+
+        Returns:
         --------
-        A list of member items 
+        A list of member items
 
         """
         return self._group_directory[self.get_nodes_groupID(node_id)][node_id]
-    
+
     def get_groups_members(self, group_id: int):
         """
-        Look up function to get items within a group 
+        Look up function to get items within a group
 
-        Parameters: 
+        Parameters:
         -----------
         group_id: int
-            Group number of desired connected component 
-        
+            Group number of desired connected component
+
         Returns:
         --------
         A list of the item members for the specified group
@@ -220,18 +215,18 @@ class JBottle():
         """
         member_list = []
         for node in self._group_directory[group_id].keys():
-            member_list = member_list + self._group_directory[group_id][node]   
+            member_list = member_list + self._group_directory[group_id][node]
         return list(set(member_list))
-    
+
     def get_groups_member_nodes(self, group_id: int):
         """
         Look up Function to get nodes within a connected component
 
-        Parameters: 
+        Parameters:
         -----------
         group_id: int
-            Group number of desired connected component 
-        
+            Group number of desired connected component
+
         Returns:
         --------
         A list of node members for the specified group
@@ -239,61 +234,60 @@ class JBottle():
         """
         return [node for node in self._group_directory[group_id].keys()]
 
-    def get_nodes_groupID(self, node_id:str):
+    def get_nodes_groupID(self, node_id: str):
         """
-        Returns the node's group id. 
+        Returns the node's group id.
 
         Parameters:
         -----------
-        node_id : str 
+        node_id : str
             A character ID specifying the node
 
         Returns:
         --------
         A group ID number.
-        
+
         """
         for group in self._group_directory.keys():
             for node in self._group_directory[group].keys():
                 if node == node_id:
                     return group
         return None
-    
 
-    def get_global_stats(self): 
+    def get_global_stats(self):
         """
-        TODO: Fill out Doc String 
+        TODO: Fill out Doc String
         """
         group_stats = {}
         raw_stats = pd.DataFrame()
         clean_stats = pd.DataFrame()
         for id in self._group_directory.keys():
             raw_sub_df = self.get_groups_raw_df(id).select_dtypes(include=np.number)
-            raw_stats["std"] = raw_sub_df.std() 
+            raw_stats["std"] = raw_sub_df.std()
             raw_stats["mean"] = raw_sub_df.mean()
 
             clean_sub_df = self.get_groups_clean_df(id)
-            clean_stats["std"] = clean_sub_df.std() 
+            clean_stats["std"] = clean_sub_df.std()
             clean_stats["mean"] = clean_sub_df.mean()
-            group_stats[id] =  {'raw': raw_stats, 'clean': clean_stats}
+            group_stats[id] = {"raw": raw_stats, "clean": clean_stats}
 
         return group_stats
-    
-    def get_nodes_raw_df(self, node_id:str): 
+
+    def get_nodes_raw_df(self, node_id: str):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_nodes_members(node_id)
         return self._raw.iloc[member_items]
-    
-    def get_nodes_clean_df(self, node_id:str):
+
+    def get_nodes_clean_df(self, node_id: str):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_nodes_members(node_id)
         return self._clean.iloc[member_items]
-    
-    def get_nodes_projections(self, node_id:str): 
+
+    def get_nodes_projections(self, node_id: str):
         """
         TODO: Fill out Doc String
         """
@@ -302,23 +296,22 @@ class JBottle():
         for item in member_items:
             projections[item] = self._projection[item]
         return projections
-    
-    def get_groups_raw_df(self, group_id:int):
+
+    def get_groups_raw_df(self, group_id: int):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_groups_members(group_id)
         return self._raw.iloc[member_items]
-    
 
-    def get_groups_clean_df(self, group_id:int):
+    def get_groups_clean_df(self, group_id: int):
         """
         TODO: Fill out Doc String
         """
         member_items = self.get_groups_members(group_id)
         return self._clean.iloc[member_items]
 
-    def get_groups_projections(self, group_id:int):
+    def get_groups_projections(self, group_id: int):
         """
         TODO: Fill out Doc String
         """
@@ -328,32 +321,31 @@ class JBottle():
             projections[item] = self._projection[item]
         return projections
 
-   
-#   NOTE: Implementations of description functions can be found in data_utils.py 
+    #   NOTE: Implementations of description functions can be found in data_utils.py
 
-    def compute_node_description(self, node_id:str, description_fn=get_minimal_std):
+    def compute_node_description(self, node_id: str, description_fn=get_minimal_std):
         """
         Compute a simple description of each node in the graph.
 
         This function labels each node based on a description function. The description
-        function is used to select a defining column from the original dataset, which will 
-        serve as a representative of the noes identity. Obviously there is a number of ways 
-        to do this, but as a default this computes the most homogenous data column for a each 
-        node. 
+        function is used to select a defining column from the original dataset, which will
+        serve as a representative of the noes identity. Obviously there is a number of ways
+        to do this, but as a default this computes the most homogenous data column for a each
+        node.
 
         Parameters:
         ----------
-        node_id: 
+        node_id:
             A node identifier (-1 for unclustered items)
 
-        description_fn: function 
-            A function that takes a data frame, mask, and density columns and returns 
+        description_fn: function
+            A function that takes a data frame, mask, and density columns and returns
             a column.
 
         Returns:
         --------
-        A dictionary containing the representing column label and the number of items in 
-        the node. 
+        A dictionary containing the representing column label and the number of items in
+        the node.
 
         """
 
@@ -366,7 +358,7 @@ class JBottle():
             mask = self._unclustered
         else:
             mask = self.get_nodes_members(node_id)
-        
+
         label = description_fn(
             df=self.clean,
             mask=mask,
@@ -374,38 +366,40 @@ class JBottle():
         )
         size = len(mask)
         return {"label": label, "size": size}
-    
 
-
-    def compute_group_description(self, group_id:int, description_fn=get_minimal_std):
+    def compute_group_description(self, group_id: int, description_fn=get_minimal_std):
         """
         Compute a simple description of a policy group.
 
-        This function creates a density description based on its member nodes description 
-        in compute_node_description(). 
+        This function creates a density description based on its member nodes description
+        in compute_node_description().
 
         Parameters:
         -----------
         group_id: int
             A group's identifier (-1 to get unclustered group)
-        
-        description_fn: function 
+
+        description_fn: function
             A function to be passed to compute_node_description()
 
         Returns
         -------
         A density description of the group.
-        
+
         """
         tmp = {}
         group_size = 0
         if group_id == -1:
-            unclustered_density = self.compute_node_description(-1, description_fn=description_fn)
-            return {unclustered_density['label']:1}    
-        else: 
+            unclustered_density = self.compute_node_description(
+                -1, description_fn=description_fn
+            )
+            return {unclustered_density["label"]: 1}
+        else:
             member_nodes = self.get_groups_member_nodes(group_id)
             for node in member_nodes:
-                node_density = self.compute_node_description(node, description_fn=description_fn)
+                node_density = self.compute_node_description(
+                    node, description_fn=description_fn
+                )
                 label = node_density["label"]
                 size = node_density["size"]
                 group_size += size
@@ -414,24 +408,24 @@ class JBottle():
                 if label in tmp.keys():
                     size += tmp[label]
                 tmp[label] = size
-        
-            return {label: np.round(size / group_size, 2) for label, size in tmp.items()}
-        
 
+            return {
+                label: np.round(size / group_size, 2) for label, size in tmp.items()
+            }
 
-    def compute_group_identity(self, group_id:int, eval_fn=std_zscore_threshold_filter,*args, **kwargs):
+    def compute_group_identity(
+        self, group_id: int, eval_fn=std_zscore_threshold_filter, *args, **kwargs
+    ):
         """
         TODO: Fill out Doc String
         """
 
-
         global_stats = self.get_global_stats()[group_id]
-        sub_df = self.get_groups_clean_df(group_id)  
+        sub_df = self.get_groups_clean_df(group_id)
         id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
         min_val = id_table.min()
         return id_table[id_table == min_val].index.tolist()
-    
 
     def get_group_descriptions(self, description_fn=get_minimal_std):
         """
@@ -439,16 +433,25 @@ class JBottle():
         """
         descriptions = {}
         for group_id in self._group_directory.keys():
-            descriptions[group_id] = self.compute_group_description(group_id=group_id, description_fn=description_fn)
+            descriptions[group_id] = self.compute_group_description(
+                group_id=group_id, description_fn=description_fn
+            )
 
         return descriptions
-    
-    def get_group_identities(self, eval_fn=std_zscore_threshold_filter):
+
+    def get_group_identities(
+        self,
+        eval_fn=std_zscore_threshold_filter,
+        *args,
+        **kwargs,
+    ):
         """
         TODO: Fill out Doc String
         """
         identities = {}
         for group_id in self._group_directory.keys():
-            identities[group_id] = self.compute_group_identity(group_id=group_id, eval_fn=eval_fn)
+            identities[group_id] = self.compute_group_identity(
+                group_id=group_id, eval_fn=eval_fn, *args, **kwargs
+            )
 
         return identities
