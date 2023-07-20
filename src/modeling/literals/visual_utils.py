@@ -1,14 +1,13 @@
 import math
-import os
 
 
 def get_subplot_specs(n):
     """
     Returns subplot specs based on the number of subplots.
-    
+
     Parameters:
         n (int): number of subplots
-        
+
     Returns:
         specs (list): 2D list of subplot specs
     """
@@ -18,9 +17,8 @@ def get_subplot_specs(n):
     return specs
 
 
+# TODO: Write a consistent and dynamic color assignment function
 
-
-# TODO: Write a consistent and dynamic color assignment function 
 
 def custom_color_scale():
     "Our own colorscale, feel free to use!"
@@ -67,7 +65,6 @@ def custom_color_scale():
         [1.0, "#a50026"],
     ]
 
-
     extended_colorscale = []
     for i in range(100):
         t = i / 99.0
@@ -104,6 +101,7 @@ def custom_color_scale():
 
     return colorscale
 
+
 def reorder_colors(colors):
     n = len(colors)
     ordered = []
@@ -113,77 +111,3 @@ def reorder_colors(colors):
         else:
             ordered.append(colors[n - (i // 2) - 1])
     return ordered
-
-
-
-
-#####################################################################################
-# 
-#   (Unnecessary?) Kepler Mapper HTML Rendering Helper Functions 
-#
-#####################################################################################
-
-#   NOTE: IF you would like to use this functionality, you will need to update  
-#   the sys Path to import Tupper, and set the `root` variable from .env. 
-
-
-# def config_plot_data(tupper: Tupper):
-#     """ "Configure the data in a tupper to agree with KepplerMapper
-#     visualizations.
-#     NOTE: These visualizations are no longer maintained by KepplerMapper
-#     and we do not reccomend using them.
-
-#     Parameters
-#     -----------
-#     tupper: <tupper.Tupper>
-#         A data container that holds raw, cleaned, and projected
-#         versions of user data.
-
-#     Returns
-#     -----------
-#     numeric_data: pd.DataFrame
-#         Only numeric columns in the tupper.
-#     labels : list
-#         List of columns in `numeric_data`
-#     """
-#     temp_data = tupper.clean
-#     string_cols = temp_data.select_dtypes(exclude="number").columns
-#     numeric_data = temp_data.drop(string_cols, axis=1).dropna()
-#     labels = list(numeric_data.columns)
-#     return numeric_data, labels
-
-
-# def mapper_plot_outfile(
-#     hyper_parameters,
-# ):
-#     """Generate output filename for Kepler Mapper HTML Visualizations.
-#     NOTE: These visualizations are no longer maintained by KepplerMapper
-#     and we do not reccomend using them.
-
-#     Parameters
-#     -----------
-#     hyper_parameters: list
-#         A list of hyperparameters used to generate a particular Mapper.
-
-#     Returns
-#     -----------
-#     output_file: str
-#         A unique filename to identify JMapper Visualization.
-#     """
-#     root = env()
-#     n, p, nbors, d, hdbscan_params, min_intersection = hyper_parameters
-#     (
-#         min_cluster_size,
-#         max_cluster_size,
-#     ) = hdbscan_params  # max_cluster size always set to zero, i.e. no upper bound
-#     output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_{max_cluster_size}UMAP_{nbors}Nbors_minD{d}_min_Intersection{min_intersection}.html"
-#     output_dir = os.path.join(root, "data/visualizations/mapper_htmls/")
-
-#     if os.path.isdir(output_dir):
-#         output_file = os.path.join(output_dir, output_file)
-#     else:
-#         os.makedirs(output_dir, exist_ok=True)
-#         output_file = os.path.join(output_dir, output_file)
-
-#     return output_file
-
