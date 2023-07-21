@@ -1,23 +1,21 @@
 # model.py
 
-import os
-import sys
 import math
+import os
 import pickle
+import sys
 from os.path import isfile
-from dotenv import load_dotenv
 
 import matplotlib.pyplot as plt
-import pandas as pd
 import networkx as nx
 import numpy as np
-import seaborn as sns
-import plotly.express as px
+import pandas as pd
 import plotly.graph_objs as go
-
-from plotly.subplots import make_subplots
-from persim import plot_diagrams
 import plotly.io as pio
+import seaborn as sns
+from dotenv import load_dotenv
+from persim import plot_diagrams
+from plotly.subplots import make_subplots
 
 # TODO: Move this to a defaulted argument for the viz functions
 pio.renderers.default = "browser"
@@ -29,15 +27,14 @@ pio.renderers.default = "browser"
 ########################################################################################
 
 
-from visual_utils import custom_color_scale, reorder_colors, get_subplot_specs
+from visual_utils import custom_color_scale, get_subplot_specs, reorder_colors
 
 load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "jmapping/fitting/")
 
-from jmapper import JMapper
 from jbottle import JBottle
-
+from jmapper import JMapper
 
 ########################################################################################
 #
@@ -89,6 +86,11 @@ class THEMA(JBottle):
         self._cluster_positions = None
 
     @property
+    def jmapper(self):
+        """Return the hyperparameters used to fit this model."""
+        return self._jmapper
+
+    @property
     def hyper_parameters(self):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
@@ -113,11 +115,10 @@ class THEMA(JBottle):
         ax = fig.add_subplot()
         color_scale = np.array(custom_color_scale()).T[1]
         # Get Node Coords
-        pos = nx.spring_layout(self.mapper.graph, k=k, seed=seed)
+        pos = nx.spring_layout(self.jmapper.jgraph.graph, k=k, seed=seed)
 
-        
         # Plot and color components
-        components, labels = zip(*self.mapper.components.items())
+        labels, components = zip(*self.jmapper.jgraph.components.items())
         for i, g in enumerate(components):
             nx.draw_networkx(
                 g,
@@ -148,7 +149,7 @@ class THEMA(JBottle):
         ax = fig.add_subplot()
 
         color_scale = np.array(custom_color_scale()).T[1]
-        components, labels = zip(*self.mapper.components.items())
+        labels, components = zip(*self.jmapper.jgraph.components.items())
         for i, g in enumerate(components):
             if i == component:
                 nx.draw_networkx(
@@ -184,17 +185,21 @@ class THEMA(JBottle):
         color_scale = np.array(custom_color_scale()).T[1]
 
         projection, parameters = (
-            self.tupper.projection,
-            self.tupper.get_projection_parameters(),
+            self.projection,
+            self.jmapper.tupper.get_projection_parameters(),
         )
+        print(projection)
         if show_color:
             fig = go.Figure()
-            for g in np.unique(self.cluster_ids):
+
+            for g in self._group_directory.keys():
+                idxs = self.get_groups_members(g)
                 label = f"Policy Group {int(g)}"
                 if g == -1:
                     label = "Unclustered Items"
-                mask = np.where(self.cluster_ids == g, True, False)
-                cluster = projection[mask]
+                # mask = np.where(, True, False)
+                cluster = projection[idxs]
+                print(f"Cluster: {cluster}")
                 fig.add_trace(
                     go.Scatter(
                         x=cluster.T[0],
@@ -206,11 +211,11 @@ class THEMA(JBottle):
                 )
         else:
             fig = go.Figure()
-            for g in np.unique(self.cluster_ids):
+            for g in np.unique(self._group_directory.keys()):
                 label = f"Policy Group {int(g)}"
                 if g == -1:
                     label = "Unclustered Items"
-                mask = np.where(self.cluster_ids == g, True, False)
+                mask = np.where(self._group_directory.keys() == g, True, False)
                 cluster = projection[mask]
                 fig.add_trace(
                     go.Scatter(
@@ -273,44 +278,37 @@ class THEMA(JBottle):
             key: colors[i % len(colors)]
             for i, key in enumerate(
                 set.union(
-                    *[
-                        set(v["density"].keys())
-                        for v in self.cluster_descriptions.values()
-                    ]
+                    *[set(v.keys()) for v in self.get_group_descriptions().values()]
                 )
             )
         }
-        cluster_descriptions = self.cluster_descriptions
-        if cluster_descriptions[-1]["size"] == 0:
-            cluster_descriptions.pop(-1)
+        group_descriptions = self.get_group_descriptions()
 
-        num_rows = math.ceil(max(len(cluster_descriptions) / 3, 1))
-        print(len(cluster_descriptions))
-        specs = get_subplot_specs(len(cluster_descriptions))
+        num_rows = math.ceil(max(len(group_descriptions) / 3, 1))
+        specs = get_subplot_specs(len(group_descriptions))
 
-        dict_2 = {i: f"Group {i}" for i in range(len(cluster_descriptions))}
-        dict_2 = {-1: "Outliers", **dict_2}
+        groups = {i: f"Group {i}" for i in range(len(group_descriptions))}
+        groups = {-1: "Outliers", **groups}
         fig = make_subplots(
             rows=num_rows,
             cols=3,
             specs=specs,
             subplot_titles=[
-                f"<b>{dict_2[key]}</b>: {cluster_descriptions[key]['size']} Members"
-                for key in cluster_descriptions
+                f"<b>{groups[group]}</b>: {len(self.get_groups_members(group))} Members"
+                for group in group_descriptions.keys()
             ],
             horizontal_spacing=0.1,
         )
 
-        for i, key in enumerate(cluster_descriptions):
-            density = cluster_descriptions[key]["density"]
+        for group in group_descriptions.keys():
 
-            labels = list(density.keys())
-            sizes = list(density.values())
+            labels = list(group_descriptions[group].keys())
+            sizes = list(group_descriptions[group].values())
 
-            # labels_list = [labels.get(item, item) for item in labels]
+            print(f"sizes: {sizes}")
 
-            row = i // 3 + 1
-            col = i % 3 + 1
+            row = group // 3 + 1
+            col = group % 3 + 1
             fig.add_trace(
                 go.Pie(
                     labels=labels,
@@ -318,7 +316,7 @@ class THEMA(JBottle):
                     values=sizes,
                     textposition="outside",
                     marker_colors=[color_map[l] for l in labels],
-                    scalegroup=key,
+                    scalegroup=group,
                     hole=0.5,
                 ),
                 row=row,
@@ -367,9 +365,16 @@ class THEMA(JBottle):
             target = target[numeric_cols]
             show_targets = True
 
-        df = self.tupper.raw
-        df["cluster_IDs"] = self.cluster_ids
+        df = self.raw
+        df["cluster_IDs"] = [
+            self.get_items_groupID(item)[0]
+            if type(self.get_items_groupID(item)) == list
+            else self.get_items_groupID(item)
+            for item in df.index
+            if item != -1
+        ]
 
+        print(df["cluster_IDs"])
         if len(cols) > 0:
             cols.append("cluster_IDs")
             df = df.loc[:, df.columns.isin(cols)]
@@ -384,18 +389,14 @@ class THEMA(JBottle):
         row = 1
         col = 1
 
-        if -1.0 not in list(df.cluster_IDs.unique()):
-            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())))}
-        else:
-            dict_2 = {i: str(i) for i in range(len(list(df.cluster_IDs.unique())) - 1)}
-        dict_2 = {-1: "Outliers", **dict_2}
+        groups = list(self._group_directory.keys())
 
         for column in df.columns.drop("cluster_IDs"):
-            for pg in list(dict_2.keys()):
+            for group in list(groups):
                 fig.add_trace(
                     go.Box(
-                        y=self.get_cluster_dfs()[f"group_{pg}"][column],
-                        name=dict_2[pg],
+                        y=self.get_groups_raw_df(group)[column],
+                        name=groups[group],
                         jitter=0.3,
                         showlegend=False,
                         whiskerwidth=0.6,
@@ -403,7 +404,7 @@ class THEMA(JBottle):
                         line_width=1,
                         boxmean=True,
                         # hovertext=df["companyName"],
-                        marker=dict(color=custom_color_scale()[int(pg)][1]),
+                        marker=dict(color=custom_color_scale()[int(group)][1]),
                     ),
                     row=row,
                     col=col,
@@ -475,7 +476,7 @@ class THEMA(JBottle):
         """
 
         ax = sns.histplot(
-            self.mapper.curvature,
+            self.jmapper.jgraph.curvature,
             discrete=True,
             stat="probability",
             kde=kde,
@@ -488,10 +489,17 @@ class THEMA(JBottle):
     def visualize_persistence_diagram(self):
         """Visualize persistence diagrams of a mapper graph
         using functionality from Persim."""
-        assert len(self.mapper.diagram) > 0, "Persistence Diagram is empty."
-        persim_diagrams = [
-            np.asarray(self.mapper.diagram[0]._pairs),
-            np.asarray(self.mapper.diagram[1]._pairs),
-        ]
-        return plot_diagrams(persim_diagrams, show=True)
+        diagram = self.jmapper.jgraph.diagram
+        # TODO: put in catch for weird diagrams...
+        assert len(diagram) > 0, "Persistence Diagram is empty."
 
+        persim_diagrams = [
+            np.asarray(diagram[0]._pairs),
+            np.asarray(diagram[1]._pairs),
+        ]
+        try:
+            fig = plot_diagrams(persim_diagrams, show=True)
+        except ValueError:
+            print("Weird Diagram")
+            fig = 0
+        return fig
