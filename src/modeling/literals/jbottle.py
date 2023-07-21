@@ -17,6 +17,7 @@ from data_utils import (
     std_zscore_threshold_filter,
     get_best_std_filter,
     get_best_zscore_filter,
+    error,
 )
 
 from dotenv import load_dotenv
@@ -455,3 +456,34 @@ class JBottle:
             )
 
         return identities
+    
+
+
+    def target_matching(
+        self,
+        target: pd.DataFrame,
+        col_filter: list = None,
+    ):
+        """
+
+        """
+
+        target_cols = target.select_dtypes(include=np.number).dropna(axis=1).columns
+        if col_filter:
+            raw_cols = col_filter
+        else:
+            raw_cols = self.raw.select_dtypes(include=np.number).columns
+
+        scores = {}
+        for group_id in self._group_directory.keys():
+            group_data = self.get_groups_raw_df(group_id)
+            score = 0
+            for col in target_cols:
+                if col in raw_cols:
+                    x = target[col][0]
+                    mu = group_data[col].mean()
+                    score += error(x, mu)
+            scores[group_id] = score
+
+        min_index = min(scores, key=scores.get)
+        return scores, min_index

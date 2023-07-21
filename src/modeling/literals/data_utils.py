@@ -89,27 +89,5 @@ def get_best_zscore_filter(col, global_stats:dict()):
 ####################################################################################
 
 
-#NOTE: Unneccessary? 
-def _define_zscore_df(jmap):
-    df_builder = pd.DataFrame()
-    dfs = jmap.tupper.clean
-
-    column_to_drop = [col for col in dfs.columns if dfs[col].nunique() == 1]
-    dfs = dfs.drop(column_to_drop, axis=1)
-
-    dfs['cluster_IDs']=(list(jmap.cluster_ids))
-
-    #loop through all policy group dataframes
-    for group in list(dfs['cluster_IDs'].unique()):
-        zscore0 = pd.DataFrame()
-        group0 = dfs[dfs['cluster_IDs']==group].drop(columns={'cluster_IDs'})
-        #loop through all columns in a policy group dataframe
-        for col in group0.columns:
-            if col != "cluster_IDs":
-                mean = dfs[col].mean()
-                std = dfs[col].std()
-                zscore0[col] = group0[col].map(lambda x: (x-mean)/std)
-        zscore0_temp = zscore0.copy()
-        zscore0_temp['cluster_IDs'] = group
-        df_builder = pd.concat([df_builder,zscore0_temp])
-    return df_builder
+def error(x, mu):
+    return abs((x - mu) / mu)

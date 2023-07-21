@@ -14,7 +14,7 @@ from jmapper import JMapper
 
 sys.path.append(src + "modeling/literals")
 from jbottle import JBottle
-from model import THEMA
+from thema import THEMA
 
 from data_utils import (
     get_minimal_std,

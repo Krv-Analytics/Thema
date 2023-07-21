@@ -41,7 +41,7 @@ from jbottle import JBottle
 
 ########################################################################################
 #
-#   Model class Implementation
+#   THEMA class Implementation
 #
 ########################################################################################
 
@@ -54,7 +54,6 @@ class THEMA(JBottle):
 
     Members
     -------
-
 
 
     Member Functions
@@ -94,44 +93,6 @@ class THEMA(JBottle):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
 
-    def target_matching(
-        self,
-        target: pd.DataFrame,
-        remove_unclustered: bool = True,
-        col_filter: list = None,
-    ):
-
-        self.index_dict = self.get_cluster_dfs()
-        # Remove Unclustered? -> at least for demo
-        if remove_unclustered and len(self.unclustered_items) > 0:
-            self.index_dict.pop("group_-1")
-
-        target_cols = target.select_dtypes(include=np.number).dropna(axis=1).columns
-        if col_filter:
-            raw_cols = col_filter
-        else:
-            raw_cols = self.tupper.raw.select_dtypes(include=np.number).columns
-
-        def error(x, mu):
-            return abs((x - mu) / mu)
-
-        scores = {}
-        for group in self.index_dict:
-            group_data = self.index_dict[group]
-            score = 0
-            for col in target_cols:
-                if col in raw_cols:
-                    x = target[col][0]
-                    mu = group_data[col].mean()
-                    score += error(x, mu)
-            scores[group] = score
-
-        min_index = min(scores, key=scores.get)
-        return scores, min_index
-
-    # Wut
-    def fib(self, i, g, colorscale):
-        return colorscale[i]
 
     def visualize_model(self, k=None, seed=6):
         """
@@ -154,14 +115,14 @@ class THEMA(JBottle):
         # Get Node Coords
         pos = nx.spring_layout(self.mapper.graph, k=k, seed=seed)
 
+        
         # Plot and color components
         components, labels = zip(*self.mapper.components.items())
         for i, g in enumerate(components):
             nx.draw_networkx(
                 g,
                 pos=pos,
-                # node_color=color_scale[i],
-                node_color=self.fib(i, g, color_scale),
+                node_color=color_scale[i],
                 node_size=100,
                 font_size=6,
                 with_labels=False,
@@ -534,39 +495,3 @@ class THEMA(JBottle):
         ]
         return plot_diagrams(persim_diagrams, show=True)
 
-
-##########################################################################################
-#
-#   Unsupported Member functions
-#
-##########################################################################################
-
-
-#    # Maybe its time we let the old ways die?
-
-
-#     @DeprecationWarning
-#     def visualize_mapper(self):
-#         """
-#         Plot using the Keppler Mapper html functionality.
-
-#         NOTE: These visualizations are no longer maintained by KepplerMapper
-#         and we do not reccomend using them.
-#         """
-#         assert len(self.complex) > 0, "Model needs a `fitted` mapper."
-#         kepler = self.mapper.mapper
-#         path_html = mapper_plot_outfile(self.hyper_parameters)
-#         numeric_data, labels = config_plot_data(self.tupper)
-
-#         colorscale = custom_color_scale()
-#         # Use Kmapper Visualization
-#         kepler.visualize(
-#             self.mapper.complex,
-#             node_color_function=["mean", "median", "std", "min", "max"],
-#             color_values=numeric_data,
-#             color_function_name=labels,
-#             colorscale=colorscale,
-#             path_html=path_html,
-#         )
-
-#         print(f"Go to {path_html} for a visualization of your JMapper!")
