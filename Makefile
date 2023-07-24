@@ -37,7 +37,7 @@ projections:
 	cd scripts/bash && ./projector.sh
 
 summarize-projections:
-	poetry run python src/summarizing/projection_summarizer.py
+	poetry run python src/modeling/synopsis/projection_summarizer.py
 
 jmaps: 
 	cd scripts/bash && ./jmap_generator.sh 

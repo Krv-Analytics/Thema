@@ -14,13 +14,14 @@ root = os.getenv("root")
 sys.path.append(root + "src/jmapping/fitting/")
 
 from jmapper import JMapper
-#from jmap_helper import env
+
+# from jmap_helper import env
 
 # Configure paths
-#root = env()
+# root = env()
 
 
-def select_jmaps(dir, keys, clustering, n):
+def select_jmaps(dir, keys, clustering, n, selection_fn):
     """
     Choose the best covered jmap from a set of equivalency classes.
     These equivalency classes are based on an Agglomerative clustering
@@ -48,7 +49,7 @@ def select_jmaps(dir, keys, clustering, n):
     selection = {}
     for key in subgroups.keys():
         subgroup = subgroups[key]
-        best_jmap = get_best_covered_jmap(subgroup)
+        best_jmap = selection_fn(subgroup)
         selection[key] = {"jmap": best_jmap, "cluster_size": len(subgroup)}
     return selection
 
@@ -173,12 +174,39 @@ def get_best_covered_jmap(jmaps):
 
     coverages = []
     for file in jmaps:
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             reference = pickle.load(f)
-        jmapper = reference['jmapper']
+        jmapper = reference["jmapper"]
         coverages.append(len(jmapper.get_unclustered_items()))
     assert len(coverages) == len(jmaps)
     best_jmap = jmaps[np.argmin(coverages)]
+    return best_jmap
+
+
+def get_most_nodes_jmap(jmaps):
+    """
+    Returns the saved jmap with the highest coverage percentage.
+
+    Parameters:
+    -----------
+    jmaps: list
+        A list of saved jmap file locations.
+
+    Returns:
+    --------
+    best_jmap: str
+        The file location of the saved jmap with the highest coverage percentage.
+    """
+
+    num_nodes = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+
+        num_nodes.append(len(jmapper.nodes))
+    assert len(num_nodes) == len(jmaps)
+    best_jmap = jmaps[np.argmax(num_nodes)]
     return best_jmap
 
 
@@ -205,9 +233,9 @@ def get_viable_jmaps(dir, n: int, coverage_filter: float):
     jmaps = []
     for file in files:
         file = os.path.join(dir, file)
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             reference = pickle.load(f)
-        jmapper = reference['jmapper']
+        jmapper = reference["jmapper"]
         N = len(jmapper.tupper.clean)
         num_unclustered_items = len(jmapper.get_unclustered_items())
         if num_unclustered_items / N <= 1 - coverage_filter:

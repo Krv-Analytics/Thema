@@ -17,7 +17,7 @@ src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "jmapping/")
 
-from jmapping.jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
+from jmapping.selecting.jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
 
 
 def plot_mapper_histogram(dir, coverage_filter=0.8):
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/jmappers/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     group_ranks = []
     for folder in os.listdir(dir):

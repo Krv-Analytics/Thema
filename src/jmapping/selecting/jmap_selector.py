@@ -12,6 +12,8 @@ import numpy as np
 from jmap_selector_helper import (
     read_graph_clustering,
     select_jmaps,
+    get_best_covered_jmap,
+    get_most_nodes_jmap,
 )
 
 load_dotenv()
@@ -83,11 +85,11 @@ if __name__ == "__main__":
             cluster_dir, metric=args.metric, n=n
         )
 
-        rel_jmap_dir = (
-            "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
-        )
+        rel_jmap_dir = "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
         jmap_dir = os.path.join(root, rel_jmap_dir)
-        selection = select_jmaps(jmap_dir, keys, clustering, n)
+        selection = select_jmaps(
+            jmap_dir, keys, clustering, n, selection_fn=get_most_nodes_jmap
+        )
 
         jmap_file = (
             f"equivalence_class_candidates_{args.metric}_{distance_threshold}DT.pkl"
