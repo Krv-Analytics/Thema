@@ -68,9 +68,13 @@ if __name__ == "__main__":
     with open(raw_data_path, "rb") as raw_data:
         df = pickle.load(raw_data)
     assert (
-        args.scaler == "standard_scaler"
+        args.scaler in ["standard_scaler", "None"]
     ), "Currently we only support `StandardScaler`"
-    scaler = StandardScaler()
+    
+    if args.scaler == "None":
+        scaler = None 
+    else:
+        scaler = StandardScaler()
 
     # Clean
     clean_data = data_cleaner(

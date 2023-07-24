@@ -305,8 +305,6 @@ class THEMA(JBottle):
             labels = list(group_descriptions[group].keys())
             sizes = list(group_descriptions[group].values())
 
-            print(f"sizes: {sizes}")
-
             row = group // 3 + 1
             col = group % 3 + 1
             fig.add_trace(
@@ -374,7 +372,6 @@ class THEMA(JBottle):
             if item != -1
         ]
 
-        print(df["cluster_IDs"])
         if len(cols) > 0:
             cols.append("cluster_IDs")
             df = df.loc[:, df.columns.isin(cols)]

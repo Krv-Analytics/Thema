@@ -40,7 +40,14 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     If encoding is not one of "integer" or "one_hot".
     """
     # Dropping columns
-    cleaned_data = data.drop(columns=column_filter)
+    try:
+        cleaned_data = data.drop(columns=column_filter)
+    except: 
+        print("\n\n             \
+            Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns. \n       \
+            Defaulting to no dropped columns                      \
+              \n\n")
+        cleaned_data = data 
 
     # Encode
     assert encoding in [
@@ -63,9 +70,10 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
             cleaned_data[column] = encoder(vals)
 
     # Scale
-    cleaned_data = pd.DataFrame(
+    if scaler is not None:
+        cleaned_data = pd.DataFrame(
         scaler.fit_transform(cleaned_data), columns=list(cleaned_data.columns)
-    ).dropna()
+        ).dropna()
 
     return cleaned_data
 
@@ -112,7 +120,7 @@ def clean_data_filename(run_name="My_Sim", scaler=None, encoding="integer", filt
         A filename for the cleaned and preprocessed data.
 
     """
-    if scaler is None:
+    if scaler== "None":
         scaler = ""
     else:
         scaler = "standard_scaled"
