@@ -104,6 +104,13 @@ if __name__ == "__main__":
         help="Percentage overlap of cubes in the cover.",
     )
     parser.add_argument(
+        "-w",
+        "--weighted",
+        default=params_json["jmap_weighted_graph"],
+        type=bool,
+        help="If true, return a weighted graph based on node intersection.",
+    )
+    parser.add_argument(
         "-I",
         "--min_intersection",
         default=1,
@@ -129,7 +136,7 @@ if __name__ == "__main__":
     min_intersections = args.min_intersection
     hdbscan_params = args.min_cluster_size, args.max_cluster_size
 
-    # GENERATE jmapS
+    # GENERATE jmaps
     # Given our hyperparameters, we generate graphs, curvature,
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
@@ -140,6 +147,7 @@ if __name__ == "__main__":
         perc_overlap=p,
         hdbscan_params=hdbscan_params,
         min_intersection=args.min_intersection,
+        weighted=args.weighted,
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
     output = {"jmapper": jmapper}

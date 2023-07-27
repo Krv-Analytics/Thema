@@ -38,6 +38,7 @@
     "jmap_minIntersection": [
         1,2,3,4
     ],
+    "jmap_weighted_graph": true,
     "jmap_random_seed": 42,
     "coverage_filter": 0.75,
     "dendrogram_metric": "landscape",

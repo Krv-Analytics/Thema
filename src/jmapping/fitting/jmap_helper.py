@@ -15,13 +15,13 @@ from jgraph import JGraph
 from nammu.curvature import ollivier_ricci_curvature
 
 
-
 def jmap_generator(
     tupper,
     n_cubes,
     perc_overlap,
     hdbscan_params,
     min_intersection,
+    weighted=False,
 ):
     """
     Fit a graph jmap using JMapper.
@@ -54,18 +54,18 @@ def jmap_generator(
     Returns
     -----------
     jmapper : <jmapper.JMapper>
-        A jmapper object if associated simplicial complex and jgraph is non-empty 
-    --
-   
-    -1: Empty graph error code 
-        The min intersection value resulted in an edgeless graph 
-    
+        A jmapper object if associated simplicial complex and jgraph is non-empty
     --
 
-    -2: Empty simplicial complex error code 
+    -1: Empty graph error code
+        The min intersection value resulted in an edgeless graph
+
+    --
+
+    -2: Empty simplicial complex error code
         The parameters for the kmapper fitting resulted in an empty simplicial complex
     """
-    # 
+    #
 
     # HDBSCAN
     min_cluster_size, max_cluster_size = hdbscan_params
@@ -74,20 +74,22 @@ def jmap_generator(
         max_cluster_size=max_cluster_size,
     )
     # Configure JMapper
-    jmapper = JMapper(tupper, n_cubes, perc_overlap, clusterer)  
+    jmapper = JMapper(tupper, n_cubes, perc_overlap, clusterer)
 
     if len(jmapper.complex["links"]) > 0:
         jmapper.min_intersection = min_intersection
-        jmapper.jgraph = JGraph(jmapper.nodes, min_intersection)
-            # Compute Curvature and Persistence Diagram
-        if(jmapper.jgraph.is_EdgeLess):  
-            return -1 # Empty Graph error code 
+        jmapper.jgraph = JGraph(
+            jmapper.nodes, weighted=weighted, min_intersection=min_intersection
+        )
+        # Compute Curvature and Persistence Diagram
+        if jmapper.jgraph.is_EdgeLess:
+            return -1  # Empty Graph error code
         else:
             jmapper.jgraph.curvature = ollivier_ricci_curvature
             jmapper.jgraph.calculate_homology()
             return jmapper
     else:
-        return -2 # Empty Simplicial Complex Code 
+        return -2  # Empty Simplicial Complex Code
 
 
 def generate_jmap_filename(args, n_neighbors, min_dist, min_intersection):
@@ -124,7 +126,7 @@ def generate_jmap_filename(args, n_neighbors, min_dist, min_intersection):
         args.perc_overlap,
         args.n_cubes,
     )
-    
+
     output_file = f"mapper_ncubes{n}_{int(p*100)}perc_hdbscan{min_cluster_size}_UMAP_{n_neighbors}Nbors_minDist{min_dist}_min_int{min_intersection}.pkl"
 
     return output_file
@@ -149,4 +151,3 @@ def script_paths(paths):
         abs_path = os.path.join(scripts_dir, rel_path)
         new_paths.append(abs_path)
     return new_paths
-

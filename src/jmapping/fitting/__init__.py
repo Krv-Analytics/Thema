@@ -11,6 +11,6 @@ sys.path.append(src + "jmapping/fitting")
 from fitting.jmapper import JMapper
 from fitting.tupper import Tupper
 from fitting.jgraph import JGraph
-from fitting.nerve import HyperNerve
+from fitting.nerve import Nerve
 from fitting.nammu import *
 from fitting.jmap_helper import *
