@@ -95,7 +95,6 @@ class THEMA(JBottle):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
 
-
     def visualize_model(self, k=None, seed=6):
         """
         Visualize the clustering as a network. This function plots
@@ -142,7 +141,7 @@ class THEMA(JBottle):
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
         self._cluster_positions = pos
-        return plt
+        return ax
 
     def visualize_component(self, component, cluster_labels=True):
         fig = plt.figure(figsize=(8, 8))
