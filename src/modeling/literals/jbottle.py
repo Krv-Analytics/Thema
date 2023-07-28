@@ -422,7 +422,8 @@ class JBottle:
         """
 
         global_stats = self.get_global_stats()[group_id]
-        sub_df = self.get_groups_clean_df(group_id)
+        numeric_columns = self.get_groups_raw_df(group_id).select_dtypes(include=np.number).columns
+        sub_df = self.get_groups_clean_df(group_id)[numeric_columns]
         id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
         min_val = id_table.min()
