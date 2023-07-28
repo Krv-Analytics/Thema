@@ -17,7 +17,7 @@ class JGraph:
 
     """
 
-    def __init__(self, nodes: dict(), weighted: bool = True, min_intersection=None):
+    def __init__(self, nodes: dict(), min_intersection=-1):
         """
         Constructor for the JGraph Class.
 
@@ -39,7 +39,6 @@ class JGraph:
         ), "You must first generate a non-empty Simplicial Complex \
         with `fit()` before you can convert to Networkx "
 
-        self.weighted = weighted
         self.min_intersection = min_intersection
         self.graph = nx.Graph()
         self.nerve = Nerve(
@@ -55,7 +54,8 @@ class JGraph:
             self._is_Edgeless = False
             self.graph.add_nodes_from(nodes)
             nx.set_node_attributes(self.graph, nodes, "membership")
-            if self.weighted:
+            # Weighted Graphs based on overlap
+            if self.min_intersection == -1:
                 self.graph.add_weighted_edges_from(edges)
             else:
                 self.graph.add_edges_from(edges)
@@ -102,7 +102,7 @@ class JGraph:
 
         """
         weight = None
-        if self.weighted:
+        if self.min_intersection == -1:
             weight = "weight"
 
         try:

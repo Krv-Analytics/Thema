@@ -104,16 +104,9 @@ if __name__ == "__main__":
         help="Percentage overlap of cubes in the cover.",
     )
     parser.add_argument(
-        "-w",
-        "--weighted",
-        default=params_json["jmap_weighted_graph"],
-        type=bool,
-        help="If true, return a weighted graph based on node intersection.",
-    )
-    parser.add_argument(
         "-I",
         "--min_intersection",
-        default=1,
+        default=-1,
         type=int,
         help="Minimum intersection reuired between cluster elements to \
             form an edge in the graph representation.",
@@ -147,7 +140,6 @@ if __name__ == "__main__":
         perc_overlap=p,
         hdbscan_params=hdbscan_params,
         min_intersection=args.min_intersection,
-        weighted=args.weighted,
     )
     # Unpack each graph (based on min_intersection) into it's own output file.
     output = {"jmapper": jmapper}

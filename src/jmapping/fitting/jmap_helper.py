@@ -21,7 +21,6 @@ def jmap_generator(
     perc_overlap,
     hdbscan_params,
     min_intersection,
-    weighted=False,
 ):
     """
     Fit a graph jmap using JMapper.
@@ -79,7 +78,8 @@ def jmap_generator(
     if len(jmapper.complex["links"]) > 0:
         jmapper.min_intersection = min_intersection
         jmapper.jgraph = JGraph(
-            jmapper.nodes, weighted=weighted, min_intersection=min_intersection
+            jmapper.nodes,
+            min_intersection=min_intersection,
         )
         # Compute Curvature and Persistence Diagram
         if jmapper.jgraph.is_EdgeLess:

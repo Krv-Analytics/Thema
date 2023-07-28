@@ -32,7 +32,7 @@
         0.7
     ],
     "jmap_minIntersection": [
-        1
+        -1 
     ],
     "jmap_weighted_graph": true,
     "jmap_random_seed": 42,

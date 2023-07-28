@@ -18,23 +18,15 @@ class Nerve:
         Not
     """
 
-    def __init__(self, weighted: bool = True, min_intersection=None):
-        self.weighted = weighted
+    def __init__(self, min_intersection: int = -1):
         self.min_intersection = min_intersection
 
-        if not self.weighted:
-            assert (
-                type(self.min_intersection) is int
-            ), "For non-weighted graphs you must specify an integer `min_intersection`"
-
     def __repr__(self):
-        return (
-            f"Nerve(weighted={self.weighted},min_intersection={self.min_intersection})"
-        )
+        return f"Nerve(min_intersection={self.min_intersection})"
 
     def compute(self, nodes):
         # TODO: Refactor this! Need to deal with >= for min intersection, and how to include the weights
-        if self.weighted:
+        if self.min_intersection == -1:
             return self.compute_weighted_edges(nodes)
         else:
             return self.compute_unweighted_edges(nodes)
