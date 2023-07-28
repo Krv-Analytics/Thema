@@ -7,9 +7,9 @@ load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "jmapping/fitting")
-
-from fitting.jmapper import JMapper
+sys.path.append(src + "jmapping")
 from fitting.tupper import Tupper
+from fitting.jmapper import JMapper
 from fitting.jgraph import JGraph
 from fitting.nerve import Nerve
 from fitting.nammu import *

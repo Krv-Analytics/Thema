@@ -90,57 +90,55 @@ if __name__ == "__main__":
         + f"/jmap_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
     )
     distance_dir = os.path.join(root, rel_distance_dir)
-    try:
-        keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
+    # try:
+    keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
+    
+    assert len(distances)>1, "ERROR: You have do not have enough jmaps for comparison."
         
-        assert len(distances)>1
-            
-        # Fit Hierarchical Clustering
-        jmap = cluster_jmaps(
-            distances,
-            p=args.dendrogram_levels,
-            metric=args.metric,
-            num_policy_groups=n,
-            distance_threshold=args.distance_threshold,
-            plot=not args.save,
+    # Fit Hierarchical Clustering
+    jmap = cluster_jmaps(
+        distances,
+        p=args.dendrogram_levels,
+        metric=args.metric,
+        num_policy_groups=n,
+        distance_threshold=args.distance_threshold,
+        plot=not args.save,
+    )
+
+    results = {
+        "keys": keys,
+        "jmap": jmap,
+        "distance_threshold": args.distance_threshold,
+    }
+    if args.save:
+        jmap_file = f"curvature_{args.metric}_clustering_jmap.pkl"
+
+        out_dir_message = f"{jmap_file} successfully written."
+
+        rel_outdir = (
+            "data/"
+            + params_json["Run_Name"]
+            + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
         )
+        output_dir = os.path.join(root, rel_outdir)
 
-        results = {
-            "keys": keys,
-            "jmap": jmap,
-            "distance_threshold": args.distance_threshold,
-        }
-        if args.save:
-            jmap_file = f"curvature_{args.metric}_clustering_jmap.pkl"
+        # Check if output directory already exists
+        if os.path.isdir(output_dir):
+            jmap_file = os.path.join(output_dir, jmap_file)
 
-            out_dir_message = f"{jmap_file} successfully written."
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            jmap_file = os.path.join(output_dir, jmap_file)
+        with open(jmap_file, "wb") as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-            rel_outdir = (
-                "data/"
-                + params_json["Run_Name"]
-                + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
+        if args.Verbose:
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------- \n\n"
             )
-            output_dir = os.path.join(root, rel_outdir)
+            print(f"{out_dir_message}")
 
-            # Check if output directory already exists
-            if os.path.isdir(output_dir):
-                jmap_file = os.path.join(output_dir, jmap_file)
-
-            else:
-                os.makedirs(output_dir, exist_ok=True)
-                jmap_file = os.path.join(output_dir, jmap_file)
-            with open(jmap_file, "wb") as handle:
-                pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-            if args.Verbose:
-                print("\n")
-                print(
-                    "-------------------------------------------------------------------------------- \n\n"
-                )
-                print(f"{out_dir_message}")
-
-                print(
-                    "\n\n -------------------------------------------------------------------------------- "
-                )
-    except AssertionError:
-        assert 1 == 1
+            print(
+                "\n\n -------------------------------------------------------------------------------- "
+            )

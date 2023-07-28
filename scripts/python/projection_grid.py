@@ -1,12 +1,19 @@
 import json
 import logging
 import os
-import subprocess
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
+from dotenv import load_dotenv
 
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
+from termcolor import colored
+
+load_dotenv()
+root = os.getenv("root")
+sys.path.append(root + "logging/")
+from gridTracking_helper import subprocess_scheduler
 
 if __name__ == "__main__":
 
@@ -27,6 +34,8 @@ if __name__ == "__main__":
     projector = params_json["projector"]
 
     projector_script = os.path.join(src, "processing/projecting/projector.py")
+    
+    
     log.info("Computing Projection Grid Search!")
     log.info(
         "--------------------------------------------------------------------------------"
@@ -57,16 +66,9 @@ if __name__ == "__main__":
     ## GRID SEARCH PROJECTIONS
     for n in N_neighbors:
         for d in min_Dists:
-            cmd = ["python", f"{projector_script}", f"-n {n}", f"-d {d}"]
+            cmd = ["python", f"{projector_script}", f"-n {n}", f"-d {d}", f"--projector={projector}"]
             subprocesses.append(cmd)
 
-    # Running processes in Parallel 
-    # TODO: optimize based on max_workers 
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
-        # Setting Progress bar to track number of completed subprocesses 
-        progress_bar = tqdm(total=num_loops, desc='Progress', unit='subprocess')
-        for future in as_completed(futures):
-        # Update the progress bar for each completed subprocess
-            progress_bar.update(1)
-    progress_bar.close()
+    
+    subprocess_scheduler(subprocesses, num_loops, "SUCCESS: Completed projections grid.")
+    

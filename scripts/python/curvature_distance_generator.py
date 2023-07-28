@@ -12,12 +12,18 @@ from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 from tqdm import tqdm
 
+
+
 load_dotenv()
 src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "jmapping/")
 
 from jmapping.selecting.jmap_selector_helper import unpack_policy_group_dir
+
+root = os.getenv("root")
+sys.path.append(root + "logging/")
+from gridTracking_helper import subprocess_scheduler
 
 
 def plot_curvature_histogram(dir):
@@ -97,13 +103,5 @@ if __name__ == "__main__":
             ]
         )
 
-    # Running processes in Parallel
-    # TODO: optimize based on max_workers
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
-        # Setting Progress bar to track number of completed subprocesses
-        progress_bar = tqdm(total=num_loops, desc="Progress", unit="subprocess")
-        for future in as_completed(futures):
-            # Update the progress bar for each completed subprocess
-            progress_bar.update(1)
-        progress_bar.close()
+    # Handle Subprocess Scheduling
+    subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed calculation of curvature distances.")

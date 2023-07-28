@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from termcolor import colored
 
 
 def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="integer"):
@@ -42,18 +43,15 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     # Dropping columns
     try:
         cleaned_data = data.drop(columns=column_filter)
-    except: 
-        print("\n\n             \
-            Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns. \n       \
-            Defaulting to no dropped columns                      \
-              \n\n")
+    except:         
+        print(colored(" \n WARNING: Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns.", "yellow"))
         cleaned_data = data 
 
     # Encode
     assert encoding in [
         "integer",
         "one_hot",
-    ], "Currently we only support `integer` and `one_hot` encodings"
+    ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer` and `one_hot` encodings", 'red')
     if encoding == "one_hot":
         # Use Pandas One Hot encoding
         cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")

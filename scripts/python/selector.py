@@ -11,12 +11,20 @@ from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 from tqdm import tqdm
 
+
+
 load_dotenv()
+root = os.getenv("root")
+sys.path.append(root + "logging/")
+from gridTracking_helper import subprocess_scheduler
+
+
 src = os.getenv("src")
 sys.path.append(src)
 sys.path.append(src + "jmapping/selecting/")
 
 from jmap_selector_helper import unpack_policy_group_dir
+
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(message)s", level=logging.INFO)
@@ -70,12 +78,5 @@ if __name__ == "__main__":
             ]
         )
 
-    # Running processes in Parallel
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
-        # Setting Progress bar to track number of completed subprocesses
-        progress_bar = tqdm(total=num_loops, desc="Progress", unit="subprocess")
-        for future in as_completed(futures):
-            # Update the progress bar for each completed subprocess
-            progress_bar.update(1)
-        progress_bar.close()
+    subprocess_scheduler(subprocesses, num_loops, "SUCCESS: Completed JMAP selection process")
+

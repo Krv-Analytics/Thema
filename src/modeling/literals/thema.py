@@ -51,10 +51,23 @@ class THEMA(JBottle):
 
     Members
     -------
+    jmapper: <jmapper.JMapper> 
+        A JMapper Object 
 
+    hyperparaemters: np.array 
+        An np.array of the hyperparameters for generating the associated JMapper
 
     Member Functions
     ----------------
+
+    visualize_model: 
+        Displays networkx graph representation of JMapper model 
+    
+    visualize_component: 
+        Displays networkx graph representation of specified CC 
+
+    
+
 
     """
 
@@ -154,7 +167,7 @@ class THEMA(JBottle):
                 nx.draw_networkx(
                     g,
                     pos=self._cluster_positions,
-                    node_color=color_scale[i],
+                    node_color=color_scale[1],
                     node_size=100,
                     font_size=10,
                     with_labels=cluster_labels,

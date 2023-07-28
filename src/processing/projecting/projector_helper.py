@@ -8,6 +8,7 @@ import numpy as np
 
 from dotenv import load_dotenv
 from umap import UMAP
+from termcolor import colored
 
 
 ######################################################################
@@ -50,7 +51,7 @@ def projection_driver(
         A dictionary containing the projection and hyperparameters.
     """
 
-    assert projector == "UMAP", "No other projections supported at this time."
+    
     data = df.dropna()
 
     umap_2d = UMAP(

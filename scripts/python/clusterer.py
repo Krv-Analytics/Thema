@@ -1,8 +1,6 @@
 import json
 import logging
 import os
-import pickle
-import subprocess
 import sys
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -17,6 +15,11 @@ warnings.simplefilter("ignore")
 
 load_dotenv()
 src = os.getenv("src")
+
+root = os.getenv("root")
+sys.path.append(root + "logging/")
+from gridTracking_helper import subprocess_scheduler
+
 sys.path.append(src)
 sys.path.append(src + "jmapping/selecting/")
 
@@ -74,13 +77,5 @@ if __name__ == "__main__":
             ]
         )
 
-    # Running processes in Parallel
-    # TODO: optimize based on max_workers
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
-        # Setting Progress bar to track number of completed subprocesses
-        progress_bar = tqdm(total=num_loops, desc="Progress", unit="subprocess")
-        for future in as_completed(futures):
-            # Update the progress bar for each completed subprocess
-            progress_bar.update(1)
-        progress_bar.close()
+    subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed JMAP Clustering.", resilient=True)
+

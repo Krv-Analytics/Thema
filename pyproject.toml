@@ -23,7 +23,6 @@ python-dotenv = "^0.21.1"
 uvicorn = "^0.20.0"
 pot = "^0.8.2"
 pytest = "^7.2.1"
-sklearn = "^0.0.post1"
 yaspin = "^2.3.0"
 datetime = "^5.0"
 kmapper = "^2.0.1"
@@ -36,6 +35,8 @@ numba = "^0.57.1"
 tqdm = "^4.65.0"
 umap = "^0.1.1"
 umap-learn = "^0.5.3"
+
+urllib3 = "1.26.16"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"
