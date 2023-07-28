@@ -182,8 +182,13 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
+    assert not jmapper == -1, "ERROR 1"
+
+    assert not jmapper == -2, "ERROR 2 "
+
     # Check for error codes from jmap_generator
     if jmapper == -1:
+        print("EMPTY!")
         runlog.log_emptyGraph_EVENT()
         # TODO: Write out the hyperparameter culprits
 
