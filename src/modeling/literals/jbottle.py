@@ -269,13 +269,14 @@ class JBottle:
         group_stats = {}
         raw_stats = pd.DataFrame()
         clean_stats = pd.DataFrame()
+        dropped_columns = self.jmapper.tupper.get_dropped_columns()
         for id in self._group_directory.keys():
-            numeric_columns = self.get_groups_raw_df(id).select_dtypes(include=np.number)
+            
+            numeric_columns = self.get_groups_raw_df(id).drop(columns=dropped_columns).select_dtypes(include=np.number).columns
             raw_sub_df = self.get_groups_raw_df(id).select_dtypes(include=np.number)
             raw_stats["std"] = raw_sub_df.std()
             raw_stats["mean"] = raw_sub_df.mean()
 
-            numeric_columns = self.get_groups_raw_df(id).select_dtypes(include=np.number).columns
             clean_sub_df = self.get_groups_clean_df(id)[numeric_columns]
             clean_stats["std"] = clean_sub_df.std()
             clean_stats["mean"] = clean_sub_df.mean()
@@ -501,9 +502,9 @@ class JBottle:
 
             `compute_group_identity(id, eval_fn=std_zscore_threshold_filter, std_threshold=0.8)`
         """
-
+        dropped_columns = self.jmapper.tupper.get_dropped_columns()
         global_stats = self.get_global_stats()[group_id]
-        numeric_columns = self.get_groups_raw_df(group_id).select_dtypes(include=np.number).columns
+        numeric_columns = self.get_groups_raw_df(group_id).drop(columns=dropped_columns).select_dtypes(include=np.number).columns
         sub_df = self.get_groups_clean_df(group_id)[numeric_columns]
         id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
