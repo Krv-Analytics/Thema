@@ -9,73 +9,29 @@ import seaborn as sns
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 
+################################################################################################
+#  Handling Local Imports  
+################################################################################################
+
 load_dotenv()
+root = os.getenv("root")
 src = os.getenv("src")
-sys.path.append(src)
-sys.path.append(src + "jmapping/selecting")
+sys.path.append(src + "jmapping/selecting/")
+sys.path.append(root + "logging/")
+sys.path.append(src + "modeling/synopsis/")
 
-from jmapping.selecting import unpack_policy_group_dir, get_viable_jmaps
-from curvature_histogram import plot_curvature_histogram
+from jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
+from meta_utils import plot_stability_histogram
+from gridTracking_helper import log_error
 
 
-def plot_histogram(root, coverage_filter):
-
-    dir = "data/" + params_json["Run_Name"] + "/"
-    dir = os.path.join(root, dir)
-    jmap_dir = os.path.join(dir, "jmaps/")
-    metric_files = os.path.join(
-        root,
-        "data/"
-        + params_json["Run_Name"]
-        + f"/jmap_analysis/distance_matrices/{coverage}_coverage/",
-    )
-
-    num_jmaps = {}
-    for folder in os.listdir(jmap_dir):
-        i = unpack_policy_group_dir(folder)
-        folder = os.path.join(jmap_dir, folder)
-        jmaps = get_viable_jmaps(folder, i, coverage_filter=coverage_filter)
-        num_jmaps[i] = len(jmaps)
-
-    num_curvature_profiles = {}
-    assert os.path.isdir(metric_files), "Not a valid directory"
-    for folder in os.listdir(metric_files):
-        i = unpack_policy_group_dir(folder)
-        folder = os.path.join(metric_files, folder)
-        print(folder)
-        if os.path.isdir(folder):
-            holder = []
-            for file in os.listdir(folder):
-                if file.endswith(".pkl"):
-                    file = os.path.join(folder, file)
-                    with open(file, "rb") as f:
-                        matrix = pickle.load(f)["distances"]
-                    print(len(matrix))
-                holder.append(int(len(matrix)))
-            # For now take the maximum number of unique curvature profiles over different metrics
-            num_curvature_profiles[i] = max(holder)
-    stability_ratio = {}
-    for key in num_curvature_profiles.keys():
-        stability_ratio[key] = num_jmaps[key] / num_curvature_profiles[key]
-    fig, ax = plt.subplots(1, 1, sharex=True, sharey=True, figsize=(15, 20))
-    fig.suptitle(f"{coverage*100}% Coverage Filter")
-    sns.barplot(
-        x=list(stability_ratio.keys()),
-        y=list(stability_ratio.values()),
-        ax=ax,
-    )
-    ax.set(xlabel="Number of Policy Groups", ylabel="Stability Ratio")
-
-    plt.show()
-    return fig
+################################################################################################
+#   Loading JSON Data  
+################################################################################################
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(message)s", level=logging.INFO)
-    log = IndentedLoggerAdapter(logging.getLogger(__name__))
-    load_dotenv()
-    root = os.getenv("root")
-    src = os.getenv("src")
+
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
         with open(JSON_PATH, "r") as f:
@@ -83,16 +39,63 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
-    dir = os.path.join(root, dir)
+    # DATA 
+    raw = params_json["raw_data"]
+    clean = params_json["clean_data"]
+    projections = params_json["projected_data"]
+    run_dir = os.path.join(root, "data/" + params_json["Run_Name"])
+    jmap_dir = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmaps/")
+
+
+    # Counting Length of updated file
+    coverage = params_json["coverage_filter"]
+    distance_matrices = (
+        "data/"
+        + params_json["Run_Name"]
+        + f"/jmap_analysis/distance_matrices/{coverage}_coverage/"
+    )
+    distance_matrices = os.path.join(root, distance_matrices)
+
+
+################################################################################################
+#   Checking for necessary files 
+################################################################################################
+     
+     # Check that raw data exists 
+    if not os.path.isfile(os.path.join(root, raw)): 
+        log_error("No raw data found. Please make sure you have specified the correct path in your params file.") 
+
+
+    # Check that clean data exits 
+    if not os.path.isfile(os.path.join(root, clean)):
+        log_error("No clean data found. Please make sure you generated clean data using `make process-data`.") 
+   
+
+    # Check that Projections Exist
+    if not os.path.isdir(os.path.join(root, projections)) or not os.listdir(os.path.join(root, projections)):
+        log_error("No projections found. Please make sure you have generated projections using `make projections`.")
+    
+    # Check that JMAPS Exist
+    if not os.path.isdir(jmap_dir) or not os.listdir(jmap_dir): 
+        log_error("No JMAPS found. Please make sure you have generated jmaps using `make jmaps`. Otherwise, the hyperparameters in your params folder may not be generating any jmaps.")
+    
+    # Check that Curvature distances Exist
+    if not os.path.isdir(distance_matrices) or not os.listdir(distance_matrices): 
+        log_error("No Curvature distances found. Please make sure you have generated enough jmaps to warrant curvature analysis. ")
+   
+
+################################################################################################
+#   Logging
+################################################################################################
+
+
     group_ranks = []
-    for folder in os.listdir(dir):
+    for folder in os.listdir(jmap_dir):
         i = unpack_policy_group_dir(folder)
         group_ranks.append(i)
 
-    # Metric Generator Configuratiosn
-    metric_generator = os.path.join(src, "tuning/metrics/metric_generator.py")
-    coverage = params_json["coverage_filter"]
+    logging.basicConfig(format="%(message)s", level=logging.INFO)
+    log = IndentedLoggerAdapter(logging.getLogger(__name__))
 
     # LOGGING
     log.info("Computing Two Layer Histogram!")
@@ -107,5 +110,4 @@ if __name__ == "__main__":
     log.add()
     # Counting Length of updated file
 
-    coverage = params_json["coverage_filter"]
-    histogram = plot_histogram(root=root, coverage_filter=coverage)
+    histogram = plot_stability_histogram(dir=run_dir, coverage=coverage)

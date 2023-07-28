@@ -63,3 +63,14 @@ def subprocess_scheduler(subprocesses: list,
     print(
     "\n\n-------------------------------------------------------------------------------- \n\n"
     )        
+
+
+
+def log_error(message, resilient=False):
+
+    if resilient:
+        print(colored("Warning:" + message, 'yellow'))
+    
+    else: 
+        print(colored("ERROR: "+ message, 'red'))
+        exit()

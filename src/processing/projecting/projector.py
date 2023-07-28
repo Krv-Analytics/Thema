@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import sys
 import time
 import json
-from termcolor import colored
 
 
 ######################################################################
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    assert os.path.isfile(args.clean_data), colored("\n ERROR: Invalid Input Data", 'red')
+    assert os.path.isfile(args.clean_data), "\n Invalid path to Clean Data"
     # Load Dataframe
     with open(args.clean_data, "rb") as clean:
         reference = pickle.load(clean)
@@ -107,7 +106,7 @@ if __name__ == "__main__":
         args.random_seed = int(time.time())
 
     # Check Projections is valid
-    assert args.projector in ["UMAP"], colored("\nERROR: UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json.", 'red')
+    assert args.projector in ["UMAP"], "\n UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json."
 
     results = projection_driver(
         df,
@@ -139,7 +138,7 @@ if __name__ == "__main__":
             "-------------------------------------------------------------------------------------- \n\n"
         )
 
-        print(colored(f"SUCCESS: Completed Projection!", 'green'),  "Written to {rel_outdir}")
+        print(f"SUCCESS: Completed Projection!", 'green'),  "Written to {rel_outdir}"
         print("\n")
         print(
             "-------------------------------------------------------------------------------------- \n\n"
