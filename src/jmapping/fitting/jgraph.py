@@ -57,11 +57,11 @@ class JGraph:
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
-####################################################################################################
-#
-#   Properties
-#
-####################################################################################################
+    ####################################################################################################
+    #
+    #   Properties
+    #
+    ####################################################################################################
 
     @property
     def is_EdgeLess(self):
@@ -90,11 +90,12 @@ class JGraph:
             The default is set to Ollivier-Ricci Curvature.
 
         """
+
         try:
             curvature = curvature_fn(self.graph)
             assert len(curvature) == len(self.graph.edges())
             self._curvature = curvature
-        except len(curvature) != len(self.graph.edges()):
+        except:
             print("Invalid Curvature function")
 
     @property
@@ -103,9 +104,9 @@ class JGraph:
         associated with JMapper graph."""
         try:
             self.calculate_homology()
-        except:
+        except AssertionError:
             print(
-                    "Persistence Diagrams could not be obtained\
+                "Persistence Diagrams could not be obtained\
                     from this simplicial complex!"
             )
         return self._diagram
@@ -164,4 +165,4 @@ class JGraph:
             "curvature",
         )
         self._diagram = pd
-        return self.diagram
+        return self._diagram
