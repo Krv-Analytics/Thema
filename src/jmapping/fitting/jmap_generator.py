@@ -1,32 +1,29 @@
 """Generate Graph jmaps using JMapper."""
 
-import argparse
 import os
-import pickle
 import sys
 import json
-
-
-########################################################################################################################
+import argparse
+import pickle
 
 from dotenv import load_dotenv
+
+################################################################################################
+#  Handling Local Imports  
+################################################################################################
 
 load_dotenv()
 root = os.getenv("root")
 src = os.getenv("src")
 sys.path.append(src + "/jmapping/")
-
-# imports from jmapping module
-from jmap_helper import (
-    generate_jmap_filename,
-    jmap_generator,
-    script_paths,
-)
-from tupper import Tupper
-
 sys.path.append(root + "logging/")
 
 from run_log import Run_Log
+from tupper import Tupper
+from jmap_helper import (
+    generate_jmap_filename,
+    jmap_generator
+)
 
 ########################################################################################################################
 
@@ -147,10 +144,12 @@ if __name__ == "__main__":
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
             # Runlog Event Tracking
+            # TODO: Improve Runlog tracking
             runlog.log_overPopulatedMapper_EVENT()
             sys.exit(1)
     except:
         # Runlog Event Tracking
+        # TODO: Improve Runlog tracking
         runlog.log_unkownError_EVENT()
         sys.exit(1)
 

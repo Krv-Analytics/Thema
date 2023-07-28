@@ -2,6 +2,7 @@
 
 
 def convert_keys_to_alphabet(dictionary):
+    """Simple Helper function to make node labels more readable."""
     base = 26  # Number of letters in the alphabet
     new_dict = {}
 

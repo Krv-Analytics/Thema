@@ -2,8 +2,6 @@ import networkx as nx
 import kmapper as km
 import numpy as np
 
-from tupper import Tupper
-
 
 from nammu.curvature import ollivier_ricci_curvature
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
@@ -59,23 +57,25 @@ class JGraph:
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
-    ####################################################################################################
-    #
-    #   Properties
-    #
-    ####################################################################################################
+####################################################################################################
+#
+#   Properties
+#
+####################################################################################################
 
     @property
     def is_EdgeLess(self):
+        "Boolean property that returns true if the graph is edgeless."
         return self._is_Edgeless
 
     @property
     def components(self):
+        """Returns a list of connected components."""
         return self._components
 
     @property
     def curvature(self):
-        """Return the curvature values for the graph of a JMapper object."""
+        """Returns the curvature values for the graph of a JMapper object."""
         assert len(self._curvature) > 0, "You don't have any edge curvatures!"
         return self._curvature
 
@@ -101,14 +101,13 @@ class JGraph:
     def diagram(self):
         """Return the persistence diagram based on curvature filtrations
         associated with JMapper graph."""
-        if self._diagram is None:  # TODO: Change! diagram is never initialized to none
-            try:
-                self.calculate_homology()
-            except self.complex == dict():
-                print(
+        try:
+            self.calculate_homology()
+        except self.complex == dict():
+            print(
                     "Persistence Diagrams could not be obtained\
                     from this simplicial complex!"
-                )
+            )
         return self._diagram
 
     ####################################################################################################

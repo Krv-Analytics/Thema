@@ -158,6 +158,18 @@ class THEMA(JBottle):
         return plt
 
     def visualize_component(self, component, cluster_labels=True):
+        """
+        Plots only the specified connected component. 
+
+        Parameters
+        ----------
+        component: int 
+            The group identifier correpsonding to the desired connected component. 
+        
+        cluster_labels: bool 
+            Shows node labels in nx plot. 
+
+        """
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot()
 
@@ -276,6 +288,9 @@ class THEMA(JBottle):
         return fig
 
     def visualize_piecharts(self):
+        """
+        A PieChart Visualization of group descriptions. 
+        """
         # Define the color map based on the dictionary values
         colors = []
 
@@ -367,6 +382,17 @@ class THEMA(JBottle):
         fig.show(config=config)
 
     def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
+        """
+        Generates an ensemble of box plots of groups over the specified data columns. 
+
+        Parameters
+        ----------
+        cols: list 
+            A list of the desired data columns to be visualized. 
+        
+        target: pd.DataFrame 
+            A data frame with one row to plot target line in boxplot.
+        """
 
         show_targets = False
         if len(target) == 1:

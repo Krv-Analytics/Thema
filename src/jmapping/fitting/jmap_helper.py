@@ -15,7 +15,6 @@ from jgraph import JGraph
 from nammu.curvature import ollivier_ricci_curvature
 
 
-
 def jmap_generator(
     tupper,
     n_cubes,
@@ -129,7 +128,7 @@ def generate_jmap_filename(args, n_neighbors, min_dist, min_intersection):
 
     return output_file
 
-
+# TODO: Remove this function 
 def env():
     """Load .env file and add necessary folders to your `sys` path."""
     load_dotenv()
@@ -140,7 +139,7 @@ def env():
     sys.path.append(src + "jmapping/")
     return root
 
-
+# NOTE: Why do we need this? 
 def script_paths(paths):
     root = env()
     scripts_dir = os.path.join(root, "scripts/")

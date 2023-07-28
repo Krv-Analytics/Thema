@@ -1,9 +1,7 @@
 "Select jmaps for analysis from structural equivalency classes of Graph jmaps based on best coverage."
-
-
-import argparse
-import sys
 import os
+import sys
+import argparse
 import pickle
 from dotenv import load_dotenv
 import json
@@ -16,14 +14,12 @@ from jmap_selector_helper import (
     get_most_nodes_jmap,
 )
 
-load_dotenv()
-src = os.getenv("src")
-sys.path.append(src + "jmapping/selecting/")
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     root = os.getenv("root")
+    load_dotenv()
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
         with open(JSON_PATH, "r") as f:

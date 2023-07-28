@@ -2,10 +2,9 @@
 import argparse
 import os
 import pickle
+import json
 from sklearn.preprocessing import StandardScaler
 from dotenv import load_dotenv
-import json
-import ast
 from termcolor import colored
 
 
@@ -18,7 +17,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     load_dotenv()
     root = os.getenv("root")
-
     JSON_PATH = os.getenv("params")
     if os.path.isfile(JSON_PATH):
         with open(JSON_PATH, "r") as f:
