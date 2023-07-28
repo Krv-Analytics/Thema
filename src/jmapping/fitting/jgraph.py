@@ -103,7 +103,7 @@ class JGraph:
         associated with JMapper graph."""
         try:
             self.calculate_homology()
-        except self.complex == dict():
+        except:
             print(
                     "Persistence Diagrams could not be obtained\
                     from this simplicial complex!"
