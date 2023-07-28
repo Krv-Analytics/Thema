@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import sys
 import time
 import json
+from termcolor import colored
 
 
 ######################################################################
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     this = sys.modules[__name__]
 
-    assert os.path.isfile(args.clean_data), "Invalid Input Data"
+    assert os.path.isfile(args.clean_data), colored("\n ERROR: Invalid Input Data", 'red')
     # Load Dataframe
     with open(args.clean_data, "rb") as clean:
         reference = pickle.load(clean)
@@ -105,42 +106,42 @@ if __name__ == "__main__":
     if args.random_seed == -1:
         args.random_seed = int(time.time())
 
-    if args.projector == "UMAP":
-        # Generate Projection
-        results = projection_driver(
-            df,
-            n=args.n_neighbors,
-            d=args.min_dist,
-            dimensions=args.dim,
-            seed=args.random_seed,
+    # Check Projections is valid
+    assert args.projector in ["UMAP"], colored("\nERROR: UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json.", 'red')
+
+    results = projection_driver(
+        df,
+        n=args.n_neighbors,
+        d=args.min_dist,
+        dimensions=args.dim,
+        projector=args.projector,
+        seed=args.random_seed
+    )
+
+    output_file = projection_file_name(
+        projector=params_json["projector"],
+        n=args.n_neighbors,
+        d=args.min_dist,
+        dimensions=2,
+        seed=args.random_seed,
+    )
+    output_file = os.path.join(output_dir, output_file)
+
+    # Output Message
+    rel_outdir = "/".join(output_file.split("/")[-3:])
+
+    with open(output_file, "wb") as f:
+        pickle.dump(results, f)
+
+    if args.Verbose:
+        print("\n")
+        print(
+            "-------------------------------------------------------------------------------------- \n\n"
         )
 
-        output_file = projection_file_name(
-            projector=params_json["projector"],
-            n=args.n_neighbors,
-            d=args.min_dist,
-            dimensions=2,
-            seed=args.random_seed,
+        print(colored(f"SUCCESS: Completed Projection!", 'green'),  "Written to {rel_outdir}")
+        print("\n")
+        print(
+            "-------------------------------------------------------------------------------------- \n\n"
         )
-        output_file = os.path.join(output_dir, output_file)
 
-        # Output Message
-        rel_outdir = "/".join(output_file.split("/")[-3:])
-
-        with open(output_file, "wb") as f:
-            pickle.dump(results, f)
-
-        if args.Verbose:
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------------- \n\n"
-            )
-
-            print(f"Finished projecting! Written to {rel_outdir}")
-            print("\n")
-            print(
-                "-------------------------------------------------------------------------------------- \n\n"
-            )
-    else:
-        print("UMAP is only dimensionality reduction algorithm supported at this time.")
-        print("Please Set your projector choice to UMAP")

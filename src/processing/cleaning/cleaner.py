@@ -6,8 +6,11 @@ from sklearn.preprocessing import StandardScaler
 from dotenv import load_dotenv
 import json
 import ast
+from termcolor import colored
+
 
 from cleaner_helper import data_cleaner, clean_data_filename
+
 
 
 if __name__ == "__main__":
@@ -63,13 +66,13 @@ if __name__ == "__main__":
 
     raw_data_path = os.path.join(root, args.data)
     # Read in Raw Data
-    assert os.path.isfile(raw_data_path), "Invalid path to Raw Data"
+    assert os.path.isfile(raw_data_path), colored(" \n ERROR: Invalid path to Raw Data. Make sure you have specified the correct path to your raw data in the params.json file.", 'red')
 
     with open(raw_data_path, "rb") as raw_data:
         df = pickle.load(raw_data)
     assert (
         args.scaler in ["standard_scaler", "None"]
-    ), "Currently we only support `StandardScaler`"
+    ), colored("\n ERROR: Invalid Scaler. Currently we only support `StandardScaler` or no scaling. Make sure you have specified the correct scalar in your params.json file.", 'red')
     
     if args.scaler == "None":
         scaler = None 
@@ -118,13 +121,13 @@ if __name__ == "__main__":
         with open(JSON_PATH, "w") as f:
             json.dump(params_json, f, indent=4)
     except:
-        print("There was a problem writing to your parameter file!")
+        print(colored("ERROR: Unable to write to params.json file. \n Make sure it exists and you have set appropriate file permissions.  ", 'red'))
 
     if args.Verbose:
         print(
             "\n\n-------------------------------------------------------------------------------- \n\n"
         )
-        print(f"Finished cleaning data! Written to {rel_outfile}")
+        print(colored(f"SUCCESS: Completed data Cleaning.", 'green'), f"Written to `{rel_outfile}`")
 
         print(
             "\n\n-------------------------------------------------------------------------------- "

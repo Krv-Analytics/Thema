@@ -9,11 +9,12 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 
+
 load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "logging/")
+from gridTracking_helper import subprocess_scheduler
 
-from run_log import Run_Log
 
 if __name__ == "__main__":
 
@@ -62,12 +63,6 @@ if __name__ == "__main__":
     # Number of loops 
     num_loops = len(n_cubes)*len(perc_overlap)*len(min_intersection)*len(min_cluster_size) *len(os.listdir(os.path.join(root, projections)))
     
-    # Instantiate a Run Log
-    runlog = Run_Log() 
-    runlog.start_jmap_log() 
-    runlog.set_jmap_gridSize(num_loops)
-    runlog.log_jmap_startTime() 
-
     # Running Grid in Parallel 
     subprocesses = []
     ## GRID SEARCH PROJECTIONS
@@ -93,14 +88,5 @@ if __name__ == "__main__":
                             )
 
     
-    # Running processes in Parallel 
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(subprocess.run, cmd) for cmd in subprocesses]
-        # Setting Progress bar to track number of completed subprocesses 
-        progress_bar = tqdm(total=num_loops, desc='Progress', unit='subprocess')
-        for future in as_completed(futures):
-        # Update the progress bar for each completed subprocess
-            progress_bar.update(1)
-        progress_bar.close()
-        
-    runlog.log_jmap_finishTime() # Logs finish time and sets total run time
+    # Handles Process scheduling 
+    subprocess_scheduler(subprocesses, num_loops, "SUCCESS: Completed JMAP generation grid.", resilient=True)

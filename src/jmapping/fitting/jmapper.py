@@ -223,9 +223,9 @@ class JMapper:
                     unclustered_items.append(idx)
                 labels[idx] = place_holder
 
-        self._unclustered_items = unclustered_items
+            self._unclustered_items = unclustered_items
 
-        return unclustered_items
+        return self._unclustered_items
 
     def re_fit(
         self,

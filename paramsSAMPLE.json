@@ -6,11 +6,7 @@
     "projected_data": "updated_by_projector",
     "cleaning_scalar": "standard_scaler",
     "cleaning_encoding": "integer",
-    "cleaning_remove_columns": [
-        "Ticker",
-        "State",
-        "Year"
-    ],
+    "cleaning_remove_columns": [],
     "projector": "UMAP",
     "projector_dimension": 2,
     "projector_Nneighbors": [
@@ -36,7 +32,7 @@
         0.7
     ],
     "jmap_minIntersection": [
-        1,2,3,4
+        1
     ],
     "jmap_random_seed": 42,
     "coverage_filter": 0.75,
