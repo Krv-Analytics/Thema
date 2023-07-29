@@ -78,15 +78,17 @@ class JGraph:
 
     @property
     def is_EdgeLess(self):
+        "Boolean property that returns true if the graph is edgeless."
         return self._is_Edgeless
 
     @property
     def components(self):
+        """Returns a list of connected components."""
         return self._components
 
     @property
     def curvature(self):
-        """Return the curvature values for the graph of a JMapper object."""
+        """Returns the curvature values for the graph of a JMapper object."""
         assert len(self._curvature) > 0, "You don't have any edge curvatures!"
         return self._curvature
 
@@ -109,21 +111,20 @@ class JGraph:
             curvature = curvature_fn(self.graph, weight=weight)
             assert len(curvature) == len(self.graph.edges())
             self._curvature = curvature
-        except len(curvature) != len(self.graph.edges()):
+        except:
             print("Invalid Curvature function")
 
     @property
     def diagram(self):
         """Return the persistence diagram based on curvature filtrations
         associated with JMapper graph."""
-        if self._diagram is None:  # TODO: Change! diagram is never initialized to none
-            try:
-                self.calculate_homology()
-            except self.complex == dict():
-                print(
-                    "Persistence Diagrams could not be obtained\
+        try:
+            self.calculate_homology()
+        except AssertionError:
+            print(
+                "Persistence Diagrams could not be obtained\
                     from this simplicial complex!"
-                )
+            )
         return self._diagram
 
     ####################################################################################################
@@ -180,4 +181,4 @@ class JGraph:
             "curvature",
         )
         self._diagram = pd
-        return self.diagram
+        return self._diagram

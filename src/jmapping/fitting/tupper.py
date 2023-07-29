@@ -145,20 +145,26 @@ class Tupper:
             )
 
     def get_raw_path(self):
+        """Returns the path to raw data file"""
         return self._raw 
     
     def get_clean_path(self):
+        """Returns the path to clean data file"""
         return self._clean 
     
     def get_projection_path(self):
+        """Returns the path to projection data file"""
         return self._projection
     
     def set_raw_path(self, path):
+        """Sets the raw data path to a new data file"""
         self._raw = path 
 
     def set_clean_path(self, path):
+        """Sets the clean data path to a new data file"""
         self._clean = path 
     
     def set_projection_path(self, path):
+        """Sets the projection data path to a new data file"""
         self._projection = path
         

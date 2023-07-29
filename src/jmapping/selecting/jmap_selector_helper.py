@@ -1,24 +1,16 @@
 import os
-import pickle
 import sys
-
-from dotenv import load_dotenv
-import matplotlib.pyplot as plt
+import pickle
 import numpy as np
-import seaborn as sns
 
 from dotenv import load_dotenv
+
 
 load_dotenv()
 root = os.getenv("root")
 sys.path.append(root + "src/jmapping/fitting/")
 
 from jmapper import JMapper
-
-# from jmap_helper import env
-
-# Configure paths
-# root = env()
 
 
 def select_jmaps(dir, keys, clustering, n, selection_fn):

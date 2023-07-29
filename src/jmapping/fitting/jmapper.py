@@ -118,7 +118,7 @@ class JMapper:
 
         self._min_intersection = None
 
-        # Public Member
+        # Public Member only to be set in THEMA Model
         self.jgraph = None
 
     ##################################################################################################
@@ -191,6 +191,12 @@ class JMapper:
 
     @min_intersection.setter
     def min_intersection(self, min_intersection: int = 1):
+        """Setting functions for min intersection. 
+        Parameters
+        ----------
+        min_intersection: int 
+            New min intersections value
+        """
         self._min_intersection = min_intersection
 
     ##################################################################################################

@@ -1,29 +1,40 @@
 "Helper functions for visualizing and evaluating jmap runs "
 
-import numpy as np
-import pandas as pd
-from dotenv import load_dotenv
 import os
 import sys
-
+import numpy as np
+import pandas as pd
+import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.io as pio
-from plotly.subplots import make_subplots
 import plotly.express as px
+
+pio.renderers.default = "browser"
+
+from dotenv import load_dotenv
 from scipy.cluster.hierarchy import dendrogram
-
-import hdbscan
-import pickle
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-pio.renderers.default = "browser"
-load_dotenv
+
+
+################################################################################################
+#  Handling Local Imports  
+################################################################################################
+
+load_dotenv()
 root = os.getenv("root")
 src = os.getenv("src")
-sys.path.append(src)
+sys.path.append(src + "jmapping/selecting/")
+sys.path.append(root + "logging/")
+
+from jmap_selector_helper import (
+    unpack_policy_group_dir,
+    get_viable_jmaps
+)
 
 
 def plot_dendrogram(model, labels, distance, p, n, distance_threshold, **kwargs):
@@ -84,3 +95,119 @@ def visualize_PCA(model, colors=True):
             fig = px.scatter(data_frame=pca_df, x='PC1', y='PC2', color_discrete_sequence=['grey'])
         fig.update_layout(template='simple_white', width=800, height=600)
         fig.show()
+
+
+def plot_curvature_histogram(dir, coverage):
+    num_curvature_profiles = {}
+    for folder in os.listdir(dir):
+        i = unpack_policy_group_dir(folder)
+        folder = os.path.join(dir, folder)
+        if os.path.isdir(folder):
+            holder = []
+            for file in os.listdir(folder):
+                if file.endswith(".pkl"):
+                    file = os.path.join(folder, file)
+                    with open(file, "rb") as f:
+                        matrix = pickle.load(f)["distances"]
+                holder.append(int(len(matrix)))
+            # For now take the maximum number of unique curvature profiles over different metrics
+            num_curvature_profiles[i] = max(holder)
+
+    fig = plt.figure(figsize=(15, 10))
+    ax = sns.barplot(
+        x=list(num_curvature_profiles.keys()),
+        y=list(num_curvature_profiles.values()),
+    )
+    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Curvature Profiles")
+    ax.set_title(f"{coverage*100} % Coverage Filter")
+    plt.show()
+    return fig
+
+
+def plot_jmapper_histogram(dir, coverage=0.8):
+    """
+    Plots a histogram of the number of viable jmappers for each rank
+    of policy groupings. This function will count the jmappers
+    (per `num_policy_groups`) that have been generated
+    according to a hyperparameter grid search.
+
+    Parameters:
+    -----------
+    coverage_filter: float
+        The minimum coverage percentage required for a jmap
+        to be considered viable.
+
+    Returns:
+    --------
+    fig: matplotlib.figure.Figure
+        The plotted figure object.
+    """
+    mappers = os.path.join(root, dir)
+    # Get list of folder names in the directory
+    policy_groups = os.listdir(mappers)
+    # Initialize counting dictionary
+    counts = {}
+    for folder in policy_groups:
+        n = unpack_policy_group_dir(folder)
+        path_to_jmaps = dir + folder
+        jmaps = get_viable_jmaps(path_to_jmaps, n, coverage)
+        counts[n] = len(jmaps)
+    keys = list(counts.keys())
+    keys.sort()
+    sorted_counts = {i: counts[i] for i in keys}
+    # plot the histogram
+    fig = plt.figure(figsize=(15, 10))
+    ax = sns.barplot(
+        x=list(sorted_counts.keys()),
+        y=list(sorted_counts.values()),
+    )
+    ax.set(xlabel="Number of Policy Groups", ylabel="Number of Viable jmaps")
+    ax.set_title(f"{coverage*100} % Coverage Filter")
+    plt.show()
+    return fig
+
+
+def plot_stability_histogram(dir, coverage):
+
+    jmap_dir = os.path.join(root, dir + "/jmaps/")
+    metric_files = os.path.join(
+        root,
+        dir 
+        + f"/jmap_analysis/distance_matrices/{coverage}_coverage/",
+    )
+    
+    num_jmaps = {}
+    for folder in os.listdir(jmap_dir):
+        i = unpack_policy_group_dir(folder)
+        folder = os.path.join(jmap_dir, folder)
+        jmaps = get_viable_jmaps(folder, i, coverage_filter=coverage)
+        num_jmaps[i] = len(jmaps)
+
+    num_curvature_profiles = {}
+    
+    for folder in os.listdir(metric_files):
+        i = unpack_policy_group_dir(folder)
+        folder = os.path.join(metric_files, folder)
+        if os.path.isdir(folder):
+            holder = []
+            for file in os.listdir(folder):
+                if file.endswith(".pkl"):
+                    file = os.path.join(folder, file)
+                    with open(file, "rb") as f:
+                        matrix = pickle.load(f)["distances"]
+                holder.append(int(len(matrix)))
+            # For now take the maximum number of unique curvature profiles over different metrics
+            num_curvature_profiles[i] = max(holder)
+    stability_ratio = {}
+    for key in num_curvature_profiles.keys():
+        stability_ratio[key] = num_jmaps[key] / num_curvature_profiles[key]
+    fig, ax = plt.subplots(1, 1, sharex=True, sharey=True, figsize=(15, 20))
+    fig.suptitle(f"{coverage*100}% Coverage Filter")
+    sns.barplot(
+        x=list(stability_ratio.keys()),
+        y=list(stability_ratio.values()),
+        ax=ax,
+    )
+    ax.set(xlabel="Number of Policy Groups", ylabel="Stability Ratio")
+    plt.show()
+    return fig
