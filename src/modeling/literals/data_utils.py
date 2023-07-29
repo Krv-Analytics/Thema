@@ -52,13 +52,12 @@ def std_zscore_threshold_filter(col, global_stats:dict(), std_threshold = 1, zsc
     TODO: Fill out Doc String
     """
     std = np.std(col)
-    if std ==0:
+    if std == 0:
         zscore = np.inf 
     else:
         zscore = (np.mean(col) - global_stats['clean']['mean'][col.name])/std
-    
 
-    if zscore > zscore_threshold and std < std_threshold:
+    if abs(zscore) > zscore_threshold and abs(std) < std_threshold:
         return 0 
     else:
         return 1
