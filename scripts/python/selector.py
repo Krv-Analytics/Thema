@@ -41,7 +41,11 @@ if __name__ == "__main__":
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
     jmap_dir = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmaps/")
-    curvature_distances = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmap-analysis/distance_matrices/" + str(params_json["coverage_filter"]) +"_coverage")
+    curvature_distances = os.path.join(root, "data/" 
+                                       + params_json["Run_Name"] 
+                                       + f"/jmap_analysis/distance_matrices/" 
+                                       + str(params_json["coverage_filter"]) 
+                                       +"_coverage")
 
    # Metric Generator Configuratiosn
     jmap_selector = os.path.join(src, "jmapping/selecting/jmap_selector.py")
