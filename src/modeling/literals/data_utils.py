@@ -76,7 +76,7 @@ def get_best_zscore_filter(col, global_stats:dict()):
     """
     TODO: Fill out Doc String
     """
-    zscore = (np.mean(col) - global_stats[col.name])/np.std(col)
+    zscore = (np.mean(col) - global_stats['clean']['mean'][col.name])/np.std(col)
 
     return zscore
 

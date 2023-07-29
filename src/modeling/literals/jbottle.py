@@ -509,10 +509,7 @@ class JBottle:
         id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
         min_val = id_table.min()
-        if min_val==0:
-            return id_table[id_table == min_val].index.tolist()
-        else:
-            return []
+        return id_table[id_table == min_val].index.tolist()
 
     def get_group_descriptions(self, description_fn=get_minimal_std):
         """
