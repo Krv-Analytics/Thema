@@ -1,5 +1,7 @@
 import os
 import sys
+import os
+import sys
 import json
 import logging
 import warnings
@@ -14,6 +16,7 @@ warnings.simplefilter("ignore")
 ################################################################################################
 
 load_dotenv()
+root = os.getenv("root")
 root = os.getenv("root")
 src = os.getenv("src")
 sys.path.append(src + "jmapping/selecting/")
@@ -43,11 +46,11 @@ if __name__ == "__main__":
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
     jmap_dir = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmaps/")
-    curvature_distances = os.path.join(
+    distance_matrices = os.path.join(
         root,
         "data/"
         + params_json["Run_Name"]
-        + f"/jmap-analysis/distance_matrices/"
+        + f"/jmap_analysis/distance_matrices/"
         + str(params_json["coverage_filter"])
         + "_coverage/",
     )
@@ -87,7 +90,7 @@ if __name__ == "__main__":
         )
 
     # Check that Curvature distances Exist
-    if not os.path.isdir(curvature_distances) or not os.listdir(curvature_distances):
+    if not os.path.isdir(distance_matrices) or not os.listdir(distance_matrices):
         log_error(
             "No Curvature distances found. Please make sure you have generated enough jmaps to warrant curvature analysis. "
         )

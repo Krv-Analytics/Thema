@@ -77,10 +77,7 @@ def jmap_generator(
 
     if len(jmapper.complex["links"]) > 0:
         jmapper.min_intersection = min_intersection
-        jmapper.jgraph = JGraph(
-            jmapper.nodes,
-            min_intersection=min_intersection,
-        )
+        jmapper.jgraph = JGraph(jmapper.nodes, min_intersection)
         # Compute Curvature and Persistence Diagram
         if jmapper.jgraph.is_EdgeLess:
             return -1  # Empty Graph error code

@@ -1,14 +1,12 @@
-
-import pandas as pd 
+import pandas as pd
 import numpy as np
 
 
 ####################################################################################
-# 
+#
 #  node_desription Helper functions
-# 
+#
 ####################################################################################
-
 
 
 def get_minimal_std(df: pd.DataFrame, mask: np.array, density_cols=None):
@@ -37,55 +35,55 @@ def get_minimal_std(df: pd.DataFrame, mask: np.array, density_cols=None):
     return col_label
 
 
-
 ####################################################################################
-# 
+#
 #  group_identity Helper functions
-# 
+#
 ####################################################################################
 
-# Filter functions that assign a value to columns => minimum is taken to be the most 
-# important columns 
+# Filter functions that assign a value to columns => minimum is taken to be the most
+# important columns
 
-def std_zscore_threshold_filter(col, global_stats:dict(), std_threshold = 1, zscore_threshold = 1): 
+
+def std_zscore_threshold_filter(
+    col, global_stats: dict(), std_threshold=1, zscore_threshold=1
+):
     """
     TODO: Fill out Doc String
     """
     std = np.std(col)
-    if std ==0:
-        zscore = np.inf 
+    if std == 0:
+        zscore = np.inf
     else:
-        zscore = (np.mean(col) - global_stats['clean']['mean'][col.name])/std
-    
+        zscore = (np.mean(col) - global_stats["clean"]["mean"][col.name]) / std
 
-    if zscore > zscore_threshold and std < std_threshold:
-        return 0 
+    if abs(zscore) > zscore_threshold and abs(std) < std_threshold:
+        return 0
     else:
         return 1
 
 
-
-def get_best_std_filter(col, global_stats:dict()):
+def get_best_std_filter(col, global_stats: dict()):
     """
     TODO: Fill out Doc String
     """
-    std = np.std(col)    
+    std = np.std(col)
     return std
 
 
-def get_best_zscore_filter(col, global_stats:dict()):
+def get_best_zscore_filter(col, global_stats: dict()):
     """
     TODO: Fill out Doc String
     """
-    zscore = (np.mean(col) - global_stats[col.name])/np.std(col)
+    zscore = (np.mean(col) - global_stats["clean"]["mean"][col.name]) / np.std(col)
 
     return zscore
 
 
 ####################################################################################
-# 
+#
 #  Auxillary functions
-# 
+#
 ####################################################################################
 
 

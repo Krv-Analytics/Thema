@@ -34,11 +34,15 @@
     "jmap_minIntersection": [
         -1 
     ],
-    "jmap_weighted_graph": true,
     "jmap_random_seed": 42,
     "coverage_filter": 0.75,
     "dendrogram_metric": "landscape",
     "dendrogram_cut": 0.3,
+    "dendrogram_levels": 10,
+
+    "runlog_dir": "**PATH_TO_YOUR_RUN**/logs/",
+    "jmap_runlog": "**PATH_TO_YOUR_RUN**/logs/jmap_runlog.json",
+    "projector_runlog": "**PATH_TO_YOUR_RUN**/logs/projector_runlog.json"
     "dendrogram_levels": 10,
 
     "runlog_dir": "**PATH_TO_YOUR_RUN**/logs/",
