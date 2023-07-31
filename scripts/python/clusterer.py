@@ -1,5 +1,7 @@
 import os
 import sys
+import os
+import sys
 import json
 import logging
 import warnings
@@ -8,6 +10,10 @@ from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 
 warnings.simplefilter("ignore")
+
+################################################################################################
+#  Handling Local Imports  
+################################################################################################
 
 ################################################################################################
 #  Handling Local Imports  
@@ -28,6 +34,9 @@ from gridTracking_helper import (
 ################################################################################################
 #   Loading JSON Data  
 ################################################################################################
+################################################################################################
+#   Loading JSON Data  
+################################################################################################
 
 if __name__ == "__main__":
 
@@ -39,6 +48,7 @@ if __name__ == "__main__":
         print("params.json file note found!")
 
     dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
+    dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
     
     # DATA 
@@ -46,7 +56,11 @@ if __name__ == "__main__":
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
     jmap_dir = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmaps/")
-    curvature_distances = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmap-analysis/distance_matrices/" + str(params_json["coverage_filter"]) + "_coverage/")
+    distance_matrices = os.path.join(root, "data/" 
+                                     + params_json["Run_Name"] 
+                                     + f"/jmap_analysis/distance_matrices/" 
+                                     + str(params_json["coverage_filter"]) 
+                                     + "_coverage/")
 
     # Metric Generator Configuratiosn
     jmap_clusterer = os.path.join(src, "tuning/graph_clustering/jmap_clusterer.py")
@@ -76,7 +90,7 @@ if __name__ == "__main__":
         log_error("No JMAPS found. Please make sure you have generated jmaps using `make jmaps`. Otherwise, the hyperparameters in your params folder may not be generating any jmaps.")
     
     # Check that Curvature distances Exist
-    if not os.path.isdir(curvature_distances) or not os.listdir(curvature_distances): 
+    if not os.path.isdir(distance_matrices) or not os.listdir(distance_matrices): 
         log_error("No Curvature distances found. Please make sure you have generated enough jmaps to warrant curvature analysis. ")
     
 
@@ -118,10 +132,14 @@ if __name__ == "__main__":
             [
                 "python",
                 f"{jmap_clusterer}",
+                f"{jmap_clusterer}",
                 f"-n{i}",
                 "-s",
             ]
         )
+
+    # Handling Parallelism
+    subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed JMAP Clustering.", resilient=True)
 
     # Handling Parallelism
     subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed JMAP Clustering.", resilient=True)
