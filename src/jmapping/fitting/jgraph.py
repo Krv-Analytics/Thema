@@ -41,9 +41,7 @@ class JGraph:
 
         self.min_intersection = min_intersection
         self.graph = nx.Graph()
-        self.nerve = Nerve(
-            weighted=self.weighted, min_intersection=self.min_intersection
-        )
+        self.nerve = Nerve(min_intersection=self.min_intersection)
 
         # Fit Nerve to generate edges
         edges = self.nerve.compute(nodes)
@@ -111,7 +109,7 @@ class JGraph:
             curvature = curvature_fn(self.graph, weight=weight)
             assert len(curvature) == len(self.graph.edges())
             self._curvature = curvature
-        except:
+        except len(self._curvature) == 0:
             print("Invalid Curvature function")
 
     @property

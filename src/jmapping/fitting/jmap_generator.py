@@ -9,7 +9,7 @@ import pickle
 from dotenv import load_dotenv
 
 ################################################################################################
-#  Handling Local Imports  
+#  Handling Local Imports
 ################################################################################################
 
 load_dotenv()
@@ -20,10 +20,7 @@ sys.path.append(root + "logging/")
 
 from run_log import Run_Log
 from tupper import Tupper
-from jmap_helper import (
-    generate_jmap_filename,
-    jmap_generator
-)
+from jmap_helper import generate_jmap_filename, jmap_generator
 
 ########################################################################################################################
 
