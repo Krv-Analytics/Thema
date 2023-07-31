@@ -1,16 +1,13 @@
+import os
+import sys
 import json
 import logging
-import os
-import pickle
-import sys
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 from dotenv import load_dotenv
 from python_log_indenter import IndentedLoggerAdapter
 
 ################################################################################################
-#  Handling Local Imports  
+#  Handling Local Imports
 ################################################################################################
 
 load_dotenv()
@@ -20,15 +17,13 @@ sys.path.append(src + "jmapping/selecting/")
 sys.path.append(root + "logging/")
 sys.path.append(src + "modeling/synopsis/")
 
-from jmap_selector_helper import unpack_policy_group_dir, get_viable_jmaps
-from meta_utils import plot_stability_histogram
+from jmap_selector_helper import unpack_policy_group_dir
+from meta_utils import plot_jmapper_histogram
 from gridTracking_helper import log_error
 
-
 ################################################################################################
-#   Loading JSON Data  
+#   Loading JSON Data
 ################################################################################################
-
 
 if __name__ == "__main__":
 
@@ -39,15 +34,13 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
-    # DATA 
+    # DATA
     raw = params_json["raw_data"]
     clean = params_json["clean_data"]
     projections = params_json["projected_data"]
-    run_dir = os.path.join(root, "data/" + params_json["Run_Name"])
     jmap_dir = os.path.join(root, "data/" + params_json["Run_Name"] + f"/jmaps/")
 
-
-    # Counting Length of updated file
+    # Metric Generator Configuratiosn
     coverage = params_json["coverage_filter"]
     distance_matrices = (
         "data/"
@@ -56,38 +49,39 @@ if __name__ == "__main__":
     )
     distance_matrices = os.path.join(root, distance_matrices)
 
+    ################################################################################################
+    #   Checking for necessary files
+    ################################################################################################
 
-################################################################################################
-#   Checking for necessary files 
-################################################################################################
-     
-     # Check that raw data exists 
-    if not os.path.isfile(os.path.join(root, raw)): 
-        log_error("No raw data found. Please make sure you have specified the correct path in your params file.") 
+    # Check that raw data exists
+    if not os.path.isfile(os.path.join(root, raw)):
+        log_error(
+            "No raw data found. Please make sure you have specified the correct path in your params file."
+        )
 
-
-    # Check that clean data exits 
+    # Check that clean data exits
     if not os.path.isfile(os.path.join(root, clean)):
-        log_error("No clean data found. Please make sure you generated clean data using `make process-data`.") 
-   
+        log_error(
+            "No clean data found. Please make sure you generated clean data using `make process-data`."
+        )
 
     # Check that Projections Exist
-    if not os.path.isdir(os.path.join(root, projections)) or not os.listdir(os.path.join(root, projections)):
-        log_error("No projections found. Please make sure you have generated projections using `make projections`.")
-    
+    if not os.path.isdir(os.path.join(root, projections)) or not os.listdir(
+        os.path.join(root, projections)
+    ):
+        log_error(
+            "No projections found. Please make sure you have generated projections using `make projections`."
+        )
+
     # Check that JMAPS Exist
-    if not os.path.isdir(jmap_dir) or not os.listdir(jmap_dir): 
-        log_error("No JMAPS found. Please make sure you have generated jmaps using `make jmaps`. Otherwise, the hyperparameters in your params folder may not be generating any jmaps.")
-    
-    # Check that Curvature distances Exist
-    if not os.path.isdir(distance_matrices) or not os.listdir(distance_matrices): 
-        log_error("No Curvature distances found. Please make sure you have generated enough jmaps to warrant curvature analysis. ")
-   
+    if not os.path.isdir(jmap_dir) or not os.listdir(jmap_dir):
+        log_error(
+            "No JMAPS found. Please make sure you have generated jmaps using `make jmaps`. Otherwise, the hyperparameters in your params folder may not be generating any jmaps."
+        )
 
-################################################################################################
-#   Logging
-################################################################################################
-
+    ################################################################################################
+    #   Logging
+    ################################################################################################
 
     group_ranks = []
     for folder in os.listdir(jmap_dir):
@@ -98,7 +92,7 @@ if __name__ == "__main__":
     log = IndentedLoggerAdapter(logging.getLogger(__name__))
 
     # LOGGING
-    log.info("Computing Two Layer Histogram!")
+    log.info("Computing jmap Histogram!")
     log.info(
         "--------------------------------------------------------------------------------"
     )
@@ -108,6 +102,9 @@ if __name__ == "__main__":
         "--------------------------------------------------------------------------------"
     )
     log.add()
-    # Counting Length of updated file
 
-    histogram = plot_stability_histogram(dir=run_dir, coverage=coverage)
+    ################################################################################################
+    #   Plotting
+    ################################################################################################
+
+    fig = plot_jmapper_histogram(dir=jmap_dir, coverage=coverage)

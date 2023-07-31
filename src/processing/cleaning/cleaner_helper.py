@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from termcolor import colored
 
 
 def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="integer"):
@@ -40,13 +41,17 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     If encoding is not one of "integer" or "one_hot".
     """
     # Dropping columns
-    cleaned_data = data.drop(columns=column_filter)
+    try:
+        cleaned_data = data.drop(columns=column_filter)
+    except:         
+        print(colored(" \n WARNING: Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns.", "yellow"))
+        cleaned_data = data 
 
     # Encode
     assert encoding in [
         "integer",
         "one_hot",
-    ], "Currently we only support `integer` and `one_hot` encodings"
+    ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer` and `one_hot` encodings", 'red')
     if encoding == "one_hot":
         # Use Pandas One Hot encoding
         cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
@@ -63,9 +68,10 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
             cleaned_data[column] = encoder(vals)
 
     # Scale
-    cleaned_data = pd.DataFrame(
+    if scaler is not None:
+        cleaned_data = pd.DataFrame(
         scaler.fit_transform(cleaned_data), columns=list(cleaned_data.columns)
-    ).dropna()
+        ).dropna()
 
     return cleaned_data
 
@@ -112,7 +118,7 @@ def clean_data_filename(run_name="My_Sim", scaler=None, encoding="integer", filt
         A filename for the cleaned and preprocessed data.
 
     """
-    if scaler is None:
+    if scaler== "None":
         scaler = ""
     else:
         scaler = "standard_scaled"

@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "coal-mapper"
+name = "krv_analytics"
 version = "0.1.0"
 description = ""
-authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>"]
+authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>", "stuart.wayland <swayland@ucsc.edu>", "sid.gathrid <sgathrid@yahoo.com>"]
 readme = "README.md"
-packages = [{ include = "coal_mapper" }]
+packages = [{ include = "krv_mapper" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -23,7 +23,6 @@ python-dotenv = "^0.21.1"
 uvicorn = "^0.20.0"
 pot = "^0.8.2"
 pytest = "^7.2.1"
-sklearn = "^0.0.post1"
 yaspin = "^2.3.0"
 datetime = "^5.0"
 kmapper = "^2.0.1"
@@ -32,6 +31,12 @@ seaborn = "^0.12.2"
 giotto-tda = "^0.6.0"
 hdbscan = "^0.8.29"
 python-log-indenter = "^0.9"
+numba = "^0.57.1"
+tqdm = "^4.65.0"
+umap = "^0.1.1"
+umap-learn = "^0.5.3"
+
+urllib3 = "1.26.16"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"

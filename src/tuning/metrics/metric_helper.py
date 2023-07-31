@@ -1,6 +1,7 @@
 import os
 import sys
 
+import pickle
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
@@ -10,12 +11,9 @@ load_dotenv()
 src = os.getenv("src")
 root = os.getenv("root")
 sys.path.append(src)
+sys.path.append(src + "jmapping/fitting/")
 
-modeling = os.path.join(src, "modeling/")
-sys.path.append(modeling)
-
-
-from modeling.model import Model
+from jmapper import JMapper
 
 
 def topology_metric(
@@ -29,7 +27,7 @@ def topology_metric(
     Parameters:
     -----------
     files : str
-        The directory containing the graph models to use.
+        The directory containing the graph jmaps to use.
     metric : str, optional
         The distance metric to use for computing the pairwise distances
         between diagrams. Default is "bottleneck".
@@ -52,12 +50,12 @@ def topology_metric(
     all_distances = distance_metric.transform(curvature_dgms)
 
     keys = np.array(list(diagrams.keys()), dtype=object)
-    trimmed_keys, trimmed_distances = collapse_equivalent_models(keys, all_distances)
+    trimmed_keys, trimmed_distances = collapse_equivalent_jmaps(keys, all_distances)
 
     return trimmed_keys, trimmed_distances
 
 
-def collapse_equivalent_models(keys, distance_matrix):
+def collapse_equivalent_jmaps(keys, distance_matrix):
     """
     Collapse diagrams with identical curvature profiles
     into a single representative diagram.
@@ -94,14 +92,14 @@ def collapse_equivalent_models(keys, distance_matrix):
 
 def get_diagrams(dir, coverage):
     """
-    Load the persistence diagrams from fitted models
+    Load the persistence diagrams from fitted jmaps
     and return them as a dictionary. This function only
-    returns diagrams for models that satisfy the coverage constraint.
+    returns diagrams for jmaps that satisfy the coverage constraint.
 
     Parameters:
     -----------
     dir : str
-        The directory containing the models,
+        The directory containing the jmaps,
         from which diagrams can be extracted.
     coverage : float
         The minimum proportion of items in a mapper cluster required
@@ -116,20 +114,20 @@ def get_diagrams(dir, coverage):
 
     assert os.path.isdir(
         dir
-    ), "Please first compute mapper objects using `model_generator.py`"
+    ), "Please first compute mapper objects using `jmap_generator.py`"
 
-    # TODO: add a filter here for `unlcustered` plants
     diagrams = {}
     cwd = os.path.dirname(__file__)
     dir = os.path.join(cwd, dir)
     for file in os.listdir(dir):
         if file.endswith(".pkl"):
             mapper_file = os.path.join(dir, file)
-            model = Model(mapper_file)
-            if len(model.unclustered_items) / len(model.tupper.clean) < 1 - coverage:
-                mapper = model.mapper
-                hyper_params = model.hyper_parameters
-                diagrams[hyper_params] = mapper.diagram
+            with open (mapper_file, 'rb') as f:
+                reference = pickle.load(f)
+            jmapper = reference['jmapper']
+            if len(jmapper.get_unclustered_items()) / len(jmapper.tupper.clean) < 1 - coverage:
+                hyper_params = reference['hyperparameters']
+                diagrams[hyper_params] = jmapper.jgraph.diagram
 
     keys = list(diagrams.keys())
     keys.sort()
