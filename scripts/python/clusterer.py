@@ -125,7 +125,6 @@ if __name__ == "__main__":
             [
                 "python",
                 f"{jmap_clusterer}",
-                f"{jmap_clusterer}",
                 f"-n{i}",
                 "-s",
             ]
@@ -133,7 +132,3 @@ if __name__ == "__main__":
 
     # Handling Parallelism
     subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed JMAP Clustering.", resilient=True)
-
-    # Handling Parallelism
-    subprocess_scheduler(subprocesses, num_loops, "SUCESS: Completed JMAP Clustering.", resilient=True)
-
