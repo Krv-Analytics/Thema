@@ -154,7 +154,7 @@ class THEMA(JBottle):
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
         self._cluster_positions = pos
-        return plt
+        return fig
 
     def visualize_component(self, component, cluster_labels=True):
         """
