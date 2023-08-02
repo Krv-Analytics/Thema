@@ -43,9 +43,5 @@
     "runlog_dir": "**PATH_TO_YOUR_RUN**/logs/",
     "jmap_runlog": "**PATH_TO_YOUR_RUN**/logs/jmap_runlog.json",
     "projector_runlog": "**PATH_TO_YOUR_RUN**/logs/projector_runlog.json"
-    "dendrogram_levels": 10,
-
-    "runlog_dir": "**PATH_TO_YOUR_RUN**/logs/",
-    "jmap_runlog": "**PATH_TO_YOUR_RUN**/logs/jmap_runlog.json",
-    "projector_runlog": "**PATH_TO_YOUR_RUN**/logs/projector_runlog.json"
+    
 }
