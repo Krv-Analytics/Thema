@@ -180,3 +180,70 @@ class JGraph:
         )
         self._diagram = pd
         return self._diagram
+
+
+    def get_MST(self, k=0):
+        """
+        Cacluates the Minimum Spanning Tree of the weighted graph. 
+
+        Note: get_MST will return a forest with the same number of 
+        trees as connected componenets by default. If a `k` value less than the 
+        number of componenets is supplied, it will be ignored. Otherwise, k trees vertex 
+        disjoint trees will be returned. 
+
+        Parameters:
+        -----------
+        k: the number of minimum spanning trees. 
+
+        Returns: 
+        --------
+        An nx.graph 
+        """
+        try: 
+            # Calculate MST 
+            mst = nx.minimum_spanning_tree(self.graph, weight="weight")
+            
+            if(k <= nx.number_connected_components(self.graph)):
+                return mst  
+
+            else: 
+                k = k - nx.number_connected_components(self.graph)
+                # Sort edges by weight
+                sorted_edges = sorted(mst.edges(data=True), key=lambda x: x[2]["weight"])
+
+                for edge in sorted_edges[-k:]: 
+                    mst.remove_edge(edge[0], edge[1])
+                
+                return mst 
+        except: 
+            return None 
+
+
+    def get_shortest_path(self, nodeID_1, nodeID_2):
+        """
+        Calculate the shortest path between two nodes in the graph using Dijkstra's algorithm.
+        
+        Parameters:
+        -----------
+            nodeID_1: source node identifier
+            nodeID_2: target node identifier
+            
+        Returns:
+            A tuple containing:
+            - A list representing the nodes in the shortest path from nodeID_1 to nodeID_2.
+            - The length of the shortest path, considering edge weights.
+            If no path exists between the nodes, returns (None, infinity).
+        """
+        try:
+            # Calculate shortest path using Dijkstra's algorithm
+            shortest_path = nx.shortest_path(self.graph, source=nodeID_1, target=nodeID_2, weight='weight')
+            
+            # Calculate the length of the shortest path
+            path_length = sum(self.graph[shortest_path[i]][shortest_path[i + 1]]['weight'] for i in range(len(shortest_path) - 1))
+            
+            return shortest_path, path_length
+            
+        except nx.NetworkXNoPath:
+            return None, float('inf')  # No path exists, return None and infinity length
+
+
