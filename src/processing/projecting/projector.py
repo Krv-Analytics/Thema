@@ -106,7 +106,7 @@ if __name__ == "__main__":
         args.random_seed = int(time.time())
 
     # Check Projections is valid
-    assert args.projector in ["UMAP"], "\n UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json."
+    assert args.projector in ["UMAP", "TSNE", "PCA"], "\n UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json."
 
     results = projection_driver(
         df,

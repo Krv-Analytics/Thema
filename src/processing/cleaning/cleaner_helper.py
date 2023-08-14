@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import category_encoders as ce
 from termcolor import colored
 
 
@@ -38,7 +39,7 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     Raises
     ------
     AssertionError
-    If encoding is not one of "integer" or "one_hot".
+    If encoding is not one of "integer", "one_hot", or "hash".
     """
     # Dropping columns
     try:
@@ -51,7 +52,8 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     assert encoding in [
         "integer",
         "one_hot",
-    ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer` and `one_hot` encodings", 'red')
+        "hash"
+    ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer`,`one_hot` and `hash` encodings", 'red')
     if encoding == "one_hot":
         # Use Pandas One Hot encoding
         cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
@@ -66,6 +68,11 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
         for column in categorical_variables:
             vals = cleaned_data[column].values
             cleaned_data[column] = encoder(vals)
+
+    if encoding == "hash":
+        categorical_variables = cleaned_data.select_dtypes(exclude=["number"]).columns.tolist()
+        hashing_encoder = ce.HashingEncoder(cols=categorical_variables, n_components=10)
+        cleaned_data = hashing_encoder.fit_transform(cleaned_data)
 
     # Scale
     if scaler is not None:
