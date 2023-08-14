@@ -1,29 +1,33 @@
 """Generate Graph jmaps using JMapper."""
+"""Generate Graph jmaps using JMapper."""
 
 import os
 import sys
 import json
 import argparse
 import pickle
+import argparse
+import pickle
 
 from dotenv import load_dotenv
 
 ################################################################################################
-#  Handling Local Imports  
+#  Handling Local Imports
 ################################################################################################
 
 load_dotenv()
 root = os.getenv("root")
+root = os.getenv("root")
 src = os.getenv("src")
+sys.path.append(src + "/jmapping/")
+sys.path.append(root + "logging/")
 sys.path.append(src + "/jmapping/")
 sys.path.append(root + "logging/")
 
 from run_log import Run_Log
+from run_log import Run_Log
 from tupper import Tupper
-from jmap_helper import (
-    generate_jmap_filename,
-    jmap_generator
-)
+from jmap_helper import generate_jmap_filename, jmap_generator
 
 ########################################################################################################################
 
@@ -32,6 +36,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     root = os.getenv("root")
+
+    # Initalize a runlog Manager
+    runlog = Run_Log()
 
     # Initalize a runlog Manager
     runlog = Run_Log()
@@ -103,7 +110,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-I",
         "--min_intersection",
-        default=1,
+        default=-1,
         type=int,
         help="Minimum intersection reuired between cluster elements to \
             form an edge in the graph representation.",

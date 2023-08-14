@@ -2,6 +2,9 @@ import networkx as nx
 import kmapper as km
 import numpy as np
 
+from tupper import Tupper
+from nerve import Nerve
+
 
 from nammu.curvature import ollivier_ricci_curvature
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
@@ -14,7 +17,7 @@ class JGraph:
 
     """
 
-    def __init__(self, nodes: dict(), min_intersection=1):
+    def __init__(self, nodes: dict(), min_intersection=-1):
         """
         Constructor for the JGraph Class.
 
@@ -23,29 +26,37 @@ class JGraph:
         nodes: <dict()>
             The nodes of a simplicial complex
 
+        weighted: bool
+            If true, return a weighted graph based on node intersection.
+
         min-intersection:
             For the moment, min_intersection value as dictated by graph nerve
 
         """
 
-        nerve = km.GraphNerve(min_intersection)
         assert (
             len(nodes) > 0
         ), "You must first generate a non-empty Simplicial Complex \
         with `fit()` before you can convert to Networkx "
 
+        self.min_intersection = min_intersection
         self.graph = nx.Graph()
+        self.nerve = Nerve(min_intersection=self.min_intersection)
 
-        _, simplices = nerve.compute(nodes)
-        edges = [edge for edge in simplices if len(edge) == 2]
+        # Fit Nerve to generate edges
+        edges = self.nerve.compute(nodes)
 
         if len(edges) == 0:
             self._is_Edgeless = True
         else:
             self._is_Edgeless = False
             self.graph.add_nodes_from(nodes)
-            self.graph.add_edges_from(edges)
             nx.set_node_attributes(self.graph, nodes, "membership")
+            # Weighted Graphs based on overlap
+            if self.min_intersection == -1:
+                self.graph.add_weighted_edges_from(edges)
+            else:
+                self.graph.add_edges_from(edges)
 
         self._components = dict(
             [
@@ -90,12 +101,15 @@ class JGraph:
             The default is set to Ollivier-Ricci Curvature.
 
         """
+        weight = None
+        if self.min_intersection == -1:
+            weight = "weight"
 
         try:
-            curvature = curvature_fn(self.graph)
+            curvature = curvature_fn(self.graph, weight=weight)
             assert len(curvature) == len(self.graph.edges())
             self._curvature = curvature
-        except:
+        except len(self._curvature) == 0:
             print("Invalid Curvature function")
 
     @property

@@ -260,7 +260,7 @@ class JBottle:
 
     def get_global_stats(self):
         """
-        Calculates global mean and standard deviation statistics. 
+        Calculates global mean and standard deviation statistics.
 
         Returns
         -------
@@ -271,8 +271,13 @@ class JBottle:
         clean_stats = pd.DataFrame()
         dropped_columns = self.jmapper.tupper.get_dropped_columns()
         for id in self._group_directory.keys():
-            
-            numeric_columns = self.get_groups_raw_df(id).drop(columns=dropped_columns).select_dtypes(include=np.number).columns
+
+            numeric_columns = (
+                self.get_groups_raw_df(id)
+                .drop(columns=dropped_columns)
+                .select_dtypes(include=np.number)
+                .columns
+            )
             raw_sub_df = self.get_groups_raw_df(id).select_dtypes(include=np.number)
             raw_stats["std"] = raw_sub_df.std()
             raw_stats["mean"] = raw_sub_df.mean()
@@ -286,32 +291,32 @@ class JBottle:
 
     def get_nodes_raw_df(self, node_id: str):
         """
-        Returns a subset of the raw dataframe only containing members of the specified node. 
+        Returns a subset of the raw dataframe only containing members of the specified node.
 
         Parameters
         ----------
-        node_id : str 
-            A node's string identifier 
+        node_id : str
+            A node's string identifier
 
-        Returns 
-        -------- 
-        A pandas data frame.  
+        Returns
+        --------
+        A pandas data frame.
         """
         member_items = self.get_nodes_members(node_id)
         return self._raw.iloc[member_items]
 
     def get_nodes_clean_df(self, node_id: str):
         """
-        Returns a subset of the clean dataframe only containing members of the specified node. 
+        Returns a subset of the clean dataframe only containing members of the specified node.
 
         Parameters
         ----------
-        node_id : str 
-            A node's string identifier 
+        node_id : str
+            A node's string identifier
 
-        Returns 
-        -------- 
-        A pandas data frame.  
+        Returns
+        --------
+        A pandas data frame.
         """
 
         member_items = self.get_nodes_members(node_id)
@@ -319,16 +324,16 @@ class JBottle:
 
     def get_nodes_projections(self, node_id: str):
         """
-        Returns a subset of the projectinos array only containing members of the specified node. 
+        Returns a subset of the projectinos array only containing members of the specified node.
 
         Parameters
         ----------
-        node_id : str 
-            A node's string identifier 
+        node_id : str
+            A node's string identifier
 
-        Returns 
-        -------- 
-        An np.array of projections.   
+        Returns
+        --------
+        An np.array of projections.
         """
         member_items = self.get_nodes_members(node_id)
         projections = {}
@@ -338,48 +343,48 @@ class JBottle:
 
     def get_groups_raw_df(self, group_id: int):
         """
-        Returns a subset of the raw dataframe only containing members of the specified group. 
+        Returns a subset of the raw dataframe only containing members of the specified group.
 
         Parameters
         ----------
         group_id : int
-            A group's identifier 
+            A group's identifier
 
-        Returns 
-        -------- 
-        A pandas data frame.  
+        Returns
+        --------
+        A pandas data frame.
         """
         member_items = self.get_groups_members(group_id)
         return self._raw.iloc[member_items]
 
     def get_groups_clean_df(self, group_id: int):
         """
-        Returns a subset of the clean dataframe only containing members of the specified group. 
+        Returns a subset of the clean dataframe only containing members of the specified group.
 
         Parameters
         ----------
         group_id : int
-            A group's identifier 
+            A group's identifier
 
-        Returns 
-        -------- 
-        A pandas data frame.  
+        Returns
+        --------
+        A pandas data frame.
         """
         member_items = self.get_groups_members(group_id)
         return self._clean.iloc[member_items]
 
     def get_groups_projections(self, group_id: int):
         """
-        Returns a subset of the projectinos array only containing members of the specified group. 
+        Returns a subset of the projectinos array only containing members of the specified group.
 
         Parameters
         ----------
-        node_id : str 
-            A groups's identifier 
+        node_id : str
+            A groups's identifier
 
-        Returns 
-        -------- 
-        An np.array of projections.   
+        Returns
+        --------
+        An np.array of projections.
         """
         member_items = self.get_groups_members(group_id)
         projections = {}
@@ -483,28 +488,33 @@ class JBottle:
         self, group_id: int, eval_fn=std_zscore_threshold_filter, *args, **kwargs
     ):
         """
-        Computes the most important identifiers of a group as specified by the evalulation function. 
+        Computes the most important identifiers of a group as specified by the evalulation function.
 
         Parameters
         ----------
 
-        group_id: 
-            A group's identifier. 
+        group_id:
+            A group's identifier.
 
-        eval_fn: 
-            The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the 
-            group's identity. 
+        eval_fn:
+            The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the
+            group's identity.
 
-        kwargs: 
-            Any key word arguments that need to passed to the aliased evaluation functinon. If, for example, 
+        kwargs:
+            Any key word arguments that need to passed to the aliased evaluation functinon. If, for example,
             you wanted to pass a parameter `std_threshold` to your eval function, `std_zscore_threshold_filter`
-            you could do as 
+            you could do as
 
             `compute_group_identity(id, eval_fn=std_zscore_threshold_filter, std_threshold=0.8)`
         """
         dropped_columns = self.jmapper.tupper.get_dropped_columns()
         global_stats = self.get_global_stats()[group_id]
-        numeric_columns = self.get_groups_raw_df(group_id).drop(columns=dropped_columns).select_dtypes(include=np.number).columns
+        numeric_columns = (
+            self.get_groups_raw_df(group_id)
+            .drop(columns=dropped_columns)
+            .select_dtypes(include=np.number)
+            .columns
+        )
         sub_df = self.get_groups_clean_df(group_id)[numeric_columns]
         id_table = sub_df.aggregate(eval_fn, global_stats=global_stats, *args, **kwargs)
 
@@ -513,14 +523,14 @@ class JBottle:
 
     def get_group_descriptions(self, description_fn=get_minimal_std):
         """
-        Returns a dictionary of group descriptions for each group as specified by the passed 
-        description function. 
+        Returns a dictionary of group descriptions for each group as specified by the passed
+        description function.
 
         Parameter
         ---------
-        description_fn: function 
-            A function that determines a representative column for each node in a group. 
-        
+        description_fn: function
+            A function that determines a representative column for each node in a group.
+
         Returns
         --------
         A density representing the composition of a group by its nodes' descriptions.
@@ -540,19 +550,19 @@ class JBottle:
         **kwargs,
     ):
         """
-        Returns a dictionary of group identies as specified by compute_group_identity. 
+        Returns a dictionary of group identies as specified by compute_group_identity.
 
         Paramters
         ---------
 
-        eval_fn: 
-            The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the 
-            group's identity. 
-        
-        kwargs: 
-            Any key word arguments that need to passed to the aliased evaluation functinon. If, for example, 
+        eval_fn:
+            The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the
+            group's identity.
+
+        kwargs:
+            Any key word arguments that need to passed to the aliased evaluation functinon. If, for example,
             you wanted to pass a parameter `std_threshold` to your eval function, `std_zscore_threshold_filter`
-            you could do so with  
+            you could do so with
 
             `get_group_identities(eval_fn=std_zscore_threshold_filter, std_threshold=0.8)`
         """
@@ -563,8 +573,6 @@ class JBottle:
             )
 
         return identities
-    
-
 
     def target_matching(
         self,
@@ -573,15 +581,15 @@ class JBottle:
     ):
         """
         Matches a target item into a generated group by calculating the minimum deviation
-        from a groups mean over available numeric columns. 
+        from a groups mean over available numeric columns.
 
         Parameters
         ----------
         target: pd.DataFrame
-            A data frame containing one row. 
+            A data frame containing one row.
 
-        col_filter: 
-            A list of columns to perform the mathcing on. 
+        col_filter:
+            A list of columns to perform the mathcing on.
         """
 
         target_cols = target.select_dtypes(include=np.number).dropna(axis=1).columns
