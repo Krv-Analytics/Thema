@@ -6,7 +6,7 @@ RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
 
 .PHONY: all 
-all: check-params process-data projections jmaps jmap-selection 
+all: check-params init process-data projections jmaps jmap-selection 
 	@echo "Process complete"
 
 .PHONY: install 
@@ -32,49 +32,58 @@ fetch-raw-data: check-params
 	poetry run python src/processing/pulling/data_generator.py -v
 
 .PHONY: process-data 
-process-data: check-params
+process-data: check-params init
 	cd scripts/bash && ./cleaner.sh
 
 .PHONY: projections 
-projections: check-params
+projections: initcheck-params
 	cd scripts/bash && ./projector.sh
 
 .PHONY: summarize-projections
-summarize-projections: check-params
+summarize-projections: init check-params
 	poetry run python src/modeling/synopsis/projection_summarizer.py
 
 .PHONY: jmaps 
-jmaps:  check-params
+jmaps: init check-params
 	cd scripts/bash && ./jmap_generator.sh 
 
 .PHONY: jmap-histogram 
-jmap-histogram: check-params 
+jmap-histogram: check-params  init
 	cd scripts/python && poetry run python jmap_histogram.py
 
 .PHONY: curvature-distances
-curvature-distances: check-params  
+curvature-distances: check-params  init
 	cd scripts/python && poetry run python curvature_distance_generator.py
 
 .PHONY: curvature-histogram
-curvature-histogram: check-params  curvature-distances
+curvature-histogram: init check-params  curvature-distances
 	cd scripts/python && poetry run python curvature_histogram.py
 
 .PHONY: stability-histogram 
-stability-histogram: check-params
+stability-histogram: check-paramsinit
 	cd scripts/python && poetry run python stability_histogram.py
 
 .PHONY: dendrogram
-dendrogram: check-params
+dendrogram: check-params init
 	cd scripts/bash && ./dendrogram.sh
 
 .PHONY: jmap-clustering 
-jmap-clustering: check-params  curvature-distances
+jmap-clustering: init check-params  curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
 .PHONY: jmap-selection 
-jmap-selection: check-params  jmap-clustering
+jmap-selection: init check-params  jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
+
+init: 
+	cd scripts/bash && ./startup.sh
+
+save: 
+	cd scripts/bash && ./dvc_save.sh 
+
+load: 
+	cd scripts/bash && ./dvc_load.sh
 
 
 # Cleaning commands for data fields 

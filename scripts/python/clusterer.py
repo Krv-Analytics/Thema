@@ -38,6 +38,7 @@ if __name__ == "__main__":
     else:
         print("params.json file note found!")
 
+   
     dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
 
