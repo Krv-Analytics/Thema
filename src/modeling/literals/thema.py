@@ -51,22 +51,22 @@ class THEMA(JBottle):
 
     Members
     -------
-    jmapper: <jmapper.JMapper> 
-        A JMapper Object 
+    jmapper: <jmapper.JMapper>
+        A JMapper Object
 
-    hyperparaemters: np.array 
+    hyperparaemters: np.array
         An np.array of the hyperparameters for generating the associated JMapper
 
     Member Functions
     ----------------
 
-    visualize_model: 
-        Displays networkx graph representation of JMapper model 
-    
-    visualize_component: 
-        Displays networkx graph representation of specified CC 
+    visualize_model:
+        Displays networkx graph representation of JMapper model
 
-    
+    visualize_component:
+        Displays networkx graph representation of specified CC
+
+
 
 
     """
@@ -107,7 +107,6 @@ class THEMA(JBottle):
     def hyper_parameters(self):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
-
 
     def visualize_model(self, k=None, seed=6):
         """
@@ -155,19 +154,19 @@ class THEMA(JBottle):
         ax.legend(loc="best", prop={"size": 8})
         plt.axis("off")
         self._cluster_positions = pos
-        return plt
+        return fig
 
     def visualize_component(self, component, cluster_labels=True):
         """
-        Plots only the specified connected component. 
+        Plots only the specified connected component.
 
         Parameters
         ----------
-        component: int 
-            The group identifier correpsonding to the desired connected component. 
-        
-        cluster_labels: bool 
-            Shows node labels in nx plot. 
+        component: int
+            The group identifier correpsonding to the desired connected component.
+
+        cluster_labels: bool
+            Shows node labels in nx plot.
 
         """
         fig = plt.figure(figsize=(8, 8))
@@ -289,7 +288,7 @@ class THEMA(JBottle):
 
     def visualize_piecharts(self):
         """
-        A PieChart Visualization of group descriptions. 
+        A PieChart Visualization of group descriptions.
         """
         # Define the color map based on the dictionary values
         colors = []
@@ -383,14 +382,14 @@ class THEMA(JBottle):
 
     def visualize_boxplots(self, cols=[], target=pd.DataFrame()):
         """
-        Generates an ensemble of box plots of groups over the specified data columns. 
+        Generates an ensemble of box plots of groups over the specified data columns.
 
         Parameters
         ----------
-        cols: list 
-            A list of the desired data columns to be visualized. 
-        
-        target: pd.DataFrame 
+        cols: list
+            A list of the desired data columns to be visualized.
+
+        target: pd.DataFrame
             A data frame with one row to plot target line in boxplot.
         """
 
