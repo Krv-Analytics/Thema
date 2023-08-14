@@ -36,15 +36,15 @@ process-data: check-params init
 	cd scripts/bash && ./cleaner.sh
 
 .PHONY: projections 
-projections: initcheck-params
+projections: check-params init 
 	cd scripts/bash && ./projector.sh
 
 .PHONY: summarize-projections
-summarize-projections: init check-params
+summarize-projections: check-params init 
 	poetry run python src/modeling/synopsis/projection_summarizer.py
 
 .PHONY: jmaps 
-jmaps: init check-params
+jmaps: check-params init 
 	cd scripts/bash && ./jmap_generator.sh 
 
 .PHONY: jmap-histogram 
@@ -56,11 +56,11 @@ curvature-distances: check-params  init
 	cd scripts/python && poetry run python curvature_distance_generator.py
 
 .PHONY: curvature-histogram
-curvature-histogram: init check-params  curvature-distances
+curvature-histogram: check-params init curvature-distances
 	cd scripts/python && poetry run python curvature_histogram.py
 
 .PHONY: stability-histogram 
-stability-histogram: check-paramsinit
+stability-histogram: check-params init
 	cd scripts/python && poetry run python stability_histogram.py
 
 .PHONY: dendrogram
@@ -68,11 +68,11 @@ dendrogram: check-params init
 	cd scripts/bash && ./dendrogram.sh
 
 .PHONY: jmap-clustering 
-jmap-clustering: init check-params  curvature-distances
+jmap-clustering:check-params init curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
 .PHONY: jmap-selection 
-jmap-selection: init check-params  jmap-clustering
+jmap-selection: check-params init jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
 
