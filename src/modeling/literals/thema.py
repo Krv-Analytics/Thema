@@ -187,7 +187,7 @@ class THEMA(JBottle):
     
 
     def visualize_model(
-                self, col=None, node_size_multiplier=10, #general params
+                self, col=None, node_size_multiplier=10, node_edge_width=0.5, #general params
                 legend_bar=False, group_labels=False, node_labels=False, show_edge_weights=False, #graph labeling & legend params
                 spring_layout_seed=8, k=None, #spring layout params
                 matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=500, #matplotlib params
@@ -209,6 +209,10 @@ class THEMA(JBottle):
             the entire graph can be visualized in a reasonable manner
                 TODO: implement a smarter way to size nodes, based on diff between number of items
                 in largest node and smallest node
+
+        node_edge_width : int, default 0.5
+            Determines the weight of the node's outline
+            Parameter might need to be adjusted when visualizing dense nodes, to ensure edge weights do not cover nodes
 
         legend_bar : boolean, default false
             to toggle on/off the matplotlib legend bar
@@ -266,7 +270,7 @@ class THEMA(JBottle):
             node_size=node_sizes, 
             ax=ax, 
             cmap=matplotlib_cmap,
-            linewidths=0.5,
+            linewidths=node_edge_width,
             edgecolors='black',
             )
 
