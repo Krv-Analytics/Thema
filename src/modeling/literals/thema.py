@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 from persim import plot_diagrams
 from plotly.subplots import make_subplots
 
+from sklearn.preprocessing import LabelEncoder
+
 # TODO: Move this to a defaulted argument for the viz functions
 pio.renderers.default = "browser"
 
@@ -107,54 +109,216 @@ class THEMA(JBottle):
     def hyper_parameters(self):
         """Return the hyperparameters used to fit this model."""
         return self._hyper_parameters
-
-    def visualize_model(self, k=None, seed=6):
+    
+    
+    def _define_nx_labels_colors(self, col=None, external_col=None):
         """
-        Visualize the clustering as a network. This function plots
-        the JMapper's graph in a matplotlib figure, coloring the nodes
-        by their respective policy group.
+        Helper Function for visualize_model()
+        Colors a nx graph by col.
+        - defaults to coloring by group
+        - ability to color by any col in the raw data
+        - TODO support ability to color by any list that corresponds to indexes in the data (for external variables not included)
 
         Parameters
         -------
+        all determined by visualize_model()
+        """
+        g = self.jmapper.jgraph.graph
+        color_dict = {}
+        labels_dict = {}
+
+        # to color by connected component group number
+        if col is None:
+            for node in g.nodes:
+                ave = self.get_nodes_groupID(node)
+                color_dict[node]= ave
+                labels_dict[node]= node
+
+        # to color by a column in the raw df
+        elif col in self.raw.columns:
+            # color by categorical variables
+            #TODO figure out how to create a legend here that can be referenced when plotting - only for categorical variables
+            if self.raw[col].dtype == 'object':
+
+                encoder = LabelEncoder()
+                encoded_col = encoder.fit_transform(self.raw[col])
+                
+                for node, encoded_value in zip(g.nodes, encoded_col):
+                    color_dict[node] = encoded_value
+                    labels_dict[node] = node
+            # color by non-categorical variables
+            else:
+                for node in g.nodes:
+                    a = self.get_nodes_raw_df(node).index
+                    ave = self.raw.iloc[a].mean()[col]
+                    color_dict[node]= ave
+                    labels_dict[node]= node
+
+        # to color by an external column
+        elif external_col == external_col:
+            #TODO
+            print('coloring by external data not supported at this time')
+        else:
+            print('error coloring')
+
+        return color_dict, labels_dict
+    
+
+    def _get_connected_component_label_positions(self):
+        """
+        Helper Function for visualize_model()
+        Adds Group/Cluster Labels to the graph for easier tracking of groups across different color schemes.
+        - can be toggled on and off via parameters in visualize_model()
+        - TODO center and offset group labels, instead of putting them over first node
+            - the commented out code is starter code (not working yet) to change the position of group labels
+
+        Parameters
+        -------
+        all determined by visualize_model()
+
+        """
+        #label_pos = {}
+        label_labels = {}
+        for group in self._group_directory.keys():
+            temp=self.get_groups_member_nodes(group)[0]
+            #label_pos[temp] = np.random.rand(1,2)
+            label_labels[temp]=f"Group {group}"
+        return label_labels #,label_pos
+    
+
+    def visualize_model(
+                self, col=None, node_size_multiplier=10, #general params
+                legend_bar=False, group_labels=False, node_labels=False, show_edge_weights=False, #graph labeling & legend params
+                spring_layout_seed=8, k=None, #spring layout params
+                matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=500, #matplotlib params
+            ):
+        """
+        Visualize the clustering as a network. This function plots
+        the JMapper's graph in a matplotlib figure, coloring the nodes
+        by their respective policy group or col parameter
+
+        Parameters
+        -------
+        col : df column, default is none
+            Parameter to determine graph coloring
+            If none, will default to color by group (connected component)
+
+        node_size_multiplier : int, default 10
+            Node sizes are determined by the number of items per node
+            For datasets with very large (or small) groups, tuning this parameter ensures
+            the entire graph can be visualized in a reasonable manner
+                TODO: implement a smarter way to size nodes, based on diff between number of items
+                in largest node and smallest node
+
+        legend_bar : boolean, default false
+            to toggle on/off the matplotlib legend bar
+
+        group_labels : boolean, default false
+            to toggle on and off group label text being placed over each group to identify group numbers
+
+        node_labels : boolean, default false 
+            to toggle on and off node label text being placed over each node to identify node's letter identifier                         
+        
+        show_edge_weights : boolean, default false
+            to toggle on and off edge weight visualizations
+            - text on edges to indicate weights
+            - dashed vs solid edges at different widths to contrast different edge weights
+
+        spring_layout_seed : int, default 8
+                             random seed to change the spring layout
+
         k : float, default is None
             Optimal distance between nodes. If None the distance is set to
             1/sqrt(n) where n is the number of nodes. Increase this value to
             move nodes farther apart.
 
-        """
-        # Config Pyplot
-        fig = plt.figure(figsize=(14, 8))
-        ax = fig.add_subplot()
-        color_scale = np.array(custom_color_scale()).T[1]
-        # Get Node Coords
-        pos = nx.spring_layout(self.jmapper.jgraph.graph, k=k, seed=seed)
+        matplotlib_cmap : string, default coolwarm
+            colorscale from matplotlib to color nodes by, supports all matplotlib colorscales
 
-        # Plot and color components
-        labels, components = zip(*self.jmapper.jgraph.components.items())
-        for i, g in enumerate(components):
-            nx.draw_networkx(
-                g,
-                pos=pos,
-                node_color=color_scale[i],
-                node_size=100,
-                font_size=6,
-                with_labels=False,
-                ax=ax,
-                label=f"Group {labels[i]}",
-                edgelist=[],
-            )
-            nx.draw_networkx_edges(
-                g,
-                pos=pos,
-                width=2,
-                ax=ax,
-                label=None,
-                alpha=0.6,
-            )
-        ax.legend(loc="best", prop={"size": 8})
-        plt.axis("off")
+        figsize : touple, default (8, 6)
+            parameter to size graph by
+
+        dpi : int, default 500
+            resulution of the plot: dots per inch.
+                TODO: implement a smarter way to assign a dpi, as this will have to be reduced
+                for very large datasets to ensure the visulization can be made in a resonable amount of time
+
+                NOTE: if you are getting weird errors, reduce the DPI. Matplotlib has trouble when dpi is too high
+
+        """
+        g = self.jmapper.jgraph.graph
+
+        colors_dict, labels_dict = self._define_nx_labels_colors(col=col)
+        pos = nx.spring_layout(g, seed=spring_layout_seed, k=k)
         self._cluster_positions = pos
-        return fig
+
+        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+        ax.set_frame_on(False)  # Remove the black border
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        node_sizes = [len(self.get_nodes_members(node)) * node_size_multiplier for node in g.nodes]
+
+        nc = nx.draw_networkx_nodes(
+            g, 
+            pos,
+            node_color=list(colors_dict.values()), 
+            node_size=node_sizes, 
+            ax=ax, 
+            cmap=matplotlib_cmap,
+            linewidths=0.5,
+            edgecolors='black',
+            )
+
+        # for weighted graphs, to visualize differently weighted edges differently
+        if show_edge_weights:
+            #split edges into two groups based on weights, for different visualizations
+            #TODO catch an error and print a message if no edge weights associated with graph
+            elarge = [(u, v) for (u, v, d) in g.edges(data=True) if d["weight"] > 0.5]
+            esmall = [(u, v) for (u, v, d) in g.edges(data=True) if d["weight"] <= 0.5]
+            nx.draw_networkx_edges(g,
+                pos,
+                edgelist=elarge, 
+                width=1,
+                ax=ax
+            )
+            nx.draw_networkx_edges(g,
+                pos,
+                edgelist=esmall,
+                width=1,
+                alpha=0.5,
+                edge_color="black",
+                style="dashed",
+                ax=ax
+            )
+        else:
+            # draw all edges the same, works for both weighted and non-weighted graphs
+            nx.draw_networkx_edges(g,
+                pos,
+                edgelist=g.edges,
+                width=1,
+                edge_color="grey",
+                ax=ax
+            )
+
+        if node_labels:
+            nx.draw_networkx_labels(g, pos, labels=labels_dict)
+        if group_labels:
+            nx.draw_networkx_labels(g, pos, labels=self._get_connected_component_label_positions())
+        if legend_bar:
+            plt.colorbar(nc)
+
+        #for weighted graphs, to add edge weight labels
+        if show_edge_weights:
+            edge_weight_labels = nx.get_edge_attributes(g,'weight')
+            nx.draw_networkx_edge_labels(g,
+                pos,
+                edge_labels=edge_weight_labels,
+                font_size=8)
+
+        # adjusting so group labels stay in-bounds
+        plt.subplots_adjust(left=-0.3)
+
 
     def visualize_component(self, component, cluster_labels=True):
         """
