@@ -187,7 +187,8 @@ class THEMA(JBottle):
     
 
     def visualize_model(
-                self, col=None, node_size_multiplier=10, node_edge_width=0.5, #general params
+                self, col=None, node_size_multiplier=10, #general params
+                node_edge_width=0.5, node_edge_color='black', #node viz params
                 legend_bar=False, group_labels=False, node_labels=False, show_edge_weights=False, #graph labeling & legend params
                 spring_layout_seed=8, k=None, #spring layout params
                 matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=500, #matplotlib params
@@ -271,7 +272,7 @@ class THEMA(JBottle):
             ax=ax, 
             cmap=matplotlib_cmap,
             linewidths=node_edge_width,
-            edgecolors='black',
+            edgecolors=node_edge_color,
             )
 
         # for weighted graphs, to visualize differently weighted edges differently
@@ -315,10 +316,15 @@ class THEMA(JBottle):
         #for weighted graphs, to add edge weight labels
         if show_edge_weights:
             edge_weight_labels = nx.get_edge_attributes(g,'weight')
-            nx.draw_networkx_edge_labels(g,
-                pos,
-                edge_labels=edge_weight_labels,
-                font_size=8)
+            edge_label_options = {
+                'edge_labels': edge_weight_labels,
+                'pos': pos,
+                'font_size': 7,
+                'font_color': 'black',  
+                'alpha': 1.0,  
+                'bbox': dict(facecolor='none', edgecolor='none') 
+            }
+            nx.draw_networkx_edge_labels(g, **edge_label_options, ax=ax)
 
         # adjusting so group labels stay in-bounds
         plt.subplots_adjust(left=-0.3)
