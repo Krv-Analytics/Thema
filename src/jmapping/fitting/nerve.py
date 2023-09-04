@@ -82,16 +82,10 @@ class Nerve:
 
         """
 
-        result = defaultdict(list)
-        weights = []
-        # Create links when clusters from different hypercubes have members with the same sample id.
+        result = []
         candidates = itertools.combinations(nodes.keys(), 2)
         for candidate in candidates:
-            # if there are non-unique members in the union
             overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
             if overlap > 0:
-                result[candidate[0]].append(candidate[1])
-                weights.append(1 / overlap)
-
-        edges = [(x, end, w) for x in result for end in result[x] for w in weights]
-        return edges
+                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
+        return result
