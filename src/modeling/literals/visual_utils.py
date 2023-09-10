@@ -146,7 +146,8 @@ def interactive_visualization(token):
         options=['sum', 'mean'],
         description='Node Size Method:',
         disabled=False,
-        style={'description_width': '120px', 'width': '200px', 'button_color': 'success'}
+        style={'description_width': '120px', 'width': '200px', 'button_color': 'success'},
+        flex='0 0 auto', width='auto', min_width='100px'
     )
 
     # Create toggle buttons for various options with a red button style
@@ -204,7 +205,7 @@ def interactive_visualization(token):
     # Define an output widget for displaying the graph
     output = widgets.Output()
 
-    left_top_box = widgets.HBox([legend_toggle_button, group_label_toggle, node_label_toggle, show_edge_weights_toggle])
+    left_top_box = widgets.VBox([legend_toggle_button, group_label_toggle, node_label_toggle, show_edge_weights_toggle])
     top_center_box = widgets.VBox([col_dropdown, color_method_dropdown, node_size_dropdown, node_size_metric_dropdown])
     top_right_box = widgets.VBox([k_slider, seed_slider], layout=widgets.Layout(justify_content='flex-end'))
     
