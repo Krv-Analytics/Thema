@@ -111,38 +111,55 @@ class THEMA(JBottle):
         return self._hyper_parameters
     
     
-    def _define_nx_labels_colors(self, col=None, external_col=None):
+    def _define_nx_labels_colors(self, col=None, external_col=None, statistic='average'):
         """
         Helper Function for visualize_model()
         Colors a nx graph by col.
         - defaults to coloring by group
-        - ability to color by any col in the raw data
-        - TODO support ability to color by any list that corresponds to indexes in the data (for external variables not included)
+        - ability to color by any col in the raw data or statistics (average, median, min, max, std deviation)
 
         Parameters
         -------
         all determined by visualize_model()
+        - col: str or None, the column name in the raw data to use for coloring (default: None)
+        - external_col: None (not fully supported yet)
+        - statistic: str, the statistic to use for coloring ('average', 'median', 'min', 'max', 'std' for standard deviation)
         """
         g = self.jmapper.jgraph.graph
         color_dict = {}
         labels_dict = {}
 
+        # Define a helper function to calculate statistics
+        def calculate_statistic(node, a, col, statistic):
+            if statistic == 'average':
+                return self.raw.iloc[a].mean()[col]
+            elif statistic == 'median':
+                return self.raw.iloc[a].median()[col]
+            elif statistic == 'sum':
+                return self.raw.iloc[a].sum()[col]
+            elif statistic == 'min':
+                return self.raw.iloc[a].min()[col]
+            elif statistic == 'max':
+                return self.raw.iloc[a].max()[col]
+            elif statistic == 'std':
+                return self.raw.iloc[a].std()[col]
+            else:
+                raise ValueError("Invalid statistic parameter")
+
         # to color by connected component group number
         if col is None:
             for node in g.nodes:
                 ave = self.get_nodes_groupID(node)
-                color_dict[node]= ave
-                labels_dict[node]= node
+                color_dict[node] = ave
+                labels_dict[node] = node
 
         # to color by a column in the raw df
         elif col in self.raw.columns:
             # color by categorical variables
-            #TODO figure out how to create a legend here that can be referenced when plotting - only for categorical variables
             if self.raw[col].dtype == 'object':
-
                 encoder = LabelEncoder()
                 encoded_col = encoder.fit_transform(self.raw[col])
-                
+
                 for node, encoded_value in zip(g.nodes, encoded_col):
                     color_dict[node] = encoded_value
                     labels_dict[node] = node
@@ -150,18 +167,18 @@ class THEMA(JBottle):
             else:
                 for node in g.nodes:
                     a = self.get_nodes_raw_df(node).index
-                    ave = self.raw.iloc[a].mean()[col]
-                    color_dict[node]= ave
-                    labels_dict[node]= node
+                    value = calculate_statistic(node, a, col, statistic)
+                    color_dict[node] = value
+                    labels_dict[node] = node
 
         # to color by an external column
         elif external_col == external_col:
-            #TODO
             print('coloring by external data not supported at this time')
         else:
             print('error coloring')
 
         return color_dict, labels_dict
+
     
 
     def _get_connected_component_label_positions(self):
@@ -188,7 +205,7 @@ class THEMA(JBottle):
 
     def visualize_model(
                 self, col=None, node_size_multiplier=10, #general params
-                node_edge_width=0.5, node_edge_color='black', #node viz params
+                node_color_method='average', node_edge_width=0.5, node_edge_color='black', #node viz params
                 legend_bar=False, group_labels=False, node_labels=False, show_edge_weights=False, #graph labeling & legend params
                 spring_layout_seed=8, k=None, #spring layout params
                 matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=500, #matplotlib params
@@ -253,7 +270,7 @@ class THEMA(JBottle):
         """
         g = self.jmapper.jgraph.graph
 
-        colors_dict, labels_dict = self._define_nx_labels_colors(col=col)
+        colors_dict, labels_dict = self._define_nx_labels_colors(col=col, statistic=node_color_method)
         pos = nx.spring_layout(g, seed=spring_layout_seed, k=k)
         self._cluster_positions = pos
 
@@ -535,7 +552,7 @@ class THEMA(JBottle):
         fig.update_traces(marker=dict(line=dict(color="white", width=3)))
 
         # TODO: Base this yshift on the number of descriptors
-        y_shift = -2
+        y_shift = -.2
 
         fig.update_layout(
             legend=dict(
