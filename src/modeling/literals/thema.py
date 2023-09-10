@@ -29,7 +29,7 @@ pio.renderers.default = "browser"
 ########################################################################################
 
 
-from visual_utils import custom_color_scale, get_subplot_specs, reorder_colors
+from visual_utils import custom_color_scale, get_subplot_specs, reorder_colors, interactive_visualization
 
 load_dotenv()
 root = os.getenv("root")
@@ -179,7 +179,35 @@ class THEMA(JBottle):
 
         return color_dict, labels_dict
 
-    
+    def calculate_node_sizes(self, col_name=None, node_size_multiplier=10, target_range=(10, 300), aggregation_method='sum'):
+        g = self.jmapper.jgraph.graph
+        
+        if col_name is None:
+            # Default behavior: size nodes by the number of items per node
+            node_sizes = [len(self.get_nodes_members(node)) * node_size_multiplier for node in g.nodes]
+        else:
+            # Check the aggregation method and calculate node sizes accordingly
+            if aggregation_method == 'mean':
+                column_values = [self.get_nodes_raw_df(node)[col_name].mean() * node_size_multiplier for node in g.nodes]
+            elif aggregation_method == 'sum':
+                column_values = [self.get_nodes_raw_df(node)[col_name].sum() * node_size_multiplier for node in g.nodes]
+            else:
+                raise ValueError("Invalid aggregation method. Supported methods: 'mean', 'sum'")
+            
+            min_value = min(column_values)
+            max_value = max(column_values)
+            
+            if min_value == max_value:
+                # Avoid division by zero if all values are the same
+                scaling_factor = 1.0
+            else:
+                scaling_factor = (target_range[1] - target_range[0]) / (max_value - min_value)
+            
+            # Apply the scaling factor to the node sizes
+            node_sizes = [(value - min_value) * scaling_factor + target_range[0] for value in column_values]
+        
+        return node_sizes
+
 
     def _get_connected_component_label_positions(self):
         """
@@ -204,11 +232,11 @@ class THEMA(JBottle):
     
 
     def visualize_model(
-                self, col=None, node_size_multiplier=10, #general params
+                self, col=None, node_size_col = None, node_size_multiplier=10, node_size_aggregation_method='sum', #general params
                 node_color_method='average', node_edge_width=0.5, node_edge_color='black', #node viz params
                 legend_bar=False, group_labels=False, node_labels=False, show_edge_weights=False, #graph labeling & legend params
                 spring_layout_seed=8, k=None, #spring layout params
-                matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=500, #matplotlib params
+                matplotlib_cmap = 'coolwarm', figsize=(8, 6), dpi=400, #matplotlib params
             ):
         """
         Visualize the clustering as a network. This function plots
@@ -279,7 +307,7 @@ class THEMA(JBottle):
         ax.set_xticks([])
         ax.set_yticks([])
 
-        node_sizes = [len(self.get_nodes_members(node)) * node_size_multiplier for node in g.nodes]
+        node_sizes = self.calculate_node_sizes(col_name=node_size_col, node_size_multiplier=node_size_multiplier, aggregation_method=node_size_aggregation_method)
 
         nc = nx.draw_networkx_nodes(
             g, 
@@ -346,6 +374,8 @@ class THEMA(JBottle):
         # adjusting so group labels stay in-bounds
         plt.subplots_adjust(left=-0.3)
 
+    def interactive_model(self):
+        return interactive_visualization(self)
 
     def visualize_component(self, component, cluster_labels=True):
         """

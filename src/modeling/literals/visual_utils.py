@@ -1,4 +1,8 @@
 import math
+import ipywidgets as widgets
+from ipywidgets import interact
+from IPython.display import display, clear_output
+import matplotlib.pyplot as plt
 
 
 def get_subplot_specs(n):
@@ -111,3 +115,133 @@ def reorder_colors(colors):
         else:
             ordered.append(colors[n - (i // 2) - 1])
     return ordered
+
+def interactive_visualization(token):
+    # Create a dropdown widget for choosing the coloring parameter with custom style
+    options_list = list(token.raw.columns)
+    options_list.insert(0, None)
+    col_dropdown = widgets.Dropdown(
+        options=options_list,
+        description='Color By:',
+        disabled=False,
+         style={'description_width': '120px', 'width': '200px', 'background-color': 'lightgray'}
+    )
+
+    node_size_dropdown = widgets.Dropdown(
+        options=options_list,
+        description='Size Nodes By:',
+        disabled=False,
+         style={'description_width': '120px', 'width': '200px', 'background-color': 'lightgray'}
+    )
+
+    # Create a dropdown widget for choosing the node_color_method with custom style
+    color_method_dropdown = widgets.Dropdown(
+        options=['average', 'sum', 'min', 'max', 'std'],
+        description='Color Method:',
+        disabled=False,
+        style={'description_width': '120px', 'width': '200px', 'button_color': 'success'}
+    )
+
+    node_size_metric_dropdown = widgets.Dropdown(
+        options=['sum', 'mean'],
+        description='Node Size Method:',
+        disabled=False,
+        style={'description_width': '120px', 'width': '200px', 'button_color': 'success'}
+    )
+
+    # Create toggle buttons for various options with a red button style
+    legend_toggle_button = widgets.ToggleButton(
+        value=False,
+        description='Legend Bar',
+        disabled=False,
+        style={'button_color': 'white', 'color': 'black'},
+        tooltip='Toggle Legend Bar'  # Add a tooltip
+    )
+
+    group_label_toggle = widgets.ToggleButton(
+        value=False,
+        description='Group Labels',
+        disabled=False,
+        style={'button_color': 'white', 'color': 'black'},
+        tooltip='Toggle Group Labels'  # Add a tooltip
+    )
+
+    node_label_toggle = widgets.ToggleButton(
+        value=False,
+        description='Node Labels',
+        disabled=False,
+        style={'button_color': 'white', 'color': 'black'},
+        tooltip='Toggle Node Labels'  # Add a tooltip
+    )
+
+    show_edge_weights_toggle = widgets.ToggleButton(
+        value=False,
+        description='Show Edge Weights',
+        disabled=False,
+        style={'button_color': 'white', 'color': 'black'},
+        tooltip='Toggle Edge Weights'  # Add a tooltip
+    )
+
+    # Create a slider widget for the k parameter
+    k_slider = widgets.FloatSlider(
+        value=0.1,
+        min=0.05,
+        max=0.5,
+        step=0.01,
+        description='k:',
+        continuous_update=False,
+    )
+
+    # Create a slider widget for the spring_layout_seed parameter
+    seed_slider = widgets.IntSlider(
+        value=8,
+        min=1,
+        max=20,
+        description='Seed:',
+        continuous_update=False,
+    )
+
+    # Define an output widget for displaying the graph
+    output = widgets.Output()
+
+    left_top_box = widgets.HBox([legend_toggle_button, group_label_toggle, node_label_toggle, show_edge_weights_toggle])
+    top_center_box = widgets.VBox([col_dropdown, color_method_dropdown, node_size_dropdown, node_size_metric_dropdown])
+    top_right_box = widgets.VBox([k_slider, seed_slider], layout=widgets.Layout(justify_content='flex-end'))
+    
+    # Stack the layout containers horizontally in the main box
+    main_box = widgets.HBox([top_center_box, top_right_box, left_top_box], layout=widgets.Layout(justify_content='space-between'))
+    
+    container = widgets.VBox([main_box, output])
+
+    # Define a function to visualize the graph based on the selected values
+    def visualize_graph(change):
+        with output:
+            clear_output(wait=True)
+            token.visualize_model(
+                col=col_dropdown.value,
+                node_color_method=color_method_dropdown.value,
+                legend_bar=legend_toggle_button.value,
+                group_labels=group_label_toggle.value,
+                node_labels=node_label_toggle.value,
+                show_edge_weights=show_edge_weights_toggle.value,
+                k=k_slider.value,
+                spring_layout_seed=seed_slider.value,
+                node_size_col = node_size_dropdown.value,
+                node_size_aggregation_method=node_size_metric_dropdown.value
+            )
+            plt.show()
+
+    # Use the observe method to connect the dropdowns, buttons, and sliders to the visualization function
+    col_dropdown.observe(visualize_graph, names='value')
+    color_method_dropdown.observe(visualize_graph, names='value')
+    legend_toggle_button.observe(visualize_graph, names='value')
+    group_label_toggle.observe(visualize_graph, names='value')
+    node_label_toggle.observe(visualize_graph, names='value')
+    show_edge_weights_toggle.observe(visualize_graph, names='value')
+    k_slider.observe(visualize_graph, names='value')
+    seed_slider.observe(visualize_graph, names='value')
+    node_size_dropdown.observe(visualize_graph, names='value')
+    node_size_metric_dropdown.observe(visualize_graph, names='value')
+
+    # Display the widget container
+    display(container)
