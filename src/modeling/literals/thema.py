@@ -191,6 +191,8 @@ class THEMA(JBottle):
                 column_values = [self.get_nodes_raw_df(node)[col_name].mean() * node_size_multiplier for node in g.nodes]
             elif aggregation_method == 'sum':
                 column_values = [self.get_nodes_raw_df(node)[col_name].sum() * node_size_multiplier for node in g.nodes]
+            elif aggregation_method == 'median':
+                column_values = [self.get_nodes_raw_df(node)[col_name].median() * node_size_multiplier for node in g.nodes]
             else:
                 raise ValueError("Invalid aggregation method. Supported methods: 'mean', 'sum'")
             
@@ -582,7 +584,7 @@ class THEMA(JBottle):
         fig.update_traces(marker=dict(line=dict(color="white", width=3)))
 
         # TODO: Base this yshift on the number of descriptors
-        y_shift = -.2
+        y_shift = -.35
 
         fig.update_layout(
             legend=dict(

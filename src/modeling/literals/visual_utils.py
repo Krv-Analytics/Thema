@@ -143,7 +143,7 @@ def interactive_visualization(token):
     )
 
     node_size_metric_dropdown = widgets.Dropdown(
-        options=['sum', 'mean'],
+        options=['sum', 'mean', 'median'],
         description='Node Size Method:',
         disabled=False,
         style={'description_width': '120px', 'width': '200px', 'button_color': 'success'},
@@ -210,7 +210,7 @@ def interactive_visualization(token):
     top_right_box = widgets.VBox([k_slider, seed_slider], layout=widgets.Layout(justify_content='flex-end'))
     
     # Stack the layout containers horizontally in the main box
-    main_box = widgets.HBox([top_center_box, top_right_box, left_top_box], layout=widgets.Layout(justify_content='space-between'))
+    main_box = widgets.HBox([top_right_box, top_center_box, left_top_box], layout=widgets.Layout(justify_content='flex-end'))
     
     container = widgets.VBox([main_box, output])
 
@@ -228,7 +228,8 @@ def interactive_visualization(token):
                 k=k_slider.value,
                 spring_layout_seed=seed_slider.value,
                 node_size_col = node_size_dropdown.value,
-                node_size_aggregation_method=node_size_metric_dropdown.value
+                node_size_aggregation_method=node_size_metric_dropdown.value,
+                node_size_multiplier=5
             )
             plt.show()
 
