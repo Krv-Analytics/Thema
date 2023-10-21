@@ -3,20 +3,19 @@
 import os
 import sys
 
-import pandas as pd
-import numpy as np
-
-from dotenv import load_dotenv
-from umap import UMAP
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-from termcolor import colored
-
-
 ######################################################################
-# Silencing UMAP Warnings 
-import warnings 
+# Silencing UMAP Warnings
+import warnings
+
+import numpy as np
+import pandas as pd
+from dotenv import load_dotenv
 from numba import NumbaDeprecationWarning
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from termcolor import colored
+from umap import UMAP
+
 warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 ######################################################################
@@ -28,7 +27,7 @@ def projection_driver(
     d: float,
     dimensions: int = 2,
     projector: str = "UMAP",
-    seed : int = 42,
+    seed: int = 42,
 ):
     """
     This function performs a projection of a DataFrame.
@@ -53,7 +52,6 @@ def projection_driver(
         A dictionary containing the projection and hyperparameters.
     """
 
-    
     data = df.dropna()
 
     if projector == "UMAP":
@@ -62,20 +60,18 @@ def projection_driver(
             n_neighbors=n,
             n_components=dimensions,
             init="random",
-            random_state= seed,
+            random_state=seed,
         )
 
         projection = umap_2d.fit_transform(data)
-    
-    if projector == "TSNE": 
-        num_samples = df.shape[0]
-        perplexity = min(30, num_samples - 1)
-        tsne = TSNE(n_components=dimensions, random_state=seed, perplexity=perplexity)
-        projection = tsne.fit_transform(data)
-    
 
-    if projector == "PCA": 
-        pca = PCA(n_components=dimensions, random_state=42)
+    if projector == "TSNE":
+        num_samples = df.shape[0]
+        tsne = TSNE(n_components=dimensions, random_state=seed, perplexity=n)
+        projection = tsne.fit_transform(data)
+
+    if projector == "PCA":
+        pca = PCA(n_components=dimensions, random_state=seed)
         projection = pca.fit_transform(data)
 
     results = {"projection": projection, "hyperparameters": [n, d, dimensions]}
