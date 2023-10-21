@@ -5,7 +5,7 @@ PARAMS_JSON := $(shell cat $(PARAMS_FILE))
 RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
 COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
 
-all: process-data projections jmaps jmap-selection 
+all: init process-data projections jmaps jmap-selection 
 	@echo "Process complete"
 
 install: check-poetry 
@@ -30,39 +30,48 @@ fetch: fetch-raw-data fetch-processed-data
 fetch-raw-data:
 	poetry run python src/processing/pulling/data_generator.py -v
 
-process-data:
+process-data: init
 	cd scripts/bash && ./cleaner.sh
 
-projections: 
+projections: init
 	cd scripts/bash && ./projector.sh
 
-summarize-projections:
+summarize-projections: init
 	poetry run python src/modeling/synopsis/projection_summarizer.py
 
-jmaps: 
+jmaps: init
 	cd scripts/bash && ./jmap_generator.sh 
 
-jmap-histogram:
+jmap-histogram: init
 	cd scripts/python && poetry run python jmap_histogram.py
 
-curvature-distances:
+curvature-distances:init
 	cd scripts/python && poetry run python curvature_distance_generator.py
 
-curvature-histogram: curvature-distances
+curvature-histogram: init curvature-distances
 	cd scripts/python && poetry run python curvature_histogram.py
 
-stability-histogram:
+stability-histogram:init
 	cd scripts/python && poetry run python stability_histogram.py
 
-dendrogram:
+dendrogram: init
 	cd scripts/bash && ./dendrogram.sh
 
-jmap-clustering: curvature-distances
+jmap-clustering: init curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
-jmap-selection: jmap-clustering
+jmap-selection: init jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
+
+init: 
+	cd scripts/bash && ./startup.sh
+
+save: 
+	cd scripts/bash && ./dvc_save.sh 
+
+load: 
+	cd scripts/bash && ./dvc_load.sh
 
 
 # Cleaning commands for data fields 
