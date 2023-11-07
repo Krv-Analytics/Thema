@@ -85,6 +85,15 @@ save:
 load: 
 	cd scripts/bash && ./dvc_load.sh
 
+init: 
+	cd scripts/bash && ./startup.sh
+
+save: 
+	cd scripts/bash && ./dvc_save.sh 
+
+load: 
+	cd scripts/bash && ./dvc_load.sh
+
 
 # Cleaning commands for data fields 
 .PHONY: clean 
