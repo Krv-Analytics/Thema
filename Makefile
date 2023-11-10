@@ -1,9 +1,10 @@
 # Makefile
 include .env
 PARAMS_FILE := $(strip $(params))
-PARAMS_JSON := $(shell cat $(PARAMS_FILE))
-RUN_NAME := $(shell echo '$(PARAMS_JSON)' | jq -r '.Run_Name')
-COVERAGE_FILTER := $(shell echo '$(PARAMS_JSON)' | jq -r '.coverage_filter')
+RUN_NAME := $(shell cat $(PARAMS_FILE) | shyaml get-value Run_Name)
+COVERAGE_FILTER := $(shell cat $(PARAMS_FILE) | shyaml get-value coverage_filter)
+
+
 
 all: init process-data projections jmaps jmap-selection 
 	@echo "Process complete"
