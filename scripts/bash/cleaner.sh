@@ -4,19 +4,16 @@
 
 
 # Load the .env file
-if [ -f ../.env ]; then
-    source ../.env
+if [ -f ../../.env ]; then
+    source ../../.env
 fi
 
-# Access Parameter Json file 
-if [ -n "$JSON_PATH" ]; then 
-    params=$(jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' "$JSON_PATH")    eval "$params" 
+
+
+if [ ! -d "${root}/data/clean" ]; then
+    mkdir "${root}/data/clean"
 fi
 
-if [ ! -d "$root/data/clean" ]; then
-    mkdir -p "$root/data/clean"
-fi
-
-# Calling cleaning script from params.json 
+# Calling cleaning script from params.yaml 
 poetry run python ../../src/processing/cleaning/cleaner.py  -v  
 

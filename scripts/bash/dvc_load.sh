@@ -35,7 +35,7 @@ if [ -n "$abs_path" ]; then
   target_folder="${abs_path#*/dvc_store/}"
   echo -e "${GREEN}Succesfully located '$Run_Name' directory: $relative_path. ${NC}"
   echo "Initiating load of $Run_Name results from dvc store repository: $dvc_store"
-  echo -e "${YELLOW}Warning: continuining will overwrite your params.json file. ${NC}"
+  echo -e "${YELLOW}Warning: continuining will overwrite your params.yaml file. ${NC}"
   echo "Would you like to proceed? [y/n]" 
   read PROCEED
 else
@@ -87,10 +87,10 @@ fi
 rsync -rvm --exclude='*.dvc' "$abs_path" "$root/data/" 
 
 
-if [ -f "$abs_path/logs/params.json" ]; then
-    cp "$abs_path/logs/params.json" "$root/params.json"
+if [ -f "$abs_path/logs/params.yaml" ]; then
+    cp "$abs_path/logs/params.yaml" "$root/params.yaml"
 else 
-    echo -e "${YELLOW}Warning: No params.json file found in logs/. Parameter file has not been updated.${NC}"
+    echo -e "${YELLOW}Warning: No params.yaml file found in logs/. Parameter file has not been updated.${NC}"
 fi 
 
 

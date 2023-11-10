@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 
 
 #####################################################################################
-#   Checking .env and Params.json file paths 
+#   Checking .env and Params.yaml file paths 
 #####################################################################################
 
 # Load the .env file
@@ -22,11 +22,11 @@ else
     exit 1
 fi
 
-# Read the JSON file and extract the dvc_store and run_Name fields using grep and awk
+# Read the yaml file and extract the dvc_store and run_Name fields using grep and awk
 Run_Name=$(grep -o '"Run_Name": *"[^"]*"' "$params" | awk -F '"' '{print $4}')
 
 #####################################################################################
-#   Checking varaible loads from .env and params.json files 
+#   Checking varaible loads from .env and params.yaml files 
 #####################################################################################
 
 
@@ -47,12 +47,12 @@ fi
 # Check that run_Name variable exists  
 if [ -z "$Run_Name" ]; then
     # Does not exist 
-    echo "${RED}Unsuccessful read of run_Name data field from params.json.${NC}" 
+    echo "${RED}Unsuccessful read of run_Name data field from params.yaml.${NC}" 
     exit 1
 fi
 
 #####################################################################################
-#   Checking variable loads from .env and params.json files 
+#   Checking variable loads from .env and params.yaml files 
 #####################################################################################
 
 
@@ -69,7 +69,7 @@ else
     # Directory does not exist
     echo "$dvc_store"
     echo "Unable to locate your dvc_store repository. Please make sure it exists and that you have 
-    specified the correct path in params.json. The dvc_store field needs to be set to the relative path 
+    specified the correct path in params.yaml. The dvc_store field needs to be set to the relative path 
     from root to the dvc_store repository." 
     exit 1  
 fi
