@@ -1,37 +1,37 @@
 "Select jmaps for analysis from structural equivalency classes of Graph jmaps based on best coverage."
-import os
-import sys
 import argparse
+import os
 import pickle
-from dotenv import load_dotenv
-import json
-import numpy as np
+import sys
 
+import numpy as np
 from jmap_selector_helper import (
-    read_graph_clustering,
-    select_jmaps,
     get_best_covered_jmap,
     get_most_nodes_jmap,
+    read_graph_clustering,
+    select_jmaps,
 )
+from omegaconf import OmegaConf
 
+from . import env
+
+root, src = env()  # Load .env
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    root = os.getenv("root")
-    load_dotenv()
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
 
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default=params_json["dendrogram_metric"],
+        default=params["dendrogram_metric"],
         help="Select metric that defines the precomputed agglomerative clustering jmap.",
     )
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         "-f",
         "--coverage_filter",
         type=float,
-        default=params_json["coverage_filter"],
+        default=params["coverage_filter"],
         help="A minimum jmap coverage for visualizing a histogram. Only set when using '-H' tag as well.",
     )
 
@@ -64,15 +64,15 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
     n = args.num_groups
-    coverage = params_json["coverage_filter"]
-    jmaps_dir = "data/" + params_json["Run_Name"] + f"/jmaps/"
+    coverage = params["coverage_filter"]
+    jmaps_dir = "data/" + params["Run_Name"] + f"/jmaps/"
 
     # Choose ~best~ jmaps from curvature equivalency classes.
     # Current implementation chooses jmap with the best coverage.
 
     rel_cluster_dir = (
         "data/"
-        + params_json["Run_Name"]
+        + params["Run_Name"]
         + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
     )
     cluster_dir = os.path.join(root, rel_cluster_dir)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             cluster_dir, metric=args.metric, n=n
         )
 
-        rel_jmap_dir = "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
+        rel_jmap_dir = "data/" + params["Run_Name"] + f"/jmaps/{n}_policy_groups/"
         jmap_dir = os.path.join(root, rel_jmap_dir)
         selection = select_jmaps(
             jmap_dir, keys, clustering, n, selection_fn=get_most_nodes_jmap
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
         output_dir1 = (
             "data/"
-            + params_json["Run_Name"]
+            + params["Run_Name"]
             + f"/jmap_analysis/token_jmaps/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir1 = os.path.join(root, output_dir1)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         stable_jmap = selection[stable_cluster]["jmap"]
 
         output_dir2 = (
-            "data/" + params_json["Run_Name"] + f"/final_jmaps/{coverage}_coverage/"
+            "data/" + params["Run_Name"] + f"/final_jmaps/{coverage}_coverage/"
         )
         output_dir2 = os.path.join(root, output_dir2)
         stable_jmap_file = f"{n}_policy_group_jmap.pkl"

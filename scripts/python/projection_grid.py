@@ -1,78 +1,77 @@
-import os
-import sys
-import json
 import logging
+import os
+import warnings
 
-from dotenv import load_dotenv
+from omegaconf import OmegaConf
 from python_log_indenter import IndentedLoggerAdapter
+from utils import env
 
-
-################################################################################################
-#  Handling Local Imports  
-################################################################################################
-
-load_dotenv()
-root = os.getenv("root")
-src = os.getenv("src")
-sys.path.append(root + "logging/")
-
-from gridTracking_helper import (
-    subprocess_scheduler, 
-    log_error
-)
+warnings.simplefilter("ignore")
 
 ################################################################################################
-#   Loading and writing JSON Data  
+#  Handling Local Imports
+################################################################################################
+
+root, src = env()  # Load .env
+
+from gridTracking_helper import log_error, subprocess_scheduler
+
+################################################################################################
+#   Loading and writing Config Data
 ################################################################################################
 
 
 if __name__ == "__main__":
-
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
 
-    # DATA 
-    raw = params_json["raw_data"]
-    clean = params_json["clean_data"]
+    # DATA
+    raw = params["raw_data"]
+    clean = params["clean_data"]
 
     # UMAP Parameters
-    N_neighbors = params_json["projector_Nneighbors"]
-    min_Dists = params_json["projector_minDists"]
-    projector = params_json["projector"]
+    N_neighbors = params["projector_Nneighbors"]
+    min_Dists = params["projector_minDists"]
+    projector = params["projector"]
 
     # Projections Script
     projector_script = os.path.join(src, "processing/projecting/projector.py")
 
-    # Updating Projections Path in params.json
-    params_json["projected_data"] = "data/" + params_json["Run_Name"] + "/projections/" + params_json["projector"] + "/"
+    # Updating Projections Path in params.yaml
+    params["projected_data"] = (
+        "data/" + params["Run_Name"] + "/projections/" + params["projector"] + "/"
+    )
     try:
-        with open(JSON_PATH, "w") as f:
-            json.dump(params_json, f, indent=4)
+        with open(YAML_PATH, "w") as f:
+            OmegaConf.save(params, f)
     except:
-        log_error("Unable to write to you parameter file. Please make sure you have set proper file permissions.")
+        log_error(
+            "Unable to write to you parameter file. Please make sure you have set proper file permissions."
+        )
 
+    ################################################################################################
+    #   Checking for necessary files
+    ################################################################################################
 
-################################################################################################
-#   Checking for necessary files 
-################################################################################################
-    
-    # Check that raw data exists 
-    if not os.path.isfile(os.path.join(root, raw)): 
-        log_error("No raw data found. Please make sure you have specified the correct path in your params file.") 
+    # Check that raw data exists
+    if not os.path.isfile(os.path.join(root, raw)):
+        log_error(
+            "No raw data found. Please make sure you have specified the correct path in your params file."
+        )
 
-
-    # Check that clean data exits 
+    # Check that clean data exits
     if not os.path.isfile(os.path.join(root, clean)):
-        log_error("No clean data found. Please make sure you generated clean data using `make process-data`.") 
-   
-   
-################################################################################################
-#   Logging 
-################################################################################################
+        log_error(
+            "No clean data found. Please make sure you generated clean data using `make process-data`."
+        )
+
+    ################################################################################################
+    #   Logging
+    ################################################################################################
 
     logging.basicConfig(format="%(message)s", level=logging.INFO)
     log = IndentedLoggerAdapter(logging.getLogger(__name__))
@@ -89,21 +88,28 @@ if __name__ == "__main__":
     )
     log.add()
 
-################################################################################################
-#   Scheduling Subprocesses 
-################################################################################################
+    ################################################################################################
+    #   Scheduling Subprocesses
+    ################################################################################################
 
-    # Number of loops 
-    num_loops = len(N_neighbors)*len(min_Dists)
+    # Number of loops
+    num_loops = len(N_neighbors) * len(min_Dists)
 
-    # Creating list of Subprocesses 
+    # Creating list of Subprocesses
     subprocesses = []
     ## GRID SEARCH PROJECTIONS
     for n in N_neighbors:
         for d in min_Dists:
-            cmd = ["python", f"{projector_script}", f"-n {n}", f"-d {d}", f"--projector={projector}"]
+            cmd = [
+                "python",
+                f"{projector_script}",
+                f"-n {n}",
+                f"-d {d}",
+                f"--projector={projector}",
+            ]
             subprocesses.append(cmd)
 
-    # Handles Process scheduling 
-    subprocess_scheduler(subprocesses, num_loops, "SUCCESS: Completed projections grid.")
-    
+    # Handles Process scheduling
+    subprocess_scheduler(
+        subprocesses, num_loops, "SUCCESS: Completed projections grid."
+    )

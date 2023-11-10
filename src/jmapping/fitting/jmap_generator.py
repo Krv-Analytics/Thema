@@ -1,39 +1,28 @@
 """Generate Graph jmaps using JMapper."""
-"""Generate Graph jmaps using JMapper."""
 
+import argparse
 import os
+import pickle
 import sys
-import json
-import argparse
-import pickle
-import argparse
-import pickle
 
-from dotenv import load_dotenv
+from jmap_helper import generate_jmap_filename, jmap_generator
+from omegaconf import OmegaConf
+from tupper import Tupper
+
+from . import env
 
 ################################################################################################
 #  Handling Local Imports
 ################################################################################################
 
-load_dotenv()
-root = os.getenv("root")
-root = os.getenv("root")
-src = os.getenv("src")
-sys.path.append(src + "/jmapping/")
-sys.path.append(root + "logging/")
-sys.path.append(src + "/jmapping/")
-sys.path.append(root + "logging/")
+root, src = env()  # Load .env
 
 from run_log import Run_Log
-from run_log import Run_Log
-from tupper import Tupper
-from jmap_helper import generate_jmap_filename, jmap_generator
 
 ########################################################################################################################
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     root = os.getenv("root")
 
@@ -43,23 +32,23 @@ if __name__ == "__main__":
     # Initalize a runlog Manager
     runlog = Run_Log()
 
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
     parser.add_argument(
         "-r",
         "--raw",
-        default=params_json["raw_data"],
+        default=params["raw_data"],
         help="Select location of raw data relative from `root`",
     )
     parser.add_argument(
         "-c",
         "--clean",
         type=str,
-        default=params_json["clean_data"],
+        default=params["clean_data"],
         help="Select location of clean data relative from  `root`.",
     )
     parser.add_argument(
@@ -88,7 +77,7 @@ if __name__ == "__main__":
         "-s",
         "--random_seed",
         type=int,
-        default=params_json["jmap_random_seed"],
+        default=params["jmap_random_seed"],
         help="Set random seed to ensure Mapper/Graph reproducibility.",
     )
 
@@ -161,7 +150,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     rel_outdir = (
-        "data/" + params_json["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
+        "data/" + params["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
     )
     output_dir = os.path.join(root, rel_outdir)
     output_file = generate_jmap_filename(
