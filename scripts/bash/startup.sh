@@ -34,11 +34,6 @@ fi
 # Extract Run_Name using yq
 Run_Name=$(yq eval '.Run_Name' "$params")
 
-echo "Parameter file should be found at $params" 
- echo " Run_Name is: $Run_Name"  
-
-exit 
-
 # First Run
 
 echo ""
