@@ -36,17 +36,21 @@ to set the parameters required to run our pipeline.
 Once you have have configured your local environment, you're all set to start using our functionality! As an overview, we provide functionality for loading data, cleaning data, projecting data, modeling data, and comparing models. For each stage of our pipeline, we provide a python driver file to perform the desired operation and save the output in an corresponding `data` directory. See `docs` for a pipeline overview and a description of our outputs.
 
 ## Possible Workflow using Makefile:
+`make init`
 `make process-data`
 `make projections`
-`make models`
-`make histogram`
-`make dendrogram`
-`make model-selection`
+`make jmaps`
+`make jmap-selection`
 
 
 ### File Structure
 ```
+├── jmapping
+│   ├── fitting
+│   ├── selecting
 ├── modeling
+│   ├── literals
+│   ├── synopsis
 ├── processing
 │   ├── cleaning
 │   ├── projecting
@@ -54,7 +58,6 @@ Once you have have configured your local environment, you're all set to start us
 └── tuning
 │    ├── graph_clustering
 │    └── metrics
-└── visualizing
 ```
 
 
