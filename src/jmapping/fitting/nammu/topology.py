@@ -6,8 +6,8 @@ import collections.abc
 
 import networkx as nx
 import numpy as np
+from nammu_utils import UnionFind
 
-from utils import UnionFind
 
 class PersistenceDiagram(collections.abc.Sequence):
     """Persistence diagram class.
@@ -277,9 +277,7 @@ def calculate_persistence_diagrams(
     # persistence diagram. This is the main loop for our current
     # filtration, and merely requires keeping track of connected
     # component information.
-    for edge_index, edge_weight in zip(
-        edge_indices, edge_weights[edge_indices]
-    ):
+    for edge_index, edge_weight in zip(edge_indices, edge_weights[edge_indices]):
         u, v = edges[edge_index]
 
         # Preliminary assignment of younger and older component. We
@@ -328,7 +326,6 @@ def calculate_persistence_diagrams(
     # structure. This ensures that multiple connected components
     # are handled correctly.
     for root in uf.roots():
-
         vertex_weight = vertex_attributes[root]
 
         creation = vertex_weight

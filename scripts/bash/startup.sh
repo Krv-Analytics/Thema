@@ -27,13 +27,11 @@ else
 fi
 
 
-# Read the JSON file and extract the dvc_store and run_Name fields using grep and awk
+# Read the yaml file and extract the dvc_store and run_Name fields using grep and awk
 Run_Name=$(grep -o '"Run_Name": *"[^"]*"' "$params" | awk -F '"' '{print $4}')
 
 
 results="$root/data/$Run_Name" 
- 
- if [ ! -d "$results/" ]; then
 
 # First Run
 
@@ -58,17 +56,18 @@ echo "                                                                          
 echo "---------------------------------------------------------------------------------------------------------------"
 echo "---------------------------------------------------------------------------------------------------------------"
 echo "                                                                                                               "
- 
+
+if [ ! -d "$results/" ]; then
 mkdir "$results"
 mkdir "$results/logs"
-cp "$root/params.json" "$results/logs/params.json"
+fi
+
+cp "$root/params.yaml" "$results/logs/params.yaml"
 
 
 
 # else 
 
-# Update Params.json
-cp "$root/params.json" "$results/logs/params.json" 
+# Update Params.yaml
+cp "$root/params.yaml" "$results/logs/params.yaml" 
 
-
-fi 

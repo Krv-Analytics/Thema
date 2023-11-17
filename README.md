@@ -27,7 +27,7 @@ poetry shell
 ### Environment Configuration
 The Makefile will also write a `.env` file for you, configuring paths and setting environment variables.
 If you are using a dataset stored on MongoDB, then please configure the following variables: 
-`mongo_client`,`mongo_database`,`mongo_collection`. Then configure `params.json` according to the sample provided
+`mongo_client`,`mongo_database`,`mongo_collection`. Then configure `params.yaml` according to the sample provided
 to set the parameters required to run our pipeline.
 
 

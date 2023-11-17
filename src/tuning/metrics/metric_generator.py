@@ -1,39 +1,36 @@
 import argparse
-import json
 import os
 import pickle
 import sys
 
-from dotenv import load_dotenv
 from metric_helper import topology_metric
+from omegaconf import OmegaConf
 
-load_dotenv()
-src = os.getenv("src")
-root = os.getenv("root")
-sys.path.append(src)
+from .. import env
+
+root, src = env()  # Load .env
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    root = os.getenv("root")
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default=params_json["dendrogram_metric"],
+        default=params["dendrogram_metric"],
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
     parser.add_argument(
         "-f",
         "--coverage_filter",
         type=float,
-        default=params_json["coverage_filter"],
+        default=params["coverage_filter"],
         help="Select the percentage of unqiue samples that need to be covered by Mapper's fit.",
     )
 
@@ -65,9 +62,7 @@ if __name__ == "__main__":
 
     n = args.num_policy_groups
     coverage = args.coverage_filter
-    rel_path_to_mappers = (
-        "data/" + params_json["Run_Name"] + f"/jmaps/{n}_policy_groups/"
-    )
+    rel_path_to_mappers = "data/" + params["Run_Name"] + f"/jmaps/{n}_policy_groups/"
     path_to_mappers = os.path.join(root, rel_path_to_mappers)
 
     try:
@@ -83,7 +78,7 @@ if __name__ == "__main__":
 
         rel_ouput_dir = (
             "data/"
-            + params_json["Run_Name"]
+            + params["Run_Name"]
             + f"/jmap_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir = os.path.join(
