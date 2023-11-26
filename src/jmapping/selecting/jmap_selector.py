@@ -92,7 +92,6 @@ if __name__ == "__main__":
         )
 
         out_dir_message1 = f"{jmap_file} successfully written."
-
         output_dir1 = (
             "data/"
             + params["Run_Name"]
@@ -151,4 +150,4 @@ if __name__ == "__main__":
             )
     except AssertionError as e:
         print(e)
-        exit(1)
+        raise 
