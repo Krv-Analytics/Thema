@@ -28,7 +28,7 @@ if __name__ == "__main__":
             params = OmegaConf.load(f)
     else:
         print("params.yaml file note found!")
-    dir = "data/" + params["Run_Name"] + f"jmaps/"
+    dir = "data/" + params["Run_Name"] + f"/jmaps/"
     dir = os.path.join(root, dir)
 
     # DATA

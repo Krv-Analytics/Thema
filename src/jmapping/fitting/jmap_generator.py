@@ -9,7 +9,7 @@ from jmap_helper import generate_jmap_filename, jmap_generator
 from omegaconf import OmegaConf
 from tupper import Tupper
 
-from . import env
+from __init__ import env
 
 ################################################################################################
 #  Handling Local Imports
@@ -17,7 +17,7 @@ from . import env
 
 root, src = env()  # Load .env
 
-from run_log import Run_Log
+# from run_log import Run_Log
 
 ########################################################################################################################
 
@@ -27,10 +27,10 @@ if __name__ == "__main__":
     root = os.getenv("root")
 
     # Initalize a runlog Manager
-    runlog = Run_Log()
+    # runlog = Run_Log()
 
     # Initalize a runlog Manager
-    runlog = Run_Log()
+    # runlog = Run_Log()
 
     YAML_PATH = os.getenv("params")
     if os.path.isfile(YAML_PATH):
