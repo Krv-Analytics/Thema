@@ -11,7 +11,7 @@ from omegaconf import OmegaConf
 
 warnings.simplefilter("ignore")
 
-from .. import env
+from __init__ import env
 
 root, src = env()  # Load .env
 

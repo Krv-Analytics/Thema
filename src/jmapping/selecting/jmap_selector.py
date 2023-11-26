@@ -124,7 +124,6 @@ if __name__ == "__main__":
         output_dir2 = os.path.join(root, output_dir2)
         stable_jmap_file = f"{n}_policy_group_jmap.pkl"
         out_dir_message2 = f"{stable_jmap_file} successfully written."
-
         # Check if output directory already exists
         if os.path.isdir(output_dir2):
             stable_jmap_file = os.path.join(output_dir2, stable_jmap_file)
@@ -150,5 +149,6 @@ if __name__ == "__main__":
             print(
                 "\n\n -------------------------------------------------------------------------------- "
             )
-    except AssertionError:
-        assert 1 == 1
+    except AssertionError as e:
+        print(e)
+        exit(1)
