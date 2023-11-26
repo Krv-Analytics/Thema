@@ -54,7 +54,12 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer` and `one_hot` encodings", 'red')
     if encoding == "one_hot":
         # Use Pandas One Hot encoding
-        cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
+        
+        #cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
+
+        non_numeric_columns = cleaned_data.select_dtypes(exclude=['number']).columns
+        for column in non_numeric_columns:
+            cleaned_data = pd.get_dummies(cleaned_data, prefix=f"OH_{column}", columns=[column])
 
     if encoding == "integer":
         encoder = integer_encoder
