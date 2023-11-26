@@ -126,28 +126,34 @@ if __name__ == "__main__":
     # Given our hyperparameters, we generate graphs, curvature,
     # and diagrams for all min_intersection values from a single JMapper fit.
     # This is done for efficiency purposes.
-
-    jmapper = jmap_generator(
-        tupper,
-        n_cubes=n,
-        perc_overlap=p,
-        hdbscan_params=hdbscan_params,
-        min_intersection=args.min_intersection,
-    )
-    # Unpack each graph (based on min_intersection) into it's own output file.
-    output = {"jmapper": jmapper}
     try:
+        jmapper = jmap_generator(
+            tupper,
+            n_cubes=n,
+            perc_overlap=p,
+            hdbscan_params=hdbscan_params,
+            min_intersection=args.min_intersection,
+        )
+
+        # Unpack each graph (based on min_intersection) into it's own output file.
+        output = {"jmapper": jmapper}
+        
+        # CHECKING TYPE HERE
+        if(type(jmapper) == int):
+            #TODO: Put in run log info - two errors 
+            sys.exit(0)
         num_policy_groups = len(jmapper.jgraph.components)
         if num_policy_groups > len(jmapper.tupper.clean):
             # Runlog Event Tracking
             # TODO: Improve Runlog tracking
-            runlog.log_overPopulatedMapper_EVENT()
-            sys.exit(1)
-    except:
+            # runlog.log_overPopulatedMapper_EVENT()
+            sys.exit(0)
+    except Exception as e:
         # Runlog Event Tracking
         # TODO: Improve Runlog tracking
-        runlog.log_unkownError_EVENT()
-        sys.exit(1)
+        # runlog.log_unkownError_EVENT()
+        print(e)
+        raise
 
     rel_outdir = (
         "data/" + params["Run_Name"] + f"/jmaps/{num_policy_groups}_policy_groups/"
@@ -178,20 +184,17 @@ if __name__ == "__main__":
     out_dir_message = output_file
     out_dir_message = "/".join(out_dir_message.split("/")[-2:])
 
-    assert not jmapper == -1, "ERROR 1"
-
-    assert not jmapper == -2, "ERROR 2 "
 
     # Check for error codes from jmap_generator
     if jmapper == -1:
         print("EMPTY!")
-        runlog.log_emptyGraph_EVENT()
+        # runlog.log_emptyGraph_EVENT()
         # TODO: Write out the hyperparameter culprits
 
     elif jmapper == -2:
-        runlog.log_emptyComplex_EVENT()
+        # runlog.log_emptyComplex_EVENT()
         # TODO: Write out the hyperparameter culprits
-
+        print("Empty Complex")
     else:
         with open(output_file, "wb") as handle:
             pickle.dump(
