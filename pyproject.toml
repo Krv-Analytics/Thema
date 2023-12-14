@@ -2,7 +2,11 @@
 name = "krv_analytics"
 version = "0.1.0"
 description = ""
-authors = ["jeremy.wayland <jeremy.don.wayland@gmail.com>", "stuart.wayland <swayland@ucsc.edu>", "sid.gathrid <sgathrid@yahoo.com>"]
+authors = [
+    "jeremy.wayland <jeremy.don.wayland@gmail.com>",
+    "stuart.wayland <swayland@ucsc.edu>",
+    "sid.gathrid <sgathrid@yahoo.com>",
+]
 readme = "README.md"
 packages = [{ include = "krv_mapper" }]
 
@@ -33,10 +37,10 @@ hdbscan = "^0.8.29"
 python-log-indenter = "^0.9"
 numba = "^0.57.1"
 tqdm = "^4.65.0"
-umap = "^0.1.1"
 umap-learn = "^0.5.3"
 
 urllib3 = "1.26.16"
+category-encoders = "^2.6.1"
 shyaml = "^0.6.2"
 omegaconf = "^2.3.0"
 
