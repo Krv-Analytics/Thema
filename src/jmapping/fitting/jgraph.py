@@ -2,8 +2,8 @@ import kmapper as km
 import networkx as nx
 import numpy as np
 from nammu.curvature import ollivier_ricci_curvature
+from nammu.nammu_utils import make_node_filtration
 from nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
-from nammu.utils import make_node_filtration
 from nerve import Nerve
 from tupper import Tupper
 

@@ -3,57 +3,57 @@
 import argparse
 import os
 import pickle
-from dotenv import load_dotenv
 import sys
 import time
-import json
-
 
 ######################################################################
 # Silencing UMAP Warnings
 import warnings
+
+from dotenv import load_dotenv
 from numba import NumbaDeprecationWarning
+from omegaconf import OmegaConf
 
 warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 
-os.environ['KMP_WARNINGS'] = 'off'
+os.environ["KMP_WARNINGS"] = "off"
 ######################################################################
 
-from projector_helper import env, projection_driver, projection_file_name
+from __init__ import env
+from projector_helper import projection_driver, projection_file_name
+
+root, src = env()  # Load .env
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    load_dotenv()
-    root = os.getenv("root")
 
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
 
     parser.add_argument(
         "-c",
         "--clean_data",
         type=str,
-        default=os.path.join(root, params_json["clean_data"]),
+        default=os.path.join(root, params["clean_data"]),
         help="Location of Cleaned data set",
     )
 
     parser.add_argument(
         "--projector",
         type=str,
-        default='UMAP',
+        default="UMAP",
         help="Set to the name of projector for dimensionality reduction. ",
     )
 
     parser.add_argument(
         "--dim",
         type=int,
-        default=params_json["projector_dimension"],
+        default=params["projector_dimension"],
         help="Set dimension of projection. ",
     )
 
@@ -75,8 +75,8 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--random_seed",
-        default=params_json["projector_random_seed"],
-        type = int,
+        default=params["projector_random_seed"],
+        type=int,
         help="UMAP ONLY: Projections generated with random seed set in parameters. (set to -1 for random)",
     )
 
@@ -96,7 +96,9 @@ if __name__ == "__main__":
     with open(args.clean_data, "rb") as clean:
         reference = pickle.load(clean)
         df = reference["clean_data"]
-    rel_outdir = "data/" + params_json["Run_Name"] + "/projections/" + params_json["projector"] + "/"
+    rel_outdir = (
+        "data/" + params["Run_Name"] + "/projections/" + params["projector"] + "/"
+    )
     output_dir = os.path.join(root, rel_outdir)
 
     if not os.path.isdir(output_dir):
@@ -114,11 +116,11 @@ if __name__ == "__main__":
         d=args.min_dist,
         dimensions=args.dim,
         projector=args.projector,
-        seed=args.random_seed
+        seed=args.random_seed,
     )
 
     output_file = projection_file_name(
-        projector=params_json["projector"],
+        projector=params["projector"],
         n=args.n_neighbors,
         d=args.min_dist,
         dimensions=2,
@@ -138,9 +140,8 @@ if __name__ == "__main__":
             "-------------------------------------------------------------------------------------- \n\n"
         )
 
-        print(f"SUCCESS: Completed Projection!", 'green'),  "Written to {rel_outdir}"
+        print(f"SUCCESS: Completed Projection!", "green"), "Written to {rel_outdir}"
         print("\n")
         print(
             "-------------------------------------------------------------------------------------- \n\n"
         )
-

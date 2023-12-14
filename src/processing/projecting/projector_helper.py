@@ -14,9 +14,16 @@ from termcolor import colored
 
 
 ######################################################################
-# Silencing UMAP Warnings 
-import warnings 
+# Silencing UMAP Warnings
+import warnings
+
+import numpy as np
+import pandas as pd
+from dotenv import load_dotenv
 from numba import NumbaDeprecationWarning
+from termcolor import colored
+from umap import UMAP
+
 warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 ######################################################################
@@ -28,7 +35,7 @@ def projection_driver(
     d: float,
     dimensions: int = 2,
     projector: str = "UMAP",
-    seed : int = 42,
+    seed: int = 42,
 ):
     """
     This function performs a projection of a DataFrame.
@@ -53,7 +60,6 @@ def projection_driver(
         A dictionary containing the projection and hyperparameters.
     """
 
-    
     data = df.dropna()
 
     if projector == "UMAP":
@@ -105,22 +111,3 @@ def projection_file_name(projector, n, d, dimensions=2, seed=42):
     """
     output_file = f"{projector}_Nbors{n}_minDist_{d}_{dimensions}D_rs_{seed}.pkl"
     return output_file
-
-
-def env():
-    """
-    This function loads the .env file and adds necessary folders to the system path.
-
-    Returns:
-    -----------
-    str
-        The root directory of the project.
-    """
-
-    load_dotenv()
-    root = os.getenv("root")
-    src = os.getenv("src")
-    sys.path.append(root)
-    sys.path.append(src)
-    sys.path.append(src + "modeling/nammu/")
-    return root

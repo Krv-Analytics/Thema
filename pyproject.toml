@@ -41,6 +41,8 @@ umap-learn = "^0.5.3"
 
 urllib3 = "1.26.16"
 category-encoders = "^2.6.1"
+shyaml = "^0.6.2"
+omegaconf = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 kmapper = "^2.0.1"

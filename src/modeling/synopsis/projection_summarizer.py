@@ -1,41 +1,36 @@
-from dotenv import load_dotenv
+import argparse
 import os
 import sys
+
 import plotly.io as pio
-
-import argparse
-import json
-
+from omegaconf import OmegaConf
 from projection_summarizer_helper import (
-    create_cluster_distribution_histogram,
-    save_visualizations_as_html,
-    create_umap_grid,
     analyze_umap_projections,
+    create_cluster_distribution_histogram,
+    create_umap_grid,
+    save_visualizations_as_html,
 )
 
-pio.renderers.default = "browser"
-load_dotenv
-root = os.getenv("root")
-src = os.getenv("src")
-sys.path.append(src)
+from . import env
 
+pio.renderers.default = "browser"
+root, src = env()  # Load .env
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    root = os.getenv("root")
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
 
     parser.add_argument(
         "-d",
         "--projection_directory",
         type=str,
-        default=params_json["projected_data"],
+        default=params["projected_data"],
         help="Specify the directory containing the projections you would like to summarize",
     )
 
@@ -87,7 +82,7 @@ if __name__ == "__main__":
         fig_list.append(analyze_umap_projections(dir))
 
     output_file = "ProjectionSummary.html"
-    output_dir = "data/" + params_json["Run_Name"] + "/plots/"
+    output_dir = "data/" + params["Run_Name"] + "/plots/"
 
     if os.path.isdir(output_dir):
         output_file = os.path.join(output_dir, output_file)

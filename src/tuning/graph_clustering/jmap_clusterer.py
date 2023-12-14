@@ -1,40 +1,35 @@
 "Group jmaps based on their graph structure via curvature filtrations."
 
 import argparse
-import sys
 import os
 import pickle
-import json
-from dotenv import load_dotenv
+import sys
 import warnings
 
-from jmap_clusterer_helper import (
-    cluster_jmaps,
-    read_distance_matrices,
-)
-
+from jmap_clusterer_helper import cluster_jmaps, read_distance_matrices
+from omegaconf import OmegaConf
 
 warnings.simplefilter("ignore")
-load_dotenv()
-src = os.getenv("src")
-sys.path.append(src)
+
+from .. import env
+
+root, src = env()  # Load .env
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    root = os.getenv("root")
-    JSON_PATH = os.getenv("params")
-    if os.path.isfile(JSON_PATH):
-        with open(JSON_PATH, "r") as f:
-            params_json = json.load(f)
+
+    YAML_PATH = os.getenv("params")
+    if os.path.isfile(YAML_PATH):
+        with open(YAML_PATH, "r") as f:
+            params = OmegaConf.load(f)
     else:
-        print("params.json file note found!")
+        print("params.yaml file note found!")
 
     parser.add_argument(
         "-m",
         "--metric",
         type=str,
-        default=params_json["dendrogram_metric"],
+        default=params["dendrogram_metric"],
         help="Select metric (that is supported by Giotto) to compare persistence daigrams.",
     )
 
@@ -50,7 +45,7 @@ if __name__ == "__main__":
         "-d",
         "--distance_threshold",
         type=float,
-        default=params_json["dendrogram_cut"],
+        default=params["dendrogram_cut"],
         help="Select distance threshold for agglomerative clustering jmap.",
     )
 
@@ -58,7 +53,7 @@ if __name__ == "__main__":
         "-p",
         "--dendrogram_levels",
         type=int,
-        default=params_json["dendrogram_levels"],
+        default=params["dendrogram_levels"],
         help="Number of levels to see in dendrogram plot.",
     )
 
@@ -83,18 +78,20 @@ if __name__ == "__main__":
 
     # Read in Keys and distances from pickle file
     n = args.num_policy_groups
-    coverage = params_json["coverage_filter"]
+    coverage = params["coverage_filter"]
     rel_distance_dir = (
         "data/"
-        + params_json["Run_Name"]
+        + params["Run_Name"]
         + f"/jmap_analysis/distance_matrices/{coverage}_coverage/{n}_policy_groups/"
     )
     distance_dir = os.path.join(root, rel_distance_dir)
     # try:
     keys, distances = read_distance_matrices(distance_dir, metric=args.metric, n=n)
-    
-    assert len(distances)>1, "ERROR: You have do not have enough jmaps for comparison."
-        
+
+    assert (
+        len(distances) > 1
+    ), "ERROR: You have do not have enough jmaps for comparison."
+
     # Fit Hierarchical Clustering
     jmap = cluster_jmaps(
         distances,
@@ -117,7 +114,7 @@ if __name__ == "__main__":
 
         rel_outdir = (
             "data/"
-            + params_json["Run_Name"]
+            + params["Run_Name"]
             + f"/jmap_analysis/graph_clustering/{coverage}_coverage/{n}_policy_groups/"
         )
         output_dir = os.path.join(root, rel_outdir)

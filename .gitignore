@@ -10,8 +10,8 @@ data/
 *.html
 .dvc/client_ID.json
 .dvc/config
-params.json
+params.yaml
 notebooks/
 .pytest_cache
-params-coal.json
+poetry.lock
 
