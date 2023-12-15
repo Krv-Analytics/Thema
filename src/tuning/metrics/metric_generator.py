@@ -6,7 +6,7 @@ import sys
 from metric_helper import topology_metric
 from omegaconf import OmegaConf
 
-from .. import env
+from __init__ import env
 
 root, src = env()  # Load .env
 

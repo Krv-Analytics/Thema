@@ -2,23 +2,23 @@
 
 import os
 import sys
+
+from __init__ import env
 from dotenv import load_dotenv
 
-load_dotenv()
-src = os.getenv("src")
-sys.path.append(src)
-
-import jmapping as jm
+root, src = env()  # Load .env
 
 import pickle
-import pandas as pd
-import numpy as np
 
+import hdbscan
+import numpy as np
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
-import plotly.express as px
-import hdbscan
+
+import jmapping as jm
 
 
 def create_umap_grid(dir):
@@ -42,9 +42,13 @@ def create_umap_grid(dir):
             params = pickle.load(f)
         umap_data.append((umap, params))
 
-    umap_data.sort(key=lambda x: (x[1]["hyperparameters"][0], x[1]["hyperparameters"][1]))
+    umap_data.sort(
+        key=lambda x: (x[1]["hyperparameters"][0], x[1]["hyperparameters"][1])
+    )
 
-    neighbors = sorted(list(set([params["hyperparameters"][0] for _, params in umap_data])))
+    neighbors = sorted(
+        list(set([params["hyperparameters"][0] for _, params in umap_data]))
+    )
     dists = sorted(list(set([params["hyperparameters"][1] for _, params in umap_data])))
 
     fig = make_subplots(
@@ -135,7 +139,6 @@ def create_umap_grid(dir):
     fig.update_yaxes(showticklabels=False, tickwidth=0, tickcolor="rgba(0,0,0,0)")
 
     return fig
-
 
 
 def create_cluster_distribution_histogram(dir):
@@ -329,8 +332,8 @@ def analyze_umap_projections(dir):
             marker=dict(
                 color=colors,
                 colorscale="Bluered",
-                #cmin=min(colors),
-                #cmax=max(colors),
+                # cmin=min(colors),
+                # cmax=max(colors),
                 colorbar=dict(
                     title="Number of Unclustered Items<br>per Projection",
                     len=0.4,  # Adjust the length of the colorbar
