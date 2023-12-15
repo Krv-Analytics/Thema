@@ -61,7 +61,6 @@ if __name__ == "__main__":
     with open(args.clean_data, "rb") as clean:
         reference = pickle.load(clean)
         df = reference["clean_data"]
-
     df = add_imputed_flags(df)
 
     '''
@@ -76,7 +75,7 @@ if __name__ == "__main__":
     '''
     fill_method = params.data_imputation.fill_method
 
-    if fill_method == "Random_normal":
+    if fill_method == "random_normal":
         iteration_number = params.data_imputation.number_for_random
 
         for num in range(1, iteration_number+1):
@@ -90,19 +89,13 @@ if __name__ == "__main__":
             with open(output_filepath, "wb") as f:
                 pickle.dump(output, f)
 
-    elif fill_method == "Drop":
-
+    else:
+        # if fill_method != "drop":
+            # TODO: write out to log file that the fill_method was not found and we are defaulting to drop NAs
+        
         imputed_data = perturbulate_data(df, fill_method='drop')
         file_name = populate_nas_filename(params.Run_Name, fill_method=fill_method)
         output_filepath = output_dir + file_name
 
         with open(output_filepath, "wb") as f:
             pickle.dump(imputed_data, f)
-
-
-            
-
-
-
-
-
