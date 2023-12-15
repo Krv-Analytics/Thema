@@ -3,25 +3,14 @@
 import argparse
 import os
 import pickle
+import re
 import sys
 import time
 
-######################################################################
-# Silencing UMAP Warnings
-import warnings
-
-from dotenv import load_dotenv
-from numba import NumbaDeprecationWarning
-from omegaconf import OmegaConf
-
-warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
-warnings.filterwarnings("ignore", category=UserWarning, module="umap")
-
-os.environ["KMP_WARNINGS"] = "off"
-######################################################################
-
 from __init__ import env
+from omegaconf import OmegaConf
 from projector_helper import projection_driver, projection_file_name
+from termcolor import colored
 
 root, src = env()  # Load .env
 
@@ -108,7 +97,11 @@ if __name__ == "__main__":
         args.random_seed = int(time.time())
 
     # Check Projections is valid
-    assert args.projector in ["UMAP", "TSNE", "PCA"], "\n UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json."
+    assert args.projector in [
+        "UMAP",
+        "TSNE",
+        "PCA",
+    ], "\n UMAP is the only supported dimensionality reduction algorithm supported at this time. Please check that you have correctly set your params.json."
 
     results = projection_driver(
         df,
@@ -119,8 +112,14 @@ if __name__ == "__main__":
         seed=args.random_seed,
     )
 
+    # Get Imputation ID
+    match = re.search(r"\d+", args.clean_data)
+    impute_id = match.group(0)
+
     output_file = projection_file_name(
-        projector=params["projector"],
+        projector=params.projector,
+        impute_method=params.data_imputation.method,
+        impute_id=impute_id,
         n=args.n_neighbors,
         d=args.min_dist,
         dimensions=2,
@@ -140,7 +139,10 @@ if __name__ == "__main__":
             "-------------------------------------------------------------------------------------- \n\n"
         )
 
-        print(f"SUCCESS: Completed Projection!", "green"), "Written to {rel_outdir}"
+        print(
+            colored(f"SUCCESS: Completed Projection!", "green"),
+            "Written to {rel_outdir}",
+        )
         print("\n")
         print(
             "-------------------------------------------------------------------------------------- \n\n"
