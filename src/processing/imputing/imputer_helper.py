@@ -10,7 +10,7 @@ import pandas as pd
 #  ╰──────────────────────────────────────────────────────────╯
 
 
-def impute_data(df: pd.DataFrame, fillna_method: function):
+def impute_data(df: pd.DataFrame, fillna_method: function, axis=0):
     """
     Function to handle NaN values in a DataFrame according to specified `fill_method`.
     Currently supported methods include:
@@ -24,10 +24,12 @@ def impute_data(df: pd.DataFrame, fillna_method: function):
 
     fill_method: <function>
         - a column-wise function to impute missing values.
-
+    axis: <int>
+        - 0 or 1, the pandas axis on which to drop NaNs
     """
     X = df.copy()
-    return X.apply(fillna_method, axis=0)
+    X = X.apply(fillna_method, axis=axis)
+    return X.dropna(axis=axis)
 
 
 #  ╭──────────────────────────────────────────────────────────╮
@@ -81,7 +83,10 @@ def median(column):
 
 
 def drop(column):
-    pass
+    """
+    Leave column as is,and remove
+    """
+    return column
 
 
 # Methods that require a distribution of imputations
