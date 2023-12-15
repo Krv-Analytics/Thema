@@ -92,9 +92,11 @@ if __name__ == "__main__":
     #   Scheduling Subprocesses
     ################################################################################################
 
-    # TODO: add logging information pertaining to data handling when NAs are present
-    imputation_files = grab_imputed_data(os.path.dirname(params.clean_data), key=params.data_imputation.fill_method)
+    file_path = os.path.join(root, os.path.dirname(params.clean_data))
 
+    # TODO: add logging information pertaining to data handling when NAs are present
+    imputation_files = grab_imputed_data( file_path, key=params.data_imputation.fill_method)
+    
     # Number of loops
     num_loops = len(N_neighbors) * len(min_Dists) * len(imputation_files)
 
