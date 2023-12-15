@@ -5,17 +5,18 @@ import os
 import pickle
 import sys
 
-import imputer_helper
+import impute_helper
 from __init__ import env
-from imputer_helper import (
+from omegaconf import OmegaConf
+from termcolor import colored
+
+from processing.imputing.impute_helper import (
     add_imputed_flags,
     clear_current_imputations,
     impute_data,
     imputed_filename,
     sampling_methods,
 )
-from omegaconf import OmegaConf
-from termcolor import colored
 
 root, src = env()  # Load .env
 
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 
     try:
         fill_method = params.data_imputation.method
-        filler = getattr(imputer_helper, fill_method)
+        filler = getattr(impute_helper, fill_method)
         # Configure outputs
         rel_outdir = "data/" + params["Run_Name"] + "/clean/"
         output_dir = os.path.join(root, rel_outdir)
