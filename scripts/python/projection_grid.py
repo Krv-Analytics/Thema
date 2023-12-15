@@ -91,12 +91,17 @@ if __name__ == "__main__":
     ################################################################################################
     #   Scheduling Subprocesses
     ################################################################################################
-
-    file_path = os.path.join(root, os.path.dirname(params.clean_data))
+    fill_method = params.data_imputation.fill_method
 
     # TODO: add logging information pertaining to data handling when NAs are present
-    imputation_files = grab_imputed_data( file_path, key=params.data_imputation.fill_method)
-    
+    if fill_method == "Random_normal":
+        file_path = os.path.join(root, os.path.dirname(params.clean_data))
+        imputation_files = grab_imputed_data(file_path, key=params.data_imputation.fill_method)
+    else:
+        file_path = os.path.join(root, params.clean_data)
+        print (file_path)
+        imputation_files = [file_path]
+
     # Number of loops
     num_loops = len(N_neighbors) * len(min_Dists) * len(imputation_files)
 
