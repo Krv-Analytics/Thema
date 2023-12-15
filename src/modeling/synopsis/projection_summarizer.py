@@ -3,6 +3,7 @@ import os
 import sys
 
 import plotly.io as pio
+from __init__ import env
 from omegaconf import OmegaConf
 from projection_summarizer_helper import (
     analyze_umap_projections,
@@ -10,8 +11,6 @@ from projection_summarizer_helper import (
     create_umap_grid,
     save_visualizations_as_html,
 )
-
-from . import env
 
 pio.renderers.default = "browser"
 root, src = env()  # Load .env

@@ -127,5 +127,5 @@ if __name__ == "__main__":
         )
 
     subprocess_scheduler(
-        subprocesses, num_loops, "SUCCESS: Completed JMAP selection process"
+        subprocesses=subprocesses, num_processes=num_loops, resilient=False,  success_message="SUCCESS: Completed JMAP selection process"
     )

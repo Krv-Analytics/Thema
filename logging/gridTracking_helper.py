@@ -46,9 +46,9 @@ def subprocess_scheduler(
         for future in as_completed(futures):
             # Log the outcome of the subprocess
             outcome = future.result()
-            if not resilient:
-                if not outcome.returncode == 0:
-                    print(colored(outcome.stderr, "red"))
+            if not outcome.returncode == 0:
+                print(colored(outcome.stderr, "red"))
+                if not resilient:
                     progress_bar.close()
                     sys.exit()
             else:

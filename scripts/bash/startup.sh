@@ -25,13 +25,14 @@ else
     echo -e "${RED}Unable to locate .env file. ${NC}" 
     exit 1
 fi
+# Check if yq is installed
+if ! command -v yq &> /dev/null; then
+    echo "yq is not installed. Please install it first. (On Mac, 'brew install yq')"
+    exit 1
+fi
 
-
-# Read the yaml file and extract the dvc_store and run_Name fields using grep and awk
-Run_Name=$(grep -o '"Run_Name": *"[^"]*"' "$params" | awk -F '"' '{print $4}')
-
-
-results="$root/data/$Run_Name" 
+# Extract Run_Name using yq
+Run_Name=$(yq eval '.Run_Name' "$params")
 
 # First Run
 
@@ -56,6 +57,8 @@ echo "                                                                          
 echo "---------------------------------------------------------------------------------------------------------------"
 echo "---------------------------------------------------------------------------------------------------------------"
 echo "                                                                                                               "
+
+results="$root$Run_Name"
 
 if [ ! -d "$results/" ]; then
 mkdir "$results"
