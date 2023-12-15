@@ -65,6 +65,9 @@ class JGraph:
         self._curvature = np.array([])
         self._diagram = PersistenceDiagram()
 
+        self.nodes = self.graph.nodes
+        self.edges = self.graph.edges
+
     ####################################################################################################
     #
     #   Properties
@@ -177,3 +180,142 @@ class JGraph:
         )
         self._diagram = pd
         return self._diagram
+
+    def get_MST(self, k=0, components=None):
+        """
+        Cacluates a customizable Minimum Spanning Tree of the weighted graph.
+
+        Default is to return a minimum spanning tree for each connected component. If
+        a `k` value is supplied that is greater than the number of connected components, then
+        a minimum spanning forest of k trees will be returned (in the case that k is less
+        than the number of connected components, then the default MST is returned).
+
+        In the case that only certain components should be considered for further edge
+        removal, then they may be specified in `components` and the `k` value should be
+        supplied as a list.
+
+        e.g.
+
+            my_jgraph.get_MST(k=[5,2], components=[3,7])
+
+        The above code will return a forest of 5 trees for connected component 3, a forest
+        of 2 trees for connected component 7. Note that the length of k must be equal to the
+        length of components. For shorthand, when only considering a single
+        connected component, one may drop the list notation.
+
+        e.g.
+
+            my_jgraph.get_MST(k=2, components=3) = my_jgraph.get_MST(k=[2], components=[3])
+
+        This will return an MST for all connected components and a 2 tree forest for connected
+        component 3.
+
+        Parameters:
+        -----------
+        k: int, list
+
+        the number of trees in the minimum spanning forest. Note that k is ignored if it
+        less than the number of connected components.
+
+        components: int, list
+
+        the connected components that are to be split
+
+        Returns:
+        --------
+        An nx.graph
+        """
+        # try:
+        # Calculate simple MST
+        mst = nx.minimum_spanning_tree(self.graph, weight="weight")
+        # Handle no components case
+        if components is None:
+            if k <= nx.number_connected_components(self.graph):
+                return mst
+
+            else:
+                k = k - nx.number_connected_components(self.graph)
+                # Sort edges by weight
+                sorted_edges = sorted(
+                    mst.edges(data=True), key=lambda x: x[2]["weight"]
+                )
+
+                for edge in sorted_edges[-k:]:
+                    mst.remove_edge(edge[0], edge[1])
+
+                return mst
+        # Handle component specific
+        else:
+            # Cast ints to list
+            if type(components) == int:
+                components = [components]
+            if type(k) == int:
+                k = [k]
+
+            # List k must be same length as component list
+            assert len(k) == len(
+                components
+            ), "Length of k must be equal to length of components"
+
+            mst = nx.Graph()
+
+            for i in range(len(self._components)):
+                cc_mst = nx.minimum_spanning_tree(self._components[i], weight="weight")
+
+                # Component is to be split into specified number of groups
+                if i in components:
+                    j = components.index(i)
+                    cc_sorted_edges = sorted(
+                        cc_mst.edges(data=True), key=lambda x: x[2]["weight"]
+                    )
+
+                    # Check number of edges is greater than k value
+                    assert k[j] < len(
+                        cc_sorted_edges
+                    ), f"k value for component {i} was greater than number of edges in component. "
+
+                    # k value should split component if it is given
+                    assert k[j] > 1, "Please supply k values greater than 1. "
+
+                    # Remove k-1 edges to result in k components
+                    for edge in cc_sorted_edges[-k[j] + 1 :]:
+                        cc_mst.remove_edge(edge[0], edge[1])
+
+                # Combine component MSTs
+                mst = nx.union(cc_mst, mst)
+            return mst
+
+        # except:
+        #     return None
+
+    def get_shortest_path(self, nodeID_1, nodeID_2):
+        """
+        Calculate the shortest path between two nodes in the graph using Dijkstra's algorithm.
+
+        Parameters:
+        -----------
+            nodeID_1: source node identifier
+            nodeID_2: target node identifier
+
+        Returns:
+            A tuple containing:
+            - A list representing the nodes in the shortest path from nodeID_1 to nodeID_2.
+            - The length of the shortest path, considering edge weights.
+            If no path exists between the nodes, returns (None, infinity).
+        """
+        try:
+            # Calculate shortest path using Dijkstra's algorithm
+            shortest_path = nx.shortest_path(
+                self.graph, source=nodeID_1, target=nodeID_2, weight="weight"
+            )
+
+            # Calculate the length of the shortest path
+            path_length = sum(
+                self.graph[shortest_path[i]][shortest_path[i + 1]]["weight"]
+                for i in range(len(shortest_path) - 1)
+            )
+
+            return shortest_path, path_length
+
+        except nx.NetworkXNoPath:
+            return None, float("inf")  # No path exists, return None and infinity length
