@@ -109,5 +109,7 @@ def populate_nas_filename(run_name, fill_method, number=None):
     """
     if number is not None:
         number_out = "_"+str(number)
+    else:
+        number_out = ""
 
     return f"{run_name}_imputed_data_{fill_method}{number_out}.pkl"

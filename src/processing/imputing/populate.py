@@ -85,8 +85,10 @@ if __name__ == "__main__":
             file_name = populate_nas_filename(params.Run_Name, fill_method=fill_method, number=num)
             output_filepath = output_dir + file_name
 
+            # TODO: log random sample seed
+            output = {"clean_data": imputed_data, "random_seed": "TODO"}
             with open(output_filepath, "wb") as f:
-                pickle.dump(imputed_data, f)
+                pickle.dump(output, f)
 
     elif fill_method == "Drop":
 
