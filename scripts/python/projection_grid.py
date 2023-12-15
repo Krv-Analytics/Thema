@@ -4,7 +4,7 @@ import warnings
 
 from omegaconf import OmegaConf
 from python_log_indenter import IndentedLoggerAdapter
-from utils import env, grab_imputed_data
+from utils import env, get_imputed_files
 
 warnings.simplefilter("ignore")
 
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     file_path = os.path.join(root, os.path.dirname(params.clean_data))
 
     # TODO: add logging information pertaining to data handling when NAs are present
-    imputation_files = grab_imputed_data( file_path, key=params.data_imputation.fill_method)
-    
+    imputation_files = get_imputed_files(file_path, key=params.data_imputation.method)
+
     # Number of loops
     num_loops = len(N_neighbors) * len(min_Dists) * len(imputation_files)
 
@@ -106,11 +106,10 @@ if __name__ == "__main__":
     for n in N_neighbors:
         for d in min_Dists:
             for f in imputation_files:
-                assert os.path.isfile(f)
                 cmd = [
                     "python",
                     f"{projector_script}",
-                    f"--clean_data="+f,
+                    f"--clean_data=" + f,
                     f"-n {n}",
                     f"-d {d}",
                     f"--projector={projector}",

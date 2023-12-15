@@ -14,6 +14,7 @@ if [ ! -d "${root}/data/clean" ]; then
     mkdir "${root}/data/clean"
 fi
 
-# Calling cleaning script from params.yaml 
+# Calling cleaning and imputing scripts. Configure options in params.yaml
 poetry run python ../../src/processing/cleaning/cleaner.py  -v  
+poetry run python ../../src/processing/imputing/imputer.py  -v  
 
