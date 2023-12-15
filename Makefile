@@ -6,16 +6,18 @@ COVERAGE_FILTER := $(shell cat $(PARAMS_FILE) | shyaml get-value coverage_filter
 
 
 
-all: init process-data projections jmaps jmap-selection 
+.PHONY: all 
+all: check-params init process-data projections jmaps jmap-selection 
 	@echo "Process complete"
 
+.PHONY: install 
 install: check-poetry 
 	@echo " Generating and populating .env file..."
 	python scripts/python/setup.py
 	@echo "Installing necessary dependencies..." 
 	poetry run pip install python-dotenv pandas pymongo scikit-learn umap-learn hdbscan kmapper networkx matplotlib seaborn giotto-tda
 
-
+.PHONY: install 
 uninstall: clean
 	@echo "Removing Dependencies from Poetry environment..."
 	poetry run pip uninstall python-dotenv pandas pymongo scikit-learn umap-learn hdbscan kmapper networkx matplotlib seaborn giotto-tda
@@ -23,45 +25,55 @@ uninstall: clean
 	sudo pip uninstall poetry 
 	rm -f .env 
 
-check-poetry:
-	@which poetry || (echo "Poetry is not installed. Installing..."; sudo pip install poetry; poetry install;)
+.PHONY: fetch 
+fetch: check-params fetch-raw-data fetch-processed-data
 
-fetch: fetch-raw-data fetch-processed-data
-
-fetch-raw-data:
+.PHONY: fetch-raw-data 
+fetch-raw-data: check-params
 	poetry run python src/processing/pulling/data_generator.py -v
 
-process-data: init
+.PHONY: process-data 
+process-data: check-params init
 	cd scripts/bash && ./cleaner.sh
 
-projections: init
+.PHONY: projections 
+projections: check-params init 
 	cd scripts/bash && ./projector.sh
 
-summarize-projections: init
+.PHONY: summarize-projections
+summarize-projections: check-params init 
 	poetry run python src/modeling/synopsis/projection_summarizer.py
 
-jmaps: init
+.PHONY: jmaps 
+jmaps: check-params init 
 	cd scripts/bash && ./jmap_generator.sh 
 
-jmap-histogram: init
+.PHONY: jmap-histogram 
+jmap-histogram: check-params  init
 	cd scripts/python && poetry run python jmap_histogram.py
 
-curvature-distances:init
+.PHONY: curvature-distances
+curvature-distances: check-params  init
 	cd scripts/python && poetry run python curvature_distance_generator.py
 
-curvature-histogram: init curvature-distances
+.PHONY: curvature-histogram
+curvature-histogram: check-params init curvature-distances
 	cd scripts/python && poetry run python curvature_histogram.py
 
-stability-histogram:init
+.PHONY: stability-histogram 
+stability-histogram: check-params init
 	cd scripts/python && poetry run python stability_histogram.py
 
-dendrogram: init
+.PHONY: dendrogram
+dendrogram: check-params init
 	cd scripts/bash && ./dendrogram.sh
 
-jmap-clustering: init curvature-distances
+.PHONY: jmap-clustering 
+jmap-clustering:check-params init curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
-jmap-selection: init jmap-clustering
+.PHONY: jmap-selection 
+jmap-selection: check-params init jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
 
@@ -74,34 +86,59 @@ save:
 load: 
 	cd scripts/bash && ./dvc_load.sh
 
+init: 
+	cd scripts/bash && ./startup.sh
+
+save: 
+	cd scripts/bash && ./dvc_save.sh 
+
+load: 
+	cd scripts/bash && ./dvc_load.sh
+
 
 # Cleaning commands for data fields 
-
-clean: clean-processed-data clean-projections clean-jmaps clean-jmap-analysis clean-final-jmaps
+.PHONY: clean 
+clean: check-params clean-processed-data clean-projections clean-jmaps clean-jmap-analysis clean-final-jmaps
 	rm -f -r data/$(RUN_NAME)/
 
-clean-processed-data: 
+.PHONY: clean-processed-data
+clean-processed-data:  check-params
 	rm -f -r data/$(RUN_NAME)/clean/*
 
-clean-projections:
+.PHONY: clean-projections
+clean-projections: check-params 
 	rm -f -r data/${RUN_NAME}/projections/*
 
-clean-jmaps:
+.PHONY: clean-jmaps
+clean-jmaps: check-params
 	rm -f -r data/${RUN_NAME}/jmaps/*
 
-clean-jmap-analysis:
+.PHONY: clean-jmap-analysis
+clean-jmap-analysis:  check-params
 	rm -f -r data/${RUN_NAME}/jmap_analysis/
 
-clean-final-jmaps:
+.PHONY: clean-final-jmaps
+clean-final-jmaps:  check-params
 	rm -f -r  data/${RUN_NAME}/final_jmaps/
 
-clean-raw-data: 
+.PHONY: clean-raw-data
+clean-raw-data: check-params
 	rm -f -r data/${RUN_NAME}/
 
-clean-all :
+.PHONY: clean-all 
+clean-all:  
 	rm -f -r data/
 
 
+
+#  Checks 
+.PHONY: check-poetry 
+check-poetry:
+	@which poetry || (echo "Poetry is not installed. Installing..."; sudo pip install poetry; poetry install;)
+
+.PHONY: check-params 
+check-params:
+	@if [ ! -f ${PARAMS_FILE} ]; then echo "Error: Paramter file not found!"; exit 1; fi 
 
 
 
