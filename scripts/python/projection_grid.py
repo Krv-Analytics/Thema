@@ -4,7 +4,7 @@ import warnings
 
 from omegaconf import OmegaConf
 from python_log_indenter import IndentedLoggerAdapter
-from utils import env
+from utils import env, get_imputed_files
 
 warnings.simplefilter("ignore")
 
@@ -92,22 +92,29 @@ if __name__ == "__main__":
     #   Scheduling Subprocesses
     ################################################################################################
 
+    file_path = os.path.join(root, os.path.dirname(params.clean_data))
+
+    # TODO: add logging information pertaining to data handling when NAs are present
+    imputation_files = get_imputed_files(file_path, key=params.data_imputation.method)
+
     # Number of loops
-    num_loops = len(N_neighbors) * len(min_Dists)
+    num_loops = len(N_neighbors) * len(min_Dists) * len(imputation_files)
 
     # Creating list of Subprocesses
     subprocesses = []
     ## GRID SEARCH PROJECTIONS
     for n in N_neighbors:
         for d in min_Dists:
-            cmd = [
-                "python",
-                f"{projector_script}",
-                f"-n {n}",
-                f"-d {d}",
-                f"--projector={projector}",
-            ]
-            subprocesses.append(cmd)
+            for f in imputation_files:
+                cmd = [
+                    "python",
+                    f"{projector_script}",
+                    f"--clean_data=" + f,
+                    f"-n {n}",
+                    f"-d {d}",
+                    f"--projector={projector}",
+                ]
+                subprocesses.append(cmd)
 
     # Handles Process scheduling
     subprocess_scheduler(

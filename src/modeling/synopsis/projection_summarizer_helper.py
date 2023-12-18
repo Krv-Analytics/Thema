@@ -38,9 +38,12 @@ def create_umap_grid(dir):
 
     umap_data = []
     for umap in os.listdir(dir):
-        with open(f"{dir}/{umap}", "rb") as f:
-            params = pickle.load(f)
-        umap_data.append((umap, params))
+        if not umap.endswith('.pkl'):
+            raise ValueError('Non-UMAP files present, likely culprit: .DS_Store')
+        else:
+            with open(f"{dir}/{umap}", "rb") as f:
+                params = pickle.load(f)
+            umap_data.append((umap, params))
 
     umap_data.sort(
         key=lambda x: (x[1]["hyperparameters"][0], x[1]["hyperparameters"][1])
