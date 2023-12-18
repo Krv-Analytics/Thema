@@ -1,6 +1,6 @@
+import category_encoders as ce
 import numpy as np
 import pandas as pd
-import category_encoders as ce
 from termcolor import colored
 
 
@@ -11,7 +11,6 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
         1) filtering columns
         2) scaling data
         3) encoding categorical variables
-        4) removing NaN values
 
     Thi function returns a new, cleaned DataFrame.
 
@@ -44,24 +43,30 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
     # Dropping columns
     try:
         cleaned_data = data.drop(columns=column_filter)
-    except:         
-        print(colored(" \n WARNING: Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns.", "yellow"))
-        cleaned_data = data 
+    except:
+        print(
+            colored(
+                " \n WARNING: Invalid Dropped Columns in Parameter file: Defaulting to no dropped columns.",
+                "yellow",
+            )
+        )
+        cleaned_data = data
 
     # Encode
-    assert encoding in [
-        "integer",
-        "one_hot",
-        "hash"
-    ], colored("\n ERROR: Invalid Encoding. Currently we only support `integer`,`one_hot` and `hash` encodings", 'red')
+    assert encoding in ["integer", "one_hot", "hash"], colored(
+        "\n ERROR: Invalid Encoding. Currently we only support `integer`,`one_hot` and `hash` encodings",
+        "red",
+    )
     if encoding == "one_hot":
         # Use Pandas One Hot encoding
-        
-        #cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
 
-        non_numeric_columns = cleaned_data.select_dtypes(exclude=['number']).columns
+        # cleaned_data = pd.get_dummies(cleaned_data, prefix="One_hot", prefix_sep="_")
+
+        non_numeric_columns = cleaned_data.select_dtypes(exclude=["number"]).columns
         for column in non_numeric_columns:
-            cleaned_data = pd.get_dummies(cleaned_data, prefix=f"OH_{column}", columns=[column])
+            cleaned_data = pd.get_dummies(
+                cleaned_data, prefix=f"OH_{column}", columns=[column]
+            )
 
     if encoding == "integer":
         encoder = integer_encoder
@@ -75,14 +80,16 @@ def data_cleaner(data: pd.DataFrame, scaler=None, column_filter=[], encoding="in
             cleaned_data[column] = encoder(vals)
 
     if encoding == "hash":
-        categorical_variables = cleaned_data.select_dtypes(exclude=["number"]).columns.tolist()
+        categorical_variables = cleaned_data.select_dtypes(
+            exclude=["number"]
+        ).columns.tolist()
         hashing_encoder = ce.HashingEncoder(cols=categorical_variables, n_components=10)
         cleaned_data = hashing_encoder.fit_transform(cleaned_data)
 
     # Scale
     if scaler is not None:
         cleaned_data = pd.DataFrame(
-        scaler.fit_transform(cleaned_data), columns=list(cleaned_data.columns)
+            scaler.fit_transform(cleaned_data), columns=list(cleaned_data.columns)
         )
     return cleaned_data
 
@@ -106,7 +113,9 @@ def integer_encoder(column_values: np.array):
     return integer_encoding
 
 
-def clean_data_filename(run_name="My_Sim", scaler=None, encoding="integer", filter: bool = True):
+def clean_data_filename(
+    run_name="My_Sim", scaler=None, encoding="integer", filter: bool = True
+):
     """
     Generate a filename for the cleaned and preprocessed data.
 
@@ -129,7 +138,7 @@ def clean_data_filename(run_name="My_Sim", scaler=None, encoding="integer", filt
         A filename for the cleaned and preprocessed data.
 
     """
-    if scaler== "None":
+    if scaler == "None":
         scaler = ""
     else:
         scaler = "standard_scaled"
