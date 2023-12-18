@@ -92,6 +92,22 @@ if __name__ == "__main__":
                 )
             args.num_imputations = 1
 
+        # Non-sampling methods require only a single imputation
+        if args.num_imputations <= 0: 
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------------- \n\n"
+            )
+
+            print(
+                colored("WARNING:", "yellow"),
+                f"`num_samplings` must be > 0. Defaulting to 1.",
+            )
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------------- \n\n"
+            )
+            args.num_imputations = 1    
         # Impute Scaled Data (multiple versions of)
         for i in range(1, args.num_imputations + 1):
             imputed_data = impute_data(df, fillna_method=filler)
