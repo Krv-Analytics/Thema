@@ -58,10 +58,13 @@ echo "--------------------------------------------------------------------------
 echo "---------------------------------------------------------------------------------------------------------------"
 echo "                                                                                                               "
 
-results="$root$Run_Name"
+results="${root}data/${Run_Name}/"
 
 if [ ! -d "$results/" ]; then
 mkdir "$results"
+fi
+
+if [ ! -d "$results/logs" ]; then
 mkdir "$results/logs"
 fi
 
