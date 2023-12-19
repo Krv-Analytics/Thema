@@ -9,6 +9,8 @@ cleaning_remove_columns: []
 data_imputation:
   method: random_sampling
   num_samplings: 10
+selection:
+  method: min_edges
 projector: UMAP
 projector_dimension: 2
 projector_Nneighbors:
