@@ -1,13 +1,7 @@
 # Makefile
-include .env
-PARAMS_FILE := $(strip $(params))
-RUN_NAME := $(shell cat $(PARAMS_FILE) | shyaml get-value Run_Name)
-COVERAGE_FILTER := $(shell cat $(PARAMS_FILE) | shyaml get-value coverage_filter)
-
-
 
 .PHONY: all 
-all: check-params init process-data projections jmaps jmap-selection 
+all:    init process-data projections jmaps jmap-selection 
 	@echo "Process complete"
 
 .PHONY: install 
@@ -26,54 +20,54 @@ uninstall: clean
 	rm -f .env 
 
 .PHONY: fetch 
-fetch: check-params fetch-raw-data fetch-processed-data
+fetch:    fetch-raw-data fetch-processed-data
 
 .PHONY: fetch-raw-data 
-fetch-raw-data: check-params
+fetch-raw-data:   
 	poetry run python src/processing/pulling/data_generator.py -v
 
 .PHONY: process-data 
-process-data: check-params init
+process-data:    init
 	cd scripts/bash && ./cleaner.sh
 
 .PHONY: projections 
-projections: check-params init 
+projections:    init 
 	cd scripts/bash && ./projector.sh
 
 .PHONY: summarize-projections
-summarize-projections: check-params init 
+summarize-projections:    init 
 	poetry run python src/modeling/synopsis/projection_summarizer.py
 
 .PHONY: jmaps 
-jmaps: check-params init 
+jmaps:    init 
 	cd scripts/bash && ./jmap_generator.sh 
 
 .PHONY: jmap-histogram 
-jmap-histogram: check-params  init
+jmap-histogram:     init
 	cd scripts/python && poetry run python jmap_histogram.py
 
 .PHONY: curvature-distances
-curvature-distances: check-params  init
+curvature-distances:     init
 	cd scripts/python && poetry run python curvature_distance_generator.py
 
 .PHONY: curvature-histogram
-curvature-histogram: check-params init curvature-distances
+curvature-histogram:    init curvature-distances
 	cd scripts/python && poetry run python curvature_histogram.py
 
 .PHONY: stability-histogram 
-stability-histogram: check-params init
+stability-histogram:    init
 	cd scripts/python && poetry run python stability_histogram.py
 
 .PHONY: dendrogram
-dendrogram: check-params init
+dendrogram:    init
 	cd scripts/bash && ./dendrogram.sh
 
 .PHONY: jmap-clustering 
-jmap-clustering:check-params init curvature-distances
+jmap-clustering:   init curvature-distances
 	cd scripts/python && poetry run python clusterer.py
 
 .PHONY: jmap-selection 
-jmap-selection: check-params init jmap-clustering
+jmap-selection:    init jmap-clustering
 	cd scripts/python && poetry run python selector.py
 
 
@@ -88,48 +82,45 @@ load:
 
 
 # Cleaning commands for data fields 
+
+
 .PHONY: clean 
-clean: check-params clean-processed-data clean-projections clean-jmaps clean-jmap-analysis clean-final-jmaps
-	rm -f -r data/$(RUN_NAME)/
+clean: 
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh 
 
 .PHONY: clean-processed-data
-clean-processed-data:  check-params
-	rm -f -r data/$(RUN_NAME)/clean/*
+clean-processed-data:    
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d clean
 
 .PHONY: clean-projections
-clean-projections: check-params 
-	rm -f -r data/${RUN_NAME}/projections/*
+clean-projections:    
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d projections
 
 .PHONY: clean-jmaps
-clean-jmaps: check-params
-	rm -f -r data/${RUN_NAME}/jmaps/*
+clean-jmaps:   
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d jmaps
 
 .PHONY: clean-jmap-analysis
-clean-jmap-analysis:  check-params
-	rm -f -r data/${RUN_NAME}/jmap_analysis/
+clean-jmap-analysis:    
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d jmap_analysis
 
 .PHONY: clean-final-jmaps
-clean-final-jmaps:  check-params
-	rm -f -r  data/${RUN_NAME}/final_jmaps/
+clean-final-jmaps:    
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d final_jmaps
 
 .PHONY: clean-raw-data
-clean-raw-data: check-params
-	rm -f -r data/${RUN_NAME}/
-
-.PHONY: clean-all 
-clean-all:  
-	rm -f -r data/
-
-
+clean-raw-data:   
+	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d raw
 
 #  Checks 
 .PHONY: check-poetry 
 check-poetry:
 	@which poetry || (echo "Poetry is not installed. Installing..."; sudo pip install poetry; poetry install;)
 
-.PHONY: check-params 
-check-params:
-	@if [ ! -f ${PARAMS_FILE} ]; then echo "Error: Paramter file not found!"; exit 1; fi 
+	
+
+
+	 
 
 
 
