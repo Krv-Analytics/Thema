@@ -4,13 +4,13 @@
 import kmapper as km
 import networkx as nx
 import numpy as np
+from fitting_utils import convert_keys_to_alphabet
 from hdbscan import HDBSCAN
+from jgraph import JGraph
 from kmapper import KeplerMapper
 
 # Local Imports
 from tupper import Tupper
-from jgraph import JGraph
-from fitting_utils import convert_keys_to_alphabet
 
 
 class JMapper:
@@ -108,6 +108,7 @@ class JMapper:
                 clusterer=self._clusterer,
             )
             self._nodes = convert_keys_to_alphabet(self._complex["nodes"])
+
         except:
             print("You have produced an Empty Simplicial Complex")
             self._complex = -1
@@ -191,10 +192,10 @@ class JMapper:
 
     @min_intersection.setter
     def min_intersection(self, min_intersection: int = 1):
-        """Setting functions for min intersection. 
+        """Setting functions for min intersection.
         Parameters
         ----------
-        min_intersection: int 
+        min_intersection: int
             New min intersections value
         """
         self._min_intersection = min_intersection
@@ -214,7 +215,6 @@ class JMapper:
            A list of unclustered item ids
         """
         if self._unclustered_items is None:
-
             N = len(self.tupper.clean)
             labels = dict()
             unclustered_items = []

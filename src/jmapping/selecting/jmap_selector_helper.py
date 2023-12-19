@@ -1,10 +1,9 @@
 import os
-import sys
 import pickle
+import sys
+
 import numpy as np
-
 from dotenv import load_dotenv
-
 
 load_dotenv()
 root = os.getenv("root")
@@ -12,14 +11,21 @@ sys.path.append(root + "src/jmapping/fitting/")
 
 from jmapper import JMapper
 
+#  ╭──────────────────────────────────────────────────────────╮
+#  │ Main Selector                                            |
+#  ╰──────────────────────────────────────────────────────────╯
+
 
 def select_jmaps(dir, keys, clustering, n, selection_fn):
     """
-    Choose the best covered jmap from a set of equivalency classes.
-    These equivalency classes are based on an Agglomerative clustering
-    of graphs (jmaps) using a curvature filtration metric.
+    Choose the "best" jmap from a set of equivalency classes
+    according to the selection criteria. Currently the
+    supported selection functions are:
 
-    This function will return a single jmap for each equivalency class.
+    * highest_coverage
+    * min/max_edges
+    *min/max_nodes
+
 
     Parameters:
     -----------
@@ -35,7 +41,7 @@ def select_jmaps(dir, keys, clustering, n, selection_fn):
     Returns:
     --------
     selection: list
-        A list of saved jmap file locations.
+        A list of saved jmap file locations, one for each EQ class.
     """
     subgroups = get_clustering_subgroups(dir, keys, clustering, n)
     selection = {}
@@ -44,6 +50,154 @@ def select_jmaps(dir, keys, clustering, n, selection_fn):
         best_jmap = selection_fn(subgroup)
         selection[key] = {"jmap": best_jmap, "cluster_size": len(subgroup)}
     return selection
+
+
+#  ╭──────────────────────────────────────────────────────────╮
+#  │ Selection Functions                                      |
+#  ╰──────────────────────────────────────────────────────────╯
+
+
+def highest_coverage(jmaps):
+    """
+    Returns the saved jmap with the highest coverage percentage.
+
+    Parameters:
+    -----------
+    jmaps: list
+        A list of saved jmap file locations.
+
+    Returns:
+    --------
+    best_jmap: str
+        The file location of the saved jmap with the highest coverage percentage.
+    """
+
+    coverages = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+        coverages.append(len(jmapper.get_unclustered_items()))
+    assert len(coverages) == len(jmaps)
+    best_jmap = jmaps[np.argmin(coverages)]
+    return best_jmap
+
+
+def min_edges(jmaps):
+    """
+    Returns the saved jmap with the minimal number of edges
+    from a given equivalency class.
+
+    Parameters:
+    -----------
+    jmaps: list
+        A list of saved jmap file locations.
+
+    Returns:
+    --------
+    best_jmap: str
+        The file location of the selected jmap.
+    """
+
+    num_edges = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+
+        num_edges.append(len(jmapper.jgraph.edges))
+    assert len(num_edges) == len(jmaps)
+    best_jmap = jmaps[np.argmin(num_edges)]
+    return best_jmap
+
+
+def max_edges(jmaps):
+    """
+    Returns the saved jmap with the maximal number of edges
+    from a given equivalency class.
+
+     Parameters:
+     -----------
+     jmaps: list
+         A list of saved jmap file locations.
+
+     Returns:
+     --------
+     best_jmap: str
+         The file location of the selected jmap.
+    """
+
+    num_edges = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+
+        num_edges.append(len(jmapper.jgraph.edges))
+    assert len(num_edges) == len(jmaps)
+    best_jmap = jmaps[np.argmax(num_edges)]
+    return best_jmap
+
+
+def max_nodes(jmaps):
+    """
+    Returns the saved jmap with the maximal number of nodes
+    from a given equivalency class.
+
+    Parameters:
+    -----------
+    jmaps: list
+        A list of saved jmap file locations.
+
+    Returns:
+    --------
+    best_jmap: str
+        The file location of the selected jmap.
+    """
+
+    num_nodes = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+
+        num_nodes.append(len(jmapper.nodes))
+    assert len(num_nodes) == len(jmaps)
+    best_jmap = jmaps[np.argmax(num_nodes)]
+    return best_jmap
+
+
+def min_nodes(jmaps):
+    """
+    Returns the saved jmap with the minimal number of nodes
+    from a given equivalency class.
+
+    Parameters:
+    -----------
+    jmaps: list
+        A list of saved jmap file locations.
+
+    Returns:
+    --------
+    best_jmap: str
+        The file location of the selected jmap.
+    """
+
+    num_nodes = []
+    for file in jmaps:
+        with open(file, "rb") as f:
+            reference = pickle.load(f)
+        jmapper = reference["jmapper"]
+
+        num_nodes.append(len(jmapper.nodes))
+    assert len(num_nodes) == len(jmaps)
+    best_jmap = jmaps[np.argmax(num_nodes)]
+    return best_jmap
+
+
+#  ╭──────────────────────────────────────────────────────────╮
+#  │ Helper Functions                                         |
+#  ╰──────────────────────────────────────────────────────────╯
 
 
 def read_graph_clustering(dir, metric, n):
@@ -147,59 +301,6 @@ def get_clustering_subgroups(dir, keys, clustering, n):
         subgroups[label] = files
 
     return subgroups
-
-
-def get_best_covered_jmap(jmaps):
-    """
-    Returns the saved jmap with the highest coverage percentage.
-
-    Parameters:
-    -----------
-    jmaps: list
-        A list of saved jmap file locations.
-
-    Returns:
-    --------
-    best_jmap: str
-        The file location of the saved jmap with the highest coverage percentage.
-    """
-
-    coverages = []
-    for file in jmaps:
-        with open(file, "rb") as f:
-            reference = pickle.load(f)
-        jmapper = reference["jmapper"]
-        coverages.append(len(jmapper.get_unclustered_items()))
-    assert len(coverages) == len(jmaps)
-    best_jmap = jmaps[np.argmin(coverages)]
-    return best_jmap
-
-
-def get_most_nodes_jmap(jmaps):
-    """
-    Returns the saved jmap with the highest coverage percentage.
-
-    Parameters:
-    -----------
-    jmaps: list
-        A list of saved jmap file locations.
-
-    Returns:
-    --------
-    best_jmap: str
-        The file location of the saved jmap with the highest coverage percentage.
-    """
-
-    num_nodes = []
-    for file in jmaps:
-        with open(file, "rb") as f:
-            reference = pickle.load(f)
-        jmapper = reference["jmapper"]
-
-        num_nodes.append(len(jmapper.nodes))
-    assert len(num_nodes) == len(jmaps)
-    best_jmap = jmaps[np.argmax(num_nodes)]
-    return best_jmap
 
 
 def get_viable_jmaps(dir, n: int, coverage_filter: float):
