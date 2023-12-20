@@ -17,8 +17,8 @@ while getopts ":d:" opt; do
 done
 
 # Load the .env file
-if [ -f ../../../.env ]; then
-    source ../../../.env
+if [ -f ../../.env ]; then
+    source ../../.env
 else
     echo "${RED}Unable to locate .env file. ${NC}" 
     exit 1
@@ -57,4 +57,4 @@ if [ -d $file_path ]; then
     rm -rf ${file_path}
 fi  
 
-echo "rm -rf ${Run_Name}/${dir}"
+echo "rm -rf ${file_path}"

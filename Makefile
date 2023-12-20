@@ -86,31 +86,31 @@ load:
 
 .PHONY: clean 
 clean: 
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh 
+	cd scripts/bash/ && ./sweeper.sh 
 
 .PHONY: clean-processed-data
 clean-processed-data:    
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d clean
+	cd scripts/bash/ && ./sweeper.sh -d clean
 
 .PHONY: clean-projections
 clean-projections:    
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d projections
+	cd scripts/bash/ && ./sweeper.sh -d projections
 
 .PHONY: clean-jmaps
 clean-jmaps:   
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d jmaps
+	cd scripts/bash/ && ./sweeper.sh -d jmaps
 
 .PHONY: clean-jmap-analysis
 clean-jmap-analysis:    
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d jmap_analysis
+	cd scripts/bash/ && ./sweeper.sh -d jmap_analysis
 
 .PHONY: clean-final-jmaps
 clean-final-jmaps:    
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d final_jmaps
+	cd scripts/bash/ && ./sweeper.sh -d final_jmaps
 
 .PHONY: clean-raw-data
 clean-raw-data:   
-	cd scripts/bash/makefile_helpers/ && ./sweeper.sh -d raw
+	cd scripts/bash/ && ./sweeper.sh -d raw
 
 #  Checks 
 .PHONY: check-poetry 
