@@ -1,52 +1,37 @@
----
-Run_Name: My_Sim
-raw_data: "***PATH_TO_YOUR_RAW_DATA_HERE***"
-clean_data: updated_by_cleaner
-projected_data: updated_by_projector
-cleaning_scalar: standard_scaler
-cleaning_encoding: integer
-cleaning_remove_columns: []
+Run_Name: MY_RUN_NAME
+raw_data: **PATH TO MY DATA**
+clean_data: **set by cleaner**
 data_imputation:
   method: random_sampling
-  num_samplings: 10
+  num_samplings: 3
 selection:
   method: min_edges
+projected_data: **set by projector**
+cleaning_scalar: standard_scaler
+cleaning_encoding: one_hot
+cleaning_remove_columns:
+- None
 projector: UMAP
 projector_dimension: 2
 projector_Nneighbors:
 - 5
-- 10
-- 15
-- 20
-- 25
-- 30
 projector_minDists:
-- 0
-- 0.01
-- 0.05
 - 0.1
-- 0.5
-- 1
+- 0.3
 projector_random_seed: 42
-jmap_min_cluster_size: 
+jmap_min_cluster_size:
 - 6
+- 2
 jmap_max_cluster_size: 0
 jmap_nCubes:
 - 5
-- 10
-- 15
-- 20
 jmap_percOverlap:
-- 0.3
-- 0.4
 - 0.5
-- 0.6
-- 0.7
 jmap_minIntersection:
 - -1
 jmap_random_seed: 42
-coverage_filter: 0.75
+coverage_filter: 0.9
+run_measure_target_column: ** set to numeric raw data column **
 dendrogram_metric: landscape
-dendrogram_cut: 0.3
+dendrogram_cut: 0.2
 dendrogram_levels: 10
-
