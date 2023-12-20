@@ -4,16 +4,12 @@ import os
 import pickle
 import sys
 
+import jmap_selector_helper as selectors
 import numpy as np
-from jmap_selector_helper import (
-    get_best_covered_jmap,
-    get_most_nodes_jmap,
-    read_graph_clustering,
-    select_jmaps,
-)
-from omegaconf import OmegaConf
-
 from __init__ import env
+from jmap_selector_helper import read_graph_clustering, select_jmaps
+from omegaconf import OmegaConf
+from termcolor import colored
 
 root, src = env()  # Load .env
 
@@ -83,15 +79,19 @@ if __name__ == "__main__":
 
         rel_jmap_dir = "data/" + params["Run_Name"] + f"/jmaps/{n}_policy_groups/"
         jmap_dir = os.path.join(root, rel_jmap_dir)
+
+        selection_method = params.selection.method
+        selection_fn = getattr(selectors, selection_method)
+
         selection = select_jmaps(
-            jmap_dir, keys, clustering, n, selection_fn=get_most_nodes_jmap
+            jmap_dir, keys, clustering, n, selection_fn=selection_fn
         )
 
         jmap_file = (
             f"equivalence_class_candidates_{args.metric}_{distance_threshold}DT.pkl"
         )
 
-        out_dir_message1 = f"{jmap_file} successfully written."
+        out_dir_message1 = f"{jmap_file}."
         output_dir1 = (
             "data/"
             + params["Run_Name"]
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         )
         output_dir2 = os.path.join(root, output_dir2)
         stable_jmap_file = f"{n}_policy_group_jmap.pkl"
-        out_dir_message2 = f"{stable_jmap_file} successfully written."
+        out_dir_message2 = f"{stable_jmap_file}"
         # Check if output directory already exists
         if os.path.isdir(output_dir2):
             stable_jmap_file = os.path.join(output_dir2, stable_jmap_file)
@@ -140,14 +140,23 @@ if __name__ == "__main__":
             print(
                 "-------------------------------------------------------------------------------- \n\n"
             )
-            print(f"jmap Selection based on Stability and Coverage complete!")
+
+            print(
+                colored(f"SUCCESS: Completed Selection!", "green"),
+                f"Token jmaps selected using {selection_method}.",
+            )
             print()
-            print(f"Token jmaps written to: \n {out_dir_message1}")
-            print(f"Final jmap written to: \n {out_dir_message2}")
+            print(f"Tokens written to: \n {out_dir_message1}")
+            print(
+                f"Final jmaps, selected based on `stability` written to: \n {out_dir_message2}"
+            )
 
             print(
                 "\n\n -------------------------------------------------------------------------------- "
             )
-    except AssertionError as e:
-        print(e)
-        raise 
+    except (AttributeError, TypeError, AssertionError) as e:
+        print(colored("ERROR:", "red"), f"{e}")
+        print(
+            "Make sure your selection method is supported (and spelled correctly) in `src/jmapping/selecting/jmap_selector_helper.py`"
+        )
+        raise

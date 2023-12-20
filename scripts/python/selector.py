@@ -93,6 +93,7 @@ if __name__ == "__main__":
         i = unpack_policy_group_dir(folder)
         group_ranks.append(i)
 
+    group_ranks.sort()
     logging.basicConfig(format="%(message)s", level=logging.INFO)
     log = IndentedLoggerAdapter(logging.getLogger(__name__))
     # LOGGING
@@ -127,5 +128,8 @@ if __name__ == "__main__":
         )
 
     subprocess_scheduler(
-        subprocesses=subprocesses, num_processes=num_loops, resilient=False,  success_message="SUCCESS: Completed JMAP selection process"
+        subprocesses=subprocesses,
+        num_processes=num_loops,
+        resilient=False,
+        success_message="SUCCESS: Completed JMAP selection process",
     )

@@ -78,37 +78,33 @@ if __name__ == "__main__":
         # Non-sampling methods require only a single imputation
         if fill_method not in sampling_methods:
             if args.num_imputations != 1:
-                print("\n")
                 print(
-                    "-------------------------------------------------------------------------------------- \n\n"
+                    "\n\n-------------------------------------------------------------------------------- \n\n"
                 )
 
                 print(
                     colored("WARNING:", "yellow"),
                     f"`{fill_method}` does not require sampling and will only produce a single, deterministic imputation.",
                 )
-                print("\n")
                 print(
-                    "-------------------------------------------------------------------------------------- \n\n"
+                    "\n\n-------------------------------------------------------------------------------- \n\n"
                 )
             args.num_imputations = 1
 
         # Non-sampling methods require only a single imputation
-        if args.num_imputations <= 0: 
-            print("\n")
+        if args.num_imputations <= 0:
             print(
-                "-------------------------------------------------------------------------------------- \n\n"
+                "\n\n-------------------------------------------------------------------------------- \n\n"
             )
 
             print(
                 colored("WARNING:", "yellow"),
                 f"`num_samplings` must be > 0. Defaulting to 1.",
             )
-            print("\n")
             print(
-                "-------------------------------------------------------------------------------------- \n\n"
+                "\n\n-------------------------------------------------------------------------------- \n\n"
             )
-            args.num_imputations = 1    
+            args.num_imputations = 1
         # Impute Scaled Data (multiple versions of)
         for i in range(1, args.num_imputations + 1):
             imputed_data = impute_data(df, fillna_method=filler)
@@ -137,9 +133,8 @@ if __name__ == "__main__":
             )
 
         if args.Verbose:
-            print("\n")
             print(
-                "-------------------------------------------------------------------------------------- \n\n"
+                "\n\n-------------------------------------------------------------------------------- \n\n"
             )
 
             print(
@@ -148,9 +143,8 @@ if __name__ == "__main__":
             )
             print(f"Written to `{rel_outdir}`.")
 
-            print("\n")
             print(
-                "-------------------------------------------------------------------------------------- \n\n"
+                "\n\n-------------------------------------------------------------------------------- \n\n"
             )
 
     except (AttributeError, TypeError) as e:
