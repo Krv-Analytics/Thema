@@ -4,5 +4,5 @@
 
 # Calling cleaning and imputing scripts. Configure options in params.yaml
 poetry run python ../../src/processing/cleaning/cleaner.py  -v  
-poetry run python ../../src/processing/imputing/impute.py  -v  
+poetry run python ../../src/processing/cleaning/impute.py  -v  
 

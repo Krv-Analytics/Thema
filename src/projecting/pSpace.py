@@ -1,19 +1,28 @@
+# File: src/projecting/projection_utils.py 
+# Last Update: 03-04-24
+# Updated by: SW 
+
 import os
 from omegaconf import OmegaConf
+from .pGen import pGen 
+from ..utils import get_imputed_files, function_scheduler
 
-from ..projecting.projector import Projector
-from .utils import env, get_imputed_files
-from .gridTracking_helper import function_scheduler
+class pSpace(): 
+    """
+    Projection Space 
 
-class pGrid(): 
-
+    TODO: Update with Proper Doc String
+    """
     def __init__(self, YAML_PATH): 
+        """
+         TODO: Update with Proper Doc String
+        """
         self.YAML_PATH = YAML_PATH
-        if os.path.isfile(YAML_PATH):
+        try:
             with open(YAML_PATH, "r") as f:
                 self.params = OmegaConf.load(f)
-        else:
-         print("params.yaml file note found!")
+        except:
+            print("params.yaml file note found!")
 
         # DATA
         self.raw = self.params["raw_data"]
@@ -42,7 +51,10 @@ class pGrid():
         # Check that clean data exits
         assert os.path.isfile(os.path.join(self.params["root_dir"], self.clean)), "No clean data found. Please make sure you generated clean data."
 
-    def fit(self):     
+    def fit(self):  
+        """
+         TODO: Update with Proper Doc String
+        """   
         clean_files = os.path.join(self.params["root_dir"], "data/" + self.params["Run_Name"] +"/clean")
         # TODO: add logging information pertaining to data handling when NAs are present
         imputation_files = get_imputed_files(clean_files, key=self.data_imputation.method)
@@ -66,6 +78,8 @@ class pGrid():
         )
 
     def _instantiate_projection(self, n, d, f):
-        my_projector = Projector(data=f, n=n, d=d, YAML_PATH=self.YAML_PATH, verbose=False)
+        """ Private Member Function Used in Parallelization"""
+        my_projector = pGen(data=f, n=n, d=d, YAML_PATH=self.YAML_PATH, verbose=False)
         my_projector.fit(n,d) 
         my_projector.save_to_file()
+

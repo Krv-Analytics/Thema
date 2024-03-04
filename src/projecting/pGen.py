@@ -1,4 +1,7 @@
-"Project cleaned data using UMAP."
+# File: src/projecting/gGen.py 
+# Last Update: 03-04-24
+# Updated by: SW 
+
 
 import argparse
 import os
@@ -9,18 +12,22 @@ from termcolor import colored
 from umap import UMAP
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from .projecting_utils import projection_file_name
+
+class pGen:
+    """
+    Projection Generator Class
 
 
-from ..generation.utils import env
-from .projector_helper import projection_driver, projection_file_name
-
-class Projector:
+     TODO: Update With Proper Doc String
+    """
     
     def __init__(self, data, n, d, YAML_PATH, verbose=True):
-        if os.path.isfile(YAML_PATH):
+        """TODO: Update with Proper Doc String"""
+        try:
             with open(YAML_PATH, "r") as f:
                 self.params = OmegaConf.load(f)
-        else:
+        except:
             print("params.yaml file note found!")
 
         assert os.path.isfile(data), "\n Invalid path to Clean Data"
@@ -45,6 +52,8 @@ class Projector:
         "PCA",
         ], "Only UMAP, TSNE, and PCA are currently supported."
 
+
+    # Fitting a Projection
     def fit(self, n, d): 
         """
         This function performs a projection of a DataFrame.
@@ -83,21 +92,41 @@ class Projector:
 
     
     def save_to_file(self): 
-
+        """TODO: Update with Proper Doc String"""
+        
         # TODO: move to helper file 
         # Get Imputation ID
         match = re.search(r"\d+", self.data_path)
         impute_id = match.group(0)
         
-        output_file = projection_file_name(
-            projector=self.params.projector,
-            impute_method=self.params.data_imputation.method,
-            impute_id=impute_id,
-            n=self.nn,
-            d=self.mindist,
-            dimensions=2,
-            seed=self.params.projector_random_seed,
-    )
+        if self.projector == "UMAP": 
+            output_file = projection_file_name(
+                projector=self.params.projector,
+                impute_method=self.params.data_imputation.method,
+                impute_id=impute_id,
+                n=self.nn,
+                d=self.mindist,
+                dimensions=2,
+                seed=self.params.projector_random_seed,
+                )
+        if self.projector == "TSNE": 
+            output_file = projection_file_name(
+                projector=self.params.projector,
+                impute_method=self.params.data_imputation.method,
+                impute_id=impute_id,
+                dimensions=2,
+                perplexity = self.perplexity,
+                seed=self.params.projector_random_seed,
+                )
+        
+        if self.projector == "PCA": 
+            output_file = projection_file_name(
+                projector=self.params.projector,
+                impute_method=self.params.data_imputation.method,
+                impute_id=impute_id,
+                dimensions=2,
+                seed=self.params.projector_random_seed,
+                )
         
         output_file = os.path.join(self.output_dir, output_file)
         with open(output_file, "wb") as f:

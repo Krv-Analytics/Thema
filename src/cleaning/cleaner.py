@@ -3,11 +3,12 @@ import argparse
 import os
 import pickle
 
-from __init__ import env
-from cleaner_helper import clean_data_filename, data_cleaner
+
+from .cleaner_helper import clean_data_filename, data_cleaner
 from omegaconf import OmegaConf
 from sklearn.preprocessing import StandardScaler
 from termcolor import colored
+from ..utils import env 
 
 root, src = env()  # Load .env
 

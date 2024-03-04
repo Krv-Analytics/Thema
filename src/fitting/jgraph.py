@@ -1,20 +1,19 @@
-import kmapper as km
 import networkx as nx
 import numpy as np
+
 from .nammu.curvature import ollivier_ricci_curvature
 from .nammu.nammu_utils import make_node_filtration
 from .nammu.topology import PersistenceDiagram, calculate_persistence_diagrams
 from .nerve import Nerve
-from .tupper import Tupper
 
 
-class JGraph:
+class jGraph:
     """
     A Graph Class to Handle all of your Curvature, Homology and Graph learning needs!
 
     """
 
-    def __init__(self, nodes: dict(), min_intersection=-1):
+    def __init__(self, nodes:dict(), min_intersection=-1):
         """
         Constructor for the JGraph Class.
 

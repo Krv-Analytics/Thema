@@ -11,7 +11,7 @@ from .jgraph import JGraph
 from .tupper import Tupper
 
 
-class JMapper:
+class jMapper:
     """A wrapper and expansion for scikit-tda's `KMapper`.
 
     This class allows you to generate graph models of high dimensional data

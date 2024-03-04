@@ -1,27 +1,15 @@
-import logging
-import os
-import warnings
-import os
-import sys
 
-from dotenv import load_dotenv
-
+import os
 from omegaconf import OmegaConf
-from python_log_indenter import IndentedLoggerAdapter
-from .utils import env
-warnings.simplefilter("ignore")
+from ..utils import log_error, function_scheduler
 
 
-################################################################################################
-#   Loading Config Data
-################################################################################################
+class gSpace: 
+    """
+    Graph Space
 
-root, src = env()  # Load .env
-from .gridTracking_helper import log_error, function_scheduler
-
-
-class gGrid: 
-    
+    TODO: Update with proper Doc String
+    """
     def __init__(self, YAML_PATH):
         if os.path.isfile(YAML_PATH):
             with open(YAML_PATH, "r") as f:
@@ -40,15 +28,15 @@ class gGrid:
         self.random_seed = self.params["jmap_random_seed"]
 
         # DATA
-        self.raw = self.params["raw_data"]
-        self.clean = self.params["clean_data"]
-        self.projections = self.params["projected_data"]
+        self.raw = self.params["root_dir"] + self.params["raw_data"]
+        self.clean = self.params["root_dir"]+ self.params["clean_data"]
+        self.projections = self.params["root_dir"] + self.params["projected_data"]
 
 
         # Grid Files
         self.data_dir = os.path.join(self.params["root_dir"], "data") 
         # TODO: Use different graph generators (ie Ball Mapper)
-        self.graph_generator = os.path.join(self.params["root_dir"], "src/jmapping/fitting/jmap_generator.py") 
+        self.graph_generator = os.path.join(self.params["root_dir"], "src/fitting/jmap_generator.py") 
         self.g_files = {}
 
     ################################################################################################
@@ -118,7 +106,7 @@ class gGrid:
                                 )
 
         # Handles Process scheduling
-        subprocess_scheduler(
+        function_scheduler(
             subprocesses,
             num_loops,
             "SUCCESS: Completed JMAP generation grid.",
