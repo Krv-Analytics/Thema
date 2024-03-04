@@ -4,7 +4,7 @@ import warnings
 
 from omegaconf import OmegaConf
 from python_log_indenter import IndentedLoggerAdapter
-from utils import env
+from modeling.generation.utils import env
 
 warnings.simplefilter("ignore")
 

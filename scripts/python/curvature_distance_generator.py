@@ -3,7 +3,7 @@ import os
 
 from omegaconf import OmegaConf
 from python_log_indenter import IndentedLoggerAdapter
-from utils import env
+from modeling.generation.utils import env
 
 ################################################################################################
 #  Handling Local Imports
