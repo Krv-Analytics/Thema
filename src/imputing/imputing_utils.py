@@ -1,35 +1,8 @@
 "Helper functions for handling missing values"
 import os
 from types import FunctionType as function
-
 import numpy as np
 import pandas as pd
-
-#  ╭──────────────────────────────────────────────────────────╮
-#  │ Main Function                                            |
-#  ╰──────────────────────────────────────────────────────────╯
-
-
-def impute_data(df: pd.DataFrame, fillna_method: function, axis=0):
-    """
-    Function to handle NaN values in a DataFrame according to specified `fill_method`.
-    Currently supported methods include:
-    *
-    *
-
-    Inputs
-    ----------
-    df: <pd.DataFrame>
-        - dataframe that we are  (dealing with missing data)
-
-    fill_method: <function>
-        - a column-wise function to impute missing values.
-    axis: <int>
-        - 0 or 1, the pandas axis on which to drop NaNs
-    """
-    X = df.copy()
-    X = X.apply(fillna_method, axis=axis)
-    return X.dropna(axis=axis)
 
 
 #  ╭──────────────────────────────────────────────────────────╮
@@ -55,7 +28,7 @@ def random_sampling(column):
     return column
 
 
-def average(column):
+def mean(column):
     """
     Function to fill in missing data in a column based on its average
     """
@@ -89,16 +62,13 @@ def drop(column):
     return column
 
 
-# Methods that require a distribution of imputations
-sampling_methods = ["random_sampling"]
-
 
 #  ╭──────────────────────────────────────────────────────────╮
 #  │ Helper Functions                                         |
 #  ╰──────────────────────────────────────────────────────────╯
 
 
-def imputed_filename(run_name, fill_method, number=None):
+def imputed_filename(data_name,  id):
     """
     Generate a filename for the cleaned and preprocessed data.
 
@@ -116,12 +86,7 @@ def imputed_filename(run_name, fill_method, number=None):
         A filename for the cleaned and preprocessed data.
 
     """
-    if number is not None:
-        number_out = "_" + str(number)
-    else:
-        number_out = ""
-
-    return f"{run_name}_imputed_data_{fill_method}{number_out}.pkl"
+    return f"{data_name}_imputed__{id}.pkl"
 
 
 def add_imputed_flags(df):
@@ -139,9 +104,9 @@ def add_imputed_flags(df):
     return pd.concat([df, imputed_columns], axis=1)
 
 
-def clear_current_imputations(dir, key):
+def clear_previous_imputations(dir, key):
     """
-    Clear all files in the current directory that contain `key`.
+    Clear all files in directory that contain `key`.
     """
     files = os.listdir(dir)
 

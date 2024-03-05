@@ -15,7 +15,7 @@ class gSpace:
             with open(YAML_PATH, "r") as f:
                 self.params = OmegaConf.load(f)
         else:
-            print("params.yaml file note found!")
+            print("params.yaml file not found!")
 
         # HDBSCAN
         self.min_cluster_size = self.params["jmap_min_cluster_size"]
@@ -160,9 +160,3 @@ class gSpace:
                     matching_files.append(file)
             # If no matching file is found, return None
         return matching_files
-
-
-if __name__ == "__main__":
-    YAML_PATH = os.getenv("params")
-    my_gGrid = gGrid(YAML_PATH=YAML_PATH)
-    my_gGrid.fit()

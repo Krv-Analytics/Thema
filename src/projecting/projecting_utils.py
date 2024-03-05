@@ -4,8 +4,8 @@
 
 def projection_file_name(
     projector,
-    impute_method,
-    impute_id,
+    impute_method=None,
+    impute_id=None,
     **kwargs
 ):
     """
@@ -25,7 +25,8 @@ def projection_file_name(
         The filename for the projected dataset.
     """
     if projector == "UMAP":
-        output_file = f"{projector}_{kwargs["dimensions"]}D_Nbors{nn}_minDist_{kwargs["minDist"]}_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
+        
+        output_file = f"{projector}_{kwargs["dimensions"]}D_Nbors{kwargs["nn"]}_minDist_{kwargs["minDist"]}_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
     
     if projector == "TSNE": 
         output_file = f"{projector}_{kwargs["dimensions"]}D_{kwargs["perplexity"]}perp_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
