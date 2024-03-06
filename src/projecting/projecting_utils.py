@@ -26,12 +26,12 @@ def projection_file_name(
     """
     if projector == "UMAP":
         
-        output_file = f"{projector}_{kwargs["dimensions"]}D_Nbors{kwargs["nn"]}_minDist_{kwargs["minDist"]}_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
+        output_file = f'{projector}_{kwargs["dimensions"]}D_Nbors{kwargs["nn"]}_minDist_{kwargs["minDist"]}_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
     
     if projector == "TSNE": 
-        output_file = f"{projector}_{kwargs["dimensions"]}D_{kwargs["perplexity"]}perp_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
+        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["perplexity"]}perp_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
     
     if projector == "PCA":
-        output_file = f"{projector}_{kwargs["dimensions"]}D_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl"
+        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
     
     return output_file

@@ -61,7 +61,7 @@ class iSpace:
                 )
                 self.num_imputations = 1
 
-            out_dir = os.join(self.params["root_dir"], f"data/{self.params["Run_Name"]}/imputations/")
+            out_dir = os.join(self.params["root_dir"], f'data/{self.params["Run_Name"]}/imputations/')
             if not os.isdir(out_dir):
                 os.makedirs(out_dir)
             
