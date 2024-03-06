@@ -8,7 +8,6 @@ from .cleaning_utils import clean_data_filename, integer_encoder
 from omegaconf import OmegaConf
 from sklearn.preprocessing import StandardScaler
 import category_encoders as ce 
-from termcolor import colored
 
 from . import cleaning_utils
 from .cleaning_utils import add_imputed_flags
@@ -210,7 +209,7 @@ class iGen:
             else: 
                 filename_without_extension, extension = os.path.splitext(self.data_path)
                 data_name = filename_without_extension.split('/')[-1]
-            file_name = cleaning_utils.clean_data_filename(data_name=data_name, id=id, scaler=self.scaler, encoding=self.encoding)
+            file_name = clean_data_filename(data_name=data_name, id=id, scaler=self.scaler, encoding=self.encoding)
             output_filepath = os.path.join(out_dir,file_name)
 
             results = {"data": self.imputed_data, 
