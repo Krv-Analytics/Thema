@@ -1,7 +1,6 @@
 # File: src/cleaning/iSpace.py 
-# Last Update: 03-11-24
+# Last Update: 03-12-24
 # Updated by: SW 
-
 
 import os
 import pickle
@@ -23,7 +22,7 @@ class iSpace:
     TODO: Update Doc String 
     """
 
-    def __init__(self, data=None, scaler="standard_scaler", encoding="one_hot", drop_columns=[], impute_methods=None, impute_columns=None, num_samples=1,verbose=True, YAML_PATH=None): 
+    def __init__(self, data=None, scaler="standard", encoding="one_hot", drop_columns=[], impute_methods=None, impute_columns=None, num_samples=1,verbose=True, YAML_PATH=None): 
         """
         TODO: Update Doc String
         """
@@ -68,7 +67,7 @@ class iSpace:
         
         elif isinstance(data, pd.DataFrame):
             self.data = data 
-            self.data_path = -1 
+            self.data_path = None 
         else: 
             raise ValueError("'data' must be a pd.DataFrame object, OR a path to a csv, xlxs, or pickle file")
 
@@ -111,6 +110,8 @@ class iSpace:
                     print("Invalid impute methods. Defaulting to 'drop'")
                     impute_methods[index] = "drop"
             self.impute_methods = impute_methods
+        
+        self.imputed_data = None 
         
     
     def get_column_summary(self):
@@ -225,8 +226,8 @@ class iSpace:
             self.imputed_data = hashing_encoder.fit_transform(self.imputed_data)
 
         # Scaling 
-        assert self.scaler in ["standard_scaler"], "Invalid Scaler"
-        if self.scaler == "standard_scaler":
+        assert self.scaler in ["standard"], "Invalid Scaler"
+        if self.scaler == "standard":
             scaler = StandardScaler()
             self.imputed_data = pd.DataFrame(
                 scaler.fit_transform(self.imputed_data), columns=list(self.imputed_data.columns)
@@ -243,7 +244,7 @@ class iSpace:
             if not os.path.isdir(out_dir):
                 os.makedirs(out_dir)
 
-            if self.data_path == -1: 
+            if self.data_path is None: 
                 data_name = "my_dataset"
             else: 
                 filename_without_extension, extension = os.path.splitext(self.data_path)
