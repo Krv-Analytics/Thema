@@ -114,17 +114,17 @@ def drop(column):
 #  ╰──────────────────────────────────────────────────────────╯
 
 
-def add_imputed_flags(df):
+def add_imputed_flags(df, impute_columns):
     """
     Add a flag for each value per column that is NA
     """
     imputationdf = df.copy()
 
-    for column in imputationdf.columns[imputationdf.isna().any()]:
-        imputed_column_name = f"imputed_{column}"
+    for column in impute_columns:
+        imputed_column_name = f"impute_{column}"
         imputationdf[imputed_column_name] = imputationdf[column].isna().astype(int)
 
-    imputed_columns = imputationdf.filter(like="imputed_")
+    imputed_columns = imputationdf.filter(like="impute_")
 
     return pd.concat([df, imputed_columns], axis=1)
 
