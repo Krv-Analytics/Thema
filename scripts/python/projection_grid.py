@@ -1,7 +1,7 @@
 import os 
 from utils import env
 root, src = env()
-from src.projecting import pGrid
+from thema.projecting import pGrid
 
 if __name__ == "__main__":
     YAML_PATH = os.getenv("params")

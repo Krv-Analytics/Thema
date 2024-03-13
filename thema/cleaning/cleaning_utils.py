@@ -60,8 +60,10 @@ def random_sampling(column):
     """
     Function to fill in missing data based on sampling from the normal distribution of the column
     """
-    mean = column.mean()
-    std = column.std()
+    column = column.copy()
+    numeric_column = column.dropna()
+    mean = numeric_column.mean()
+    std = numeric_column.std()
     na_mask = column.isna()
     na_count = na_mask.sum()
 
@@ -78,6 +80,7 @@ def mean(column):
     """
     Function to fill in missing data in a column based on its average
     """
+    column = column.copy()
     average = column.mean()
     column.fillna(average, inplace=True)
     return column
@@ -87,6 +90,7 @@ def mode(column):
     """
     Function to fill in missing data in a column based on its mode (most frequent value)
     """
+    column = column.copy()
     mode_value = column.mode().iloc[0]  # Get the first mode if multiple modes exist
     column.fillna(mode_value, inplace=True)
     return column
@@ -96,6 +100,7 @@ def median(column):
     """
     Function to fill in missing data in a column based on its median value
     """
+    column = column.copy()
     average = column.median()
     column.fillna(average, inplace=True)
     return column
@@ -105,6 +110,7 @@ def drop(column):
     """
     Leave column as is and remove element 
     """
+    
     return column
 
 

@@ -13,7 +13,7 @@ import category_encoders as ce
 
 from . import cleaning_utils
 from .cleaning_utils import clean_data_filename, integer_encoder
-from .cleaning_utils import add_imputed_flags
+from .cleaning_utils import add_imputed_flags, random_sampling
 from ..utils import function_scheduler
 
 class iSpace: 
@@ -22,12 +22,14 @@ class iSpace:
     TODO: Update Doc String 
     """
 
-    def __init__(self, data=None, scaler="standard", encoding="one_hot", drop_columns=[], impute_methods=None, impute_columns=None, num_samples=1,verbose=True, YAML_PATH=None): 
+    def __init__(self, data=None, scaler:str="standard", encoding:str="one_hot", dropColumns=None, imputeMethods=None, imputeColumns=None, num_samples:int=1, verbose: bool=True, YAML_PATH=None): 
         """
         TODO: Update Doc String
         """
         
-        assert YAML_PATH is not None or data is not None, "Please provide config parameters or a path to a yaml configuration file."
+        if YAML_PATH is None and data is None:
+            raise ValueError("Please provide config parameters or a path to a yaml configuration file.")
+        
         self.verbose = verbose
         self.YAML_PATH = None 
         if YAML_PATH is not None: 
@@ -39,9 +41,9 @@ class iSpace:
                 data = params.data
                 scaler = params.cleaning.scaler 
                 encoding = params.cleaning.encoding 
-                drop_columns = params.cleaning.drop_columns
-                impute_columns = params.cleaning.impute_columns
-                impute_methods = params.cleaning.impute_methods
+                dropColumns = params.cleaning.dropColumns
+                imputeColumns = params.cleaning.imputeColumns
+                imputeMethods = params.cleaning.imputeMethods
                 num_samples = params.cleaning.num_samples 
 
             except Exception as e: 
@@ -57,7 +59,7 @@ class iSpace:
                         self.data = pd.read_excel(data)
                     self.data_path = data
                 elif data.endswith('.pkl'):
-                    assert os.path.isfile(data), "\n Invalid path to Clean Data"
+                    assert os.path.isfile(data), "\n Invalid path to Data"
                     self.data = pd.read_pickle(data)
                     self.data_path = data
                 else:
@@ -72,76 +74,107 @@ class iSpace:
             raise ValueError("'data' must be a pd.DataFrame object, OR a path to a csv, xlxs, or pickle file")
 
         # HARD CODED SUPPORTED TYPED 
-        supported_impute_methods = ["random_sampling", "drop", "mean", "median", "mode"]
+        supported_imputeMethods = ["random_sampling", "drop", "mean", "median", "mode"]
         
         self.scaler = scaler 
         self.encoding = encoding 
         self.num_samples = num_samples
-        self.drop_columns = drop_columns
+        
+        assert self.scaler in ["standard"]
+        assert self.encoding in ["one_hot", "integer", "hash"], "Only one_hot, integer, and hash encoding are supported."
+        
+        
+        if dropColumns is None:
+            self.dropColumns = []
+        else:
+            assert type(dropColumns) == list, "dropColumns must be a list" 
+            self.dropColumns = dropColumns
 
         assert num_samples > 0, "Please Specify a postive number of Samples"
 
 
-        if impute_columns is None or impute_columns=="None": 
-            self.impute_columns = []
-        elif impute_columns == "all":
-            self.impute_columns = self.data.isna().any().columns
-        elif type(impute_columns) == ListConfig or type(impute_columns) == list:
-            self.impute_columns = impute_columns
-            for c in impute_columns:
+        if imputeColumns is None or imputeColumns=="None": 
+            self.imputeColumns = []
+        elif imputeColumns == "all":
+            self.imputeColumns = self.data.isna().any()[self.data.isna().any()].index.tolist()
+        elif type(imputeColumns) == ListConfig or type(imputeColumns) == list:
+            self.imputeColumns = imputeColumns
+            for c in imputeColumns:
                 if c not in self.data.columns:
                     print("Invalid impute column. Defaulting to 'None'") 
-                    self.impute_columns =[] 
+                    self.imputeColumns =[] 
         else: 
-            impute_columns=[]
+            self.imputeColumns=[]
 
-        if impute_methods is None or impute_methods == "None": 
-            self.impute_methods = ["drop" for _ in range(len(impute_columns))] 
+        if imputeMethods is None or imputeMethods == "None": 
+            self.imputeMethods = ["drop" for _ in range(len(self.imputeColumns))] 
         
-        elif type(impute_methods) == str:
-            if not impute_methods in supported_impute_methods: 
+        elif type(imputeMethods) == str:
+            if not imputeMethods in supported_imputeMethods: 
                 print("Invalid impute methods. Defaulting to 'drop'")
-                impute_methods = "drop"
-            self.impute_methods = [impute_methods for _ in range(len(impute_columns))]
+                imputeMethods = "drop" 
+            self.imputeMethods = [imputeMethods for _ in range(len(self.imputeColumns))]
             self.num_samples = 1 
         else: 
-            for index, method in enumerate(impute_methods):
-                if not method in supported_impute_methods: 
+            assert len(imputeMethods) == len(imputeColumns), "Lengh of imputeMethods must match length of imputeColumns"
+            for index, method in enumerate(imputeMethods):
+                if not method in supported_imputeMethods: 
                     print("Invalid impute methods. Defaulting to 'drop'")
-                    impute_methods[index] = "drop"
-            self.impute_methods = impute_methods
+                    imputeMethods[index] = "drop"
+            self.imputeMethods = imputeMethods
         
         self.imputed_data = None 
         
-    
-    def get_column_summary(self):
-        """
-        Prints a breakdown of columns from the DataFrame 'data' that are 'numeric', 'categorical', and 'missing values'.
-        """
         
-        columns_with_na = self.data.columns[self.data.isna().any()].tolist()
-        non_numeric = self.data.select_dtypes(exclude='number').columns
-        numeric = self.data.select_dtypes(include='number').columns
-        print("Non-Numeric Columns")
-        print("----------------")
-        print()
-        for column in non_numeric: 
-            print(column)
-        print()
+    def get_missingData_summary(self):
+        """
+        Returns a dictionary containing a breakdown of columns from 'data' that are:
+        - 'numericMissing': Numeric columns with missing values
+        - 'numericComplete': Numeric columns without missing values
+        - 'categoricalMissing': Categorical columns with missing values
+        - 'categoricalComplete': Categorical columns without missing values
+        """
 
-        print("Missing Values")
-        print("----------------")
-        print()
-        for column in columns_with_na:
-            num_missing_values = self.data[column].isna().sum()
-            print(f"Column '{column}' has {num_missing_values} missing values.")
+        numeric_missing = []
+        numeric_not_missing = []
+        categorical_missing = []
+        categorical_complete = []
 
-        print("Numeric Columns")
-        print("----------------")
-        print()
-        for column in numeric:
-            print(column)
-        print()
+        for column in self.data.columns:
+            if self.data[column].dtype.kind in 'biufc':
+                if self.data[column].isna().any():
+                    numeric_missing.append(column)
+                else:
+                    numeric_not_missing.append(column)
+            else:
+                if self.data[column].isna().any():
+                    categorical_missing.append(column)
+                else:
+                    categorical_complete.append(column)
+
+        summary = {
+            'numericMissing': numeric_missing,
+            'numericComplete': numeric_not_missing,
+            'categoricalMissing': categorical_missing,
+            'categoricalComplete': categorical_complete
+        }
+
+        return summary
+    
+
+    def get_dropped_ratio(self, axis=0):
+        """
+        Calculates the ratio of the number of rows after fit over the total number of rows in 'self.data'.
+    
+        Returns:
+        float: The ratio of rows after NaNs are dropped to the total number of rows.
+        """
+        if self.imputed_data is None: 
+            print("Make sure to run 'fit' before looking at the dropped ratio")
+            return 0 
+        return self.imputed_data.shape[axis]/self.data[axis]
+
+    
     
     def get_na_as_list(self):
         return self.data.columns[self.data.isna().any()].tolist()
@@ -155,6 +188,7 @@ class iSpace:
                 methods.append("random_sampling")
             else: 
                 methods.append("mode")
+        
         return methods 
 
     
@@ -180,28 +214,28 @@ class iSpace:
         """
         """
         self.fit()
-        self.save_to_file(out_dir=out_dir, id=id)   
+        self.dump(out_dir=out_dir, id=id)   
 
 
     def fit(self):
         """
         """
-        if not self.drop_columns == [] and all(column in self.data.columns for column in self.drop_columns): 
-            self.imputed_data = self.data.drop(columns=self.drop_columns)    
+        if not self.dropColumns == [] and all(column in self.data.columns for column in self.dropColumns): 
+            self.imputed_data = self.data.drop(columns=self.dropColumns)    
         else:
             self.imputed_data = self.data
 
-        self.imputed_data = add_imputed_flags(self.data, self.impute_columns)
-        
-        for index, column in enumerate(self.impute_columns):
-            impute_function = getattr(cleaning_utils, self.impute_methods[index])
-            impute_column = self.data[column]
-            self.imputed_data[column] = impute_column.apply(impute_function, axis=1)
+        self.imputed_data = add_imputed_flags(self.data, self.imputeColumns)
+        for index, column in enumerate(self.imputeColumns):
+            impute_function = getattr(cleaning_utils, self.imputeMethods[index])
+            self.imputed_data[column] = impute_function(self.data[column])
 
         # Drops unaccounted columns
         self.imputed_data.dropna(axis=1, inplace=True)
 
         # Encoding 
+        assert self.encoding in ["one_hot", "integer", "hash"], "Only one_hot, integer, and hash encoding are supported."
+
         if self.encoding == "one_hot":
             non_numeric_columns = self.imputed_data.select_dtypes(exclude=["number"]).columns
             for column in non_numeric_columns:
@@ -234,7 +268,7 @@ class iSpace:
             )
 
     
-    def save_to_file(self, out_dir, id=None): 
+    def dump(self, out_dir, id=None): 
         """
         
         """
@@ -255,12 +289,27 @@ class iSpace:
             results = {"data": self.imputed_data, 
                         "description": {"raw": self.data_path, 
                                         "scaler": self.scaler,
-                                        "ecoding": self.encoding,
-                                        "drop_columns": self.drop_columns,
-                                        "impute_columns": self.impute_columns,
-                                        "impute_methods": self.impute_methods}
+                                        "encoding": self.encoding,
+                                        "dropColumns": self.dropColumns,
+                                        "imputeColumns": self.imputeColumns,
+                                        "imputeMethods": self.imputeMethods}
                             }
             with open(output_filepath, "wb") as f:
                 pickle.dump(results, f)
+        except Exception as e:
+            print(e)
+
+
+    def save(self, file_path): 
+        """
+        Save the current object instance to a file using pickle serialization.
+
+        Parameters:
+            file_path (str): The path to the file where the object will be saved.
+
+        """
+        try:
+            with open(file_path, "wb") as f:
+                pickle.dump(self, f)
         except Exception as e:
             print(e)
