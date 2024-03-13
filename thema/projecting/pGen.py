@@ -24,6 +24,13 @@ class pGen:
     def __init__(self, data, projector="UMAP", verbose=True, **kwargs):
         """TODO: Update with Proper Doc String"""
         
+        if projector == "UMAP" and not kwargs:  
+            kwargs = {
+                'nn': 4,
+                'dimensions': 2,
+                'minDist': 0.1,
+                'seed': 42
+            }
         self.verbose = verbose
         # Setting data member 
         if type(data) == str:
@@ -31,7 +38,12 @@ class pGen:
                 assert os.path.isfile(data), "\n Invalid path to Clean Data"
                 with open(data, "rb") as clean:
                     reference = pickle.load(clean)
-                    self.data = reference["clean_data"]
+                    if isinstance(reference, dict):
+                        self.data = reference["data"]
+                    elif isinstance(reference, pd.DataFrame):
+                        self.data = reference 
+                    else: 
+                        raise ValueError("Please provide a data path to a dictionary (with a 'data' key) or a pandas Dataframe")
                 self.data_path = data
             except:
                 print("There was an issue opening your data file. Please make sure it exists and is a pickle file.")
@@ -59,6 +71,7 @@ class pGen:
 
         # Configuring TSNE Parameters 
         elif self.projector == "TSNE": 
+            assert self.data.shape[0] >= kwargs["perplexity"]
             self.perplexity = kwargs["perplexity"]
             self.dimensions = kwargs["dimensions"]
             self.seed = kwargs["seed"]
@@ -68,10 +81,12 @@ class pGen:
             self.dimensions = kwargs["dimensions"]
             self.seed = kwargs["seed"]
 
+        else: 
+            raise ValueError("Only UMAP, PCA, and TSNE are supported.")
 
 
 
-    # Fitting a Projection
+
     def fit(self): 
         """
         This function performs a projection of a DataFrame.
@@ -86,42 +101,41 @@ class pGen:
         if self.data.isna().any().any() and self.verbose: 
             print("Warning: your data contains NA values that will be dropped without remorse before projecting.")
         
-        # Drop NA before projection 
+        # Ensure No NAs before projection  
         data = self.data.dropna()
         
         # Fitting UMAP 
         if self.projector == "UMAP":
-            umap_2d = UMAP(
+            umap = UMAP(
                 min_dist=self.minDist,
                 n_neighbors=self.nn,
                 n_components=self.dimensions,
                 init="random",
                 random_state=self.seed,
+                n_jobs=1
             )
 
-            projection = umap_2d.fit_transform(data)
-            self.results = {"projection": projection, "description": [self.projector, self.nn, self.minDist, self.dimensions, self.seed, self.data_path]}
+            self.projection = umap.fit_transform(data)
+            self.results = {"projection": self.projection, "description": [self.projector, self.nn, self.minDist, self.dimensions, self.seed, self.data_path]}
 
         # Fitting TSNE 
         elif self.projector == "TSNE":
-            num_samples = self.data.shape[0]
-            perplexity = min(30, num_samples - 1)
             tsne = TSNE(n_components=self.dimensions, random_state=self.seed, perplexity=self.perplexity)
-            projection = tsne.fit_transform(data)
-            self.results = {"projection": projection, "description": [self.projector, self.perplexity, self.seed, self.data_path]}
+            self.projection = tsne.fit_transform(data)
+            self.results = {"projection": self.projection, "description": [self.projector, self.perplexity, self.seed, self.data_path]}
 
         # Fitting PCA 
         elif self.projector == "PCA":
             pca = PCA(n_components=self.params.projector_dimension, random_state=self.params.projector_random_seed)
             self.projection = pca.fit_transform(self.data)
-            self.results = {"projection": projection, "description": [ self.projector, self.dimensions, self.seed, self.data_path]}
+            self.results = {"projection": self.projection, "description": [ self.projector, self.dimensions, self.seed, self.data_path]}
         
         # Unknown Projector Case Handling 
         else: 
             raise ValueError("Only UMAP, TSNE, and PCA are currently supported. Please make sure you have set the correct projector.")
 
     
-    def save_to_file(self, out_dir, impute_method=None, impute_id=None): 
+    def dump(self, out_dir, impute_method=None, impute_id=None): 
         """TODO: Update with Proper Doc String"""
         try: 
             # Create Directory if it does not exist       
@@ -175,7 +189,7 @@ class pGen:
 
                 print(
                     colored(f"SUCCESS: Completed Projection!", "green"),
-                    "Written to {rel_outdir}",
+                    f"Written to {rel_outdir}",
                 )
                 print("\n")
                 print(
@@ -183,6 +197,22 @@ class pGen:
                 )
 
         except Exception as e: 
+            print(e)
+
+        
+
+    def save(self, file_path): 
+        """
+        Save the current object instance to a file using pickle serialization.
+
+        Parameters:
+            file_path (str): The path to the file where the object will be saved.
+
+        """
+        try:
+            with open(file_path, "wb") as f:
+                pickle.dump(self, f)
+        except Exception as e:
             print(e)
 
 
