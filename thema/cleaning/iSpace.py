@@ -13,7 +13,7 @@ import category_encoders as ce
 
 from . import cleaning_utils
 from .cleaning_utils import clean_data_filename, integer_encoder
-from .cleaning_utils import add_imputed_flags, random_sampling
+from .cleaning_utils import add_imputed_flags
 from ..utils import function_scheduler
 
 class iSpace: 
@@ -193,11 +193,11 @@ class iSpace:
 
     
 
-    def fit_space(self, out_dir, num_samples=None): 
+    def fit_space(self, out_dir, numSamples=None): 
         """
         """
-        if(num_samples):
-            self.num_samples = num_samples
+        if(numSamples):
+            self.num_samples = numSamples
         subprocesses = []
         for i in range(self.num_samples):
             cmd = (self.fit_space_helper, 

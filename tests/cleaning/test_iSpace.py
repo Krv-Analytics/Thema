@@ -7,6 +7,7 @@ import pytest
 import tempfile
 import pickle
 from pandas.testing import assert_frame_equal
+import numpy as np
 from thema import cleaning as c 
 from tests import test_utils as ut 
 
@@ -282,6 +283,16 @@ class Test_iSpace:
             assert x.imputeMethods == y["description"]["imputeMethods"]
 
 
+
+
+    def test_fit_space(self): 
+        temp_file_path = ut.create_temp_data_file(ut.test_data_0, "pkl")
+        x = c.iSpace(data=temp_file_path)
+
+        numSamples = np.random.randint(1, 51)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            x.fit_space(temp_dir, numSamples=numSamples)
+            assert len(os.listdir(temp_dir)) == numSamples
 
 
 
