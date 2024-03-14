@@ -51,17 +51,15 @@ class iSpace:
         
         if type(data) == str:
             try:
-                if data.endswith('.csv') or data.endswith('.xlsx'):
-                    assert os.path.isfile(data), "\n Invalid path to Data"
-                    if data.endswith('.csv'):
-                        self.data = pd.read_csv(data)
-                    elif data.endswith('.xlsx'):
-                        self.data = pd.read_excel(data)
-                    self.data_path = data
+                assert os.path.isfile(data), "\n Invalid path to Data"
+                self.data_path = data
+                if data.endswith('.csv'):
+                    self.data = pd.read_csv(data)
+                elif data.endswith('.xlsx'):
+                    self.data = pd.read_excel(data)
                 elif data.endswith('.pkl'):
                     assert os.path.isfile(data), "\n Invalid path to Data"
                     self.data = pd.read_pickle(data)
-                    self.data_path = data
                 else:
                     raise ValueError("Unsupported file format. Supported formats: .csv, .xlsx, .pkl")
             except:

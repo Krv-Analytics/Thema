@@ -21,7 +21,7 @@ class pGen:
      TODO: Update With Proper Doc String
     """
     
-    def __init__(self, data, projector: str="UMAP", verbose:bool=True, id:int=None, **kwargs):
+    def __init__(self, data, projector: str="UMAP", verbose:bool=True, clean_id:int=None, **kwargs):
         """TODO: Update with Proper Doc String"""
         
         if projector == "UMAP" and not kwargs:  
@@ -34,9 +34,9 @@ class pGen:
         self.verbose = verbose
 
         if id is None: 
-            self.id = ""
+            self.clean_id = ""
         else: 
-            self.id = str(id)
+            self.clean_id = str(clean_id)
 
         # Setting data member 
         if type(data) == str:
@@ -156,7 +156,7 @@ class pGen:
     def dump(self, out_dir, id=None): 
         """TODO: Update with Proper Doc String"""
 
-        id = self.id + str(id)
+        id = self.clean_id + "-" + str(id)
         try:       
             if not os.path.isdir(out_dir):
                 os.makedirs(out_dir)

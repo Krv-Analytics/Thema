@@ -8,15 +8,24 @@ import pickle
 import pandas as pd 
 
 
-def create_temp_yaml(data:str,runName="test", 
+def create_temp_yaml(data:str,
+                     out_dir:str,
+                     runName="test", 
                      cleaning={ 
                         "scaler": "standard",
                         "encoding": "one_hot",
                         "num_samples": 1,
                         "dropColumns": None,
                         "imputeColumns": [],
-                        "impute_methods": []
-                        }):
+                        "impute_methods": []},
+                        projecting={
+                            "projector": "UMAP",
+                            "umap":{"nn": [2],
+                                    "minDists": [0.1, 0.2],
+                                    "seed": [30, 31]
+                                    }
+                        }
+                        ):
     """
     Creates a temporary YAML file containing the provided input parameters.
 
@@ -24,6 +33,7 @@ def create_temp_yaml(data:str,runName="test",
         Run_Name (str): The name of the run.
         data (str): The path to the data file.
         cleaning (dict): Dictionary containing cleaning configuration.
+        projecting (dict): Dictionary containing projecting configuration.
 
     Returns:
         str: The path to the temporary YAML file.
@@ -32,7 +42,8 @@ def create_temp_yaml(data:str,runName="test",
     parameters = {
         "runName": runName,
         "data": data,
-        "cleaning": cleaning
+        "cleaning": cleaning,
+        "projecting": projecting
     }
 
     # Create a temporary file
@@ -74,7 +85,6 @@ def create_temp_data_file(data, file_format):
         # Get the file path
         temp_file_path = temp_file.name
     return temp_file_path
-
 
 
 test_data_0 = pd.DataFrame({
@@ -137,3 +147,5 @@ test_cleanData_0 = pd.DataFrame({
 
 test_dict_1 = {"data": test_cleanData_0,
                "description": "Nonsense"}
+
+
