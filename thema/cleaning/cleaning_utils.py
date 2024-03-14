@@ -62,6 +62,8 @@ def clean_data_filename(data_name, scaler=None, encoding=None, id=None):
 def random_sampling(column):
     """
     Function to fill in missing data based on sampling from the normal distribution of the column
+
+    TODO: Include a seed parameter to fix samples 
     """
     column = column.copy()
     numeric_column = column.dropna()

@@ -137,3 +137,8 @@ class pSpace():
         my_projector = pGen(data=clean_data_file, projector="PCA",clean_id=clean_id, dimensions=dimensions, seed=seed, verbose=False)
         my_projector.fit() 
         my_projector.dump(self.out_dir)
+    
+
+
+    def write_params_to_yaml(self, yaml_path): 
+        pass 

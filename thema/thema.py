@@ -31,6 +31,18 @@ class Thema:
         self.graph_files = None 
 
 
+    def get_iSpace_object(self, example_yaml=None): 
+        # instantiates with yaml file oarameters ad returns a an iSpace object 
+        pass
+    
+    def get_pSpace_object(self, example_yaml=None): 
+        # instantiatnes with yaml parameters a pSpace object
+        pass
+
+    def get_Selection_object(self, example_yaml=None):
+        # instantiates selectin yaml with a blah blah 
+        pass 
+
     def fit_iSpace(self):
         """
         TODO: Update Doc String 
@@ -70,25 +82,7 @@ class Thema:
             assert os.listdir(clean_outdir) > 0, "You do not have any clean data. Run .fit_iSpace() to generate some."
         
         
-        projection_outdir = os.path.join(self.params.out_dir, self.params.runName + "/projections/")
-        if os.path.isdir(projection_outdir):
-            assert os.listdir(projection_outdir) == 0, "Your projection data directory is not empty. Please clean it with .sweep_pSpace()" 
-        else: 
-            os.mkdir(projection_outdir)
-
-        id = 0
-        processes = []
-        for clean_id, clean_file in enumerate(os.listdir(clean_outdir)):
-            if self.params.projecting.projector == "UMAP":
-                for n in self.params.projecting.nn: 
-                    for minDist in self.params.projecting.minDists:
-                        cmd = (pGen, clean_file, "UMAP", False, clean_id, )
-                    
-
-            elif self.params.projecting.projector == "TSNE":
-                pass 
-            elif self.params.projecting.projector == "PCA":
-                pass 
+        # Instantiates pSpace and fits it 
     
     
 
@@ -96,5 +90,15 @@ class Thema:
         pass 
 
 
-        
+    def fit_gSpace(self): 
+        # Create and collapse 
+        pass 
 
+    def sweep_gSpace(self): 
+        pass 
+    
+
+    def investigate_model(self, model_id): 
+        
+        # Instantiates an (old) thema object
+        pass 

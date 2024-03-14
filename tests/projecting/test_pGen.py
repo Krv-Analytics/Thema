@@ -341,5 +341,9 @@ class Test_pGen:
             assert y["description"]["dimensions"] == x.dimensions 
             assert  y["description"]["seed"] == x.seed 
             assert y["description"]["clean"] == temp_file 
+        
+
+    def test_determinism(self): 
+        pass 
 
     

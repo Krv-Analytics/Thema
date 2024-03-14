@@ -1,7 +1,8 @@
-
+# File: thema/fitting/gSpace.py
+# Lasted Updated: 03-
 import os
 from omegaconf import OmegaConf
-from ..utils import log_error, function_scheduler
+from ..utils import function_scheduler
 
 
 class gSpace: 
@@ -160,3 +161,26 @@ class gSpace:
                     matching_files.append(file)
             # If no matching file is found, return None
         return matching_files
+
+
+
+
+    def collapse(self, method="curvature"):
+
+        # method needs to by supprted by jgraph 
+        # compares values and get a pairwise distance over gSpace (creates a metric space)
+        # cluster based on differences (clustering method???)
+        # choose a representative (at random...)
+
+        pass 
+        
+    def summarize_graph_clustering(self):
+        # return a dictionary of the clusters and their corresponding graph members {"cluser0": [graph_1.pkl, ..., ], ...}
+        pass 
+
+
+    def get_representative(self, cluster=None, id=None): 
+        # returns a randomly selected graph from cluster 
+
+        # from your rep, you get the id. You can also always just get the id itself 
+        pass 

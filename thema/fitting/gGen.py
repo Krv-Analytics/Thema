@@ -62,7 +62,12 @@ class gGen:
         """
         Fit your Graph Model
         """
+        # Fit based on gen method 
+        # instantiate jgraph based on gen methods output 
+        # end of fit is containing a self.jgraph (and corresponding members to gen method ie nodes dictionary)
+        
 
+        
         if self.gen_method == "jmap":
             # HDBSCAN
             min_cluster_size, max_cluster_size = self.hdbscan_params
@@ -162,3 +167,4 @@ class gGen:
             print(
                 "\n\n -------------------------------------------------------------------------------------- "
             )
+            
