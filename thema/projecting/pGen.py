@@ -21,7 +21,7 @@ class pGen:
      TODO: Update With Proper Doc String
     """
     
-    def __init__(self, data, projector="UMAP", verbose=True, **kwargs):
+    def __init__(self, data, projector: str="UMAP", verbose:bool=True, id:int=None, **kwargs):
         """TODO: Update with Proper Doc String"""
         
         if projector == "UMAP" and not kwargs:  
@@ -32,6 +32,12 @@ class pGen:
                 'seed': 42
             }
         self.verbose = verbose
+
+        if id is None: 
+            self.id = ""
+        else: 
+            self.id = str(id)
+
         # Setting data member 
         if type(data) == str:
             try:
@@ -116,88 +122,98 @@ class pGen:
             )
 
             self.projection = umap.fit_transform(data)
-            self.results = {"projection": self.projection, "description": [self.projector, self.nn, self.minDist, self.dimensions, self.seed, self.data_path]}
+            self.results = {"projection": self.projection, "description": {"projector": self.projector, 
+                                                                           "nn": self.nn, 
+                                                                           "minDist": self.minDist,
+                                                                            "dimensions": self.dimensions, 
+                                                                            "seed": self.seed, 
+                                                                            "clean": self.data_path}}
 
         # Fitting TSNE 
         elif self.projector == "TSNE":
             tsne = TSNE(n_components=self.dimensions, random_state=self.seed, perplexity=self.perplexity)
             self.projection = tsne.fit_transform(data)
-            self.results = {"projection": self.projection, "description": [self.projector, self.perplexity, self.seed, self.data_path]}
+            self.results = {"projection": self.projection, "description": {"projector": self.projector,
+                                                                           "perplexity": self.perplexity, 
+                                                                           "dimensions": self.dimensions,
+                                                                           "seed": self.seed, 
+                                                                           "clean": self.data_path}}
 
         # Fitting PCA 
         elif self.projector == "PCA":
-            pca = PCA(n_components=self.params.projector_dimension, random_state=self.params.projector_random_seed)
+            pca = PCA(n_components=self.dimensions, random_state=self.seed)
             self.projection = pca.fit_transform(self.data)
-            self.results = {"projection": self.projection, "description": [ self.projector, self.dimensions, self.seed, self.data_path]}
+            self.results = {"projection": self.projection, "description": {"projector": self.projector, 
+                                                                           "dimensions": self.dimensions, 
+                                                                           "seed": self.seed, 
+                                                                           "clean": self.data_path}}
         
         # Unknown Projector Case Handling 
         else: 
             raise ValueError("Only UMAP, TSNE, and PCA are currently supported. Please make sure you have set the correct projector.")
 
     
-    def dump(self, out_dir, impute_method=None, impute_id=None): 
+    def dump(self, out_dir, id=None): 
         """TODO: Update with Proper Doc String"""
-        try: 
-            # Create Directory if it does not exist       
+
+        id = self.id + str(id)
+        try:       
             if not os.path.isdir(out_dir):
-                os.makedirs(self.out_dir)
-            
-            if self.projector == "UMAP": 
-                output_file = projection_file_name(
-                    projector=self.projector,
-                    impute_method=impute_method,
-                    impute_id=impute_id,
-                    n=self.nn,
-                    d=self.mindist,
-                    dimensions=2,
-                    seed=self.params.projector_random_seed,
-                    )
-            if self.projector == "TSNE": 
-                output_file = projection_file_name(
-                    projector=self.params.projector,
-                    impute_method=impute_method,
-                    impute_id=impute_id,
-                    dimensions=2,
-                    perplexity = self.perplexity,
-                    seed=self.seed,
-                    )
-            
-            if self.projector == "PCA": 
-                output_file = projection_file_name(
-                    projector=self.params.projector,
-                    impute_method=impute_method,
-                    impute_id=impute_id,
-                    dimensions=2,
-                    seed=self.seed,
-                    )
-            
-            # Create absolute file path 
-            output_file = os.path.join(self.out_dir, output_file)
-            with open(output_file, "wb") as f:
-                pickle.dump(self.results, f)
-            
-            # Output Message
-            rel_outdir = "/".join(output_file.split("/")[-3:])
-            with open(output_file, "wb") as f:
-                pickle.dump(self.results, f)
-
-            if  self.verbose:
-                print("\n")
-                print(
-                "-------------------------------------------------------------------------------------- \n\n"
-                )
-
-                print(
-                    colored(f"SUCCESS: Completed Projection!", "green"),
-                    f"Written to {rel_outdir}",
-                )
-                print("\n")
-                print(
-                    "-------------------------------------------------------------------------------------- \n\n"
-                )
-
+                os.makedirs(out_dir)
         except Exception as e: 
             print(e)
+        
+        if self.projector == "UMAP": 
+            output_file = projection_file_name(
+                projector=self.projector,
+                id=id,
+                nn=self.nn,
+                minDist=self.minDist,
+                dimensions=2,
+                seed=self.seed,
+                )
+        if self.projector == "TSNE": 
+            output_file = projection_file_name(
+                projector=self.projector,
+                id=id,
+                dimensions=self.dimensions,
+                perplexity = self.perplexity,
+                seed=self.seed,
+                )
+        
+        if self.projector == "PCA": 
+            output_file = projection_file_name(
+                projector=self.projector,
+                id=id,
+                dimensions=self.dimensions,
+                seed=self.seed,
+                )
+        
+        # Create absolute file path 
+        output_file = os.path.join(out_dir, output_file)
+        with open(output_file, "wb") as f:
+            pickle.dump(self.results, f)
+        
+        # Output Message
+        rel_outdir = "/".join(output_file.split("/")[-3:])
+        with open(output_file, "wb") as f:
+            pickle.dump(self.results, f)
+
+        if  self.verbose:
+            print("\n")
+            print(
+            "-------------------------------------------------------------------------------------- \n\n"
+            )
+
+            print(
+                colored(f"SUCCESS: Completed Projection!", "green"),
+                f"Written to {rel_outdir}",
+            )
+            print("\n")
+            print(
+                "-------------------------------------------------------------------------------------- \n\n"
+            )
+
 
         
 

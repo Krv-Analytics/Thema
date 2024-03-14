@@ -8,7 +8,7 @@ import tempfile
 import pickle
 from pandas.testing import assert_frame_equal
 import numpy as np
-from thema import cleaning as c 
+from thema.cleaning import iSpace 
 from tests import test_utils as ut 
 
 
@@ -19,20 +19,20 @@ class Test_iSpace:
 
     def test_init_empty(self):
         with pytest.raises(ValueError):
-            c.iSpace()
+            iSpace()
 
     def test_init_missingYamlFile(self):
         with pytest.raises(AssertionError):
-            c.iSpace(YAML_PATH="../a/very/junk/file")
+            iSpace(YAML_PATH="../a/very/junk/file")
 
     def test_init_incorrectYamlFile(self):
             temp_file_path = ut.create_temp_data_file(ut.test_data_0, 'pkl') 
             with pytest.raises(ValueError):
-                c.iSpace(YAML_PATH=temp_file_path)
+                iSpace(YAML_PATH=temp_file_path)
     
     
     def test_init_defaults(self):
-        my_iSpace = c.iSpace(data=ut.test_data_0)
+        my_iSpace = iSpace(data=ut.test_data_0)
         
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -46,7 +46,7 @@ class Test_iSpace:
     
     def test_init_dataPath_pkl(self): 
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "pkl")
-        my_iSpace = c.iSpace(data=temp_file_path)
+        my_iSpace = iSpace(data=temp_file_path)
         
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -62,7 +62,7 @@ class Test_iSpace:
         print(temp_file_path)
         temp_yaml_path = ut.create_temp_yaml(data=temp_file_path)
 
-        my_iSpace = c.iSpace(YAML_PATH=temp_yaml_path)
+        my_iSpace = iSpace(YAML_PATH=temp_yaml_path)
 
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -76,7 +76,7 @@ class Test_iSpace:
 
     def test_init_dataPath_csv(self): 
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "csv")
-        my_iSpace = c.iSpace(data=temp_file_path)
+        my_iSpace = iSpace(data=temp_file_path)
 
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -92,7 +92,7 @@ class Test_iSpace:
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "csv")
         temp_yaml_path = ut.create_temp_yaml(data=temp_file_path)
 
-        my_iSpace = c.iSpace(YAML_PATH=temp_yaml_path)
+        my_iSpace = iSpace(YAML_PATH=temp_yaml_path)
 
 
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
@@ -106,7 +106,7 @@ class Test_iSpace:
 
     def test_init_dataPath_xlsx(self): 
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "xlsx")
-        my_iSpace = c.iSpace(data=temp_file_path)
+        my_iSpace = iSpace(data=temp_file_path)
 
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -122,7 +122,7 @@ class Test_iSpace:
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "xlsx")
         temp_yaml_path = ut.create_temp_yaml(data=temp_file_path)
 
-        my_iSpace = c.iSpace(YAML_PATH=temp_yaml_path)
+        my_iSpace = iSpace(YAML_PATH=temp_yaml_path)
 
         assert_frame_equal(my_iSpace.data, ut.test_data_0)
         assert my_iSpace.scaler == "standard"
@@ -136,15 +136,15 @@ class Test_iSpace:
 
     def test_init_scaler(self):
         with pytest.raises(AssertionError):
-            c.iSpace(data=ut.test_data_0, scaler="a good one") 
+            iSpace(data=ut.test_data_0, scaler="a good one") 
 
     def test_init_encoding(self):
         with pytest.raises(AssertionError):
-            c.iSpace(data=ut.test_data_0, encoding="a better one") 
+            iSpace(data=ut.test_data_0, encoding="a better one") 
 
-        x = c.iSpace(data=ut.test_data_0, encoding="one_hot")
-        y = c.iSpace(data=ut.test_data_0, encoding="integer")
-        z = c.iSpace(data=ut.test_data_0, encoding="hash")
+        x = iSpace(data=ut.test_data_0, encoding="one_hot")
+        y = iSpace(data=ut.test_data_0, encoding="integer")
+        z = iSpace(data=ut.test_data_0, encoding="hash")
 
         assert x.encoding == "one_hot"
         assert y.encoding == "integer"
@@ -153,16 +153,16 @@ class Test_iSpace:
 
     def test_init_dropColumns(self):
         with pytest.raises(AssertionError):
-            c.iSpace(data=ut.test_data_0, dropColumns="all") 
+            iSpace(data=ut.test_data_0, dropColumns="all") 
     
-        my_iSpace2= c.iSpace(data=ut.test_data_0, dropColumns=['A'])
+        my_iSpace2= iSpace(data=ut.test_data_0, dropColumns=['A'])
         assert my_iSpace2.dropColumns == ['A']
 
     def test_init_imputeColumns(self): 
-        w = c.iSpace(data=ut.test_data_0, imputeColumns="ABCs")
-        x = c.iSpace(data=ut.test_data_0, imputeColumns="all")
-        y = c.iSpace(data=ut.test_data_0, imputeColumns="None")
-        z = c.iSpace(data=ut.test_data_0, imputeColumns=["A"])
+        w = iSpace(data=ut.test_data_0, imputeColumns="ABCs")
+        x = iSpace(data=ut.test_data_0, imputeColumns="all")
+        y = iSpace(data=ut.test_data_0, imputeColumns="None")
+        z = iSpace(data=ut.test_data_0, imputeColumns=["A"])
 
         assert w.imputeColumns == []
         assert x.imputeColumns == ['B']
@@ -172,12 +172,12 @@ class Test_iSpace:
 
     def test_init_imputeMethods(self):
         with pytest.raises(AssertionError):
-            c.iSpace(data=ut.test_data_0, imputeColumns=["A", "B"], imputeMethods=["mean", "median", "drop"])
+            iSpace(data=ut.test_data_0, imputeColumns=["A", "B"], imputeMethods=["mean", "median", "drop"])
 
-        w = c.iSpace(data=ut.test_data_0, imputeColumns="all", imputeMethods="wrong")
-        x = c.iSpace(data=ut.test_data_0, imputeColumns="all", imputeMethods="random_sampling")
-        y = c.iSpace(data=ut.test_data_0, imputeColumns=["A", "B"], imputeMethods=None)
-        z = c.iSpace(data=ut.test_data_0, imputeColumns=["A"], imputeMethods=["mean"])
+        w = iSpace(data=ut.test_data_0, imputeColumns="all", imputeMethods="wrong")
+        x = iSpace(data=ut.test_data_0, imputeColumns="all", imputeMethods="random_sampling")
+        y = iSpace(data=ut.test_data_0, imputeColumns=["A", "B"], imputeMethods=None)
+        z = iSpace(data=ut.test_data_0, imputeColumns=["A"], imputeMethods=["mean"])
 
         assert w.imputeMethods == ["drop"]
         assert x.imputeMethods == ["random_sampling"]
@@ -186,9 +186,9 @@ class Test_iSpace:
     
 
     def test_get_column_summary(self): 
-        x = c.iSpace(data=ut.test_data_0) 
-        y = c.iSpace(data=ut.test_data_1) 
-        z = c.iSpace(data=ut.test_data_2) 
+        x = iSpace(data=ut.test_data_0) 
+        y = iSpace(data=ut.test_data_1) 
+        z = iSpace(data=ut.test_data_2) 
         
         assert x.get_missingData_summary() == ut.test_data_0_missingData_summary
         assert y.get_missingData_summary() == ut.test_data_1_missingData_summary
@@ -196,18 +196,18 @@ class Test_iSpace:
 
 
     def test_get_na_as_list(self): 
-        x = c.iSpace(data=ut.test_data_0) 
-        y = c.iSpace(data=ut.test_data_1) 
-        z = c.iSpace(data=ut.test_data_2)
+        x = iSpace(data=ut.test_data_0) 
+        y = iSpace(data=ut.test_data_1) 
+        z = iSpace(data=ut.test_data_2)
 
         assert x.get_na_as_list() == ['B']
         assert y.get_na_as_list() == ['A', 'B', 'C', 'D', 'E', 'F']
         assert z.get_na_as_list() == ['Y', 'Z', 'V']
 
     def test_get_reccomended_sampling_method(self): 
-        x = c.iSpace(data=ut.test_data_0) 
-        y = c.iSpace(data=ut.test_data_1) 
-        z = c.iSpace(data=ut.test_data_2)
+        x = iSpace(data=ut.test_data_0) 
+        y = iSpace(data=ut.test_data_1) 
+        z = iSpace(data=ut.test_data_2)
 
         assert x.get_reccomended_sampling_method() == ['random_sampling']
         assert y.get_reccomended_sampling_method() == ['random_sampling', 'mode', 'mode', 'random_sampling', 'mode', 'mode']
@@ -215,18 +215,18 @@ class Test_iSpace:
 
     
     def test_fit(self): 
-        x = c.iSpace(data=ut.test_data_0) 
+        x = iSpace(data=ut.test_data_0) 
         x.fit()
         assert len(x.imputed_data.select_dtypes(include='object').columns) == 0
         assert x.imputed_data.isna().sum().sum() == 0
 
-        y = c.iSpace(data=ut.test_data_1, imputeColumns="all") 
+        y = iSpace(data=ut.test_data_1, imputeColumns="all") 
         y.imputeMethods = y.get_reccomended_sampling_method()
         y.fit()
         assert len(y.imputed_data.select_dtypes(include='object').columns) == 0
         assert y.imputed_data.isna().sum().sum() == 0
 
-        z = c.iSpace(data=ut.test_data_2, dropColumns=['Y', 'Z', 'V'])
+        z = iSpace(data=ut.test_data_2, dropColumns=['Y', 'Z', 'V'])
         z.fit() 
         assert len(z.imputed_data.select_dtypes(include='object').columns) == 0
         assert z.imputed_data.isna().sum().sum() == 0
@@ -235,7 +235,7 @@ class Test_iSpace:
     
     def test_save(self): 
 
-        x = c.iSpace(data=ut.test_data_0)
+        x = iSpace(data=ut.test_data_0)
         x.fit()
 
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -259,7 +259,7 @@ class Test_iSpace:
 
     def test_dump(self): 
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "pkl")
-        x = c.iSpace(data=temp_file_path)
+        x = iSpace(data=temp_file_path)
         x.fit() 
         with tempfile.TemporaryDirectory() as temp_dir:
             test_id = 123
@@ -287,7 +287,7 @@ class Test_iSpace:
 
     def test_fit_space(self): 
         temp_file_path = ut.create_temp_data_file(ut.test_data_0, "pkl")
-        x = c.iSpace(data=temp_file_path)
+        x = iSpace(data=temp_file_path)
 
         numSamples = np.random.randint(1, 51)
         with tempfile.TemporaryDirectory() as temp_dir:

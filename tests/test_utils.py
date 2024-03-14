@@ -4,6 +4,7 @@
 
 import yaml 
 import tempfile
+import pickle
 import pandas as pd 
 
 
@@ -61,7 +62,11 @@ def create_temp_data_file(data, file_format):
     with tempfile.NamedTemporaryFile(suffix='.' + file_format, delete=False) as temp_file:
         # Save the DataFrame into the temporary file based on the specified format
         if file_format == 'pkl':
-            data.to_pickle(temp_file.name)
+            if isinstance(data, pd.DataFrame):
+                data.to_pickle(temp_file.name)
+            else: 
+                with open(temp_file.name, 'wb') as f:
+                    pickle.dump(data, f)
         elif file_format == 'csv':
             data.to_csv(temp_file.name, index=False)
         elif file_format == 'xlsx':
@@ -127,3 +132,8 @@ test_cleanData_0 = pd.DataFrame({
     'OH_C_a': [0.707107, -1.414214, 0.707107],
     'OH_C_c': [-0.707107, 1.414214, -0.707107]
 })
+
+
+
+test_dict_1 = {"data": test_cleanData_0,
+               "description": "Nonsense"}

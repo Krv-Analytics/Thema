@@ -1,11 +1,10 @@
 # File: src/projecting/projection_utils.py 
-# Last Update: 03-04-24
+# Last Update: 03-13-24
 # Updated by: SW 
 
 def projection_file_name(
     projector,
-    impute_method=None,
-    impute_id=None,
+    id=None,
     **kwargs
 ):
     """
@@ -26,12 +25,11 @@ def projection_file_name(
     """
     if projector == "UMAP":
         
-        output_file = f'{projector}_{kwargs["dimensions"]}D_Nbors{kwargs["nn"]}_minDist_{kwargs["minDist"]}_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
+        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["nn"]}nn_{kwargs["minDist"]}minDist_{kwargs["seed"]}rs__{id}.pkl'
     
     if projector == "TSNE": 
-        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["perplexity"]}perp_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
+        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["perplexity"]}perp_{kwargs["seed"]}rs__{id}.pkl'
     
     if projector == "PCA":
-        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["seed"]}rs_{impute_method}_{impute_id}.pkl'
-    
+        output_file = f'{projector}_{kwargs["dimensions"]}D_{kwargs["seed"]}rs_{id}.pkl'
     return output_file

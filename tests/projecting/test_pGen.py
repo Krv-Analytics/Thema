@@ -31,7 +31,14 @@ class Test_pGen:
         assert x.nn == 4
         assert x.dimensions == 2 
         assert x.seed == 42 
-
+    def test_init_dict(self):
+        projector = "UMAP"
+        minDist = .1
+        nn = 4
+        dimensions = 2 
+        seed = 42
+        temp_file = ut.create_temp_data_file(ut.test_dict_1, 'pkl') 
+        x = pGen(data = temp_file, projector=projector, minDist=minDist,nn=nn, dimensions=dimensions, seed=seed)
     
     def test_init_UMAP_a(self): 
         projector = "UMAP"
@@ -158,3 +165,181 @@ class Test_pGen:
         assert x.seed == seed
         assert x.projection.shape[1] == dimensions 
         assert x.projection.shape[0] == x.data.shape[0]
+
+    
+    def test_fit_PCA(self): 
+        projector = "PCA"
+        dimensions = 2 
+        seed = 42 
+        x = pGen(data=ut.test_cleanData_0, projector=projector, dimensions=dimensions, seed=seed)
+        x.fit() 
+        assert_frame_equal(x.data,ut.test_cleanData_0)
+        assert x.projector == projector
+        assert x.data_path == -1 
+        assert x.dimensions == dimensions 
+        assert x.seed == seed
+        assert x.projection.shape[1] == dimensions 
+        assert x.projection.shape[0] == x.data.shape[0]
+
+
+
+    def test_save(self): 
+        projector = "UMAP"
+        minDist = .1
+        nn = 2
+        dimensions = 2 
+        seed = 42 
+        x = pGen(data=ut.test_cleanData_0, projector=projector, minDist=minDist,nn=nn, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            x.save(temp_file.name)
+        
+        assert(os.path.exists(temp_file.name))  
+
+        
+        with open(temp_file.name, "rb") as f:
+            y = pickle.load(f)
+            
+        assert_frame_equal(x.data, y.data)
+        assert np.array_equal(x.projection, y.projection)
+        assert x.data_path == y.data_path 
+        assert x.projector == y.projector
+        assert x.nn == y.nn
+        assert x.minDist == y.minDist
+
+    
+    def test_dump_UMAP_a(self): 
+        projector = "UMAP"
+        minDist = .1
+        nn = 2
+        dimensions = 2 
+        seed = 42 
+        x = pGen(data=ut.test_cleanData_0, id=949, projector=projector, minDist=minDist,nn=nn, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "UMAP_2D_2nn_0.1minDist_42rs__949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["nn"] == x.nn 
+            assert y["description"]["minDist"] == x.minDist 
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+    
+
+    def test_dump_UMAP_b(self): 
+        projector = "UMAP"
+        minDist = .1
+        nn = 2
+        dimensions = 2 
+        seed = 42 
+        temp_file = ut.create_temp_data_file(ut.test_cleanData_0, 'pkl')
+        x = pGen(data=temp_file, id=949, projector=projector, minDist=minDist,nn=nn, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "UMAP_2D_2nn_0.1minDist_42rs__949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["nn"] == x.nn 
+            assert y["description"]["minDist"] == x.minDist 
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+            assert y["description"]["clean"] == temp_file 
+    
+
+    def test_dump_TSNE_a(self): 
+        projector = "TSNE"
+        perplexity = 2
+        dimensions = 2 
+        seed = 42 
+        x = pGen(data=ut.test_cleanData_0, id=949, projector=projector, perplexity=perplexity, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "TSNE_2D_2perp_42rs__949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["perplexity"] == x.perplexity
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+    
+    def test_dump_TSNE_b(self): 
+        projector = "TSNE"
+        perplexity = 2
+        dimensions = 2 
+        seed = 42 
+        temp_file = ut.create_temp_data_file(ut.test_cleanData_0, 'pkl')
+        x = pGen(data=temp_file, id=949, projector=projector, perplexity=perplexity, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "TSNE_2D_2perp_42rs__949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["perplexity"] == x.perplexity
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+            assert y["description"]["clean"] == temp_file 
+
+    def test_dump_PCA_a(self): 
+        projector = "PCA"
+        dimensions = 2 
+        seed = 42 
+        x = pGen(data=ut.test_cleanData_0, id=949, projector=projector, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "PCA_2D_42rs_949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+
+    def test_dump_PCA_b(self): 
+        projector = "PCA"
+        dimensions = 2 
+        seed = 42 
+        temp_file = ut.create_temp_data_file(ut.test_cleanData_0, 'pkl')
+        x = pGen(data=temp_file, id=949, projector=projector, dimensions=dimensions, seed=seed)
+        x.fit()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_id = 123
+            x.dump(temp_dir, id=test_id)
+            assert len(os.listdir(temp_dir)) > 0
+
+            with open(os.path.join(temp_dir, "PCA_2D_42rs_949123.pkl"), "rb") as f:
+                y = pickle.load(f)
+
+            assert np.array_equal(y["projection"], x.projection) 
+            assert y["description"]["projector"] == x.projector 
+            assert y["description"]["dimensions"] == x.dimensions 
+            assert  y["description"]["seed"] == x.seed 
+            assert y["description"]["clean"] == temp_file 
+
+    
