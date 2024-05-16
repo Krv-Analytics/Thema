@@ -1,6 +1,6 @@
 # File: core.py
-# Last Updated: 03-30-24
-# Updated By: SW
+# Last Updated: 05/15/24
+# Updated By: JW
 
 
 import pickle
