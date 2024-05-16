@@ -329,3 +329,55 @@ class Nerve:
             if overlap > 0:
                 result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
         return result
+
+
+########################################################################################
+
+# Kepler Mapper clustering utility functions
+
+########################################################################################
+
+
+def get_clusterer(clusterer: list):
+    """
+    Converts a list configuration to an initialized clusterer.
+
+    Parameters
+    ----------
+    clusterer: list
+        A length 2 list containing in position 0 the name of the clusterer, and
+        in position 1 the parameters to configure it.
+        *Example*
+        clusterer = ["HDBSCAN", {"minDist":0.1}]
+
+    Returns
+    -------
+    An initialized clustering object
+    """
+    if clusterer[0] == "HDBSCAN":
+        return HDBSCAN(**clusterer[1])
+
+    elif clusterer[0] == "DBSCAN":
+        return DBSCAN(**clusterer[1])
+
+    else:
+        raise ValueError("Only HDBSCAN and DBSCAN supported at this time.")
+
+
+def convert_keys_to_alphabet(dictionary):
+    """Simple Helper function to make kmapper node labels more readable."""
+    base = 26  # Number of letters in the alphabet
+    new_dict = {}
+
+    keys = list(dictionary.keys())
+    for i, key in enumerate(keys):
+        # Calculate the position of each letter in the new key
+        position = i
+        new_key = ""
+        while position >= 0:
+            new_key = chr(ord("a") + (position % base)) + new_key
+            position = (position // base) - 1
+
+        new_dict[new_key] = dictionary[key]
+
+    return new_dict
