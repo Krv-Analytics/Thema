@@ -429,12 +429,11 @@ class Telescope:
         ## TODO --> color TARGETS differently (red:high, blue:low for example)
         # Also add interpolation between landmark colors for larger Sankeys
 
-        colors = px.colors.sequential.RdBu_r[: len(nodes)]
-        if len(nodes) != len(colors):
-            raise NotImplementedError(
-                "Your Score Function returns a Sankey Diagram that is too \
-                large for our color palette! Continuous palette coming soon."
-            )
+        num_nodes = len(nodes)
+        colors = px.colors.sample_colorscale(
+            px.colors.sequential.RdBu_r, [n / (num_nodes - 1) for n in range(num_nodes)]
+        )
+
         link_colors = _reduce_colorOpacity(colors, opacity=0.3)
 
         # Create Sankey diagram
