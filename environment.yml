@@ -1,0 +1,33 @@
+name: thema-py3.11
+
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - numpy=1.24.2
+  - networkx=3.0
+  - pandas=1.5.3
+  - jupyter=1.0.0
+  - omegaconf=2.3.0
+  - category_encoders=2.6.3
+  - tqdm=4.66.2
+  - umap-learn=0.5.5
+  - scikit-learn=1.4.1
+  - hdbscan=0.8.33
+  - pot=0.9.3
+  - matplotlib=3.8.3
+  - plotly=5.19.0
+  - gudhi=3.9.0
+  - invoke=2.2.0
+  - black
+  - pytest
+  - openpyxl
+  - pyyaml
+  - seaborn
+  - pip
+  - pip:
+    - termcolor
+    - kmapper==2.0.1
+    - grakel==0.1.10
