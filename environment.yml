@@ -31,3 +31,4 @@ dependencies:
     - termcolor
     - kmapper==2.0.1
     - grakel==0.1.10
+    - invoke==2.2.0

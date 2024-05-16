@@ -53,16 +53,3 @@ Galaxy:
     clusterer:
       - [HDBSCAN, {min_cluster_size: 5}] 
       - [HDBSCAN, {min_cluster_size: 7}]
-  gudhi:
-    N: 
-      - 100 
-      - 150 
-    beta: 
-      - 0.0
-      - 0.3 
-    C: 
-      - 10.0
-      - 12.4
-    clusterer:
-      - [HDBSCAN, {min_cluster_size: 2}] 
-      - [HDBSCAN, {min_cluster_size: 3}]
