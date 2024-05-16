@@ -15,7 +15,26 @@ from thema.multiverse import Galaxy
 
 
 def run_galaxy():
+    """
+    Run the Galaxy simulation.
+
+    This function creates and runs a simulation of a Universe
+    using the parameters specified in `params.yaml`. It is called when using
+    `invoke u`
+
+    NOTE: Your `params.yaml` file must be in the root directory to
+    work for invoke commands.
+
+    Examples:
+    >>> run_galaxy()
+    -------------------------------------------------------------------------------------------------
+
+     Successfully created the Universe! (and unlocked its secrets).
+
+    -------------------------------------------------------------------------------------------------
+    """
     path_to_root = ut.get_root()
+
     path_to_yaml = os.path.join(path_to_root, "params.yaml")
     try:
         with open(path_to_yaml, "r") as f:

@@ -1,26 +1,46 @@
 # File: scripts/sweeper.py
-# Last Update: 04-19-24
-# Updated By: SW
+# Last Update: 05/15/24
+# Updated By: JW
 
 import os
-import sys
 import shutil
-import utils as ut
+import sys
 
+import utils as ut
 from omegaconf import OmegaConf
 
 
 def get_path_to_data():
-    """Returns path outDir as specified in params.yaml"""
+    """
+    Returns
+    -------
+    str
+        The path to the data directory specified in params.yaml.
+    """
+
     path_to_root = ut.get_root()
     path_to_yaml = os.path.join(path_to_root, "params.yaml")
     with open(path_to_yaml, "r") as f:
         yamlParams = OmegaConf.load(f)
     return os.path.join(yamlParams.outDir, yamlParams.runName)
-    re
 
 
 def sweep():
+    """
+    Remove the directory associated with the current run in `params.yaml`.
+
+    This function deletes the directory specified by the path returned
+    by the `get_path_to_data()` function.
+    If the directory exists, it is recursively removed using
+    `shutil.rmtree()`. If an error occurs during the removal process,
+    an `OSError` is raised.
+
+    Raises
+    ------
+    OSError
+        If an error occurs during the removal process.
+    """
+
     broom = get_path_to_data()
     if os.path.exists(broom):
         try:
@@ -30,6 +50,21 @@ def sweep():
 
 
 def sweep_inner():
+    """
+    Remove the `clean` directory associated with the
+    current run in `params.yaml`.
+
+    This function deletes the directory specified by the path returned
+    by the `get_path_to_data()` function. If the directory exists, it is
+    recursively removed using `shutil.rmtree()`. If an error occurs during
+    the removal process, an `OSError` is raised.
+
+    Raises
+    ------
+    OSError
+        If an error occurs during the removal process.
+    """
+
     broom = os.path.join(get_path_to_data(), "clean")
     print(f"rm -r {broom}")
     if os.path.exists(broom):
@@ -40,6 +75,21 @@ def sweep_inner():
 
 
 def sweep_outer():
+    """
+    Remove the `projections` directory associated with the
+    current run in `params.yaml`.
+
+    This function deletes the directory specified by the path returned
+    by the `get_path_to_data()` function. If the directory exists, it is
+    recursively removed using `shutil.rmtree()`. If an error occurs during
+    the removal process, an `OSError` is raised.
+
+    Raises
+    ------
+    OSError
+        If an error occurs during the removal process.
+    """
+
     broom = os.path.join(get_path_to_data(), "projections")
     print(f"rm -r {broom}")
     if os.path.exists(broom):
@@ -50,6 +100,20 @@ def sweep_outer():
 
 
 def sweep_universe():
+    """
+    Remove the `models` directory associated with the
+    current run in `params.yaml`.
+
+    This function deletes the directory specified by the path returned
+    by the `get_path_to_data()` function. If the directory exists, it is
+    recursively removed using `shutil.rmtree()`. If an error occurs during
+    the removal process, an `OSError` is raised.
+
+    Raises
+    ------
+    OSError
+        If an error occurs during the removal process.
+    """
     broom = os.path.join(get_path_to_data(), "models")
     try:
         shutil.rmtree(broom)
