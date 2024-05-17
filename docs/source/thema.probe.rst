@@ -1,4 +1,4 @@
-thema.probe package
+THEMA's Probe Package
 ===================
 
 Submodules

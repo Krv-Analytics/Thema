@@ -3,19 +3,30 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Thema's documentation!
-=================================
+
+
+.. Thema documentation master file, created by
+
+.. module:: thema
+
+*******************
+Thema Documentation
+*******************
+
+**Date**: |today| **Version**: |version|
+
+Welcome to the documentation for the Thema package. This documentation provides a comprehensive guide on how to use the various modules and functionalities of Thema.
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    thema
-   modules
+   user_guide.rst
 
-Indices and tables
+References
 ==================
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
