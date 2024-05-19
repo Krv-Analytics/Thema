@@ -17,16 +17,16 @@ Thema Documentation
 
 Welcome to the documentation for the Thema package. This documentation provides a comprehensive guide on how to use the various modules and functionalities of Thema.
 
-
+Contents
+---------
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    thema
    user_guide.rst
 
 References
-==================
+---------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

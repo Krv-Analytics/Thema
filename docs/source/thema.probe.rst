@@ -1,4 +1,4 @@
-THEMA's Probe Package
+THEMA: Probe
 ===================
 
 Submodules
