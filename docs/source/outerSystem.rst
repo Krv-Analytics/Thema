@@ -1,40 +1,84 @@
-THEMA: Outer System
+Outer System
 ==========================
 
 Overview
 -----------------
-Thema's ``multiverse.system.outer`` submodule offers two key classes: **Moon** and **Planet**. These classes facilitate preprocessing of tabular data, easing the transition from raw datasets to cleaned, imputed, and ready-for-analysis dataframes.
 
-**Moon Class:** This class sits close to the original dataset, focusing on preprocessing steps crucial for downstream analysis. It streamlines data cleaning and aids in the creation of an *imputeData* dataframe, which is a formatted version of the data suitable for in-depth exploration. The Moon class supports standard sklearn.preprocessing operations such as scaling and encoding, with an emphasis on imputation methods for handling missing values.
+The ``thema.multiverse.system.outer`` module provides essential functionality for managing and exploring high-dimensional data through projection algorithms. At the core of this module is the ``COMET`` class, which serves as a base template for projection algorithms, enforcing a structured approach to data management and projection. This enables a universal procedure for generating projection objects.
 
-**Planet Class:** Operating within the inner system, the Planet class manages the transformation of raw tabular data into processed, scaled, encoded, and complete datasets. Its key function is handling datasets with missing values, utilizing a ``Moon`` *imputeData* dataframe using random sampling to fill in these gaps while exploring the distribution of possible missing values.
+The ``Oort`` class, a key component of the ``system.outer`` module, generates a space of projected representations of an original, high-dimensional dataset. While navigating this space of projections can be challenging, our tools facilitate easy exploration and interpretation of the data.
 
-Both classes are integral to Thema's data preprocessing capabilities, providing efficient solutions for common data cleaning and imputation tasks.
 
-Moon Class
+:ref:`Comet Class: <comet-class>`
+    A base class template for projection algorithms, enforcing structure on data management and projection.
+    
+:ref:`Projectiles: <projectiles>`
+    Support for creating ``Comet`` subclasses. Thema currently supports three projection methods:
+        - Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)
+        - T-distributed Stochastic Neighbor Embedding (t-SNE)
+        - Principle Component Analysis (PCA)
+
+:ref:`Oort Class: <oort-class>`
+    Generates a space of projected representations of high-dimensional datasets, aiding in data exploration.
+
+Usage
+^^^^^^^^^^^^^^^^^^
+
+- **Creating and Managing Projections:** Use ``Projectiles`` class to create and manage a universe of different unsupervised projections of your data.
+- **Unlocking the Multiverse of Representations** Use ``Oort`` to handle the space of multiple data projections
+
+
+Comet Base Class
 -----------------
+.. _comet-class:
 
-.. note::
-    ``thema.multiverse.system.inner.Moon`` handles data **preprocessing**, moving from raw, tabular datasets to cleaned, scaled, and encoded python-friendly formats.
-
-.. automodule:: thema.multiverse.system.inner.moon
+.. automodule:: thema.multiverse.system.outer.comet
    :members:
    :undoc-members:
    :show-inheritance:
 
-Planet Class
+Projectiles
 -----------------
-.. note::
-    ``thema.multiverse.system.inner.Planet`` handles data **transformation**, managing and exploring the distribution of possible missing values.
+.. _projectiles:
+Create and manage the universe of different unsupervised projections of your data. We have decided to support three standard dimensionality reduction methods:
 
-.. automodule:: thema.multiverse.system.inner.planet
+- Uniform Manifold Approximation and Projection for Dimension Reduction: `UMAP <https://umap-learn.readthedocs.io/en/latest/>`_
+- T-distributed Stochastic Neighbor Embedding: `t-SNE <https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#:~:text=t%2DSNE%20%5B1%5D%20is,and%20the%20high%2Ddimensional%20data.>`_
+- Principle Component Analysis: `PCA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html>`_
+
+.. hint::
+    - An interactive overview of the key differences between UMAP and t-SNE projections: `UMAP vs. t-SNE <https://pair-code.github.io/understanding-umap/#:~:text=UMAP%20vs%20t%2DSNE%2C%20revisited,structure%20in%20the%20final%20projection.>`_
+    
+
+UMAP
+^^^^^^^^^^^^^^^^^^
+.. automodule:: thema.multiverse.system.outer.projectiles.umapProj
    :members:
    :undoc-members:
    :show-inheritance:
 
-Inner System Utils
------------------
-.. automodule:: thema.multiverse.system.inner.inner_utils
+TSNE
+^^^^^^^^^^^^^^^^^^
+.. automodule:: thema.multiverse.system.outer.projectiles.tsneProj
    :members:
    :undoc-members:
    :show-inheritance:
+
+PCA
+^^^^^^^^^^^^^^^^^^
+.. automodule:: thema.multiverse.system.outer.projectiles.pcaProj
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Oort Class
+-----------------
+.. _oort-class:
+
+.. automodule:: thema.multiverse.system.outer.oort
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+

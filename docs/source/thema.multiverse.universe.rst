@@ -1,10 +1,28 @@
 THEMA: Universe
 ==========================
 
-Module contents
----------------
+Overview
+----------
+STUB
 
-.. automodule:: thema.multiverse.system.inner
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. code-block:: bash
+
+    thema.multiverse.universe
+        ├── galaxy.py
+        ├── geodesics.py
+        ├── star.py
+        ├── starGraph.py
+        ├── starSelectors.py
+        └── stars
+            └── jmapStar.py
+
+Module Contents
+----------
+.. toctree::
+   :maxdepth: 2
+
+   multiverse.stars
+   multiverse.galaxy
+   multiverse.geodesics
+
+

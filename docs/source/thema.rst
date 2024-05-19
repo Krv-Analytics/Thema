@@ -6,7 +6,8 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    thema.multiverse
-   thema.probe
+
+   .. TODO --> thema.probe
