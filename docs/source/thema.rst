@@ -9,5 +9,4 @@ Subpackages
    :maxdepth: 3
 
    thema.multiverse
-
-   .. TODO --> thema.probe
+   thema.probe
