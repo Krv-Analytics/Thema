@@ -15,4 +15,5 @@ params.yaml
 notebooks/
 .pytest_cache
 poetry.lock
-
+dist/
+docs/

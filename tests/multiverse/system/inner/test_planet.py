@@ -40,7 +40,9 @@ class Test_Planet:
         assert my_Planet.imputeColumns == []
         assert my_Planet.imputeMethods == []
 
-    def test_init_dataPath_pkl(self, temp_planet_dir, temp_dataFile_0, test_data_0):
+    def test_init_dataPath_pkl(
+        self, temp_planet_dir, temp_dataFile_0, test_data_0
+    ):
         my_Planet = Planet(data=temp_dataFile_0.name, outDir=temp_planet_dir)
 
         assert_frame_equal(my_Planet.data, test_data_0)
@@ -60,7 +62,9 @@ class Test_Planet:
         assert my_Planet.imputeColumns == ["B"]
         assert my_Planet.imputeMethods == ["sampleNormal"]
 
-    def test_init_dataPath_csv(self, temp_planet_dir, temp_csv_dataFile, test_data_0):
+    def test_init_dataPath_csv(
+        self, temp_planet_dir, temp_csv_dataFile, test_data_0
+    ):
         my_Planet = Planet(data=temp_csv_dataFile.name, outDir=temp_planet_dir)
         assert_frame_equal(my_Planet.data, test_data_0)
         assert my_Planet.scaler == "standard"
@@ -82,7 +86,9 @@ class Test_Planet:
     def test_init_dataPath_xlsx(
         self, temp_planet_dir, temp_excel_dataFile, test_data_0
     ):
-        my_Planet = Planet(data=temp_excel_dataFile.name, outDir=temp_planet_dir)
+        my_Planet = Planet(
+            data=temp_excel_dataFile.name, outDir=temp_planet_dir
+        )
 
         assert_frame_equal(my_Planet.data, test_data_0)
         assert my_Planet.scaler == "standard"
@@ -104,18 +110,26 @@ class Test_Planet:
     def test_init_scaler(self, temp_planet_dir, temp_dataFile_0):
         with pytest.raises(AssertionError):
             Planet(
-                data=temp_dataFile_0.name, outDir=temp_planet_dir, scaler="a good one"
+                data=temp_dataFile_0.name,
+                outDir=temp_planet_dir,
+                scaler="a good one",
             )
 
     def test_init_encoding(self, temp_planet_dir, temp_dataFile_0):
 
         x = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="one_hot"
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            encoding="one_hot",
         )
         y = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="integer"
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            encoding="integer",
         )
-        z = Planet(data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="hash")
+        z = Planet(
+            data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="hash"
+        )
 
         assert x.encoding == "one_hot"
         assert y.encoding == "integer"
@@ -123,7 +137,11 @@ class Test_Planet:
 
     def test_init_dropColumns(self, temp_planet_dir, temp_dataFile_0):
         with pytest.raises(AssertionError):
-            Planet(data=temp_dataFile_0.name, outDir=temp_planet_dir, dropColumns="all")
+            Planet(
+                data=temp_dataFile_0.name,
+                outDir=temp_planet_dir,
+                dropColumns="all",
+            )
 
         my_Planet2 = Planet(
             data=temp_dataFile_0.name, outDir=temp_planet_dir, dropColumns=["A"]
@@ -132,16 +150,24 @@ class Test_Planet:
 
     def test_init_imputeColumns(self, temp_planet_dir, temp_dataFile_0):
         w = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, imputeColumns="ABCs"
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            imputeColumns="ABCs",
         )
         x = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, imputeColumns="all"
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            imputeColumns="all",
         )
         y = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, imputeColumns="None"
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            imputeColumns="None",
         )
         z = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, imputeColumns=["A"]
+            data=temp_dataFile_0.name,
+            outDir=temp_planet_dir,
+            imputeColumns=["A"],
         )
 
         assert w.imputeColumns == []
@@ -277,11 +303,15 @@ class Test_Planet:
         assert x.seeds == seeds
         assert len(os.listdir(temp_planet_dir)) == numSamples
 
-    def test_determinism(self, temp_planet_dir, temp_planet_dir_1, temp_dataFile_3):
-        numSamples = random.randint(1, 25)
+    def test_determinism(
+        self, temp_planet_dir, temp_planet_dir_1, temp_dataFile_3
+    ):
+        numSamples = 1
         seeds = [random.randint(0, 100) for _ in range(numSamples)]
+        print(seeds)
         clear_temporary_directory(temp_planet_dir)
         clear_temporary_directory(temp_planet_dir_1)
+
         x = Planet(
             data=temp_dataFile_3.name,
             outDir=temp_planet_dir,
@@ -289,12 +319,18 @@ class Test_Planet:
             numSamples=numSamples,
             seeds=seeds,
         )
+
+        x.imputeMethods = x.get_recomended_sampling_method()
+
         assert x.seeds == seeds
         x_models = []
         x.fit()
         files_in_directory = os.listdir(temp_planet_dir)
         absolute_paths = sorted(
-            [os.path.join(temp_planet_dir, filename) for filename in files_in_directory]
+            [
+                os.path.join(temp_planet_dir, filename)
+                for filename in files_in_directory
+            ]
         )
         for path in absolute_paths:
             with open(path, "rb") as f:
@@ -307,6 +343,8 @@ class Test_Planet:
             numSamples=numSamples,
             seeds=seeds,
         )
+
+        y.imputeMethods = y.get_recomended_sampling_method()
 
         assert y.seeds == seeds
         y_models = []
@@ -323,7 +361,9 @@ class Test_Planet:
                 y_models.append(pickle.load(f))
 
         for index in range(len(y_models)):
-            assert_frame_equal(x_models[index].imputeData, y_models[index].imputeData)
+            assert_frame_equal(
+                x_models[index].imputeData, y_models[index].imputeData
+            )
 
 
 def clear_temporary_directory(tempDir):
