@@ -25,7 +25,11 @@ class Test_Moon:
         assert_frame_equal(x.data, test_data_0)
 
     def test_fit_pkl(self, temp_dataFile_0, test_data_0):
-        x = Moon(data=temp_dataFile_0.name)
+        x = Moon(
+            data=temp_dataFile_0.name,
+            imputeColumns=["A", "B"],
+            imputeMethods=["drop", "drop"],
+        )
         assert_frame_equal(x.data, test_data_0)
         x.fit()
         assert len(x.imputeData.select_dtypes(include="object").columns) == 0
@@ -44,6 +48,11 @@ class Test_Moon:
         x.fit()
         assert len(x.imputeData.select_dtypes(include="object").columns) == 0
         assert x.imputeData.isna().sum().sum() == 0
+
+    def test_dropColumns(self, temp_dataFile_0):
+        x = Moon(data=temp_dataFile_0.name, dropColumns=["A"])
+        x.fit()
+        assert "A" not in x.imputeData.columns
 
     def test_save(self, temp_dataFile_0):
         x = Moon(data=temp_dataFile_0.name)

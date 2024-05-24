@@ -3,6 +3,7 @@
 # Updated By: JW
 
 import pickle
+import warnings
 
 import category_encoders as ce
 import pandas as pd
@@ -136,22 +137,20 @@ class Moon(Core):
         self.imputeData = inner_utils.add_imputed_flags(
             self.data, self.imputeColumns
         )
-
-        self.dropColumns = [
-            col for col in self.dropColumns if col in self.data.columns
-        ]
-
         for index, column in enumerate(self.imputeColumns):
             impute_function = getattr(inner_utils, self.imputeMethods[index])
             self.imputeData[column] = impute_function(
                 self.data[column], self.seed
             )
 
+        self.dropColumns = [
+            col for col in self.dropColumns if col in self.data.columns
+        ]
         # Drop Columns
         if not self.dropColumns == []:
             self.imputeData = self.data.drop(columns=self.dropColumns)
 
-        # Drops unaccounted columns
+        # Drop Rows with Nans
         self.imputeData.dropna(axis=0, inplace=True)
 
         if type(self.encoding) == str:
