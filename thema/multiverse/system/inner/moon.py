@@ -3,6 +3,7 @@
 # Updated By: JW
 
 import pickle
+import warnings
 
 import category_encoders as ce
 import pandas as pd
@@ -14,7 +15,7 @@ from . import inner_utils
 
 class Moon(Core):
     """
-    Modify, Omit, Oscillate and Normalize.
+    The Moon: Modify, Omit, Oscillate and Normalize.
     ----------
 
     The Moon data class resides cosmically near to the original raw dataset.
@@ -132,28 +133,35 @@ class Moon(Core):
         >>> moon = Moon()
         >>> moon.fit()
         """
-        # Cleaning procedure
-        if not self.dropColumns == [] and all(
-            column in self.data.columns for column in self.dropColumns
-        ):
-            self.imputeData = self.data.drop(columns=self.dropColumns)
-        else:
-            self.imputeData = self.data
 
-        self.imputeData = inner_utils.add_imputed_flags(self.data, self.imputeColumns)
-
+        self.imputeData = inner_utils.add_imputed_flags(
+            self.data, self.imputeColumns
+        )
         for index, column in enumerate(self.imputeColumns):
             impute_function = getattr(inner_utils, self.imputeMethods[index])
-            self.imputeData[column] = impute_function(self.data[column], self.seed)
+            self.imputeData[column] = impute_function(
+                self.data[column], self.seed
+            )
 
-        # Drops unaccounted columns
-        self.imputeData.dropna(axis=1, inplace=True)
+        self.dropColumns = [
+            col for col in self.dropColumns if col in self.data.columns
+        ]
+        # Drop Columns
+        if not self.dropColumns == []:
+            self.imputeData = self.data.drop(columns=self.dropColumns)
+
+        # Drop Rows with Nans
+        self.imputeData.dropna(axis=0, inplace=True)
 
         if type(self.encoding) == str:
             self.encoding = [
                 self.encoding
                 for _ in range(
-                    len(self.imputeData.select_dtypes(include=["object"]).columns)
+                    len(
+                        self.imputeData.select_dtypes(
+                            include=["object"]
+                        ).columns
+                    )
                 )
             ]
 
@@ -180,8 +188,12 @@ class Moon(Core):
 
             elif encoding == "hash":
                 if self.imputeData[column].dtype == object:
-                    hashing_encoder = ce.HashingEncoder(cols=[column], n_components=10)
-                    self.imputeData = hashing_encoder.fit_transform(self.imputeData)
+                    hashing_encoder = ce.HashingEncoder(
+                        cols=[column], n_components=10
+                    )
+                    self.imputeData = hashing_encoder.fit_transform(
+                        self.imputeData
+                    )
 
             else:
                 pass

@@ -44,7 +44,9 @@ def generate_dataframe(num_rows=100, seed=42):
     return df
 
 
-_test_data_0 = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, None], "C": ["a", "b", "c"]})
+_test_data_0 = pd.DataFrame(
+    {"A": [1, 2, 3], "B": [4, 5, None], "C": ["a", "b", "c"]}
+)
 
 
 _test_data_1 = pd.DataFrame(
@@ -75,7 +77,6 @@ _test_data_3 = pd.DataFrame(
         "B": [None, 2, None, 4, None],
         "C": [6, None, 8, None, 10],
         "D": [None, 1.1, 2.0, None, 2.3],
-        "E": [11, 12, 13, 14, 15],
     }
 )
 
