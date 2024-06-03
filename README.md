@@ -1,9 +1,10 @@
-# THEMA 🔮 
-*By Krv Analytics.*
+# THEMA 🔮
+
+_By Krv Analytics._
 
 ---
 
-Welcome to **Thema**, our custom *Topological Hyperparameter Evaluation and Mapping Algorithm*!🌟
+Welcome to **Thema**, our custom _Topological Hyperparameter Evaluation and Mapping Algorithm_!🌟
 
 ---
 
@@ -14,30 +15,53 @@ Imagine navigating a landscape of endless possibilities, where each preprocessin
 Dive into the world of Thema and transform the way you explore and interpret your data. With Thema, the subject of your analysis is always the star of the show! 🌠🚀
 
 ---
+
 ## Installation
+
 To install the Thema software package, you can use pip, the Python package installer. Follow the steps below to install Thema:
 
 1. Open a terminal.
 
 2. Run the following command:
 
-```
+```bash
 pip install thema
 ```
-   
+
 This command will download and install the latest version of Thema from the Python Package Index (PyPI).
 
 Once the installation is complete, you can verify that Thema is installed correctly by running:
 
-```
+```bash
 pip show thema
 ```
 
 This will display information about the installed package, including its version and location. Now you're ready to start using Thema in your projects!
 
----
-## Usage
+You can also clone our repository by running:
 
+```bash
+git clone https://github.com/Krv-Analytics/Thema.git
+```
+
+This will give you access to our [invoke](https://www.pyinvoke.org/) scripts. Once you have `invoke` installed (`pip install invoke`) you can create a conda environment with:
+
+```bash
+cd Thema
+invoke condaenv
+```
+
+or if you prefer [poetry](https://python-poetry.org/):
+
+```
+poetry install
+```
+
+The details of these environments are in `environment.yml` and `pyproject.toml` respectively.
+
+---
+
+## Usage
 
 Welcome to the **Thema** usage tutorial! This guide will walk you through the process of using Thema to analyze your data, generate embeddings, and visualize the results. Follow the steps below to get started. See `params.yaml.sample` as a template for defining your own representation grid search. Once you've filled this out, follwow the steps below!
 
