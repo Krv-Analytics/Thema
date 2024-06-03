@@ -1,5 +1,5 @@
 # File: multiverse/system/inner/moon.py
-# Last Update: 05/15/24
+# Last Update: 06/02/24
 # Updated By: JW
 
 import pickle
@@ -195,17 +195,15 @@ class Moon(Core):
                         self.imputeData
                     )
 
-            else:
-                pass
-
         # Scaling
-        assert self.scaler in ["standard"], "Invalid Scaler"
-        if self.scaler == "standard":
-            scaler = StandardScaler()
-            self.imputeData = pd.DataFrame(
-                scaler.fit_transform(self.imputeData),
-                columns=list(self.imputeData.columns),
-            )
+        if self.scaler:
+            assert self.scaler in ["standard"], "Invalid Scaler"
+            if self.scaler == "standard":
+                scaler = StandardScaler()
+                self.imputeData = pd.DataFrame(
+                    scaler.fit_transform(self.imputeData),
+                    columns=list(self.imputeData.columns),
+                )
 
     def save(self, file_path):
         """

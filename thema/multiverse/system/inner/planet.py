@@ -1,5 +1,5 @@
 # File: /multiverse/system/inner/planet.py
-# Last Update: 05/15/24
+# Last Update: 06/02/24
 # Updated By: JW
 
 import os
@@ -277,7 +277,7 @@ class Planet(Core):
             except Exception as e:
                 print(e)
 
-        # HARD CODED SUPPORTED TYPED
+        # Supported imputation methods
         supported_imputeMethods = [
             "sampleNormal",
             "sampleCategorical",
@@ -286,6 +286,8 @@ class Planet(Core):
             "median",
             "mode",
         ]
+        # Supported Scalers
+        supported_scalers = ["standard"]
 
         self.scaler = scaler
         self.encoding = encoding
@@ -299,7 +301,11 @@ class Planet(Core):
         assert numSamples > 0
         assert len(seeds) == numSamples
 
-        assert self.scaler in ["standard"]
+        if self.scaler is not None:
+            if self.scaler not in supported_scalers:
+                raise NotImplementedError(
+                    f"We only support the following scalers: {supported_scalers} "
+                )
 
         if dropColumns is None or (
             type(dropColumns) == str and dropColumns.lower() == "none"
@@ -336,6 +342,7 @@ class Planet(Core):
 
         elif type(imputeMethods) == str:
             if not imputeMethods in supported_imputeMethods:
+                # TODO: Raise warning here
                 print("Invalid impute methods. Defaulting to 'drop'")
                 imputeMethods = "drop"
                 self.numSamples = 1
@@ -348,6 +355,7 @@ class Planet(Core):
             ), f"Lengh of imputeMethods: {len(imputeMethods)} must match length of imputeColumns: {len(self.imputeColumns)}"
             for index, method in enumerate(imputeMethods):
                 if not method in supported_imputeMethods:
+                    # TODO: Raise warning here
                     print("Invalid impute methods. Defaulting to 'drop'")
                     imputeMethods[index] = "drop"
             self.imputeMethods = imputeMethods
