@@ -108,7 +108,7 @@ class Test_Planet:
         assert my_Planet.imputeMethods == ["sampleNormal"]
 
     def test_init_scaler(self, temp_planet_dir, temp_dataFile_0):
-        with pytest.raises(AssertionError):
+        with pytest.raises(NotImplementedError):
             Planet(
                 data=temp_dataFile_0.name,
                 outDir=temp_planet_dir,

@@ -80,6 +80,9 @@ _test_data_3 = pd.DataFrame(
     }
 )
 
+
+_test_data_4 = generate_dataframe(seed=42)
+
 _test_data_0_missingData_summary = {
     "numericMissing": ["B"],
     "numericComplete": ["A"],

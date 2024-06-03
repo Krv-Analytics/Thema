@@ -1,12 +1,13 @@
 # File: tests/multiverse/system/inner/test_moon.py
-# Lasted Updated: 03-13-24
-# Updated By: SW
+# Lasted Updated: 06-02-24
+# Updated By: JW
 
 import os
 import pytest
 import pickle
 import random
 import tempfile
+import numpy as np
 from pandas.testing import assert_frame_equal
 from thema.multiverse.system.inner.moon import Moon
 
@@ -53,6 +54,31 @@ class Test_Moon:
         x = Moon(data=temp_dataFile_0.name, dropColumns=["A"])
         x.fit()
         assert "A" not in x.imputeData.columns
+
+    def test_scaler(self, temp_dataFile_4):
+        x = Moon(
+            data=temp_dataFile_4.name,
+            dropColumns=[
+                "Cat1",
+                "Cat2",
+                "Cat3",
+                "Cat4",
+                "Cat5",
+            ],
+            scaler=None,
+        )
+        assert x.scaler == None
+        x.fit()
+        for col in x.imputeData.columns:
+            assert x.imputeData[col].std() != 1
+
+        x.scaler = "standard"
+        x.fit()
+        assert x.scaler == "standard"
+
+        # Approximate Unit Variance
+        for col in x.imputeData.columns:
+            assert np.round(x.imputeData[col].var(), 1) == 1.0
 
     def test_save(self, temp_dataFile_0):
         x = Moon(data=temp_dataFile_0.name)

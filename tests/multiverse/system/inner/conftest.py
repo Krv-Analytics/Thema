@@ -1,6 +1,6 @@
 # File:tests/multiverse/system/inner/conftest.py
-# Last Updated: 04-04-24
-# Updated By: SW
+# Last Updated: 06/02/24
+# Updated By: JW
 
 import os
 import yaml
@@ -180,6 +180,14 @@ def temp_dataFile_2():
 def temp_dataFile_3():
     with tempfile.NamedTemporaryFile(suffix=".pkl") as temp_file:
         ut._test_data_3.to_pickle(temp_file.name)
+        yield temp_file
+    temp_file.close()
+
+
+@pytest.fixture
+def temp_dataFile_4():
+    with tempfile.NamedTemporaryFile(suffix=".pkl") as temp_file:
+        ut._test_data_4.to_pickle(temp_file.name)
         yield temp_file
     temp_file.close()
 
