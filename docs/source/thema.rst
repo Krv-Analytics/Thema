@@ -8,5 +8,5 @@ Subpackages
 .. toctree::
    :maxdepth: 3
 
-   thema.multiverse
-   thema.probe
+   multiverse/thema.multiverse
+   probe/thema.probe

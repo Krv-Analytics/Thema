@@ -28,8 +28,13 @@ extensions = [
     "nbsphinx",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    # 'sphinxcontrib.jupyter',  # Uncomment if using sphinxcontrib-jupyter
 ]
 
+autosectionlabel_prefix_document = True
 nbsphinx_execute = "always"
 nbsphinx_kernel_name = "python3"
 

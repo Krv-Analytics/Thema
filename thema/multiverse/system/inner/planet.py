@@ -316,9 +316,7 @@ class Planet(Core):
 
         elif imputeColumns == "all":
 
-            self.imputeColumns = self.data.columns[
-                self.data.isna().any()
-            ].tolist()
+            self.imputeColumns = self.data.columns[self.data.isna().any()].tolist()
 
         elif type(imputeColumns) == ListConfig or type(imputeColumns) == list:
             self.imputeColumns = imputeColumns
@@ -330,18 +328,14 @@ class Planet(Core):
             self.imputeColumns = []
 
         if imputeMethods is None or imputeMethods == "None":
-            self.imputeMethods = [
-                "drop" for _ in range(len(self.imputeColumns))
-            ]
+            self.imputeMethods = ["drop" for _ in range(len(self.imputeColumns))]
 
         elif type(imputeMethods) == str:
             if not imputeMethods in supported_imputeMethods:
                 print("Invalid impute methods. Defaulting to 'drop'")
                 imputeMethods = "drop"
                 self.numSamples = 1
-            self.imputeMethods = [
-                imputeMethods for _ in range(len(self.imputeColumns))
-            ]
+            self.imputeMethods = [imputeMethods for _ in range(len(self.imputeColumns))]
         else:
             assert len(imputeMethods) == len(
                 self.imputeColumns
@@ -351,6 +345,77 @@ class Planet(Core):
                     print("Invalid impute methods. Defaulting to 'drop'")
                     imputeMethods[index] = "drop"
             self.imputeMethods = imputeMethods
+
+    def _repr_html_(self):
+        """
+        Generate HTML representation of the Planet Class
+        """
+        html = """
+        <style>
+        .planet-table {
+            display: none; /* Hide the table by default */
+            font-family: Arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 600px; /* Set maximum width for the table */
+        }
+
+        .planet-table th {
+            background-color: #f2f2f2;
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .planet-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .planet-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .planet-emoticon {
+            font-size: 24px;
+            cursor: pointer; /* Add cursor pointer for clickable effect */
+            user-select: none; /* Disable text selection for the icon */
+        }
+
+        .planet-emoticon:hover {
+            color: #007bff; /* Change color on hover for visual feedback */
+        }
+        </style>
+        """
+
+        # Generate a unique ID for each instance of the Planet class
+        planet_id = id(self)
+
+        html += f"<h2><span class='planet-emoticon' onclick=\"toggleTable('planet-table-{planet_id}')\">🪐</span> thema.multiverse.Planet</h2>"
+        html += f"<table class='planet-table' id='planet-table-{planet_id}'>"
+        for attr, value in self.getParams().items():
+            html += "<tr><td class='planet-name'>{}</td><td>{}</td></tr>".format(
+                attr, value
+            )
+        html += "</table>"
+
+        # Add JavaScript to toggle table visibility
+        html += """
+        <script>
+        function toggleTable(id) {
+            var table = document.getElementById(id);
+            if (table.style.display === 'none') {
+                table.style.display = 'table';
+            } else {
+                table.style.display = 'none';
+            }
+        }
+        </script>
+        """
+
+        return html
 
     def get_missingData_summary(self) -> dict:
         """
@@ -541,9 +606,7 @@ class Planet(Core):
         )
         my_moon.fit()
 
-        filename_without_extension, extension = os.path.splitext(
-            self.get_data_path()
-        )
+        filename_without_extension, extension = os.path.splitext(self.get_data_path())
         data_name = filename_without_extension.split("/")[-1]
         file_name = clean_data_filename(
             data_name=data_name,
