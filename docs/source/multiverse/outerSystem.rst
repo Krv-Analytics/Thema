@@ -3,7 +3,6 @@
 Outer System
 ==========================
 
-
 The ``thema.multiverse.system.outer`` module provides essential functionality for managing and exploring high-dimensional data through projection algorithms. At the core of this module is the ``COMET`` class, which serves as a base template for projection algorithms, enforcing a structured approach to data management and projection. This enables a universal procedure for generating projection objects.
 
 The ``Oort`` class, a key component of the ``system.outer`` module, generates a space of projected representations of an original, high-dimensional dataset. While navigating this space of projections can be challenging, our tools facilitate easy exploration and interpretation of the data.
@@ -14,9 +13,9 @@ The ``Oort`` class, a key component of the ``system.outer`` module, generates a 
     
 :ref:`Projectiles: <projectiles>`
     Support for creating ``Comet`` subclasses. Thema currently supports three projection methods:
-        - Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)
-        - T-distributed Stochastic Neighbor Embedding (t-SNE)
-        - Principle Component Analysis (PCA)
+        - Uniform Manifold Approximation and Projection for Dimension Reduction (:ref:`UniformMAP`)
+        - T-distributed Stochastic Neighbor Embedding (:ref:`TSNE`)
+        - Principle Component Analysis (:ref:`principCA`)
 
 :ref:`Oort Class: <oort-class>`
     Generates a space of projected representations of high-dimensional datasets, aiding in data exploration.
@@ -27,19 +26,21 @@ Usage
 - **Creating and Managing Projections:** Use ``Projectiles`` class to create and manage a universe of different unsupervised projections of your data.
 - **Unlocking the Multiverse of Representations** Use ``Oort`` to handle the space of multiple data projections
 
+.. _comet-class:
 
 Comet Base Class
 -----------------
-.. _comet-class:
 
 .. automodule:: thema.multiverse.system.outer.comet
    :members:
    :undoc-members:
    :show-inheritance:
 
+
+.. _projectiles:
+
 Projectiles
 -----------------
-.. _projectiles:
 Create and manage the universe of different unsupervised projections of your data. We have decided to support three standard dimensionality reduction methods:
 
 - Uniform Manifold Approximation and Projection for Dimension Reduction: `UMAP <https://umap-learn.readthedocs.io/en/latest/>`_
@@ -49,7 +50,7 @@ Create and manage the universe of different unsupervised projections of your dat
 .. hint::
     - An interactive overview of the key differences between UMAP and t-SNE projections: `UMAP vs. t-SNE <https://pair-code.github.io/understanding-umap/#:~:text=UMAP%20vs%20t%2DSNE%2C%20revisited,structure%20in%20the%20final%20projection.>`_
     
-
+.. _UniformMAP:
 UMAP
 ^^^^^^^^^^^^^^^^^^
 .. automodule:: thema.multiverse.system.outer.projectiles.umapProj
@@ -57,13 +58,15 @@ UMAP
    :undoc-members:
    :show-inheritance:
 
-TSNE
+.. _TSNE:
+t-SNE
 ^^^^^^^^^^^^^^^^^^
 .. automodule:: thema.multiverse.system.outer.projectiles.tsneProj
    :members:
    :undoc-members:
    :show-inheritance:
 
+.. _principCA:
 PCA
 ^^^^^^^^^^^^^^^^^^
 .. automodule:: thema.multiverse.system.outer.projectiles.pcaProj
@@ -71,9 +74,11 @@ PCA
    :undoc-members:
    :show-inheritance:
 
+
+.. _oort-class:
+
 Oort Class
 -----------------
-.. _oort-class:
 
 .. automodule:: thema.multiverse.system.outer.oort
    :members:
