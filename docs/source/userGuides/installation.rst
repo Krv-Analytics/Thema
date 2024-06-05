@@ -22,6 +22,12 @@ Installing from PyPI
 .. note::
     You must have ``pip>=19.3`` to install from PyPI.
 
+Once installation is complete, you can verify that ``thema`` is installed correctly by running:
+
+.. code-block:: shell
+
+    pip show thema
+
 
 .. _install.source:
 
@@ -29,7 +35,18 @@ Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
 
 A detailed guide comming soon with complete instructions on building from the git source tree.
-See `Krv Analytics on GitHub <https://github.com/Krv-Analytics/Thema>` for more info. 
+See `Krv Analytics on GitHub <https://github.com/Krv-Analytics/Thema>`__ for more info. 
+
+
+.. _install.using:
+
+Using ``thema``
+~~~~~~~~~~~~~~~~~~~~~~
+Once installed, you can import `thema` using the following code:
+
+.. ipython:: python
+
+   import thema
 
 .. _install.version:
 

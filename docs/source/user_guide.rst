@@ -61,5 +61,5 @@ Guides
 
     userGuides/installation
     userGuides/preprocessing.ipynb
-    userGuides/testing
+    userGuides/embedding
     

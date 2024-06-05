@@ -1,8 +1,8 @@
+.. _outerSystem:
+
 Outer System
 ==========================
 
-Overview
------------------
 
 The ``thema.multiverse.system.outer`` module provides essential functionality for managing and exploring high-dimensional data through projection algorithms. At the core of this module is the ``COMET`` class, which serves as a base template for projection algorithms, enforcing a structured approach to data management and projection. This enables a universal procedure for generating projection objects.
 

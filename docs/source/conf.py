@@ -23,6 +23,7 @@ release = "1.0"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
+    "sphinx_design",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     "nbsphinx",
@@ -30,7 +31,6 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
-    "sphinx.ext.viewcode",
     # 'sphinxcontrib.jupyter',  # Uncomment if using sphinxcontrib-jupyter
 ]
 
@@ -55,3 +55,7 @@ html_theme = "furo"
 # html_theme = "sphinx_rtd_theme"
 
 html_static_path = ["_static"]
+
+html_css_files = [
+    "custom.css",  # your custom CSS file
+]

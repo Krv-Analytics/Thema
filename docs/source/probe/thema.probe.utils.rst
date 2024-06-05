@@ -1,31 +1,10 @@
 Probe Utils
 ==============
-STUB
+Utility funtionality to help with Probe functionality (to probe your data!)
 
-Overview
-----------------------
-STUB
+.. _dataUtils:
 
-Util Classes + Functionality
-----------------------
-
-thema.probe.observatory module
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: thema.probe.observatory
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-thema.probe.visual\_utils module
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: thema.probe.visual_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-thema.probe.data\_utils module
+thema.probe.data\_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: thema.probe.data_utils

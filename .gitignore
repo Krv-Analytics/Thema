@@ -2,7 +2,11 @@
 .env
 .vscode
 *__pycache__
+
+# Ignore .ipynb files except those used in documentation builds
 *.ipynb
+!docs/source/**/*.ipynb
+
 docs/.DS_Store
 outputs/
 data/
