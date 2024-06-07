@@ -12,7 +12,6 @@ outputs/
 data/
 *.ipynb_checkpoints
 *.DS_Store
-*.html
 .dvc/client_ID.json
 .dvc/config
 params.yaml
