@@ -4,14 +4,14 @@
     padding: 15px;
     margin: 10px;
     border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
     transition: box-shadow 0.3s ease;
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
     text-align: center;
 }
 
 .intro-card:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); */
 }
 
 .intro-card h3 {
@@ -21,7 +21,7 @@
 
 .intro-card p {
     font-size: 0.9em;
-    color: #666;
+    /* color: #666; */
 }
 
 button-link {
@@ -30,20 +30,20 @@ button-link {
     margin-top: 10px;
     border: none;
     border-radius: 3px;
-    background-color: #007bff;
-    color: #fff;
+    /* background-color: #007bff; */
+    /* color: #fff; */
     text-decoration: none;
     font-size: 0.9em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    /* transition: background-color 0.3s ease; */
 }
 
 button-link:hover {
-    background-color: #0056b3;
+    /* background-color: #0056b3; */
 }
 
 .references {
     margin-top: 30px;
     padding-top: 10px;
-    border-top: 1px solid #ddd;
+    /* border-top: 1px solid #ddd; */
 }

@@ -15,12 +15,12 @@ class Core:
 
     This class points to the locations of three local versions
     of the user's data:
-        1) data: raw data pulled directly from a database (e.g. Mongo),
-            downloaded, or collected locally.
-        2) clean: data that has been cleaned via dropping features, scaling,
-            removing NaNs, etc.
-        3) projection: data that has been collapsed using a dimensionality
-            reduction technique (e.g. PCA, UMAP).
+    1) data: raw data pulled directly from a database (e.g. Mongo),
+        downloaded, or collected locally.
+    2) clean: data that has been cleaned via dropping features, scaling,
+        removing NaNs, etc.
+    3) projection: data that has been collapsed using a dimensionality
+        reduction technique (e.g. PCA, UMAP).
 
     Parameters
     ----------

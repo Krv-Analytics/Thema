@@ -44,7 +44,7 @@ Planet Class
 .. _inner_utils:
 
 Inner System Utils
------------------
+--------------------
 .. automodule:: thema.multiverse.system.inner.inner_utils
    :members:
    :undoc-members:

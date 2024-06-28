@@ -15,8 +15,9 @@ Thema Documentation
 
 Welcome to the documentation for the Thema package. This documentation provides a comprehensive guide on how to use the various modules and functionalities of Thema.
 
-.. grid:: 2
+.. grid:: 1 2 2 2
    :gutter: 4
+   :padding: 2 2 0 0
 
    .. grid-item-card:: API Reference
       :class-card: intro-card
@@ -25,10 +26,13 @@ Welcome to the documentation for the Thema package. This documentation provides 
       Learn about the Thema API, including detailed information on all available functions, classes, and modules.
 
       +++
+      .. button-ref:: thema
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
 
-      :ref:`API Reference <thema>`
-
-   .. grid-item-card:: User Guides
+   .. grid-item-card:: Guides
       :class-card: intro-card
       :shadow: md
 
@@ -36,7 +40,11 @@ Welcome to the documentation for the Thema package. This documentation provides 
 
       +++
 
-      :ref:`User Guides <user_guide>`
+      .. button-ref:: user_guide
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
 
 .. toctree::
    :maxdepth: 2

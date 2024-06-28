@@ -5,22 +5,19 @@ THEMA: Systems
 
 The ``thema.multiverse.systems`` module comprises the first segment of the Thema pipeline, focusing on data cleaning/processing and data projection.
 
-.. grid:: 2
+.. grid:: 1 2 2 2
    :gutter: 4
+   :padding: 2 2 0 0
 
-   .. grid-item::
+   .. grid-item:: **Inner System**
 
       .. _thema-stars:
 
-      **Inner System**
-
       The Inner System encompasses functionality for cleaning, processing, encoding, scaling, and imputing data. It facilitates the transition from tabular data to internally-managed Python-friendly files, enhancing ease of use.
 
-   .. grid-item::
+   .. grid-item:: **Outer System**
 
       .. _thema-galaxy:
-
-      **Outer System**
 
       The Outer System includes functionality for comprehending the projection space of your data. It enables grid searching of a hyperparameter space for multiple unsupervised projection and dimensionality reduction methods.
 

@@ -22,7 +22,7 @@ Star Class
    :show-inheritance:
 
 StarGraph Class
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 .. automodule:: thema.multiverse.universe.starGraph
    :members:
    :undoc-members:

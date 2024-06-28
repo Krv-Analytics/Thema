@@ -5,8 +5,9 @@ THEMA: Universe
 
 The ``thema.multiverse.universe`` module provides functionality for creating and managing a universe of different unsupervised projections of data. At the core of THEMA lies the concept of Stars, which are base class templates for atlas (graph) construction algorithms.
 
-.. grid:: 2
+.. grid:: 1 2 2 2
    :gutter: 4
+   :padding: 2 2 0 0
 
    .. grid-item::
 

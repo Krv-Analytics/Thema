@@ -12,25 +12,33 @@ Welcome to the documentation for THEMA, an advanced algorithm designed for topol
    :gutter: 4
    :padding: 2 2 0 0
 
-   .. grid-item-card:: Multiverse
+   .. grid-item-card:: Generate Multiple Data Views
       :class-card: intro-card
       :shadow: md
 
       The `multiverse` subpackage provides tools for creating and managing multiple potential scenarios or configurations. It includes utilities for scenario generation, evaluation, and comparison.
 
       +++
+      .. button-ref:: thema-multiverse
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
 
-      :doc:`Multiverse <multiverse/thema.multiverse>`
 
-   .. grid-item-card:: Probe
+   .. grid-item-card:: Explore Your Data's Multiverse
       :class-card: intro-card
       :shadow: md
 
       The `probe` subpackage offers a suite of tools for probing and analyzing hyperparameters. It enables detailed examination of hyperparameter spaces and facilitates effective hyperparameter tuning.
 
       +++
+      .. button-ref:: probe
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
 
-      :doc:`Probe <probe/thema.probe>`
 
 .. toctree::
    :maxdepth: 3

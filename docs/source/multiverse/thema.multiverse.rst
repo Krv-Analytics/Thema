@@ -1,3 +1,5 @@
+.. _thema-multiverse:
+
 THEMA: Multiverse
 ==========================
    

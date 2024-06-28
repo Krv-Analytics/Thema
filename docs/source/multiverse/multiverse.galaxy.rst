@@ -20,7 +20,7 @@ A galaxy is generated from distributions of inner and outer systems, which defin
 By leveraging the ``Galaxy`` class, users can create a comprehensive and organized space of data representations, facilitating deeper insights and more effective analysis of complex datasets.
 
 Galaxy Class
-----------
+--------------
 .. automodule:: thema.multiverse.universe.galaxy
    :members:
    :undoc-members:

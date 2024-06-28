@@ -1,26 +1,23 @@
+.. _probe:
+
 THEMA: Probe
 ===================
 
 The Probe module is designed to "probe" your data, much like a space probe explores and gathers information in space. It provides tools and functionality to analyze, visualize, and understand complex data structures within the Thema framework. The Probe module includes classes and utilities for exploring data relationships, visualizing data structures, and gaining insights into the underlying patterns and structures of your data.
 
-.. grid:: 2
+.. grid:: 1 2 2 2
    :gutter: 4
+   :padding: 2 2 0 0
 
-   .. grid-item::
-
-      **Telescope**
+   .. grid-item:: **Telescope**
 
       The ``Telescope`` class provides visualization capabilities for democratically selected star instances. It is designed to meet various visualization needs for analyzing and understanding data relationships within the Thema framework.
 
-   .. grid-item::
-
-      **Observatory**
+   .. grid-item:: **Observatory**
 
       The ``jmapObservatory`` class is a custom observatory designed specifically for viewing JMAP Stars. It extends the functionality of the base ``Observatory`` class, providing additional methods and attributes tailored to the graph models outputted by JMAP Star.
 
-   .. grid-item::
-
-      **Probe Utils**
+   .. grid-item:: **Probe Utils**
 
       Utility functionality to help with Probe functionality (to probe your data!).
 

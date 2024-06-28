@@ -59,3 +59,5 @@ html_static_path = ["_static"]
 html_css_files = [
     "custom.css",  # your custom CSS file
 ]
+
+nbsphinx_allow_errors = True
