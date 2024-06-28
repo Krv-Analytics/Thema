@@ -11,7 +11,7 @@ from ...core import Core
 class Star(Core):
     """
     Simple Targeted Atlas Representation
-    ----
+    ------------------------------------
     A STAR is a base class template for atlas (graph) construction algorithms.
     As a parent class, Star enforces structure on data management and graph
     generation, enabling a 'universal' procedure for generating these objects.

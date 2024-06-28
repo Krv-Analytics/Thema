@@ -44,7 +44,7 @@ class jmapStar(Star):
     Generates a graph representation of projection using Kepler Mapper.
 
     Members
-    ------
+    --------
     data: pd.DataFrame
         a pandas dataframe of raw data
     clean: pd.DataFrame
@@ -68,7 +68,7 @@ class jmapStar(Star):
         An expanded framework for analyzing networkx graphs
 
     Functions
-    --------
+    ----------
     get_data_path() -> str
         returns path to raw data
     get_clean_path() -> str
@@ -132,12 +132,12 @@ class jmapStar(Star):
         constructs a resulting graph.
 
         Returns
-        ------
+        -------
         None
             Initializes complex and starGraph members
 
         Warning
-        ------
+        --------
         Particular combinations of parameters can result in empty graphs or
         empty complexes.
 

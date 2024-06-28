@@ -31,7 +31,7 @@ class tsneProj(Comet):
     See: https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
 
     Members
-    -------
+    ---------
     data : pd.DataFrame
         A pandas dataframe of raw data.
     clean : pd.DataFrame
@@ -46,7 +46,7 @@ class tsneProj(Comet):
         Seed for randomization.
 
     Functions
-    --------
+    ----------
     fit()
         Fits a tsne projection from given parameters and saves to projectionArray.
     save()

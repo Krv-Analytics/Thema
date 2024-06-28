@@ -27,6 +27,15 @@ dependencies:
   - pyyaml
   - seaborn
   - pip
+## for SPHINX documentation Builds
+  - sphinx>=3.0
+  - sphinx-design
+  - sphinx-autodoc
+  - sphinx-viewcode
+  - sphinx-autosectionlabel
+  - sphinx-napoleon
+  - sphinx-mathjax
+  - nbsphinx
   - pip:
     - termcolor
     - kmapper==2.0.1
