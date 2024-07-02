@@ -15,6 +15,8 @@ Guides
     :maxdepth: 2
 
     userGuides/installation
-    userGuides/preprocessing.ipynb
+    userGuides/preprocessing
     userGuides/embedding
+    userGuides/graphing
+    
     

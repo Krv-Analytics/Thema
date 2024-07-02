@@ -4,14 +4,14 @@
     padding: 15px;
     margin: 10px;
     border-radius: 5px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
     /* background-color: #f9f9f9; */
     text-align: center;
 }
 
 .intro-card:hover {
-    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .intro-card h3 {
@@ -39,11 +39,11 @@ button-link {
 }
 
 button-link:hover {
-    /* background-color: #0056b3; */
+    background-color: #0056b3; 
 }
 
 .references {
     margin-top: 30px;
     padding-top: 10px;
-    /* border-top: 1px solid #ddd; */
+    border-top: 1px solid #ddd;
 }
