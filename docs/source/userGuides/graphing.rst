@@ -83,15 +83,19 @@ For this example, we construct a very simple hyperameter space to example the br
     Oort:
         umap:
             nn:
+            - 5
             - 10
             - 50
             minDist:
+            - 0.05
             - 0.1
-            - 0.25
+            - 0.15
+            - 0.5
             dimensions:
             - 2
             seed:
             - 32
+            - 50
         projectiles:
             - umap
 
@@ -104,12 +108,19 @@ For this example, we construct a very simple hyperameter space to example the br
         jmap:
             nCubes:
             - 2
+            - 5
+            - 15
+            - 30
             percOverlap:
             - 0.05
+            - 0.1
+            - 0.5
             minIntersection:
             - -1
             clusterer:
             - [HDBSCAN, {min_cluster_size: 2}] 
+            - [HDBSCAN, {min_cluster_size: 5}] 
+            - [HDBSCAN, {min_cluster_size: 10}] 
 
 Step 2: Preprocessing
 ^^^^^^^^^^^^^^^^^^^^^

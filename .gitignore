@@ -1,12 +1,24 @@
+# Ignore virtual environment directories
 .venv
 .env
+
+# Ignore VS Code settings directory
 .vscode
+
+# Ignore Python cache directories
 *__pycache__
+
+# Ignore all .pkl files in docs/source/userGuides directory except for the specific one needed
+docs/source/userGuides/**/*.pkl
 
 # Ignore .ipynb files except those used in documentation builds
 *.ipynb
-!docs/source/**/*.ipynb
 
+
+# Ignore all files in the clean directory
+docs/source/userGuides/demoFiles/*
+
+# Ignore specific files and directories
 docs/.DS_Store
 outputs/
 data/
@@ -21,3 +33,9 @@ notebooks/
 poetry.lock
 dist/
 build/
+
+# Do not ignore specific files in documentation
+!docs/source/userGuides/demoFiles/breastCancer.pkl
+!docs/source/userGuides/demoFiles/MDS.html
+!docs/source/userGuides/demoFiles/params.yaml
+!docs/source/**/*.ipynb
