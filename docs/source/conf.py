@@ -32,6 +32,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
+    "sphinx.ext.githubpages",
     # 'sphinxcontrib.jupyter',  # Uncomment if using sphinxcontrib-jupyter
 ]
 
