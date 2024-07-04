@@ -34,10 +34,12 @@ jobs:
 
     - name: Set up Conda
       uses: ./.github/actions/setup-conda
+      with:
+        environment-file: ${{ env.ENV_FILE }}
 
     - name: Build Sphinx documentation
       run: |
-        conda run -n myenv sphinx-build -b html docs docs/_build/html
+        conda run -n myenv sphinx-build -b html docs docs/build/html
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

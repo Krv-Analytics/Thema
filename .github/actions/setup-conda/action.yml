@@ -6,11 +6,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install ${{ inputs.environment-file }}
-      uses: mamba-org/setup-micromamba@v1
+    - name: Install Miniconda
+      uses: conda-incubator/setup-miniconda@v2
       with:
+        python-version: '3.11'  # You can adjust the Python version as needed
+        auto-update-conda: true
         environment-file: ${{ inputs.environment-file }}
-        environment-name: test
-        condarc-file: ci/.condarc
-        cache-environment: true
-        cache-downloads: true
+        activate-environment: test
