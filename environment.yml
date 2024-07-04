@@ -29,15 +29,15 @@ dependencies:
   - pip
   ## for SPHINX documentation Builds
   - sphinx>=3.0
-  - sphinx_design
-  - sphinx-autodoc-typehints
-  - sphinx-viewcode
-  - sphinx-autosectionlabel
-  - sphinxcontrib-napoleon
-  - sphinx-mathjax
   - nbsphinx
   - pip:
     - termcolor
     - kmapper==2.0.1
     - grakel==0.1.10
     - invoke==2.2.0
+    - sphinx-design
+    - sphinx-viewcode
+    - sphinx-mathjax
+    - sphinx-autosectionlabel
+    - sphinx-autodoc
+    - sphinxcontrib-napoleon
