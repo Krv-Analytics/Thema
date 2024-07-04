@@ -37,12 +37,12 @@ jobs:
       with:
         environment-file: ${{ env.ENV_FILE }}
 
-    - name: Build Sphinx documentation
+    - name: Build Sphinx Docs
       run: |
-        conda run -n test sphinx-build -b html docs docs/build/html
+        conda run -n test sphinx-build -b html docs/source docs/build/html
 
-    - name: Deploy to GitHub Pages
+    - name: Deploy to Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html  # Change this if your output directory is different
+        publish_dir: ./docs/build/html  # Change this if your output directory is different
