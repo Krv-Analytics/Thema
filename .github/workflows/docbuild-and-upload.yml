@@ -3,7 +3,7 @@ name: Deploy Sphinx Documentation to GitHub Pages
 on:
   push:
     branches:
-      - sg_docs  # Change this to your default branch
+      - main  # Change this to your default branch
 
 jobs:
   build:
@@ -13,23 +13,24 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: '3.11'  # Specify the Python version you want
+        auto-update-conda: true
+        activate-environment: thema-py3.11
+        environment-file: environment.yml
 
-    - name: Install dependencies
+    - name: Install additional dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install sphinx sphinx-rtd-theme
+        conda run -n thema-py3.11 pip install sphinx sphinx-rtd-theme
 
     - name: Build Sphinx documentation
       run: |
-        cd docs  # Change this to your docs directory if it's not 'docs'
-        make html
+        conda run -n thema-py3.11sphinx-build -b html docs docs/_build/html
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html  # Change this if your output directory is different
+        publish_dir: ./docs/build/html  # Change this if your output directory is different
