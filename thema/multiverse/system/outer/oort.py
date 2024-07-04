@@ -152,7 +152,9 @@ class Oort(Core):
         """
         if YAML_PATH is not None:
             self.YAML_PATH = YAML_PATH
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), f"yaml parameter file could not be found: {YAML_PATH}"
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
