@@ -1,36 +1,46 @@
-name: Deploy Sphinx Documentation to GitHub Pages
+name: Doc Build and Upload
 
 on:
   push:
     branches:
-      - main  # Change this to your default branch
+      - sg_docs
+
+env:
+  ENV_FILE: environment.yml
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  web_and_docs:
+    name: Doc Build and Upload
+    runs-on: ubuntu-22.04
+
+    # concurrency:
+    #   # https://github.community/t/concurrecy-not-work-for-push/183068/7
+    #   group: ${{ github.event_name == 'push' && github.run_number || github.ref }}-web-docs
+    #   cancel-in-progress: true
+
+    defaults:
+      run:
+        shell: bash -el {0}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Conda
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        python-version: '3.11'  # Specify the Python version you want
-        auto-update-conda: true
-        activate-environment: thema-py3.11
-        environment-file: environment.yml
-
-    - name: Install additional dependencies
-      run: |
-        conda run -n thema-py3.11 pip install sphinx sphinx-rtd-theme
+      uses: ./.github/actions/setup-conda
 
     - name: Build Sphinx documentation
       run: |
-        conda run -n thema-py3.11sphinx-build -b html docs docs/_build/html
+        conda run -n myenv sphinx-build -b html docs docs/_build/html
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build/html  # Change this if your output directory is different
+        publish_dir: ./docs/_build/html  # Change this if your output directory is different
