@@ -253,7 +253,9 @@ class Planet(Core):
         self.verbose = verbose
         self.YAML_PATH = None
         if YAML_PATH is not None:
-            assert os.path.isfile(YAML_PATH), "params.yaml file not found!"
+            assert os.path.isfile(
+                YAML_PATH
+            ), f"yaml parameter file could not be found: {YAML_PATH}"
 
             self.YAML_PATH = YAML_PATH
             with open(YAML_PATH, "r") as f:
