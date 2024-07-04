@@ -35,9 +35,6 @@ dependencies:
     - kmapper==2.0.1
     - grakel==0.1.10
     - invoke==2.2.0
-    - sphinx-design
-    - sphinx-viewcode
-    - sphinx-mathjax
-    - sphinx-autosectionlabel
-    - sphinx-autodoc
+    - sphinx_design
     - sphinxcontrib-napoleon
+
