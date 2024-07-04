@@ -27,13 +27,13 @@ dependencies:
   - pyyaml
   - seaborn
   - pip
-## for SPHINX documentation Builds
+  ## for SPHINX documentation Builds
   - sphinx>=3.0
-  - sphinx-design
-  - sphinx-autodoc
+  - sphinx_design
+  - sphinx-autodoc-typehints
   - sphinx-viewcode
   - sphinx-autosectionlabel
-  - sphinx-napoleon
+  - sphinxcontrib-napoleon
   - sphinx-mathjax
   - nbsphinx
   - pip:
