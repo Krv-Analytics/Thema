@@ -37,4 +37,5 @@ dependencies:
     - invoke==2.2.0
     - sphinx_design
     - sphinxcontrib-napoleon
+    - furo
 
