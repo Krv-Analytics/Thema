@@ -12,4 +12,5 @@ runs:
         python-version: '3.11'  # You can adjust the Python version as needed
         auto-update-conda: true
         environment-file: ${{ inputs.environment-file }}
+        environment-name: test
         activate-environment: test
