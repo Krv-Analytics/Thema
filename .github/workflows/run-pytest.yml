@@ -26,10 +26,10 @@ jobs:
       uses: ./.github/actions/setup-conda
       with:
         environment-file: ${{ env.ENV_FILE }}
+        activate-environment: test
 
     - name: Run pytest
       run: |
-        source ~/miniconda/bin/activate test
         pytest
       shell: bash -el {0}
 

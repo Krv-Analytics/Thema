@@ -11,12 +11,7 @@ runs:
   using: composite
   steps:
     - name: Set up Conda
-      uses: ../setup-conda  # Use the setup-conda action from your repo
+      uses: ../setup-conda 
       with:
         environment-file: ${{ inputs.environment-file }}
-
-    - name: Run pytest
-      run: |
-        source ~/miniconda/bin/activate test
-        pytest
-      shell: bash -el {0}
+        activate-environment: test
