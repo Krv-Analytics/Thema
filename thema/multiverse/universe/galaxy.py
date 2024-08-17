@@ -437,7 +437,7 @@ class Galaxy:
         )
 
         # Update fig axis template
-        fig.update_layout(template="none", width=1100, height=700, margin={"r": 100})
+        fig.update_layout(template="none", margin={"r": 100})
         fig.add_annotation(
             x=1.1,
             y=0.5,
@@ -449,7 +449,10 @@ class Galaxy:
             textangle=90,
         )
         # Show figure
-        fig.show()
+        import plotly.io as pio
+
+        pio.show(fig)
+        # fig.show()
 
     def save(self, file_path):
         """

@@ -17,5 +17,6 @@ runs:
 
     - name: Run pytest
       run: |
-        conda run -n test pytest
+        source ~/miniconda/bin/activate test
+        pytest
       shell: bash -el {0}

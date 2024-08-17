@@ -125,13 +125,25 @@ For this example, we construct a very simple hyperameter space to example the br
 Step 2: Preprocessing
 ^^^^^^^^^^^^^^^^^^^^^
 
+Handle filepaths -- not necessary when running locally!
+
+.. ipython:: python
+
+    import sys, os
+    sys.path.insert(0, os.path.abspath('.'))
+    yaml = os.path.join(os.path.abspath('.'),'source', 'userGuides', 'demoFiles', 'params.yaml')
+
+    if not os.path.isfile(yaml):
+        # Print the current working directory
+        cwd = os.getcwd()
+        raise FileNotFoundError(f"YAML parameter file could not be found: {yaml}\nCurrent working directory: {cwd}")
+
 See the :ref:`preprocessing` for a detailed look at the steps involved in data preprocessing. In this specific example, the breast cancer dataset being used has no missing values and most pre-processing steps required for more `organic`, real world datasets have already been taken by scikit-learn.
 
 .. ipython:: python
 
     from thema.multiverse import Planet
 
-    yaml = "/Users/gathrid/Repos/thema_light/Thema/docs/source/userGuides/demoFiles/params.yaml"
     planet = Planet(YAML_PATH=yaml)
     planet.fit()
 
