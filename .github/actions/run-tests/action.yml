@@ -1,0 +1,21 @@
+name: Run Tests and Report Results
+description: Set up the Conda environment and run tests using pytest.
+
+inputs:
+  environment-file:
+    description: The Conda environment file to use.
+    required: true
+    default: environment.yml
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Conda
+      uses: ../setup-conda  # Use the setup-conda action from your repo
+      with:
+        environment-file: ${{ inputs.environment-file }}
+
+    - name: Run pytest
+      run: |
+        conda run -n test pytest
+      shell: bash -el {0}
