@@ -1,0 +1,858 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Probe Utils" href="thema.probe.utils.html" /><link rel="prev" title="Telescope" href="thema.probe.telescope.html" />
+
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>Observatories - Thema 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=788eb046" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Thema 1.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Thema 1.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../thema.html">THEMA</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of THEMA</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../multiverse/thema.multiverse.html">THEMA: Multiverse</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of THEMA: Multiverse</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../multiverse/thema.multiverse.system.html">THEMA: Systems</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of THEMA: Systems</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../multiverse/innerSystem.html">Inner System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../multiverse/outerSystem.html">Outer System</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../multiverse/thema.multiverse.universe.html">THEMA: Universe</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of THEMA: Universe</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../multiverse/multiverse.stars.html">Stars</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../multiverse/multiverse.galaxy.html">Galaxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../multiverse/multiverse.geodesics.html">Geodesics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="thema.probe.html">THEMA: Probe</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of THEMA: Probe</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="thema.probe.telescope.html">Telescope</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Observatories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="thema.probe.utils.html">Probe Utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../configuration.html">THEMA: Core</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_guide.html">User Guide</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of User Guide</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userGuides/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userGuides/preprocessing.html">Data Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userGuides/embedding.html">Embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userGuides/graphing.html">Graph Construction</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/probe/thema.probe.observatory.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="observatories">
+<span id="observatory"></span><h1>Observatories<a class="headerlink" href="#observatories" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">jmapObservatory</span></code> class is a custom observatory designed specifically for viewing JMAP Stars. It extends the functionality of the base <cite>Observatory</cite> class, providing additional methods and attributes tailored to the graph models outputted by JMAP Star. This class allows for detailed analysis and exploration of complex data relationships within the JMAP framework.</p>
+<section id="module-thema.probe.observatories.jmapObservatory">
+<span id="jmapobservatory"></span><h2>jmapObservatory<a class="headerlink" href="#module-thema.probe.observatories.jmapObservatory" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.initialize">
+<span class="sig-prename descclassname"><span class="pre">thema.probe.observatories.jmapObservatory.</span></span><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.initialize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">thema.probe.observatories.jmapObservatory.</span></span><span class="sig-name descname"><span class="pre">jmapObservatory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">star_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Observatory</span></code></p>
+<p>Custom observatory for viewing JMAP Stars.</p>
+<p>This class extends the <cite>Observatory</cite> class and provides additional
+functionality specific to the graph models outputted by JMAP Star.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>star_file<span class="classifier">str</span></dt><dd><p>The file path to the star file.</p>
+</dd>
+</dl>
+</section>
+<section id="attributes">
+<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>_unclustered<span class="classifier">list</span></dt><dd><p>A list of unclustered items.</p>
+</dd>
+<dt>_group_lookuptable<span class="classifier">dict</span></dt><dd><p>A dictionary to aid in group decomposition and item lookup.</p>
+</dd>
+<dt>_node_lookuptable<span class="classifier">dict</span></dt><dd><p>A dictionary to aid in group decomposition and item lookup.</p>
+</dd>
+<dt>_group_directory<span class="classifier">dict</span></dt><dd><p>A dictionary containing cluster members for each group.</p>
+</dd>
+</dl>
+</section>
+<section id="methods">
+<h3>Methods:<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>get_items_groupID(item_id)</dt><dd><p>Look up function for finding an item’s connected component (i.e., group).</p>
+</dd>
+<dt>get_items_nodeID(item_id)</dt><dd><p>Look up function for finding an item’s member node.</p>
+</dd>
+<dt>get_nodes_members(node_id)</dt><dd><p>Look up function to get members of a node.</p>
+</dd>
+<dt>get_groups_members(group_id)</dt><dd><p>Look up function to get items within a group.</p>
+</dd>
+<dt>get_groups_member_nodes(group_id)</dt><dd><p>Look up function to get nodes within a connected component.</p>
+</dd>
+<dt>get_nodes_groupID(node_id)</dt><dd><p>Returns the node’s group id.</p>
+</dd>
+<dt>get_global_stats()</dt><dd><p>Calculates global mean and standard deviation statistics.</p>
+</dd>
+<dt>get_nodes_raw_df(node_id)</dt><dd><p>Returns a subset of the raw dataframe only containing members of the
+specified node.</p>
+</dd>
+<dt>get_nodes_clean_df(node_id)</dt><dd><p>Returns a subset of the clean dataframe only containing members of the
+specified node.</p>
+</dd>
+<dt>get_nodes_projections(node_id)</dt><dd><p>Returns a subset of the projections array only containing members of
+the specified node.</p>
+</dd>
+<dt>get_groups_raw_df(group_id)</dt><dd><p>Returns a subset of the raw dataframe only containing members of the
+specified group.</p>
+</dd>
+<dt>get_groups_clean_df(group_id)</dt><dd><p>Returns a subset of the clean dataframe only containing members of the
+specified group.</p>
+</dd>
+<dt>get_groups_projections(group_id)</dt><dd><p>Returns a subset of the projections array only containing members of
+the specified group.</p>
+</dd>
+<dt>compute_node_description(node_id, description_fn=get_minimal_std)</dt><dd><p>Compute a simple description of each node in the graph.</p>
+</dd>
+<dt>compute_group_description(group_id, description_fn=get_minimal_std)</dt><dd><p>Compute a simple description of a policy group.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thema.probe.observatories</span> <span class="kn">import</span> <span class="n">jmapObservatory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">star_file</span> <span class="o">=</span> <span class="s2">&quot;path/to/star_file&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span> <span class="o">=</span> <span class="n">jmapObservatory</span><span class="p">(</span><span class="n">star_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obs</span><span class="o">.</span><span class="n">get_items_groupID</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_description">
+<span class="sig-name descname"><span class="pre">compute_group_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description_fn=&lt;function</span> <span class="pre">get_minimal_std&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.compute_group_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_description" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a simple description of a policy group.</p>
+<p>This function creates a density description based on its member nodes description
+in compute_node_description().</p>
+<section id="id1">
+<h4>Parameters:<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>group_id: int</dt><dd><p>A group’s identifier (-1 to get unclustered group)</p>
+</dd>
+<dt>description_fn: function</dt><dd><p>A function to be passed to compute_node_description()</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">rtype<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A density description of the group.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_identity">
+<span class="sig-name descname"><span class="pre">compute_group_identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_fn=&lt;function</span> <span class="pre">std_zscore_threshold_filter&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.compute_group_identity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_identity" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the most important identifiers of a group as specified by the evalulation function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_id</strong> – A group’s identifier.</p></li>
+<li><p><strong>eval_fn</strong> – The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the
+group’s identity.</p></li>
+<li><p><strong>kwargs</strong> – <p>Any key word arguments that need to passed to the aliased evaluation functinon. If, for example,
+you wanted to pass a parameter <cite>std_threshold</cite> to your eval function, <cite>std_zscore_threshold_filter</cite>
+you could do as</p>
+<p><cite>compute_group_identity(id, eval_fn=std_zscore_threshold_filter, std_threshold=0.8)</cite></p>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.compute_node_description">
+<span class="sig-name descname"><span class="pre">compute_node_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description_fn=&lt;function</span> <span class="pre">get_minimal_std&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.compute_node_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_node_description" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a simple description of each node in the graph.</p>
+<p>This function labels each node based on a description function. The description
+function is used to select a defining column from the original dataset, which will
+serve as a representative of the noes identity. Obviously there is a number of ways
+to do this, but as a default this computes the most homogenous data column for a each
+node.</p>
+<section id="id2">
+<h4>Parameters:<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>node_id:</dt><dd><p>A node identifier (-1 for unclustered items)</p>
+</dd>
+<dt>description_fn: function</dt><dd><p>A function that takes a data frame, mask, and density columns and returns
+a column.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h4>Returns:<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h4>
+<p>A dictionary containing the representing column label and the number of items in
+the node.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.dataset_zscores_df">
+<span class="sig-name descname"><span class="pre">dataset_zscores_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.dataset_zscores_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.dataset_zscores_df" title="Link to this definition">¶</a></dt>
+<dd><p>STUB</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.define_nodeValueDict">
+<span class="sig-name descname"><span class="pre">define_nodeValueDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.define_nodeValueDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.define_nodeValueDict" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a dict where each node is assiged a value based on an
+aggregation of items in that node,used to create a path graph
+target/sink nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_number</strong> (<em>int</em>) – Group/Connected component number</p></li>
+<li><p><strong>col</strong> (<em>str</em>) – Column from the clean dataframe</p></li>
+<li><p><strong>aggregation_func</strong> (<em>np.&lt;function&gt;</em><em>, </em><em>defaults to calculating mean</em>) – <dl>
+<dt>method by which to aggregate values within a node for coloring</dt><dd><ul>
+<li><p>color node by the median value or by the sum of values for</p></li>
+</ul>
+<p>example supports all numpy aggregation functions such as
+np.mean, np.median, np.sum, etc</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>results_dict</strong> – A dictionarty with node IDs as keys and their corresponding
+numeric value as values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_aggregatedGroupDf">
+<span class="sig-name descname"><span class="pre">get_aggregatedGroupDf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregation_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_aggregatedGroupDf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_aggregatedGroupDf" title="Link to this definition">¶</a></dt>
+<dd><p>Aggregate each group of the DataFrame using a custom aggregation function.</p>
+<p>Parameters:
+- aggregation_func: function, the aggregation function to apply</p>
+<p>Returns:
+- DataFrame with the aggregation function applied to each group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_global_stats">
+<span class="sig-name descname"><span class="pre">get_global_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_global_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_global_stats" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates global mean and standard deviation statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing statistics on both raw and clean df subsets for each group.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_descriptions">
+<span class="sig-name descname"><span class="pre">get_group_descriptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description_fn=&lt;function</span> <span class="pre">get_minimal_std&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_group_descriptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_descriptions" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of group descriptions for each group as specified by the passed
+description function.</p>
+<section id="parameter">
+<h4>Parameter<a class="headerlink" href="#parameter" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>description_fn: function</dt><dd><p>A function that determines a representative column for each node in a group.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">rtype<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A density representing the composition of a group by its nodes’ descriptions.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_identities">
+<span class="sig-name descname"><span class="pre">get_group_identities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_fn=&lt;function</span> <span class="pre">std_zscore_threshold_filter&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_group_identities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_identities" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of group identies as specified by compute_group_identity.</p>
+<section id="paramters">
+<h4>Paramters<a class="headerlink" href="#paramters" title="Link to this heading">¶</a></h4>
+<dl>
+<dt>eval_fn:</dt><dd><p>The function used score each column in the dataframe. The minimum scoring columns are chosen to represent the
+group’s identity.</p>
+</dd>
+<dt>kwargs:</dt><dd><p>Any key word arguments that need to passed to the aliased evaluation functinon. If, for example,
+you wanted to pass a parameter <cite>std_threshold</cite> to your eval function, <cite>std_zscore_threshold_filter</cite>
+you could do so with</p>
+<p><cite>get_group_identities(eval_fn=std_zscore_threshold_filter, std_threshold=0.8)</cite></p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_numbers">
+<span class="sig-name descname"><span class="pre">get_group_numbers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_group_numbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_numbers" title="Link to this definition">¶</a></dt>
+<dd><p>Return a list of all group #s in a jmapStar graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_clean_df">
+<span class="sig-name descname"><span class="pre">get_groups_clean_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_groups_clean_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_clean_df" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the clean dataframe only containing members of the specified group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>group_id</strong> (<em>int</em>) – A group’s identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_member_nodes">
+<span class="sig-name descname"><span class="pre">get_groups_member_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_groups_member_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_member_nodes" title="Link to this definition">¶</a></dt>
+<dd><p>Look up Function to get nodes within a connected component</p>
+<section id="id3">
+<h4>Parameters:<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>group_id: int</dt><dd><p>Group number of desired connected component</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h4>Returns:<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<p>A list of node members for the specified group</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_members">
+<span class="sig-name descname"><span class="pre">get_groups_members</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_groups_members"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_members" title="Link to this definition">¶</a></dt>
+<dd><p>Look up function to get items within a group</p>
+<section id="id5">
+<h4>Parameters:<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>group_id: int</dt><dd><p>Group number of desired connected component</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h4>Returns:<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<p>A list of the item members for the specified group</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_projections">
+<span class="sig-name descname"><span class="pre">get_groups_projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_groups_projections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_projections" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the projectinos array only containing members of the specified group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<em>str</em>) – A groups’s identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>An np.array of projections.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_raw_df">
+<span class="sig-name descname"><span class="pre">get_groups_raw_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_groups_raw_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_raw_df" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the raw dataframe only containing members of the specified group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>group_id</strong> (<em>int</em>) – A group’s identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_groupID">
+<span class="sig-name descname"><span class="pre">get_items_groupID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_items_groupID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_groupID" title="Link to this definition">¶</a></dt>
+<dd><p>Look up function for finding an item’s connected component (ie group)</p>
+<section id="id7">
+<h4>Parameters:<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>item_id: int</dt><dd><p>Index of desired look up item from user’s raw data frame</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h4>Returns:<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<p>A list of group ids that the item is a member of (-1 if unclustered)</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_nodeID">
+<span class="sig-name descname"><span class="pre">get_items_nodeID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_items_nodeID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_nodeID" title="Link to this definition">¶</a></dt>
+<dd><p>Look up function for finding item’s member node</p>
+<section id="id9">
+<h4>Parameters:<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>item_id: int</dt><dd><p>Index of desired look up item from user’s raw data frame</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h4>Returns:<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<p>A list of node ids that the item is a member of</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_clean_df">
+<span class="sig-name descname"><span class="pre">get_nodes_clean_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_nodes_clean_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_clean_df" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the clean dataframe only containing members of the specified node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<em>str</em>) – A node’s string identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_groupID">
+<span class="sig-name descname"><span class="pre">get_nodes_groupID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_nodes_groupID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_groupID" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the node’s group id.</p>
+<section id="id11">
+<h4>Parameters:<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>node_id<span class="classifier">str</span></dt><dd><p>A character ID specifying the node</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h4>Returns:<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<p>A group ID number.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_members">
+<span class="sig-name descname"><span class="pre">get_nodes_members</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_nodes_members"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_members" title="Link to this definition">¶</a></dt>
+<dd><p>Look up function to get members of a node</p>
+<section id="id13">
+<h4>Parameters:<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>node_id: str</dt><dd><p>String identifier of a node</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h4>Returns:<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<p>A list of member items</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_projections">
+<span class="sig-name descname"><span class="pre">get_nodes_projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_nodes_projections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_projections" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the projectinos array only containing members of the specified node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<em>str</em>) – A node’s string identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>An np.array of projections.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_raw_df">
+<span class="sig-name descname"><span class="pre">get_nodes_raw_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.get_nodes_raw_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_raw_df" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a subset of the raw dataframe only containing members of the specified node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<em>str</em>) – A node’s string identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thema.probe.observatories.jmapObservatory.jmapObservatory.target_matching">
+<span class="sig-name descname"><span class="pre">target_matching</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/thema/probe/observatories/jmapObservatory.html#jmapObservatory.target_matching"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.target_matching" title="Link to this definition">¶</a></dt>
+<dd><p>Matches a target item into a generated group by calculating the minimum deviation
+from a groups mean over available numeric columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>pd.DataFrame</em>) – A data frame containing one row.</p></li>
+<li><p><strong>col_filter</strong> – A list of columns to perform the mathcing on.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="thema.probe.utils.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Probe Utils</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="thema.probe.telescope.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Telescope</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Sidney Gathrid, Stuart Wayland, Jeremy Wayland
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Observatories</a><ul>
+<li><a class="reference internal" href="#module-thema.probe.observatories.jmapObservatory">jmapObservatory</a><ul>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.initialize"><code class="docutils literal notranslate"><span class="pre">initialize()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory"><code class="docutils literal notranslate"><span class="pre">jmapObservatory</span></code></a><ul>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_description"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.compute_group_description()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_group_identity"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.compute_group_identity()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.compute_node_description"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.compute_node_description()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.dataset_zscores_df"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.dataset_zscores_df()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.define_nodeValueDict"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.define_nodeValueDict()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_aggregatedGroupDf"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_aggregatedGroupDf()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_global_stats"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_global_stats()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_descriptions"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_group_descriptions()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_identities"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_group_identities()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_group_numbers"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_group_numbers()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_clean_df"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_groups_clean_df()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_member_nodes"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_groups_member_nodes()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_members"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_groups_members()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_projections"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_groups_projections()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_groups_raw_df"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_groups_raw_df()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_groupID"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_items_groupID()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_items_nodeID"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_items_nodeID()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_clean_df"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_nodes_clean_df()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_groupID"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_nodes_groupID()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_members"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_nodes_members()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_projections"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_nodes_projections()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.get_nodes_raw_df"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.get_nodes_raw_df()</span></code></a></li>
+<li><a class="reference internal" href="#thema.probe.observatories.jmapObservatory.jmapObservatory.target_matching"><code class="docutils literal notranslate"><span class="pre">jmapObservatory.target_matching()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
