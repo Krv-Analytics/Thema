@@ -12,13 +12,15 @@ class Realtor:
         
     
     def glauber_dynamics(self):
-        # Placeholder for Glauber dynamics implementation
+        # Placeholder for Glauber dynamics implementation @stuartwayland
         pass
     
     def node_docking(self,metric="euclidean"):
-        #calculate pairwise distance between target and all nodes in the graph
         distances = cdist([self.target], self.node_features, metric=metric)
-        #find the index of the node with the minimum distance to the target
         best_node_index = np.argmin(distances)
-        #return the index of the best node
         return best_node_index
+    
+    
+    def _star_link(self):
+        # Connect into the Multiverse system. Take in a star and unpack appropriately
+        pass

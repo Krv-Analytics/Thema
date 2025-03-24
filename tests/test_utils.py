@@ -6,6 +6,7 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 import random
+import networkx as nx
 
 
 def generate_dataframe(num_rows=100, seed=42):
@@ -112,3 +113,5 @@ _test_cleanData_0 = pd.DataFrame(
         "OH_C_c": [-0.707107, -0.707107, 1.414214],
     }
 )
+
+
