@@ -1,14 +1,15 @@
 # File: tests/multiverse/universe/stars/test_jmapStar.py
-# Lasted Updated: 04-09-24
-# Updated By: SW
+# Lasted Updated: 07-29-25
+# Updated By: JW
 
 import pickle
 import networkx.utils as nxut
 
+
 from thema.multiverse.universe.stars.jmapStar import jmapStar
 
 
-class Test_jmapStar:
+class TestJmapStar:
     """Pytest Class for jmapStar"""
 
     def test_init_defaults(self, tmp_umapMoonAndData):

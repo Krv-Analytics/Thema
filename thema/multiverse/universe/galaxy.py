@@ -11,11 +11,16 @@ import pickle
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
+from sklearn.manifold import MDS
+import plotly.graph_objects as go
+import plotly.express as px
 from sklearn.cluster import AgglomerativeClustering
+
+from .utils import starFilters, starSelectors
 
 from ... import config
 from ...utils import create_file_name, function_scheduler
-from . import geodesics, starSelectors
+from . import geodesics
 
 
 class Galaxy:
@@ -90,8 +95,8 @@ class Galaxy:
         cleanDir=None,
         projDir=None,
         outDir=None,
-        metric="stellar_kernel_distance",
-        selector="random",
+        metric="stellar_curvature_distance",
+        selector="max_nodes",
         nReps=3,
         YAML_PATH=None,
         verbose=False,
@@ -147,6 +152,8 @@ class Galaxy:
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
             nReps = yamlParams.Galaxy.nReps
+            filterFn = yamlParams.Galaxy.filter
+
             if type(yamlParams.Galaxy.stars) == str:
                 stars = [yamlParams.Galaxy.stars]
             else:
@@ -170,10 +177,12 @@ class Galaxy:
         self.metric = metric
         self.selector = selector
         self.nReps = nReps
+        self.filterFn = filterFn
 
         self.keys = None
         self.distances = None
         self.verbose = verbose
+        self.selection = {}
 
         assert self.data is not None, "Missing path to raw data file"
         assert self.cleanDir is not None, "Missing 'cleanDir' parameter'"
@@ -250,7 +259,6 @@ class Galaxy:
                         )
                         subprocesses.append(cmd)
 
-        # TODO: Optimize max workers
         function_scheduler(
             subprocesses,
             4,
@@ -307,38 +315,33 @@ class Galaxy:
         output_file = os.path.join(self.outDir, output_file)
         my_star.save(output_file)
 
-    def collapse(self, metric=None, nReps=None, selector=None, **kwargs):
+    def collapse(
+        self,
+        metric=None,
+        nReps=None,
+        selector=None,
+        filter_fn=None,
+        **kwargs,
+    ):
         """
         Collapses the space of Stars into a small number of representative Stars
 
         Parameters
         ----------
-        metric : str, optional
-            The metric used when comparing graphs. Currently, we only support
-            `stellar_kernel_distance`. (default: None)
-        nReps : int, optional
-            The number of representative stars. (default: None)
-        selector : str, optional
-            The selection criteria to choose representatives from a cluster.
-            Currently, only "random" is supported. (default: None)
-        **kwargs : dict
-            Additional arguments necessary for different metric functions.
+        metric: str
+            metric used when comparing graphs. Currently, supported types are `stellar_curvature_distance`
+            and `stellar_kernel_distance`.
+        nReps: int
+            The number of representative stars
+        selector: str
+            The selection criteria to choose representatives from a cluster. Currently, only "random" supported.
+        **kwargs:
+            Arguments necessary for different metric functions.
 
         Returns
         -------
         dict
-            A dictionary containing the path to the star and the size of the
-            group it represents.
-
-        Examples
-        --------
-        >>> galaxy = Galaxy()
-        >>> galaxy.collapse(metric='stellar_kernel_distance', nReps=5, selector='random')
-        {'0': {'star': 'path/to/star1', 'cluster_size': 10},
-            '1': {'star': 'path/to/star2', 'cluster_size': 8},
-            '2': {'star': 'path/to/star3', 'cluster_size': 12},
-            '3': {'star': 'path/to/star4', 'cluster_size': 9},
-            '4': {'star': 'path/to/star5', 'cluster_size': 11}}
+            A dictionary containing the path to the star and the size of the group it represents.
         """
 
         if metric is None:
@@ -347,12 +350,26 @@ class Galaxy:
             nReps = self.nReps
         if selector is None:
             selector = self.selector
-        metric = getattr(geodesics, metric)
-        selector = getattr(starSelectors, selector)
-        self.keys, self.distances = metric(
-            files=self.outDir, filterfunction=None, **kwargs
-        )
 
+        if filter_fn is None:
+            filter_fn = self.filterFn
+
+        metric_fn = getattr(
+            geodesics, metric, geodesics.stellar_curvature_distance
+        )
+        selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
+
+        # Handle the filter function
+        if filter_fn is None:
+            filter_fn = starFilters.nofilterfunction
+        else:
+            filter_fn = getattr(
+                starFilters, filter_fn, starFilters.nofilterfunction
+            )
+
+        self.keys, self.distances = metric_fn(
+            files=self.outDir, filterfunction=filter_fn, **kwargs
+        )
         model = AgglomerativeClustering(
             metric="precomputed",
             linkage="average",
@@ -363,17 +380,16 @@ class Galaxy:
         model.fit(self.distances)
 
         labels = model.labels_
-        self.clusters = {}
+        subgroups = {}
 
         for label in labels:
             mask = np.where(labels == label, True, False)
             subkeys = self.keys[mask]
-            self.clusters[label] = subkeys
+            subgroups[label] = subkeys
 
-        self.selection = {}
-        for key in self.clusters.keys():
-            subgroup = self.clusters[key]
-            selected_star = selector(subgroup)
+        for key in subgroups.keys():
+            subgroup = subgroups[key]
+            selected_star = selector_fn(subgroup)
             self.selection[key] = {
                 "star": selected_star,
                 "cluster_size": len(subgroup),

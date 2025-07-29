@@ -50,7 +50,9 @@ def function_scheduler(
     """
     with warnings.catch_warnings(record=True) as outputs:
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(func, *args) for func, *args in functions]
+            futures = [
+                executor.submit(func, *args) for func, *args in functions
+            ]
 
             # Setting progress bar to track the number of completed functions
             progress_bar = tqdm(

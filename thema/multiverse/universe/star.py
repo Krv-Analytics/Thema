@@ -34,7 +34,9 @@ class Star(Core):
             Path to a projectile (child of a Comet) object file.
         """
         super().__init__(
-            data_path=data_path, clean_path=clean_path, projection_path=projection_path
+            data_path=data_path,
+            clean_path=clean_path,
+            projection_path=projection_path,
         )
         self.starGraph = None
 
@@ -62,7 +64,11 @@ class Star(Core):
         force : bool, default=False
             If True, saves object even with an uninitialized or empty starGraph member.
         """
-        if force is True or self.starGraph and len(self.starGraph.graph.nodes()) > 0:
+        if (
+            force is True
+            or self.starGraph
+            and len(self.starGraph.graph.nodes()) > 0
+        ):
             try:
                 with open(file_path, "wb") as f:
                     pickle.dump(self, f)

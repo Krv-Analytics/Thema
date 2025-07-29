@@ -38,9 +38,10 @@ Oort:
     - tsne
     - pca 
 Galaxy:
-  metric: landscape_distance 
+  metric: stellar_curvature_distance
   selector: random
   nReps: 3
+  filter: None
   stars:
     - jmap 
   jmap:

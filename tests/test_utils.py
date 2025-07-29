@@ -113,5 +113,3 @@ _test_cleanData_0 = pd.DataFrame(
         "OH_C_c": [-0.707107, -0.707107, 1.414214],
     }
 )
-
-

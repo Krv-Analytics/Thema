@@ -10,15 +10,17 @@ import networkx as nx
 import numpy as np
 from scott import Comparator
 
+from .utils.starFilters import nofilterfunction
+
 
 def stellar_curvature_distance(
     files,
-    filterfunction: Callable = None,
+    filterfunction: Callable | None = None,
     curvature="forman_curvature",
     vectorization="landscape",
 ):
     """
-    Compute a pairwise distance matrix between graphs based on `grakel` kernels.
+    Compute a pairwise distance matrix between graphs based on curvature filtrations.
 
     Parameters
     ----------
@@ -43,17 +45,24 @@ def stellar_curvature_distance(
     # Convert starGraphs values to a list for indexed access
     starGraph_list = list(starGraphs.values())
 
+    # Extract the actual networkx graphs
+    graphs = [sg.graph for sg in starGraph_list]
+
+    # Map string node IDs to integers for GUDHI compatibility
+    mapped_graphs, node_mapping = _map_string_nodes_to_integers(graphs)
+
     # Create a Curvature Comparator
     C = Comparator(
         measure=curvature,
+        weight="weight",
     )
-    n = len(starGraph_list)
+    n = len(mapped_graphs)
     distance_matrix = np.zeros((n, n))
     for i in range(n):
         for j in range(i + 1, n):
             d_ij = C.fit_transform(
-                [starGraph_list[i].graph],
-                [starGraph_list[j].graph],
+                [mapped_graphs[i]],
+                [mapped_graphs[j]],
                 metric=vectorization,
             )
             distance_matrix[i, j] = d_ij
@@ -62,7 +71,7 @@ def stellar_curvature_distance(
     return np.array(keys), distance_matrix
 
 
-def _load_starGraphs(dir: str, graph_filter: Callable = None) -> dict:
+def _load_starGraphs(dir: str, graph_filter: Callable | None = None) -> dict:
     """
     Load starGraphs in a given directory. This function only
     returns diagrams for starGraphs that satisfy the constraint
@@ -108,5 +117,42 @@ def _load_starGraphs(dir: str, graph_filter: Callable = None) -> dict:
     return starGraphs
 
 
-def nofilterfunction(graphobject):
-    return 1
+def _map_string_nodes_to_integers(graphs):
+    """
+    Map string node IDs to integers for GUDHI compatibility.
+
+    GUDHI's SimplexTree requires integer node IDs, but jmapStar creates
+    graphs with string node IDs ('a', 'b', 'c', etc.). This function
+    creates a consistent mapping across all graphs.
+
+    Parameters
+    ----------
+    graphs : list
+        List of networkx graphs that may have string node IDs
+
+    Returns
+    -------
+    tuple
+        (mapped_graphs, node_mapping) where mapped_graphs have integer
+        node IDs and node_mapping is the string->int mapping dict
+    """
+    # Collect all unique nodes across all graphs
+    all_nodes = set()
+    for graph in graphs:
+        all_nodes.update(graph.nodes())
+
+    # Create consistent mapping from string nodes to integers
+    node_mapping = {node: i for i, node in enumerate(sorted(all_nodes))}
+
+    # Map all graphs to use integer node IDs
+    mapped_graphs = []
+    for graph in graphs:
+        # Only remap if we have non-integer nodes
+        if any(not isinstance(node, int) for node in graph.nodes()):
+            mapped_graph = nx.relabel_nodes(graph, node_mapping)
+            mapped_graphs.append(mapped_graph)
+        else:
+            # Graph already has integer nodes
+            mapped_graphs.append(graph.copy())
+
+    return mapped_graphs, node_mapping

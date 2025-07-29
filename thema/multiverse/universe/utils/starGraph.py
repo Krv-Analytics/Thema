@@ -133,7 +133,9 @@ class starGraph:
             mst = nx.Graph()
 
             for i in range(len(self._components)):
-                cc_mst = nx.minimum_spanning_tree(self._components[i], weight="weight")
+                cc_mst = nx.minimum_spanning_tree(
+                    self._components[i], weight="weight"
+                )
 
                 # Component is to be split into specified number of groups
                 if i in components:
@@ -192,4 +194,6 @@ class starGraph:
             return shortest_path, path_length
 
         except nx.NetworkXNoPath:
-            return None, float("inf")  # No path exists, return None and infinity length
+            return None, float(
+                "inf"
+            )  # No path exists, return None and infinity length

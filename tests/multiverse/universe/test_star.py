@@ -1,6 +1,6 @@
 # File: tests/multiverse/universe/test_star.py
-# Lasted Updated: 04-06-24
-# Updated By: SW
+# Lasted Updated: 07/29/25
+# Updated By: JW
 
 import pytest
 import pickle
@@ -8,7 +8,7 @@ import pickle
 from thema.multiverse.universe.star import Star
 
 
-class Test_star:
+class TestStar:
     """PyTesting Class for Star"""
 
     def test_inits_empty(self):

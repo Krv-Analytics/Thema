@@ -21,7 +21,9 @@ class Realtor:
         """
         G = self.graph
         node_distances = cdist([self.target], self.node_features, metric=metric)
-        group_distances = cdist([self.target], self.group_features, metric=metric)
+        group_distances = cdist(
+            [self.target], self.group_features, metric=metric
+        )
         samples = []
         for _ in range(n_samples):
             # select a random starting point
@@ -29,14 +31,18 @@ class Realtor:
             for __ in range(m_steps):
                 # choose a neighbor (including self loops) based on feature distances
                 neighbors = list(G.neighbors(current_node)) + [current_node]
-                neighbor_distances = node_distances[0, [int(nb) for nb in neighbors]]
+                neighbor_distances = node_distances[
+                    0, [int(nb) for nb in neighbors]
+                ]
                 t_probabilities = neighbor_distances / sum(neighbor_distances)
                 current_node = np.random.choice(neighbors, p=t_probabilities)
 
                 # if no good local choices, jump somewhere else with prob 1/4
                 if (
                     max(neighbor_distances)
-                    > np.average(group_distances)  # could take Nth quantile here.
+                    > np.average(
+                        group_distances
+                    )  # could take Nth quantile here.
                     and np.random.rand() < 1 / 4
                 ):
                     current_node = np.random.choice(list(G.nodes))
