@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "openpyxl>=3.1.5",
     "pytest>=8.4.1",
