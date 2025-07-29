@@ -11,9 +11,6 @@ import pickle
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
-from sklearn.manifold import MDS
-import plotly.graph_objects as go
-import plotly.express as px
 from sklearn.cluster import AgglomerativeClustering
 
 from .utils import starFilters, starSelectors
