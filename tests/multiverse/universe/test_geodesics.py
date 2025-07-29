@@ -7,8 +7,7 @@ import os
 import numpy as np
 import networkx as nx
 
-from thema.multiverse.universe import geodesics,starGraph
-
+from thema.multiverse.universe import geodesics, starGraph
 
 
 class Test_Geodesics:
@@ -18,18 +17,18 @@ class Test_Geodesics:
         files = temp_starGraphs
         graphs = geodesics._load_starGraphs(files)
         assert len(graphs) == len(os.listdir(files))
-        for id_,sG in graphs.items():
+        for id_, sG in graphs.items():
             assert os.path.exists(id_)
-            assert isinstance(sG.graph,nx.Graph)
-        
+            assert isinstance(sG.graph, nx.Graph)
 
-
-    def test_stellar_kernel_distance(self, temp_starGraphs):
+    def test_stellar_curvature_distance(self, temp_starGraphs):
         files = temp_starGraphs
-        keys,M = geodesics.stellar_kernel_distance(files,filterfunction=None)
+        keys, M = geodesics.stellar_curvature_distance(
+            files,
+            filterfunction=None,
+        )
         assert len(keys) == M.shape[0]
         assert isinstance(M, np.ndarray)
         for key in keys:
-            assert os.path.exists(key)    
+            assert os.path.exists(key)
         assert np.allclose(M, M.T)
-	

@@ -1,5 +1,5 @@
 # File: multiverse/universe/geodesics.py
-# Lasted Updated: 05/15/24
+# Lasted Updated: 07/29/25
 # Updated By: JW
 
 import os
@@ -8,14 +8,14 @@ from typing import Callable
 
 import networkx as nx
 import numpy as np
-from grakel import GraphKernel
-from grakel.utils import graph_from_networkx
+from scott import Comparator
 
 
-def stellar_kernel_distance(
+def stellar_curvature_distance(
     files,
     filterfunction: Callable = None,
-    kernel="shortest_path",
+    curvature="forman_curvature",
+    vectorization="landscape",
 ):
     """
     Compute a pairwise distance matrix between graphs based on `grakel` kernels.
@@ -39,21 +39,26 @@ def stellar_kernel_distance(
         A pairwise distance matrix between the persistence landscapes of the starGraphs.
     """
     starGraphs = _load_starGraphs(files, filterfunction)
-    # Assign class 0 label to all nodes
-    nx_graphs = []
-    for sG in starGraphs.values():
-        G = sG.graph
-        node_labels = {node: 0 for node in G.nodes()}
-        nx.set_node_attributes(G, node_labels, "class")
-        nx_graphs.append(G)
-
     keys = list(starGraphs.keys())
-    # Convert to GraKel Graphs
-    G = graph_from_networkx(nx_graphs, node_labels_tag="class")
-    gk = GraphKernel(kernel=kernel, normalize=True)
+    # Convert starGraphs values to a list for indexed access
+    starGraph_list = list(starGraphs.values())
 
-    # Distance as 1 - similarity
-    distance_matrix = 1 - gk.fit_transform(G)
+    # Create a Curvature Comparator
+    C = Comparator(
+        measure=curvature,
+    )
+    n = len(starGraph_list)
+    distance_matrix = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            d_ij = C.fit_transform(
+                [starGraph_list[i].graph],
+                [starGraph_list[j].graph],
+                metric=vectorization,
+            )
+            distance_matrix[i, j] = d_ij
+            distance_matrix[j, i] = d_ij
+
     return np.array(keys), distance_matrix
 
 
