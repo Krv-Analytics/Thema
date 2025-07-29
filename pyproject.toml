@@ -5,11 +5,15 @@ description = "Topological Hyperparameter Evaluation and Mapping Algorithm, by K
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "category-encoders>=2.8.1",
     "curvature-filtrations>=0.1.1",
     "networkx>=3.4.2",
     "numpy>=2.2.6",
+    "omegaconf>=2.3.0",
     "pandas>=2.3.1",
+    "pyyaml>=6.0.2",
     "scikit-learn>=1.7.1",
+    "tqdm>=4.67.1",
 ]
 
 [dependency-groups]
