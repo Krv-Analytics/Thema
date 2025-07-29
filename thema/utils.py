@@ -3,6 +3,7 @@
 # Updated by: JW
 
 import os
+import re
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -151,7 +152,7 @@ def unpack_dataPath_types(data):
 
 def create_file_name(className, classParameters, id=None):
     """
-    Generate a filename for a class based on its name, parameters,
+    Generate a safe filename for a class based on its name, parameters,
     and an optional ID.
 
     Parameters:
@@ -160,28 +161,25 @@ def create_file_name(className, classParameters, id=None):
         The name of the class.
     classParameters : dict
         A dictionary containing the parameters of the class.
-    id : int, optional
+    id : int or str, optional
         An optional ID to append to the filename.
 
     Returns:
-    -----------
+    --------
     str
-        The filename for the class.
-
-    Examples:
-    -----------
-    >>> create_file_name("MyClass", {"param1": 10, "param2": "abc"})
-    'MyClass_param110_param2abc.pkl'
-
-    >>> create_file_name("AnotherClass", {"param1": 5, "param2": "xyz"}, id=123)
-    'AnotherClass_param15_param2xyz_id123.pkl'
+        A sanitized, safe filename for the class.
     """
-    illegal_chars = ["[", "]", ",", "{", "}", ",", "'", "/", " ", ":"]
-    filename = f"{className}_"
-    for parameter, value in classParameters.items():
-        filename += f"{parameter}{value}_"
+
+    def sanitize(value):
+        # Convert to string, replace '.' with '_', remove illegal characters
+        val_str = str(value).replace(".", "_")
+        return re.sub(r"[^\w\-]", "", val_str)
+
+    parts = [className]
+    for key, val in sorted(classParameters.items()):
+        parts.append(f"{sanitize(key)}{sanitize(val)}")
     if id is not None:
-        filename += f"id{id}"
-    filename += ".pkl"
-    filename = "".join(c for c in filename if c not in illegal_chars)
+        parts.append(f"id{sanitize(id)}")
+
+    filename = "_".join(parts) + ".pkl"
     return filename

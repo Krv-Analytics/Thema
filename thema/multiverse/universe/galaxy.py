@@ -126,9 +126,7 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(
-                YAML_PATH
-            ), "yaml parameter file could not be found."
+            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -136,15 +134,11 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(
-                yamlParams.outDir, yamlParams.runName + "/clean/"
-            )
+            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(
-                yamlParams.outDir, yamlParams.runName + "/models/"
-            )
+            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -204,64 +198,72 @@ class Galaxy:
 
     def fit(self):
         """
-        Configure and generate space of Stars
-        Uses the `ProcessPoolExecutor` library to spawn multiple star
-        instances and fit them.
+        Configure and generate space of Stars.
+        Uses the `function_scheduler` to spawn multiple star
+        instances and fit them in parallel.
 
         Returns
         ------
         None
-            Saves star objects to outDir
+            Saves star objects to outDir and prints a count of failed saves.
         """
 
         subprocesses = []
+
         for starName, starParamsDict in self.params.items():
             star_configName = config.tag_to_class[starName]
             cfg = getattr(config, star_configName)
             module = importlib.import_module(cfg.module)
             star = module.initialize()
+
+            # Load matching files
             cleanfile_pattern = os.path.join(self.cleanDir, "*.pkl")
             valid_cleanFiles = glob.glob(cleanfile_pattern)
+
             projfile_pattern = os.path.join(self.projDir, "*.pkl")
             valid_projFiles = glob.glob(projfile_pattern)
+
             for j, projFile in enumerate(valid_projFiles):
-                projFile = os.path.join(self.projDir, projFile)
-                with open(projFile, "rb") as f:
+                projFilePath = os.path.join(self.projDir, projFile)
+                with open(projFilePath, "rb") as f:
                     cleanFile = pickle.load(f).get_clean_path()
-                    parameter_combinations = itertools.product(
-                        itertools.product(
-                            *[
-                                starParamsDict[attr]
-                                for attr in sorted(cfg.__annotations__)
-                                if attr not in ["name", "module"]
-                            ]
-                        )
-                    )
-                    for k, combination in enumerate(parameter_combinations):
-                        starParameters = {
-                            key: value
-                            for key, value in zip(
-                                sorted(starParamsDict.keys()), combination[0]
-                            )
-                        }
-                        cmd = (
+
+                param_attr_names = [
+                    attr
+                    for attr in sorted(cfg.__annotations__)
+                    if attr not in ["name", "module"]
+                ]
+                param_combinations = itertools.product(
+                    *[starParamsDict[attr] for attr in param_attr_names]
+                )
+
+                for k, combination in enumerate(param_combinations):
+                    starParameters = dict(zip(param_attr_names, combination))
+
+                    subprocesses.append(
+                        (
                             self._instantiate_star,
                             self.data,
                             cleanFile,
-                            projFile,
+                            projFilePath,
                             star,
                             starParameters,
                             starName,
                             f"{k}_{j}",
                         )
-                        subprocesses.append(cmd)
+                    )
 
-        function_scheduler(
+        # Run with function scheduler
+        results = function_scheduler(
             subprocesses,
-            4,
-            "SUCCESS: Graph Generation(s)",
+            max_workers=4,
             resilient=True,
             verbose=self.verbose,
+        )
+
+        failed_saves = sum(1 for r in results if r is False)
+        print(
+            f"\n⭐️ {failed_saves} star object(s) were not saved due to empty or invalid graphs."
         )
 
     def _instantiate_star(
@@ -310,7 +312,7 @@ class Galaxy:
         my_star.fit()
         output_file = create_file_name(starName, starParameters, id)
         output_file = os.path.join(self.outDir, output_file)
-        my_star.save(output_file)
+        return my_star.save(output_file)
 
     def collapse(
         self,
@@ -351,18 +353,14 @@ class Galaxy:
         if filter_fn is None:
             filter_fn = self.filterFn
 
-        metric_fn = getattr(
-            geodesics, metric, geodesics.stellar_curvature_distance
-        )
+        metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
         # Handle the filter function
         if filter_fn is None:
             filter_fn = starFilters.nofilterfunction
         else:
-            filter_fn = getattr(
-                starFilters, filter_fn, starFilters.nofilterfunction
-            )
+            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
 
         self.keys, self.distances = metric_fn(
             files=self.outDir, filterfunction=filter_fn, **kwargs
@@ -398,16 +396,17 @@ class Galaxy:
         Save the current object instance to a file using pickle serialization.
 
         Parameters
-        ---------
-            file_path:  str
-              The path to the file where the object will be saved.
-
+        ----------
+        file_path : str
+            The path to the file where the object will be saved.
         """
         try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "wb") as f:
                 pickle.dump(self, f)
+            print(f"Saved object to {file_path}")
         except Exception as e:
-            print(e)
+            print(f"Failed to save object: {e}")
 
     def getParams(self):
         """

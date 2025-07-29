@@ -2,6 +2,7 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
+import os
 import pickle
 from abc import abstractmethod
 
@@ -62,15 +63,28 @@ class Star(Core):
             The path to the file where the object will be saved.
 
         force : bool, default=False
-            If True, saves object even with an uninitialized or empty starGraph member.
+            If True, saves object even if the starGraph is uninitialized or empty.
+
+        Returns
+        -------
+        bool
+            True if saved successfully, False otherwise.
         """
-        if (
-            force is True
-            or self.starGraph
-            and len(self.starGraph.graph.nodes()) > 0
-        ):
-            try:
+        try:
+            save_ok = (
+                force
+                or hasattr(self, "starGraph")
+                and hasattr(self.starGraph, "graph")
+                and hasattr(self.starGraph.graph, "nodes")
+                and len(self.starGraph.graph.nodes()) > 0
+            )
+
+            if save_ok:
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 with open(file_path, "wb") as f:
                     pickle.dump(self, f)
-            except Exception as e:
-                print(e)
+                return True
+            else:
+                return False
+        except Exception:
+            return False

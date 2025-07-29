@@ -1,0 +1,250 @@
+diff --git a/thema/multiverse/universe/galaxy.py b/thema/multiverse/universe/galaxy.py
+index f59eeed..2a54aac 100644
+--- a/thema/multiverse/universe/galaxy.py
++++ b/thema/multiverse/universe/galaxy.py
+@@ -196,67 +196,74 @@ class Galaxy:
+ 
+     def fit(self):
+         """
+-        Configure and generate space of Stars
+-        Uses the `ProcessPoolExecutor` library to spawn multiple star
+-        instances and fit them.
++        Configure and generate space of Stars.
++        Uses the `function_scheduler` to spawn multiple star
++        instances and fit them in parallel.
+ 
+         Returns
+         ------
+         None
+-            Saves star objects to outDir
++            Saves star objects to outDir and prints a count of failed saves.
+         """
+ 
+         subprocesses = []
++
+         for starName, starParamsDict in self.params.items():
+             star_configName = config.tag_to_class[starName]
+             cfg = getattr(config, star_configName)
+             module = importlib.import_module(cfg.module)
+             star = module.initialize()
++
++            # Load matching files
+             cleanfile_pattern = os.path.join(self.cleanDir, "*.pkl")
+             valid_cleanFiles = glob.glob(cleanfile_pattern)
++
+             projfile_pattern = os.path.join(self.projDir, "*.pkl")
+             valid_projFiles = glob.glob(projfile_pattern)
++
+             for j, projFile in enumerate(valid_projFiles):
+-                projFile = os.path.join(self.projDir, projFile)
+-                with open(projFile, "rb") as f:
++                projFilePath = os.path.join(self.projDir, projFile)
++                with open(projFilePath, "rb") as f:
+                     cleanFile = pickle.load(f).get_clean_path()
+-                    parameter_combinations = itertools.product(
+-                        itertools.product(
+-                            *[
+-                                starParamsDict[attr]
+-                                for attr in sorted(cfg.__annotations__)
+-                                if attr not in ["name", "module"]
+-                            ]
+-                        )
+-                    )
+-                    for k, combination in enumerate(parameter_combinations):
+-                        starParameters = {
+-                            key: value
+-                            for key, value in zip(
+-                                sorted(starParamsDict.keys()), combination[0]
+-                            )
+-                        }
+-                        cmd = (
++
++                param_attr_names = [
++                    attr
++                    for attr in sorted(cfg.__annotations__)
++                    if attr not in ["name", "module"]
++                ]
++                param_combinations = itertools.product(
++                    *[starParamsDict[attr] for attr in param_attr_names]
++                )
++
++                for k, combination in enumerate(param_combinations):
++                    starParameters = dict(zip(param_attr_names, combination))
++
++                    subprocesses.append(
++                        (
+                             self._instantiate_star,
+                             self.data,
+                             cleanFile,
+-                            projFile,
++                            projFilePath,
+                             star,
+                             starParameters,
+                             starName,
+                             f"{k}_{j}",
+                         )
+-                        subprocesses.append(cmd)
++                    )
+ 
+-        # TODO: Optimize max workers
+-        function_scheduler(
++        # Run with function scheduler
++        results = function_scheduler(
+             subprocesses,
+-            4,
+-            "SUCCESS: Graph Generation(s)",
++            max_workers=4,
+             resilient=True,
+             verbose=self.verbose,
+         )
+ 
++        failed_saves = sum(1 for r in results if r is False)
++        print(
++            f"\n⭐️ {failed_saves} star object(s) were not saved due to empty or invalid graphs."
++        )
++
+     def _instantiate_star(
+         self,
+         data_path,
+@@ -303,7 +310,7 @@ class Galaxy:
+         my_star.fit()
+         output_file = create_file_name(starName, starParameters, id)
+         output_file = os.path.join(self.outDir, output_file)
+-        my_star.save(output_file)
++        return my_star.save(output_file)
+ 
+     def collapse(self, metric=None, nReps=None, selector=None, **kwargs):
+         """
+@@ -456,16 +463,17 @@ class Galaxy:
+         Save the current object instance to a file using pickle serialization.
+ 
+         Parameters
+-        ---------
+-            file_path:  str
+-              The path to the file where the object will be saved.
+-
++        ----------
++        file_path : str
++            The path to the file where the object will be saved.
+         """
+         try:
++            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+             with open(file_path, "wb") as f:
+                 pickle.dump(self, f)
++            print(f"Saved object to {file_path}")
+         except Exception as e:
+-            print(e)
++            print(f"Failed to save object: {e}")
+ 
+     def getParams(self):
+         """
+diff --git a/thema/multiverse/universe/star.py b/thema/multiverse/universe/star.py
+index 9323816..1335e67 100644
+--- a/thema/multiverse/universe/star.py
++++ b/thema/multiverse/universe/star.py
+@@ -2,6 +2,7 @@
+ # Last Update: 05/15/24
+ # Updated by: JW
+ 
++import os
+ import pickle
+ from abc import abstractmethod
+ 
+@@ -60,11 +61,28 @@ class Star(Core):
+             The path to the file where the object will be saved.
+ 
+         force : bool, default=False
+-            If True, saves object even with an uninitialized or empty starGraph member.
++            If True, saves object even if the starGraph is uninitialized or empty.
++
++        Returns
++        -------
++        bool
++            True if saved successfully, False otherwise.
+         """
+-        if force is True or self.starGraph and len(self.starGraph.graph.nodes()) > 0:
+-            try:
++        try:
++            save_ok = (
++                force
++                or hasattr(self, "starGraph")
++                and hasattr(self.starGraph, "graph")
++                and hasattr(self.starGraph.graph, "nodes")
++                and len(self.starGraph.graph.nodes()) > 0
++            )
++
++            if save_ok:
++                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                 with open(file_path, "wb") as f:
+                     pickle.dump(self, f)
+-            except Exception as e:
+-                print(e)
++                return True
++            else:
++                return False
++        except Exception:
++            return False
+diff --git a/thema/utils.py b/thema/utils.py
+index 025984e..90e11ec 100644
+--- a/thema/utils.py
++++ b/thema/utils.py
+@@ -3,6 +3,7 @@
+ # Updated by: JW
+ 
+ import os
++import re
+ import warnings
+ from concurrent.futures import ProcessPoolExecutor, as_completed
+ 
+@@ -149,7 +150,7 @@ def unpack_dataPath_types(data):
+ 
+ def create_file_name(className, classParameters, id=None):
+     """
+-    Generate a filename for a class based on its name, parameters,
++    Generate a safe filename for a class based on its name, parameters,
+     and an optional ID.
+ 
+     Parameters:
+@@ -158,28 +159,25 @@ def create_file_name(className, classParameters, id=None):
+         The name of the class.
+     classParameters : dict
+         A dictionary containing the parameters of the class.
+-    id : int, optional
++    id : int or str, optional
+         An optional ID to append to the filename.
+ 
+     Returns:
+-    -----------
++    --------
+     str
+-        The filename for the class.
++        A sanitized, safe filename for the class.
++    """
+ 
+-    Examples:
+-    -----------
+-    >>> create_file_name("MyClass", {"param1": 10, "param2": "abc"})
+-    'MyClass_param110_param2abc.pkl'
++    def sanitize(value):
++        # Convert to string, replace '.' with '_', remove illegal characters
++        val_str = str(value).replace(".", "_")
++        return re.sub(r"[^\w\-]", "", val_str)
+ 
+-    >>> create_file_name("AnotherClass", {"param1": 5, "param2": "xyz"}, id=123)
+-    'AnotherClass_param15_param2xyz_id123.pkl'
+-    """
+-    illegal_chars = ["[", "]", ",", "{", "}", ",", "'", "/", " ", ":"]
+-    filename = f"{className}_"
+-    for parameter, value in classParameters.items():
+-        filename += f"{parameter}{value}_"
++    parts = [className]
++    for key, val in sorted(classParameters.items()):
++        parts.append(f"{sanitize(key)}{sanitize(val)}")
+     if id is not None:
+-        filename += f"id{id}"
+-    filename += ".pkl"
+-    filename = "".join(c for c in filename if c not in illegal_chars)
++        parts.append(f"id{sanitize(id)}")
++
++    filename = "_".join(parts) + ".pkl"
+     return filename
