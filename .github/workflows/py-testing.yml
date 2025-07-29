@@ -38,4 +38,4 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest --cov=thema --cov-report=xml --cov-report=html --cov-fail-under=80
+          uv run python -m pytest --cov=thema --cov-report=xml --cov-report=html --cov-fail-under=80
