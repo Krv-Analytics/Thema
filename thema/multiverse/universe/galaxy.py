@@ -10,12 +10,8 @@ import pickle
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import yaml
 from omegaconf import OmegaConf
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.manifold import MDS
 
 from ... import config
 from ...utils import create_file_name, function_scheduler
@@ -128,7 +124,9 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -136,11 +134,15 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
+            cleanDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/clean/"
+            )
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
+            outDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/models/"
+            )
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -377,79 +379,6 @@ class Galaxy:
                 "cluster_size": len(subgroup),
             }
         return self.selection
-
-    def show_mds(self, randomState: int = None):
-        """
-        Generates an embedding based on precomputed metric.
-
-        Parameters
-        ---------
-        randomState : int, default None
-            seed to set MDS and ensure reproducable results
-
-        Returns
-        ------
-        None
-            Shows a plot of the embedding.
-        """
-
-        if self.distances is None:
-            metric = getattr(geodesics, self.metric)
-            self.keys, self.distances = metric(files=self.outDir, filterfunction=None)
-        mds = MDS(dissimilarity="precomputed", random_state=randomState)
-        X = mds.fit_transform(X=self.distances)
-        df = pd.DataFrame(X, columns=["x", "y"])
-
-        ## --> FIXME weird bug where, when running multiple times, this
-        # continues appending to the front of the color scale
-        colorscale = px.colors.sequential.Reds.copy()
-        colorscale.insert(0, "rgba(255, 255, 255, 0)")
-
-        # Create figure
-        fig = go.Figure()
-
-        # Add 2D histogram contour
-        fig.add_trace(
-            go.Histogram2dContour(
-                colorbar={"title": "", "tickvals": []},
-                x=df["x"],
-                y=df["y"],
-                colorscale=colorscale,
-                xaxis="x",
-                yaxis="y",
-            )
-        )
-
-        # Add scatter plot
-        fig.add_trace(
-            go.Scatter(
-                x=df["x"],
-                y=df["y"],
-                mode="markers",
-                marker={
-                    "color": "grey",
-                    "opacity": 0.5,
-                    "line": {"width": 1, "color": "black"},
-                },
-                customdata=df.index,
-                hovertemplate="Index: %{customdata}<extra></extra>",
-            )
-        )
-
-        # Update fig axis template
-        fig.update_layout(template="none", width=1100, height=700, margin={"r": 100})
-        fig.add_annotation(
-            x=1.1,
-            y=0.5,
-            xref="paper",
-            yref="paper",
-            text="Model Density",
-            showarrow=False,
-            font=dict(size=15),
-            textangle=90,
-        )
-        # Show figure
-        fig.show()
 
     def save(self, file_path):
         """
