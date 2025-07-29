@@ -1801,11 +1801,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/26/60/1ddff83a56d33aaf6f10ec8ce84b4c007d9368b21008876fceda7e7381ef/sphinx-8.1.3-py3-none-any.whl", hash = "sha256:09719015511837b76bf6e03e42eb7595ac8c2e41eeb9c29c5b755c6b677992a2", size = 3487125, upload-time = "2024-10-13T20:27:10.448Z" },
 ]
 
-[package.optional-dependencies]
-docs = [
-    { name = "sphinxcontrib-websupport" },
-]
-
 [[package]]
 name = "sphinx-basic-ng"
 version = "1.0.0b2"
@@ -1885,20 +1880,6 @@ wheels = [
 ]
 
 [[package]]
-name = "sphinxcontrib-websupport"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "jinja2" },
-    { name = "sphinx" },
-    { name = "sphinxcontrib-serializinghtml" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/87/ed/11167ae7c3eb80e7c67823bceea24207bb7b886aefde6c367b4a571c05de/sphinxcontrib_websupport-2.0.0.tar.gz", hash = "sha256:0b7367d3bac6454b1f97e42aa8c4d4d4a1b756d525fc726ebbe5571e033e79cd", size = 600125, upload-time = "2024-07-29T01:10:23.095Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1a/c9/b9ce2eaacaf75d94a5ee5b809bb2be351f1c9cda5c14316cc53b1aea0650/sphinxcontrib_websupport-2.0.0-py3-none-any.whl", hash = "sha256:365b4da67e03cc163dc4752ed44b3c4bc334172c8198102135a7eb7945111229", size = 37069, upload-time = "2024-07-29T01:10:21.538Z" },
-]
-
-[[package]]
 name = "stack-data"
 version = "0.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1960,12 +1941,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "category-encoders" },
     { name = "curvature-filtrations" },
-    { name = "furo" },
     { name = "hdbscan" },
-    { name = "ipython", version = "8.37.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "ipython", version = "9.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "kmapper" },
-    { name = "nbsphinx" },
     { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "networkx", version = "3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1974,8 +1951,6 @@ dependencies = [
     { name = "pandas" },
     { name = "pyyaml" },
     { name = "scikit-learn" },
-    { name = "sphinx", extra = ["docs"] },
-    { name = "sphinx-design" },
     { name = "tqdm" },
 ]
 
@@ -1985,24 +1960,27 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
 ]
+docs = [
+    { name = "furo" },
+    { name = "ipython", version = "8.37.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "nbsphinx" },
+    { name = "sphinx" },
+    { name = "sphinx-design" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "category-encoders", specifier = ">=2.8.1" },
     { name = "curvature-filtrations", specifier = ">=0.1.1" },
-    { name = "furo", extras = ["docs"], specifier = ">=2025.7.19" },
     { name = "hdbscan", specifier = ">=0.8.40" },
-    { name = "ipython", extras = ["docs"], specifier = ">=8.37.0" },
     { name = "kmapper", specifier = ">=2.1.0" },
-    { name = "nbsphinx", extras = ["docs"], specifier = ">=0.9.7" },
     { name = "networkx", specifier = ">=3.4.2" },
     { name = "numpy", specifier = ">=2.2.6" },
     { name = "omegaconf", specifier = ">=2.3.0" },
     { name = "pandas", specifier = ">=2.3.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "scikit-learn", specifier = ">=1.7.1" },
-    { name = "sphinx", extras = ["docs"], specifier = ">=8.1.3" },
-    { name = "sphinx-design", extras = ["docs"], specifier = ">=0.6.1" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
 
@@ -2011,6 +1989,13 @@ dev = [
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
+]
+docs = [
+    { name = "furo", specifier = ">=2025.7.19" },
+    { name = "ipython", specifier = ">=8.37.0" },
+    { name = "nbsphinx", specifier = ">=0.9.7" },
+    { name = "sphinx", specifier = ">=8.1.3" },
+    { name = "sphinx-design", specifier = ">=0.6.1" },
 ]
 
 [[package]]
