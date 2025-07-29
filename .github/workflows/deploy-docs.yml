@@ -24,7 +24,7 @@ jobs:
 
       # Install dependencies and documentation tools
       - run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      - run: uv sync --extra dev --extra docs
+      - run: uv sync --extra docs
       - run: uv pip install umap-learn
       - run: uv run sphinx-build -M html docs/source docs/build
 
