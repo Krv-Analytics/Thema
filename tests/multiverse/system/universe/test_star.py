@@ -15,16 +15,16 @@ class TestStar:
         with pytest.raises(TypeError):
             Star()
 
-    def test_inits_defaults(self, tmp_umapMoonAndData):
-        tmp_dataFile, tmp_moon, tmp_projectile = tmp_umapMoonAndData
+    def test_inits_defaults(self, tmp_tsneMoonAndData):
+        tmp_dataFile, tmp_moon, tmp_projectile = tmp_tsneMoonAndData
         Star(
             data_path=tmp_dataFile.name,
             clean_path=tmp_moon.name,
             projection_path=tmp_projectile.name,
         )
 
-    def test_fit(self, tmp_umapMoonAndData):
-        tmp_dataFile, tmp_moon, tmp_projectile = tmp_umapMoonAndData
+    def test_fit(self, tmp_tsneMoonAndData):
+        tmp_dataFile, tmp_moon, tmp_projectile = tmp_tsneMoonAndData
         with pytest.raises(NotImplementedError):
             star = Star(
                 data_path=tmp_dataFile.name,
@@ -33,8 +33,8 @@ class TestStar:
             )
             star.fit()
 
-    def test_save(self, tmp_umapMoonAndData, tmp_file):
-        tmp_dataFile, tmp_moon, tmp_projectile = tmp_umapMoonAndData
+    def test_save(self, tmp_tsneMoonAndData, tmp_file):
+        tmp_dataFile, tmp_moon, tmp_projectile = tmp_tsneMoonAndData
         star = Star(
             data_path=tmp_dataFile.name,
             clean_path=tmp_moon.name,

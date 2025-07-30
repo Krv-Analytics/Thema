@@ -19,7 +19,8 @@ from thema.multiverse import Planet, Oort
 from thema.multiverse.system.inner.moon import Moon
 from thema.multiverse.system.outer.projectiles.pcaProj import pcaProj
 from thema.multiverse.system.outer.projectiles.tsneProj import tsneProj
-from thema.multiverse.system.outer.projectiles.umapProj import umapProj
+
+# Removed umapProj import
 from thema.multiverse.universe.utils.starGraph import starGraph
 
 
@@ -38,71 +39,7 @@ def tmp_outDir():
         shutil.rmtree(tmp_outDir)
 
 
-@pytest.fixture
-def tmp_umapMoonAndData():
-    """
-    Creates a temporary pre-configured tuple consisting of
-    raw data, a moon object, and a umap projectile.
-    """
-    with tempfile.NamedTemporaryFile(
-        suffix=".pkl",
-        mode="wb",
-        delete=True,
-    ) as tmp_dataFile:
-        ut.generate_dataframe().to_pickle(tmp_dataFile.name)
-        with tempfile.NamedTemporaryFile(
-            suffix=".pkl",
-            mode="wb",
-        ) as tmp_moon:
-            moon = Moon(
-                data=tmp_dataFile.name,
-                imputeColumns=[
-                    "Num1",
-                    "Num2",
-                    "Num3",
-                    "Num4",
-                    "Num5",
-                    "Num6",
-                    "Num7",
-                    "Num8",
-                    "Num9",
-                    "Num10",
-                ],
-                imputeMethods=[
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                    "sampleNormal",
-                ],
-                encoding="one_hot",
-                scaler="standard",
-                seed=42,
-            )
-            moon.fit()
-            moon.save(tmp_moon.name)
-            with tempfile.NamedTemporaryFile(
-                suffix=".pkl", mode="wb"
-            ) as tmp_projectile:
-                umapproj = umapProj(
-                    data_path=tmp_dataFile.name,
-                    clean_path=tmp_moon.name,
-                    nn=4,
-                    minDist=0.2,
-                    dimensions=2,
-                    seed=42,
-                )
-                umapproj.fit()
-                umapproj.save(file_path=tmp_projectile.name)
-                yield tmp_dataFile, tmp_moon, tmp_projectile
-            tmp_projectile.close()
-        tmp_moon.close()
-    tmp_dataFile.close()
+# Removed tmp_umapMoonAndData fixture in favor of tmp_tsneMoonAndData
 
 
 @pytest.fixture
@@ -255,13 +192,7 @@ def temp_galaxyYaml_1():
             }
 
             projecting = {
-                "projectiles": ["umap", "tsne", "pca"],
-                "umap": {
-                    "nn": [2],
-                    "minDist": [0.1, 0.2],
-                    "dimensions": [2],
-                    "seed": [42],
-                },
+                "projectiles": ["tsne", "pca"],
                 "tsne": {"perplexity": [2], "dimensions": [2], "seed": [42]},
                 "pca": {"dimensions": [2], "seed": [42]},
             }
@@ -284,12 +215,6 @@ def temp_galaxyYaml_1():
             }
 
             params = {
-                "umap": {
-                    "nn": [2],
-                    "minDist": [0.1],
-                    "dimensions": [2],
-                    "seed": [42],
-                },
                 "tsne": {"perplexity": [2], "dimensions": [2], "seed": [42]},
                 "pca": {"dimensions": [2], "seed": [42]},
             }
@@ -345,7 +270,7 @@ def temp_starGraphs():
             # Create base graph structure
             n_nodes = np.random.randint(low=20, high=80)
             G = nx.erdos_renyi_graph(n_nodes, 0.05 + 0.15 * np.random.random())
-            
+
             # Convert to string node IDs like jmapStar's convert_keys_to_alphabet function
             def generate_node_id(index):
                 """Generate string node IDs like jmapStar: a, b, c, ..., z, aa, ab, etc."""
@@ -356,10 +281,10 @@ def temp_starGraphs():
                     result = chr(ord("a") + (position % base)) + result
                     position = (position // base) - 1
                 return result
-            
+
             mapping = {old_id: generate_node_id(old_id) for old_id in G.nodes()}
             G = nx.relabel_nodes(G, mapping)
-            
+
             # Set jmap-style float weights mimicking Nerve.compute_weighted_edges
             # Real jmap weights are round(1/overlap, 3) where overlap is node intersection count
             for u, v in G.edges():
@@ -367,7 +292,7 @@ def temp_starGraphs():
                 overlap = np.random.randint(1, 11)
                 weight = round(1.0 / overlap, 3)
                 G[u][v]["weight"] = weight
-            
+
             graph_object = test_star(graph=G)
             file_path = os.path.join(temp_dir, f"jmap_realistic_graph_{i}.pkl")
             with open(file_path, "wb") as f:
@@ -383,73 +308,91 @@ def temp_real_jmap_starGraphs():
     """Create starGraphs using actual jmapStar objects with realistic parameters"""
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a small dataset for jmapStar to work with
-        with tempfile.NamedTemporaryFile(suffix='.pkl', delete=False) as tmp_dataFile:
+        with tempfile.NamedTemporaryFile(
+            suffix=".pkl", delete=False
+        ) as tmp_dataFile:
             test_data = ut.generate_dataframe()
             test_data.to_pickle(tmp_dataFile.name)
-            
+
             # Create minimal moon and comet objects
             with tempfile.TemporaryDirectory() as pipeline_dir:
                 # Create Moon
                 moon = Moon(
                     data=tmp_dataFile.name,
-                    imputeColumns=['B'],
-                    imputeMethods=['sampleNormal'],
-                    encoding='one_hot',
-                    scaler='standard',
-                    seed=42
+                    imputeColumns=["B"],
+                    imputeMethods=["sampleNormal"],
+                    encoding="one_hot",
+                    scaler="standard",
+                    seed=42,
                 )
                 moon.fit()
-                moon_file = os.path.join(pipeline_dir, 'moon.pkl')
+                moon_file = os.path.join(pipeline_dir, "moon.pkl")
                 moon.save(moon_file)
-                
-                # Create UMAP projection
-                umap_proj = umapProj(
+
+                # Create TSNE projection
+                tsne_proj = tsneProj(
                     data_path=tmp_dataFile.name,
                     clean_path=moon_file,
-                    nn=4,
-                    minDist=0.1,
+                    perplexity=4,
                     dimensions=2,
-                    seed=42
+                    seed=42,
                 )
-                umap_proj.fit()
-                proj_file = os.path.join(pipeline_dir, 'umap.pkl')
-                umap_proj.save(proj_file)
-                
+                tsne_proj.fit()
+                proj_file = os.path.join(pipeline_dir, "tsne.pkl")
+                tsne_proj.save(proj_file)
+
                 # Create multiple jmapStar objects with different parameters
                 jmap_configs = [
-                    {'nCubes': 4, 'percOverlap': 0.5, 'minIntersection': -1, 
-                     'clusterer': ['HDBSCAN', {'min_cluster_size': 2}]},
-                    {'nCubes': 6, 'percOverlap': 0.3, 'minIntersection': -1,
-                     'clusterer': ['HDBSCAN', {'min_cluster_size': 3}]},
-                    {'nCubes': 5, 'percOverlap': 0.4, 'minIntersection': -1,
-                     'clusterer': ['HDBSCAN', {'min_cluster_size': 2}]},
+                    {
+                        "nCubes": 4,
+                        "percOverlap": 0.5,
+                        "minIntersection": -1,
+                        "clusterer": ["HDBSCAN", {"min_cluster_size": 2}],
+                    },
+                    {
+                        "nCubes": 6,
+                        "percOverlap": 0.3,
+                        "minIntersection": -1,
+                        "clusterer": ["HDBSCAN", {"min_cluster_size": 3}],
+                    },
+                    {
+                        "nCubes": 5,
+                        "percOverlap": 0.4,
+                        "minIntersection": -1,
+                        "clusterer": ["HDBSCAN", {"min_cluster_size": 2}],
+                    },
                 ]
-                
+
                 from thema.multiverse.universe.stars.jmapStar import jmapStar
-                
+
                 for i, config in enumerate(jmap_configs):
                     try:
                         star = jmapStar(
                             data_path=tmp_dataFile.name,
                             clean_path=moon_file,
                             projection_path=proj_file,
-                            **config
+                            **config,
                         )
                         star.fit()
-                        
+
                         # Only save if we got a valid graph
-                        if star.starGraph is not None and star.starGraph.graph.number_of_nodes() > 0:
-                            file_path = os.path.join(temp_dir, f"real_jmap_star_{i}.pkl")
-                            with open(file_path, 'wb') as f:
+                        if (
+                            star.starGraph is not None
+                            and star.starGraph.graph.number_of_nodes() > 0
+                        ):
+                            file_path = os.path.join(
+                                temp_dir, f"real_jmap_star_{i}.pkl"
+                            )
+                            with open(file_path, "wb") as f:
                                 pickle.dump(star, f)
                     except Exception as e:
                         # Skip failed star creation (some parameter combinations might fail)
                         print(f"Skipping jmapStar config {i}: {e}")
                         continue
-        
+
         # Clean up temp data file
         os.unlink(tmp_dataFile.name)
-        
+
         yield temp_dir
         shutil.rmtree(temp_dir)
 

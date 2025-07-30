@@ -10,37 +10,7 @@ from typing import List, Union
 # ╭────────────────────────────────╮
 # │    Config Data Classes         |
 # ╰────────────────────────────────╯
-@dataclass
-class umapProjConfig:
-    """
-    Configuration class for a UMAP projectile.
-
-    Activated when exploring the outer system using `Comet` or `Oort`,
-    this class is used to configure the parameters to project your data
-    into a lower-dimensional space using the UMAP algorithm.
-
-    Parameters
-    ----------
-    name : str, optional
-        The name of the projection. Default is "umapProj".
-    module : str
-        The module where the projection is implemented.
-    nn : int, optional
-        The number of nearest neighbors to consider. Default is 4.
-    minDist : float, optional
-        The minimum distance between points in the projection. Default is 0.
-    dimensions : int, optional
-        The number of dimensions in the projection. Default is 2.
-    seed : int, optional
-        The seed for the random number generator. Default is 42.
-    """
-
-    name: str = "umapProj"
-    module: str = "thema.multiverse.system.outer.projectiles.umapProj"
-    nn: int = 4
-    minDist: float = 0
-    dimensions: int = 2
-    seed: int = 42
+# umapProjConfig has been removed in favor of tsneProjConfig
 
 
 @dataclass
@@ -168,7 +138,6 @@ class jmapObservatoryConfig:
 
 # Map from YAML tags to class names
 tag_to_class = {
-    "umap": "umapProjConfig",
     "tsne": "tsneProjConfig",
     "pca": "pcaProjConfig",
     "jmap": "jmapStarConfig",

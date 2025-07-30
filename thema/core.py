@@ -20,7 +20,7 @@ class Core:
         2) clean: data that has been cleaned via dropping features, scaling,
             removing NaNs, etc.
         3) projection: data that has been collapsed using a dimensionality
-            reduction technique (e.g. PCA, UMAP).
+            reduction technique (e.g. PCA, TSNE).
 
     Parameters
     ----------

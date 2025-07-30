@@ -2,7 +2,7 @@
 Outer System Module.
 
 This module contains components for data dimension reduction and projection:
-- Comet: For dimension reduction algorithms (PCA, t-SNE, UMAP)
+- Comet: For dimension reduction algorithms (PCA, t-SNE)
 - Oort: For coordinating multiple Comet instances for dimension reduction
 """
 

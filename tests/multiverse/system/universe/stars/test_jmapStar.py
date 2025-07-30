@@ -12,8 +12,8 @@ from thema.multiverse.universe.stars.jmapStar import jmapStar
 class TestJmapStar:
     """Pytest Class for jmapStar"""
 
-    def test_init_defaults(self, tmp_umapMoonAndData):
-        data_file, moon_file, comet_file = tmp_umapMoonAndData
+    def test_init_defaults(self, tmp_tsneMoonAndData):
+        data_file, moon_file, comet_file = tmp_tsneMoonAndData
         jmapStar(
             data_path=data_file.name,
             clean_path=moon_file.name,
@@ -33,8 +33,8 @@ class TestJmapStar:
             clusterer=["DBSCAN", {"eps": 0.4}],
         )
 
-    def test_fit(self, tmp_umapMoonAndData):
-        data_file, moon_file, comet_file = tmp_umapMoonAndData
+    def test_fit(self, tmp_tsneMoonAndData):
+        data_file, moon_file, comet_file = tmp_tsneMoonAndData
         hdbscan_jmap = jmapStar(
             data_path=data_file.name,
             clean_path=moon_file.name,
@@ -60,8 +60,8 @@ class TestJmapStar:
         assert hdbscan_jmap.starGraph is not None
         assert dbscan_jmap.starGraph is not None
 
-    def test_save(self, tmp_umapMoonAndData, tmp_file):
-        data_file, moon_file, comet_file = tmp_umapMoonAndData
+    def test_save(self, tmp_tsneMoonAndData, tmp_file):
+        data_file, moon_file, comet_file = tmp_tsneMoonAndData
         jmap = jmapStar(
             data_path=data_file.name,
             clean_path=moon_file.name,
@@ -86,8 +86,8 @@ class TestJmapStar:
         if jmap.starGraph is not None:
             assert jmap1.starGraph is not None
 
-    def test_determinism(self, tmp_umapMoonAndData, tmp_file):
-        data_file, moon_file, comet_file = tmp_umapMoonAndData
+    def test_determinism(self, tmp_tsneMoonAndData, tmp_file):
+        data_file, moon_file, comet_file = tmp_tsneMoonAndData
         jmap0 = jmapStar(
             data_path=data_file.name,
             clean_path=moon_file.name,
