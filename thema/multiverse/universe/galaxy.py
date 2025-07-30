@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.manifold import MDS
 
 from .utils import starFilters, starSelectors
 
@@ -54,8 +55,8 @@ class Galaxy:
         fits a space of Stars and saves to outDir
     collapse() -> list
         clusters and selects representatives of star models
-    show_MDS() -> None
-        plots a 2D representation of model layout
+    get_galaxy_coordinates() -> np.ndarray
+        computes a 2D coordinate system of stars in the galaxy using Multidimensional Scaling (MDS)
     save() -> None
         Saves instance to pickle file.
 
@@ -80,8 +81,22 @@ class Galaxy:
     ...            outDir = outDir)
 
     >>> galaxy.fit()
-    >>> galaxy.show_MDS()
-    >>> galaxy.collapse()
+    >>> # First, compute distances and cluster the stars
+    >>> selected_stars = galaxy.collapse()
+    >>> print(f"Selected {len(selected_stars)} representative stars")
+    >>>
+    >>> # Generate and visualize the galaxy coordinates with custom plotting
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>>
+    >>> # Manual plotting of the galaxy coordinates (NOTE: `Thema` does not have built-in visualization dependencies)
+    >>> coordinates = galaxy.get_galaxy_coordinates()
+    >>> plt.figure(figsize=(8, 6))
+    >>> plt.scatter(coordinates[:, 0], coordinates[:, 1], alpha=0.7)
+    >>> plt.title('2D Coordinate Map of Star Models')
+    >>> plt.xlabel('X Coordinate')
+    >>> plt.ylabel('Y Coordinate')
+    >>> plt.show()
     ```
     """
 
@@ -126,7 +141,9 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -134,11 +151,15 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
+            cleanDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/clean/"
+            )
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
+            outDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/models/"
+            )
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -353,14 +374,18 @@ class Galaxy:
         if filter_fn is None:
             filter_fn = self.filterFn
 
-        metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
+        metric_fn = getattr(
+            geodesics, metric, geodesics.stellar_curvature_distance
+        )
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
         # Handle the filter function
         if filter_fn is None:
             filter_fn = starFilters.nofilterfunction
         else:
-            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
+            filter_fn = getattr(
+                starFilters, filter_fn, starFilters.nofilterfunction
+            )
 
         self.keys, self.distances = metric_fn(
             files=self.outDir, filterfunction=filter_fn, **kwargs
@@ -390,6 +415,58 @@ class Galaxy:
                 "cluster_size": len(subgroup),
             }
         return self.selection
+
+    def get_galaxy_coordinates(self) -> np.ndarray:
+        """
+        Computes a 2D coordinate system for stars in the galaxy, allowing visualization
+        of their relative positions. This function uses Multidimensional Scaling (MDS)
+        to project the high-dimensional distance matrix into a 2D space, preserving the
+        relative distances between stars as much as possible.
+
+        Note: This method requires that distances have been computed first, usually by calling the
+        collapse() method or directly computing distances with a metric function.
+
+        Returns
+        -------
+        np.ndarray
+            A 2D array of shape (n_stars, 2) containing the X,Y coordinates of each star in the galaxy.
+            Each row represents the 2D coordinates of one star.
+
+        Examples
+        --------
+        >>> # After fitting the galaxy and computing distances
+        >>> import matplotlib.pyplot as plt
+        >>> coordinates = galaxy.get_galaxy_coordinates()
+        >>>
+        >>> # Basic scatter plot
+        >>> plt.figure(figsize=(10, 8))
+        >>> plt.scatter(coordinates[:, 0], coordinates[:, 1], alpha=0.7)
+        >>> plt.title('Star Map of the Galaxy')
+        >>> plt.xlabel('X Coordinate')
+        >>> plt.ylabel('Y Coordinate')
+        >>> plt.show()
+        >>>
+        >>> # Advanced plot with cluster coloring
+        >>> if galaxy.selection:  # If collapse() has been called
+        >>>     plt.figure(figsize=(12, 10))
+        >>>     # Plot all stars
+        >>>     plt.scatter(coordinates[:, 0], coordinates[:, 1], c='lightgray', alpha=0.5)
+        >>>     # Highlight representative stars
+        >>>     for cluster_id, info in galaxy.selection.items():
+        >>>         # Find the index of the representative star in the keys array
+        >>>         rep_idx = np.where(galaxy.keys == info['star'])[0][0]
+        >>>         plt.scatter(coordinates[rep_idx, 0], coordinates[rep_idx, 1],
+        >>>                   s=100, c='red', edgecolor='black', label=f'Cluster {cluster_id}')
+        >>>     plt.legend()
+        >>>     plt.title('Star Map with Representative Stars')
+        >>>     plt.show()
+        """
+        if self.distances is None:
+            raise ValueError("Distance matrix is not computed.")
+
+        mds = MDS(n_components=2, dissimilarity="precomputed")
+        coordinates = mds.fit_transform(self.distances)
+        return coordinates
 
     def save(self, file_path):
         """
