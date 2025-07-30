@@ -12,15 +12,6 @@ Planet:
   numSamples: 10
   seeds: auto 
 Oort:
-  umap:
-    nn:
-      - 2
-    minDist:
-      - 0.1
-    dimensions:
-      - 2
-    seed:
-      - 32
   tsne: 
     perplexity: 
       - 2 
@@ -34,7 +25,6 @@ Oort:
     seed:
       - 32
   projectiles:
-    - umap
     - tsne
     - pca 
 Galaxy:
