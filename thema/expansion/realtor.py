@@ -56,6 +56,7 @@ class Realtor:
         best_node_index = np.argmin(distances)
         return best_node_index
 
+    # TODO: Implement the star link function
     def _star_link(self):
         # Connect into the Multiverse system. Take in a star and unpack appropriately
         pass
