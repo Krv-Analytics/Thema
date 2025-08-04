@@ -12,6 +12,7 @@ from thema.multiverse import Oort
 from tests import test_utils as ut
 
 
+@pytest.mark.compute
 class Test_oort:
     """Testing class for Oort"""
 

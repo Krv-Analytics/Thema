@@ -3,10 +3,12 @@
 # Updated By: JW
 
 import os
+import pytest
 
 from thema.multiverse import Galaxy
 
 
+@pytest.mark.compute
 class TestGalaxy:
     """Pytest class for Galaxy"""
 
