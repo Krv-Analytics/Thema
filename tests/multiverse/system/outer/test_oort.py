@@ -12,6 +12,7 @@ from thema.multiverse import Oort
 from tests import test_utils as ut
 
 
+@pytest.mark.compute
 class Test_oort:
     """Testing class for Oort"""
 
@@ -71,7 +72,7 @@ class Test_oort:
             outDir=tmp_outDir,
         )
         oort.fit()
-        assert len(os.listdir(oort.outDir)) == 60
+        assert len(os.listdir(oort.outDir)) == 36  # Was 60 when UMAP was included
 
     def test_getParams(
         self,

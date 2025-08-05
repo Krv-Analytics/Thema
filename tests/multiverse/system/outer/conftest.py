@@ -87,12 +87,6 @@ def tmp_planetAndData():
 @pytest.fixture
 def test_params1():
     return {
-        "umap": {
-            "minDist": [0.1, 0.2],
-            "nn": [2],
-            "dimensions": [2, 3],
-            "seed": [2, 4],
-        },
         "tsne": {
             "perplexity": [
                 2,
@@ -122,8 +116,7 @@ def test_erroneous_params0():
 @pytest.fixture
 def test_erroneous_params1():
     return {
-        "umap": {
-            "minDist": [0.1, 0.2],
+        "tsne": {
             "dimensions": [2, 3],
             "seed": [2, 4],
         }
@@ -149,13 +142,7 @@ def temp_projYaml_0():
             }
 
             projecting = {
-                "projectiles": ["umap", "tsne", "pca"],
-                "umap": {
-                    "nn": [2],
-                    "minDist": [0.1, 0.2],
-                    "dimensions": [2],
-                    "seed": [42],
-                },
+                "projectiles": ["tsne", "pca"],
                 "tsne": {"perplexity": [2], "dimensions": [2], "seed": [42]},
                 "pca": {"dimensions": [2], "seed": [42]},
             }

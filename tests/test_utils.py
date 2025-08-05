@@ -6,6 +6,7 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 import random
+import networkx as nx
 
 
 def generate_dataframe(num_rows=100, seed=42):

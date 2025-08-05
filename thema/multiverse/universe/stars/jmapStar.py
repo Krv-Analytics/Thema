@@ -12,7 +12,7 @@ from kmapper import Cover, KeplerMapper
 from sklearn.cluster import DBSCAN
 
 from ..star import Star
-from ..starGraph import starGraph
+from ..utils.starGraph import starGraph
 
 
 def initialize():
@@ -64,7 +64,7 @@ class jmapStar(Star):
         A kmapper mapper object.
     complex: dict
         A dictionary specifying node membership
-    starGraph: thema.multiverse.universe.starGraph class
+    starGraph: thema.multiverse.universe.utils.starGraph class
         An expanded framework for analyzing networkx graphs
 
     Functions
@@ -119,7 +119,9 @@ class jmapStar(Star):
             clusterer = ["HDBSCAN", {"minDist":0.1}]
         """
         super().__init__(
-            data_path=data_path, clean_path=clean_path, projection_path=projection_path
+            data_path=data_path,
+            clean_path=clean_path,
+            projection_path=projection_path,
         )
         self.nCubes = nCubes
         self.percOverlap = percOverlap
@@ -325,9 +327,13 @@ class Nerve:
         candidates = itertools.combinations(nodes.keys(), 2)
         for candidate in candidates:
             # if there are non-unique members in the union
-            overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
+            overlap = len(
+                set(nodes[candidate[0]]).intersection(nodes[candidate[1]])
+            )
             if overlap > 0:
-                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
+                result.append(
+                    (candidate[0], candidate[1], round(1 / overlap, 3))
+                )
         return result
 
 

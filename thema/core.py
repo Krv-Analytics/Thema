@@ -20,7 +20,7 @@ class Core:
         2) clean: data that has been cleaned via dropping features, scaling,
             removing NaNs, etc.
         3) projection: data that has been collapsed using a dimensionality
-            reduction technique (e.g. PCA, UMAP).
+            reduction technique (e.g. PCA, TSNE).
 
     Parameters
     ----------
@@ -91,7 +91,9 @@ class Core:
         self._projection = projection_path
 
         if self._data is not None:
-            assert isfile(self._data), f"Invalid raw data file path: {data_path}"
+            assert isfile(
+                self._data
+            ), f"Invalid raw data file path: {data_path}"
         if self._clean is not None:
             assert isfile(self._clean), f"Invalid clean file path: {clean_path}"
         if self._projection is not None:

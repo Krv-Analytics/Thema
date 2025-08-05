@@ -74,9 +74,8 @@ class Oort(Core):
     >>> data = "<PATH TO RAW DATA FILE>"
     >>> outDir = "<PATH TO OUT DIRECTORY OF PROJECTIONS>"
     >>> params = {
-    ...     "umap" : {
-    ...         "nn" : [2, 5, 10],
-    ...         "minDist" : [0.1, 0.5],
+    ...     "tsne" : {
+    ...         "perplexity" : [2, 5, 10],
     ...         "dimensions" : [2],
     ...         "seed" : [42]
     ...     }
@@ -133,9 +132,8 @@ class Oort(Core):
         >>> data = "<PATH TO RAW DATA FILE>"
         >>> outDir = "<PATH TO OUT DIRECTORY OF PROJECTIONS>"
         >>> params = {
-        ...     "umap" : {
-        ...         "nn" : [2, 5, 10],
-        ...         "minDist" : [0.1, 0.5],
+        ...     "tsne" : {
+        ...         "perplexity" : [2, 5, 10],
         ...         "dimensions" : [2],
         ...         "seed" : [42]
         ...     }
@@ -152,7 +150,9 @@ class Oort(Core):
         """
         if YAML_PATH is not None:
             self.YAML_PATH = YAML_PATH
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -160,7 +160,9 @@ class Oort(Core):
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
+            cleanDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/clean/"
+            )
             outDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )

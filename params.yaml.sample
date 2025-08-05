@@ -6,21 +6,11 @@ Planet:
   encoding: one_hot
   dropColumns: 
     - ID
-  imputeColumns: all 
-  imputeMethods: 
-    - sampleNormal 
+  imputeColumns: auto
+  imputeMethods: auto 
   numSamples: 10
   seeds: auto 
 Oort:
-  umap:
-    nn:
-      - 2
-    minDist:
-      - 0.1
-    dimensions:
-      - 2
-    seed:
-      - 32
   tsne: 
     perplexity: 
       - 2 
@@ -34,13 +24,13 @@ Oort:
     seed:
       - 32
   projectiles:
-    - umap
     - tsne
     - pca 
 Galaxy:
-  metric: landscape_distance 
+  metric: stellar_curvature_distance
   selector: random
   nReps: 3
+  filter: None
   stars:
     - jmap 
   jmap:
