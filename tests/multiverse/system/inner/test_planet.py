@@ -286,6 +286,7 @@ class Test_Planet:
             data=temp_dataFile_1.name,
             outDir=temp_planet_dir,
             imputeColumns="auto",
+            imputeMethods="auto",
             numSamples=numSamples,
             seeds=seeds,
             encoding="one_hot",
