@@ -33,3 +33,8 @@ docs = [
     "sphinx>=8.1.3",
     "sphinx-design>=0.6.1",
 ]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.30.1",
+]

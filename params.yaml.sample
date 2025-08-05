@@ -6,9 +6,8 @@ Planet:
   encoding: one_hot
   dropColumns: 
     - ID
-  imputeColumns: all 
-  imputeMethods: 
-    - sampleNormal 
+  imputeColumns: auto
+  imputeMethods: auto 
   numSamples: 10
   seeds: auto 
 Oort:

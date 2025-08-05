@@ -40,9 +40,7 @@ class Test_Planet:
         assert my_Planet.imputeColumns == []
         assert my_Planet.imputeMethods == []
 
-    def test_init_dataPath_pkl(
-        self, temp_planet_dir, temp_dataFile_0, test_data_0
-    ):
+    def test_init_dataPath_pkl(self, temp_planet_dir, temp_dataFile_0, test_data_0):
         my_Planet = Planet(data=temp_dataFile_0.name, outDir=temp_planet_dir)
 
         assert_frame_equal(my_Planet.data, test_data_0)
@@ -62,9 +60,7 @@ class Test_Planet:
         assert my_Planet.imputeColumns == ["B"]
         assert my_Planet.imputeMethods == ["sampleNormal"]
 
-    def test_init_dataPath_csv(
-        self, temp_planet_dir, temp_csv_dataFile, test_data_0
-    ):
+    def test_init_dataPath_csv(self, temp_planet_dir, temp_csv_dataFile, test_data_0):
         my_Planet = Planet(data=temp_csv_dataFile.name, outDir=temp_planet_dir)
         assert_frame_equal(my_Planet.data, test_data_0)
         assert my_Planet.scaler == "standard"
@@ -86,9 +82,7 @@ class Test_Planet:
     def test_init_dataPath_xlsx(
         self, temp_planet_dir, temp_excel_dataFile, test_data_0
     ):
-        my_Planet = Planet(
-            data=temp_excel_dataFile.name, outDir=temp_planet_dir
-        )
+        my_Planet = Planet(data=temp_excel_dataFile.name, outDir=temp_planet_dir)
 
         assert_frame_equal(my_Planet.data, test_data_0)
         assert my_Planet.scaler == "standard"
@@ -127,9 +121,7 @@ class Test_Planet:
             outDir=temp_planet_dir,
             encoding="integer",
         )
-        z = Planet(
-            data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="hash"
-        )
+        z = Planet(data=temp_dataFile_0.name, outDir=temp_planet_dir, encoding="hash")
 
         assert x.encoding == "one_hot"
         assert y.encoding == "integer"
@@ -157,7 +149,7 @@ class Test_Planet:
         x = Planet(
             data=temp_dataFile_0.name,
             outDir=temp_planet_dir,
-            imputeColumns="all",
+            imputeColumns="auto",
         )
         y = Planet(
             data=temp_dataFile_0.name,
@@ -187,13 +179,13 @@ class Test_Planet:
         w = Planet(
             data=temp_dataFile_0.name,
             outDir=temp_planet_dir,
-            imputeColumns="all",
+            imputeColumns="auto",
             imputeMethods="wrong",
         )
         x = Planet(
             data=temp_dataFile_0.name,
             outDir=temp_planet_dir,
-            imputeColumns="all",
+            imputeColumns="auto",
             imputeMethods="sampleNormal",
         )
         y = Planet(
@@ -261,16 +253,16 @@ class Test_Planet:
         assert x.get_recomended_sampling_method() == ["sampleNormal"]
         assert y.get_recomended_sampling_method() == [
             "sampleNormal",
-            "mode",
-            "mode",
+            "sampleCategorical",
+            "sampleCategorical",
             "sampleNormal",
-            "mode",
-            "mode",
+            "sampleCategorical",
+            "sampleCategorical",
         ]
         assert z.get_recomended_sampling_method() == [
-            "mode",
+            "sampleCategorical",
             "sampleNormal",
-            "mode",
+            "sampleCategorical",
         ]
 
     def test_save(self, temp_planet_dir, temp_dataFile_0):
@@ -293,7 +285,7 @@ class Test_Planet:
         x = Planet(
             data=temp_dataFile_1.name,
             outDir=temp_planet_dir,
-            imputeColumns="all",
+            imputeColumns="auto",
             numSamples=numSamples,
             seeds=seeds,
             encoding="one_hot",
@@ -303,9 +295,7 @@ class Test_Planet:
         assert x.seeds == seeds
         assert len(os.listdir(temp_planet_dir)) == numSamples
 
-    def test_determinism(
-        self, temp_planet_dir, temp_planet_dir_1, temp_dataFile_3
-    ):
+    def test_determinism(self, temp_planet_dir, temp_planet_dir_1, temp_dataFile_3):
         numSamples = 1
         seeds = [random.randint(0, 100) for _ in range(numSamples)]
         print(seeds)
@@ -315,7 +305,7 @@ class Test_Planet:
         x = Planet(
             data=temp_dataFile_3.name,
             outDir=temp_planet_dir,
-            imputeColumns="all",
+            imputeColumns="auto",
             numSamples=numSamples,
             seeds=seeds,
         )
@@ -327,10 +317,7 @@ class Test_Planet:
         x.fit()
         files_in_directory = os.listdir(temp_planet_dir)
         absolute_paths = sorted(
-            [
-                os.path.join(temp_planet_dir, filename)
-                for filename in files_in_directory
-            ]
+            [os.path.join(temp_planet_dir, filename) for filename in files_in_directory]
         )
         for path in absolute_paths:
             with open(path, "rb") as f:
@@ -339,7 +326,7 @@ class Test_Planet:
         y = Planet(
             data=temp_dataFile_3.name,
             outDir=temp_planet_dir_1,
-            imputeColumns="all",
+            imputeColumns="auto",
             numSamples=numSamples,
             seeds=seeds,
         )
@@ -361,9 +348,7 @@ class Test_Planet:
                 y_models.append(pickle.load(f))
 
         for index in range(len(y_models)):
-            assert_frame_equal(
-                x_models[index].imputeData, y_models[index].imputeData
-            )
+            assert_frame_equal(x_models[index].imputeData, y_models[index].imputeData)
 
 
 def clear_temporary_directory(tempDir):
