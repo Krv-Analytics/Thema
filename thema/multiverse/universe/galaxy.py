@@ -141,9 +141,7 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(
-                YAML_PATH
-            ), "yaml parameter file could not be found."
+            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -151,15 +149,11 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(
-                yamlParams.outDir, yamlParams.runName + "/clean/"
-            )
+            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(
-                yamlParams.outDir, yamlParams.runName + "/models/"
-            )
+            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -284,7 +278,7 @@ class Galaxy:
 
         failed_saves = sum(1 for r in results if r is False)
         print(
-            f"\n⭐️ {failed_saves} star object(s) were not saved due to empty or invalid graphs."
+            f"\n⭐️ {failed_saves} star object(s) failed to save due to generating an empty graph."
         )
 
     def _instantiate_star(
@@ -374,18 +368,14 @@ class Galaxy:
         if filter_fn is None:
             filter_fn = self.filterFn
 
-        metric_fn = getattr(
-            geodesics, metric, geodesics.stellar_curvature_distance
-        )
+        metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
         # Handle the filter function
         if filter_fn is None:
             filter_fn = starFilters.nofilterfunction
         else:
-            filter_fn = getattr(
-                starFilters, filter_fn, starFilters.nofilterfunction
-            )
+            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
 
         self.keys, self.distances = metric_fn(
             files=self.outDir, filterfunction=filter_fn, **kwargs
@@ -554,4 +544,4 @@ class Galaxy:
             The keys are the cluster names and the values are lists of graph
             file names.
         """
-        return self.clusters
+        pass
