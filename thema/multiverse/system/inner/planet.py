@@ -346,6 +346,19 @@ class Planet(Core):
                     imputeMethods[index] = "drop"
             self.imputeMethods = imputeMethods
 
+        # Check if any imputeMethods are randomized
+        has_randomized_imputation = any(
+            method in ["sampleNormal", "sampleCategorical"]
+            for method in self.imputeMethods
+        )
+        if not has_randomized_imputation and self.numSamples > 1:
+            print(
+                "Warning: No randomized imputation methods specified. "
+                "Overwriting to single sample."
+            )
+            self.numSamples = 1
+            self.seeds = [42]
+
     def get_missingData_summary(self) -> dict:
         """
         Get a summary of missing data in the columns of the 'data' dataframe.

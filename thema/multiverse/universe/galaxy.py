@@ -278,7 +278,7 @@ class Galaxy:
 
         failed_saves = sum(1 for r in results if r is False)
         print(
-            f"\n⭐️ {failed_saves} star object(s) failed to save due to generating an empty graph."
+            f"\n⭐️ {len(results)-failed_saves}({(len(results)- failed_saves)/len(results)*100}%) star objects successfully saved."
         )
 
     def _instantiate_star(
