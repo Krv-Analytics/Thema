@@ -60,7 +60,6 @@ class Thema:
             self.YAML_PATH = YAML_PATH
             with open(YAML_PATH, "r") as f:
                 self.params = OmegaConf.load(f)
-            self.YAML_PATH = YAML_PATH
         else:
             raise ValueError("There was an issue with your yaml parameter file")
 
