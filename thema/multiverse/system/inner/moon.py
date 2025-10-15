@@ -1,9 +1,9 @@
 # File: multiverse/system/inner/moon.py
-# Last Update: 05/15/24
-# Updated By: JW
+# Last Update: 10/15/25
+# Updated By: SG
 
 import pickle
-import warnings
+import logging
 
 import category_encoders as ce
 import pandas as pd
@@ -11,6 +11,9 @@ from sklearn.preprocessing import StandardScaler
 
 from ....core import Core
 from . import inner_utils
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Moon(Core):
@@ -122,81 +125,79 @@ class Moon(Core):
         self.seed = seed
         self.imputeData = None
 
-    def fit(self):
-        """
-        Performs the cleaning procedure according to the constructor arguments.
-        Initializes the imputeData member as a DataFrame, which is a scaled,
-        numeric, and complete representation of the original raw data set.
-
-        Examples
-        ----------
-        >>> moon = Moon()
-        >>> moon.fit()
-        """
-
-        self.imputeData = inner_utils.add_imputed_flags(
-            self.data, self.imputeColumns
+        # Log initial state
+        logger.debug(f"Moon initialized with data shape: {self.data.shape}")
+        logger.debug(f"Drop columns: {self.dropColumns}")
+        logger.debug(f"Impute columns: {self.imputeColumns}")
+        logger.debug(f"Impute methods: {self.imputeMethods}")
+        logger.debug(
+            f"Encoding: {self.encoding}, Scaler: {self.scaler}, Seed: {self.seed}"
         )
+
+    def fit(self):
+        # Add imputed flags
+        self.imputeData = inner_utils.add_imputed_flags(self.data, self.imputeColumns)
+        logger.debug("Added imputed flags to columns")
+        logger.debug(f"Data shape after adding flags: {self.imputeData.shape}")
+
+        # Apply imputation
         for index, column in enumerate(self.imputeColumns):
             impute_function = getattr(inner_utils, self.imputeMethods[index])
-            self.imputeData[column] = impute_function(
-                self.data[column], self.seed
+            self.imputeData[column] = impute_function(self.data[column], self.seed)
+            logger.debug(
+                f"Column '{column}' imputed using '{self.imputeMethods[index]}'. "
+                f"NaNs remaining: {self.imputeData[column].isna().sum()}"
             )
 
-        self.dropColumns = [
-            col for col in self.dropColumns if col in self.data.columns
-        ]
-        # Drop Columns
-        if not self.dropColumns == []:
-            self.imputeData = self.data.drop(columns=self.dropColumns)
+        # Drop specified columns
+        self.dropColumns = [col for col in self.dropColumns if col in self.data.columns]
+        if self.dropColumns:
+            before_drop = self.imputeData.shape
+            self.imputeData = self.imputeData.drop(columns=self.dropColumns)
+            logger.debug(
+                f"Dropped columns: {self.dropColumns}. Shape before: {before_drop}, after: {self.imputeData.shape}"
+            )
 
-        # Drop Rows with Nans
+        # Drop rows with NaNs
+        nan_cols = self.imputeData.columns[self.imputeData.isna().any()]
+        logger.debug(f"Columns with NaN values before dropping rows: {list(nan_cols)}")
         self.imputeData.dropna(axis=0, inplace=True)
+        logger.debug(f"Shape after dropping rows with NaNs: {self.imputeData.shape}")
 
-        if type(self.encoding) == str:
+        # Ensure encoding is a list
+        if isinstance(self.encoding, str):
             self.encoding = [
                 self.encoding
                 for _ in range(
-                    len(
-                        self.imputeData.select_dtypes(
-                            include=["object"]
-                        ).columns
-                    )
+                    len(self.imputeData.select_dtypes(include=["object"]).columns)
                 )
             ]
 
         # Encoding
-        assert len(self.encoding) == len(
-            self.imputeData.select_dtypes(include=["object"]).columns
-        ), f"length of encoding: {len(self.encoding)}, length of cat variables: {len(self.imputeData.select_dtypes(include=['object']).columns)}"
+        cat_cols = self.imputeData.select_dtypes(include=["object"]).columns
+        assert len(self.encoding) == len(cat_cols), (
+            f"length of encoding: {len(self.encoding)}, "
+            f"length of categorical variables: {len(cat_cols)}"
+        )
+        for i, column in enumerate(cat_cols):
+            encoding_method = self.encoding[i]
+            if encoding_method == "one_hot" and self.imputeData[column].dtype == object:
+                self.imputeData = pd.get_dummies(
+                    self.imputeData, prefix=f"OH_{column}", columns=[column]
+                )
+                logger.debug(f"Column '{column}' one-hot encoded")
 
-        for i, column in enumerate(
-            self.imputeData.select_dtypes(include=["object"]).columns
-        ):
-            encoding = self.encoding[i]
+            elif (
+                encoding_method == "integer" and self.imputeData[column].dtype == object
+            ):
+                vals = self.imputeData[column].values
+                self.imputeData[column] = inner_utils.integer_encoder(vals)
+                logger.debug(f"Column '{column}' integer encoded")
 
-            if encoding == "one_hot":
-                if self.imputeData[column].dtype == object:
-                    self.imputeData = pd.get_dummies(
-                        self.imputeData, prefix=f"OH_{column}", columns=[column]
-                    )
-
-            elif encoding == "integer":
-                if self.imputeData[column].dtype == object:
-                    vals = self.imputeData[column].values
-                    self.imputeData[column] = inner_utils.integer_encoder(vals)
-
-            elif encoding == "hash":
-                if self.imputeData[column].dtype == object:
-                    hashing_encoder = ce.HashingEncoder(
-                        cols=[column], n_components=10
-                    )
-                    self.imputeData = hashing_encoder.fit_transform(
-                        self.imputeData
-                    )
-
-            else:
-                pass
+            elif encoding_method == "hash" and self.imputeData[column].dtype == object:
+                hashing_encoder = ce.HashingEncoder(cols=[column], n_components=10)
+                self.imputeData = hashing_encoder.fit_transform(self.imputeData)
+                logger.debug(f"Column '{column}' hash encoded")
 
         # Scaling
         assert self.scaler in ["standard"], "Invalid Scaler"
@@ -205,6 +206,9 @@ class Moon(Core):
             self.imputeData = pd.DataFrame(
                 scaler.fit_transform(self.imputeData),
                 columns=list(self.imputeData.columns),
+            )
+            logger.debug(
+                f"Data scaled using StandardScaler. Final shape: {self.imputeData.shape}"
             )
 
     def save(self, file_path):
@@ -224,3 +228,4 @@ class Moon(Core):
         """
         with open(file_path, "wb") as f:
             pickle.dump(self, f)
+        logger.debug(f"Moon object saved to {file_path}")

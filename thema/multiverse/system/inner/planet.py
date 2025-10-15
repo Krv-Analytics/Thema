@@ -5,6 +5,7 @@
 import os
 import pickle
 import random
+import logging
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,13 @@ from ....core import Core
 from ....utils import function_scheduler
 from .inner_utils import clean_data_filename
 from .moon import Moon
+from ....logging_utils import (
+    get_current_logging_config,
+    configure_child_process_logging,
+)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Planet(Core):
@@ -359,6 +367,15 @@ class Planet(Core):
             self.numSamples = 1
             self.seeds = [42]
 
+        # Log Planet configuration
+        logger.debug(f"Planet initialized with data shape: {self.data.shape}")
+        logger.debug(f"Number of samples to generate: {self.numSamples}")
+        logger.debug(f"Impute columns: {self.imputeColumns}")
+        logger.debug(f"Impute methods: {self.imputeMethods}")
+        logger.debug(f"Drop columns: {self.dropColumns}")
+        logger.debug(f"Encoding: {self.encoding}, Scaler: {self.scaler}")
+        logger.debug(f"Output directory: {self.outDir}")
+
     def get_missingData_summary(self) -> dict:
         """
         Get a summary of missing data in the columns of the 'data' dataframe.
@@ -499,12 +516,27 @@ class Planet(Core):
 
         >>> planet.imputeData.to_pickle("myCleanData")
         """
+        logger.info(
+            f"Starting Planet.fit() - creating {self.numSamples} Moon object(s)"
+        )
+        logger.debug(f"Using seeds: {self.seeds}")
+        logger.debug(f"Output directory: {self.outDir}")
+
+        # Get current logging config to pass to child processes
+        logging_config = get_current_logging_config()
+
         assert len(self.seeds) == self.numSamples
         subprocesses = []
         for i in range(self.numSamples):
-            cmd = (self._instantiate_moon, i)
+            logger.debug(
+                f"Preparing Moon {i+1}/{self.numSamples} with seed {self.seeds[i]}"
+            )
+            cmd = (self._instantiate_moon, i, logging_config)
             subprocesses.append(cmd)
 
+        logger.info(
+            f"Launching {len(subprocesses)} Moon processes with max {min(4, self.numSamples)} workers"
+        )
         function_scheduler(
             subprocesses,
             max_workers=min(4, self.numSamples),
@@ -512,15 +544,21 @@ class Planet(Core):
             resilient=True,
             verbose=self.verbose,
         )
+        logger.info("Planet.fit() completed - all Moon objects processed")
 
-    def _instantiate_moon(self, id):
+    def _instantiate_moon(self, id, logging_config):
         """
         Helper function for the fit() method. See `fit()` for more details.
+
+        This method creates and processes a single Moon instance with proper
+        logging configuration for multiprocessing environments.
 
         Parameters
         ----------
         id : int
             Identifier for the Moon instance.
+        logging_config : dict or None
+            Logging configuration from parent process.
 
         Returns
         -------
@@ -529,8 +567,10 @@ class Planet(Core):
         Examples
         --------
         >>> planet = Planet()
-        >>> planet._instantiate_moon(1)
+        >>> planet._instantiate_moon(1, logging_config)
         """
+        # Configure logging in this child process
+        configure_child_process_logging(logging_config)
 
         if self.seeds is None:
             self.seeds = dict()
