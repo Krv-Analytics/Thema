@@ -5,6 +5,7 @@
 import glob
 import importlib
 import itertools
+import logging
 import os
 import pickle
 
@@ -19,6 +20,10 @@ from .utils import starFilters, starSelectors
 from ... import config
 from ...utils import create_file_name, function_scheduler
 from . import geodesics
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())  # suppress messages unless app enables them
 
 
 class Galaxy:
@@ -226,7 +231,7 @@ class Galaxy:
         None
             Saves star objects to outDir and prints a count of failed saves.
         """
-
+        logger.info(f"Starting Galaxy fit with {len(self.params)} star type(s)")
         subprocesses = []
 
         for starName, starParamsDict in self.params.items():
@@ -281,9 +286,11 @@ class Galaxy:
         )
 
         failed_saves = sum(1 for r in results if r is False)
-        print(
-            f"\n⭐️ {len(results)-failed_saves}({(len(results)- failed_saves)/len(results)*100}%) star objects successfully saved."
-        )
+        success_count = len(results) - failed_saves
+        success_rate = (success_count / len(results) * 100) if len(results) > 0 else 0
+        logger.info(f"Galaxy fit complete: {success_count}/{len(results)} ({success_rate:.1f}%) stars successfully saved")
+        if failed_saves > 0:
+            logger.warning(f"{failed_saves} star saves failed")
 
     def _instantiate_star(
         self,
@@ -386,9 +393,23 @@ class Galaxy:
         metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
+        # Count total files before filtering for logging
+        total_files = len([f for f in os.listdir(self.outDir) if f.endswith('.pkl')])
+        logger.debug(f"Found {total_files} star files before filtering")
+        
+        logger.info(f"Computing {metric} distances with filter: {getattr(filter_fn, '__name__', str(filter_fn))}")
         self.keys, self.distances = metric_fn(
             files=self.outDir, filterfunction=filter_fn, **kwargs
         )
+        
+        # Log filtering results
+        filtered_count = len(self.keys)
+        logger.info(f"Filter results: {filtered_count}/{total_files} graphs passed the filter")
+        if filtered_count < total_files:
+            logger.info(f"Filtered out {total_files - filtered_count} graphs that didn't meet criteria")
+        
+        logger.debug(f"Computing distance matrix of shape {self.distances.shape}")
+        logger.info(f"Clustering {filtered_count} graphs into {nReps} representative groups")
         model = AgglomerativeClustering(
             metric="precomputed",
             linkage="average",
@@ -397,6 +418,7 @@ class Galaxy:
             n_clusters=nReps,
         )
         model.fit(self.distances)
+        logger.debug(f"Clustering complete with {len(set(model.labels_))} clusters found")
 
         labels = model.labels_
         subgroups = {}
@@ -406,6 +428,7 @@ class Galaxy:
             subkeys = self.keys[mask]
             subgroups[label] = subkeys
 
+        logger.info(f"Selecting representatives using '{selector}' selector")
         for key in subgroups.keys():
             subgroup = subgroups[key]
             selected_star = selector_fn(subgroup)
@@ -413,6 +436,9 @@ class Galaxy:
                 "star": selected_star,
                 "cluster_size": len(subgroup),
             }
+            logger.debug(f"Cluster {key}: selected {os.path.basename(selected_star)} from {len(subgroup)} candidates")
+        
+        logger.info(f"Galaxy collapse complete: {len(self.selection)} representative stars selected")
         return self.selection
 
     def get_galaxy_coordinates(self) -> np.ndarray:
