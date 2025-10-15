@@ -635,44 +635,41 @@ class Planet(Core):
 
     def writeParams_toYaml(self, YAML_PATH=None):
         """
-        Write the specified parameters to a YAML file.
+        Write or create a YAML file with the Planet parameters.
 
         Parameters
         ----------
-        YAML_PATH : str
-            The path to an existing YAML file.
+        YAML_PATH : str, optional
+            Path to an existing or new YAML file.
 
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> planet = Planet()
-        >>> planet.writeParams_toYaml("config.yaml")
-        YAML file successfully updated
         """
         if YAML_PATH is None and self.YAML_PATH is not None:
             YAML_PATH = self.YAML_PATH
-        if YAML_PATH is None and self.YAML_PATH is None:
+        if YAML_PATH is None:
             raise ValueError("Please provide a valid filepath to YAML")
-        # Check if file exists and is correct type
-        if not os.path.isfile(YAML_PATH):
-            raise TypeError("File path does not point to a YAML file")
 
+        # If the file exists, load it; otherwise start a new config
         if os.path.isfile(YAML_PATH):
             params = OmegaConf.load(YAML_PATH)
         else:
             params = OmegaConf.create()
 
+        # Update with this object's parameters
         params.Planet = self.getParams()
         params.Planet.pop("outDir", None)
         params.Planet.pop("data", None)
 
-        with open(YAML_PATH, "w") as f:
-            OmegaConf.save(params, f)
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(YAML_PATH), exist_ok=True)
 
-        print("YAML file successfully updated")
+        # Save the YAML file
+        OmegaConf.save(params, YAML_PATH)
+        print(
+            f"YAML file successfully {'updated' if os.path.isfile(YAML_PATH) else 'created'} at {YAML_PATH}"
+        )
 
     def save(self, file_path):
         """
