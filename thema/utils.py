@@ -8,7 +8,16 @@ import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import pandas as pd
-from tqdm import tqdm
+
+try:
+    from IPython import get_ipython
+
+    if get_ipython() is not None and "IPKernelApp" in get_ipython().config:
+        from tqdm.notebook import tqdm
+    else:
+        from tqdm import tqdm
+except:
+    from tqdm import tqdm
 
 
 def function_scheduler(
@@ -51,16 +60,14 @@ def function_scheduler(
     """
     with warnings.catch_warnings(record=True) as outputs:
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [
-                executor.submit(func, *args) for func, *args in functions
-            ]
+            futures = [executor.submit(func, *args) for func, *args in functions]
 
             # Setting progress bar to track the number of completed functions
             progress_bar = tqdm(
                 total=len(functions),
                 desc="Progress",
                 unit="function",
-                dynamic_ncols=True,
+                # dynamic_ncols=True,
             )
 
             outcomes = []
