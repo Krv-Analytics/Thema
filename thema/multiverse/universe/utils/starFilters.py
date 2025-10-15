@@ -75,3 +75,34 @@ def minimum_edges_filter(min_edges: int) -> Callable:
             return 0
         return 1 if graphobject.starGraph.graph.number_of_edges() >= min_edges else 0
     return _filter
+
+
+def minimum_unique_items_filter(min_unique_items: int) -> Callable:
+    """Filter for graphs with minimum number of unique items across all nodes.
+    
+    This filter counts the total number of unique data points present
+    across all nodes in the Mapper graph, ensuring no double-counting
+    of items that appear in multiple nodes.
+    
+    Args:
+        min_unique_items: Minimum number of unique items required
+        
+    Returns:
+        Filter function that returns 1 for graphs meeting criteria, 0 otherwise
+        
+    Example:
+        >>> filter_func = minimum_unique_items_filter(100)
+        >>> galaxy.collapse(filter_fn=filter_func)
+    """
+    def _filter(graphobject) -> int:
+        if graphobject.starGraph is None:
+            return 0
+        
+        # Collect all unique items from node membership lists
+        unique_items = set()
+        for node in graphobject.starGraph.graph.nodes():
+            membership = graphobject.starGraph.graph.nodes[node]['membership']
+            unique_items.update(membership)
+        
+        return 1 if len(unique_items) >= min_unique_items else 0
+    return _filter
