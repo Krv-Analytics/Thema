@@ -660,8 +660,10 @@ class Planet(Core):
         if not os.path.isfile(YAML_PATH):
             raise TypeError("File path does not point to a YAML file")
 
-        with open(YAML_PATH, "r") as f:
-            params = OmegaConf.load(f)
+        if os.path.isfile(YAML_PATH):
+            params = OmegaConf.load(YAML_PATH)
+        else:
+            params = OmegaConf.create()
 
         params.Planet = self.getParams()
         params.Planet.pop("outDir", None)
