@@ -288,7 +288,9 @@ class Galaxy:
         failed_saves = sum(1 for r in results if r is False)
         success_count = len(results) - failed_saves
         success_rate = (success_count / len(results) * 100) if len(results) > 0 else 0
-        logger.info(f"Galaxy fit complete: {success_count}/{len(results)} ({success_rate:.1f}%) stars successfully saved")
+        logger.info(
+            f"Galaxy fit complete: {success_count}/{len(results)} ({success_rate:.1f}%) stars successfully saved"
+        )
         if failed_saves > 0:
             logger.warning(f"{failed_saves} star saves failed")
 
@@ -346,46 +348,23 @@ class Galaxy:
         nReps=None,
         selector=None,
         filter_fn=None,
+        files: list | None = None,
+        distance_threshold: float | None = None,  # NEW
         **kwargs,
     ):
         """
-        Collapses the space of Stars into a small number of representative Stars
-
-        Parameters
-        ----------
-        metric: str
-            metric used when comparing graphs. Currently, supported types are `stellar_curvature_distance`
-            and `stellar_kernel_distance`.
-        nReps: int
-            The number of representative stars
-        selector: str
-            The selection criteria to choose representatives from a cluster. Currently, only "random" supported.
-        **kwargs:
-            Arguments necessary for different metric functions.
-
-        Returns
-        -------
-        dict
-            A dictionary containing the path to the star and the size of the group it represents.
+        Collapses the space of Stars into representative Stars.
+        Either nReps (number of clusters) or distance_threshold (AgglomerativeClustering) can be used.
         """
+        metric = metric or self.metric
+        selector = selector or self.selector
 
-        if metric is None:
-            metric = self.metric
-        if nReps is None:
-            nReps = self.nReps
-        if selector is None:
-            selector = self.selector
-
-        # Handle the filter function - use parameter, fallback to instance default, then to no filter
+        # Filter function handling
         if filter_fn is None:
             filter_fn = self.filterFn or starFilters.nofilterfunction
-        
-        # Convert string filter names to actual functions
-        if isinstance(filter_fn, str):
+        elif isinstance(filter_fn, str):
             filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
-        elif callable(filter_fn):
-            pass  # Use the callable directly
-        elif filter_fn is not None:
+        elif not callable(filter_fn):
             raise ValueError(
                 f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
             )
@@ -393,52 +372,60 @@ class Galaxy:
         metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
-        # Count total files before filtering for logging
-        total_files = len([f for f in os.listdir(self.outDir) if f.endswith('.pkl')])
-        logger.debug(f"Found {total_files} star files before filtering")
-        
-        logger.info(f"Computing {metric} distances with filter: {getattr(filter_fn, '__name__', str(filter_fn))}")
-        self.keys, self.distances = metric_fn(
-            files=self.outDir, filterfunction=filter_fn, **kwargs
+        # Determine files
+        files_to_use = files if files is not None else self.outDir
+        total_files = (
+            len(files)
+            if files is not None
+            else len([f for f in os.listdir(self.outDir) if f.endswith(".pkl")])
         )
-        
-        # Log filtering results
+
+        logger.debug(f"Found {total_files} star files before filtering")
+        self.keys, self.distances = metric_fn(
+            files=files_to_use, filterfunction=filter_fn, **kwargs
+        )
+        logger.info(
+            f"Distance matrix stats — min distance: {np.min(self.distances):.4f}, max distance: {np.max(self.distances):.4f}"
+        )
+
         filtered_count = len(self.keys)
-        logger.info(f"Filter results: {filtered_count}/{total_files} graphs passed the filter")
-        if filtered_count < total_files:
-            logger.info(f"Filtered out {total_files - filtered_count} graphs that didn't meet criteria")
-        
-        logger.debug(f"Computing distance matrix of shape {self.distances.shape}")
-        logger.info(f"Clustering {filtered_count} graphs into {nReps} representative groups")
+        logger.info(
+            f"Filter results: {filtered_count}/{total_files} graphs passed the filter"
+        )
+
+        # Use nReps or distance_threshold for AgglomerativeClustering
+        if nReps is None and distance_threshold is None:
+            nReps = self.nReps  # fallback to instance default
+
         model = AgglomerativeClustering(
             metric="precomputed",
             linkage="average",
             compute_distances=True,
-            distance_threshold=None,
             n_clusters=nReps,
+            distance_threshold=distance_threshold,
         )
         model.fit(self.distances)
-        logger.debug(f"Clustering complete with {len(set(model.labels_))} clusters found")
+        logger.debug(
+            f"Clustering complete with {len(set(model.labels_))} clusters found"
+        )
 
         labels = model.labels_
-        subgroups = {}
+        subgroups = {label: self.keys[labels == label] for label in set(labels)}
 
-        for label in labels:
-            mask = np.where(labels == label, True, False)
-            subkeys = self.keys[mask]
-            subgroups[label] = subkeys
-
-        logger.info(f"Selecting representatives using '{selector}' selector")
-        for key in subgroups.keys():
-            subgroup = subgroups[key]
+        self.selection = {}
+        for label, subgroup in subgroups.items():
             selected_star = selector_fn(subgroup)
-            self.selection[key] = {
+            self.selection[label] = {
                 "star": selected_star,
                 "cluster_size": len(subgroup),
             }
-            logger.debug(f"Cluster {key}: selected {os.path.basename(selected_star)} from {len(subgroup)} candidates")
-        
-        logger.info(f"Galaxy collapse complete: {len(self.selection)} representative stars selected")
+            logger.debug(
+                f"Cluster {label}: selected {os.path.basename(selected_star)} from {len(subgroup)} candidates"
+            )
+
+        logger.info(
+            f"Galaxy collapse complete: {len(self.selection)} representative stars selected"
+        )
         return self.selection
 
     def get_galaxy_coordinates(self) -> np.ndarray:
