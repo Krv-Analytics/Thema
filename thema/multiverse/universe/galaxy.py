@@ -349,21 +349,45 @@ class Galaxy:
         selector=None,
         filter_fn=None,
         files: list | None = None,
-        distance_threshold: float | None = None,  # NEW
+        distance_threshold: float | None = None,
         **kwargs,
     ):
         """
         Collapses the space of Stars into representative Stars.
         Either nReps (number of clusters) or distance_threshold (AgglomerativeClustering) can be used.
+
+        Parameters
+        ----------
+        metric : str, optional
+            Metric function name for comparing graphs. Defaults to self.metric.
+        nReps : int, optional
+            Number of clusters for AgglomerativeClustering. Ignored if distance_threshold is set.
+        selector : str, optional
+            Selection function name to choose representative stars. Defaults to self.selector.
+        filter_fn : callable, str, or None
+            Filter function to select a subset of graphs. Defaults to no filter.
+        files : list[str] or None
+            Optional list of file paths to process. Defaults to self.outDir.
+        distance_threshold : float, optional
+            AgglomerativeClustering distance threshold. Used if nReps is None.
+        **kwargs :
+            Additional arguments passed to the metric function.
+
+        Returns
+        -------
+        dict
+            Mapping from cluster labels to selected stars and cluster sizes.
         """
         metric = metric or self.metric
         selector = selector or self.selector
 
-        # Filter function handling
+        # Ensure filter_fn is a callable
         if filter_fn is None:
-            filter_fn = self.filterFn or starFilters.nofilterfunction
-        elif isinstance(filter_fn, str):
+            filter_fn = self.filterFn
+        if isinstance(filter_fn, str):
             filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
+        if filter_fn is None:
+            filter_fn = starFilters.nofilterfunction
         elif not callable(filter_fn):
             raise ValueError(
                 f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
@@ -372,10 +396,10 @@ class Galaxy:
         metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
-        # Determine files
+        # Determine files to process
         files_to_use = files if files is not None else self.outDir
         total_files = (
-            len(files)
+            len(files_to_use)
             if files is not None
             else len([f for f in os.listdir(self.outDir) if f.endswith(".pkl")])
         )
@@ -395,7 +419,7 @@ class Galaxy:
 
         # Use nReps or distance_threshold for AgglomerativeClustering
         if nReps is None and distance_threshold is None:
-            nReps = self.nReps  # fallback to instance default
+            nReps = self.nReps
 
         model = AgglomerativeClustering(
             metric="precomputed",
