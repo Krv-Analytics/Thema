@@ -110,6 +110,7 @@ class Galaxy:
         metric="stellar_curvature_distance",
         selector="max_nodes",
         nReps=3,
+        filter_fn=None,
         YAML_PATH=None,
         verbose=False,
     ):
@@ -135,6 +136,9 @@ class Galaxy:
             {"star0_name" : {   "star0_parameter0":[list of star0_parameter0 values],
                                 "star0_parameter1": [list of star0_parameter1 values]},
              "star1_name": {"star1_parameter0": [list of star1_parameter0 values]} }
+        filter_fn: str, callable, or None, optional
+            Filter function to apply to stars before distance calculations.
+            Can be a string name of a function in starFilters, a callable, or None for no filtering.
         YAML_PATH : str, optional
             The path to a YAML file containing configuration settings. Default is None.
         verbose: bool
@@ -158,7 +162,7 @@ class Galaxy:
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
             nReps = yamlParams.Galaxy.nReps
-            filterFn = yamlParams.Galaxy.filter
+            filter_fn = yamlParams.Galaxy.filter
 
             if type(yamlParams.Galaxy.stars) == str:
                 stars = [yamlParams.Galaxy.stars]
@@ -183,7 +187,7 @@ class Galaxy:
         self.metric = metric
         self.selector = selector
         self.nReps = nReps
-        self.filterFn = filterFn
+        self.filterFn = filter_fn
 
         self.keys = None
         self.distances = None
@@ -365,17 +369,22 @@ class Galaxy:
         if selector is None:
             selector = self.selector
 
+        # Handle the filter function - use parameter, fallback to instance default, then to no filter
         if filter_fn is None:
-            filter_fn = self.filterFn
+            filter_fn = self.filterFn or starFilters.nofilterfunction
+        
+        # Convert string filter names to actual functions
+        if isinstance(filter_fn, str):
+            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
+        elif callable(filter_fn):
+            pass  # Use the callable directly
+        elif filter_fn is not None:
+            raise ValueError(
+                f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
+            )
 
         metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
-
-        # Handle the filter function
-        if filter_fn is None:
-            filter_fn = starFilters.nofilterfunction
-        else:
-            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
 
         self.keys, self.distances = metric_fn(
             files=self.outDir, filterfunction=filter_fn, **kwargs
