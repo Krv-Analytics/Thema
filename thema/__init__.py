@@ -28,6 +28,16 @@ from .multiverse.universe.utils.starGraph import starGraph
 from .thema import Thema
 
 import logging
+import warnings
+
+# Suppress sklearn deprecation warnings about force_all_finite -> ensure_all_finite
+# This affects dependencies like kmapper and hdbscan that haven't updated yet
+warnings.filterwarnings(
+    "ignore",
+    message=".*'force_all_finite' was renamed to 'ensure_all_finite'.*",
+    category=FutureWarning,
+    module="sklearn.*"
+)
 
 
 def enable_logging(level="INFO"):
