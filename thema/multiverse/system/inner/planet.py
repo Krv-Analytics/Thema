@@ -12,13 +12,14 @@ import pandas as pd
 from omegaconf import ListConfig, OmegaConf
 
 from ....core import Core
-from ....utils import function_scheduler
-from .inner_utils import clean_data_filename
-from .moon import Moon
-from ....logging_utils import (
+from ....utils import (
+    function_scheduler,
     get_current_logging_config,
     configure_child_process_logging,
 )
+from .inner_utils import clean_data_filename
+from .moon import Moon
+
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -324,7 +325,9 @@ class Planet(Core):
 
         elif imputeColumns == "auto":
 
-            self.imputeColumns = self.data.columns[self.data.isna().any()].tolist()
+            self.imputeColumns = self.data.columns[
+                self.data.isna().any()
+            ].tolist()
 
         elif type(imputeColumns) == ListConfig or type(imputeColumns) == list:
             self.imputeColumns = imputeColumns
@@ -336,14 +339,18 @@ class Planet(Core):
             self.imputeColumns = []
 
         if imputeMethods is None or imputeMethods == "None":
-            self.imputeMethods = ["drop" for _ in range(len(self.imputeColumns))]
+            self.imputeMethods = [
+                "drop" for _ in range(len(self.imputeColumns))
+            ]
         elif imputeMethods == "auto":
             self.imputeMethods = self.get_recomended_sampling_method()
         elif type(imputeMethods) == str:
             if not imputeMethods in supported_imputeMethods:
                 print("Invalid impute methods. Defaulting to 'drop'")
                 imputeMethods = "drop"
-            self.imputeMethods = [imputeMethods for _ in range(len(self.imputeColumns))]
+            self.imputeMethods = [
+                imputeMethods for _ in range(len(self.imputeColumns))
+            ]
         else:
             assert len(imputeMethods) == len(
                 self.imputeColumns
@@ -588,7 +595,9 @@ class Planet(Core):
         )
         my_moon.fit()
 
-        filename_without_extension, extension = os.path.splitext(self.get_data_path())
+        filename_without_extension, extension = os.path.splitext(
+            self.get_data_path()
+        )
         data_name = filename_without_extension.split("/")[-1]
         file_name = clean_data_filename(
             data_name=data_name,
