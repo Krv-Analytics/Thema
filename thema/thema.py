@@ -304,6 +304,7 @@ class Thema:
         self.model_files = [
             model_outdir + file for file in os.listdir(model_outdir)
         ]
+        self.galaxy.collapse()
 
     def spaghettify_galaxy(self):
         """
