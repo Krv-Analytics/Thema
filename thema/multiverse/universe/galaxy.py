@@ -167,7 +167,7 @@ class Galaxy:
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
             nReps = yamlParams.Galaxy.nReps
-            filter_fn = yamlParams.Galaxy.filter
+            filter_fn = yamlParams.Galaxy.get('filter', None)
 
             if type(yamlParams.Galaxy.stars) == str:
                 stars = [yamlParams.Galaxy.stars]
@@ -192,7 +192,7 @@ class Galaxy:
         self.metric = metric
         self.selector = selector
         self.nReps = nReps
-        self.filterFn = filter_fn
+        self.filterFn = self._setup_filter(filter_fn, yamlParams if YAML_PATH is not None else None)
 
         self.keys = None
         self.distances = None
@@ -229,6 +229,27 @@ class Galaxy:
         )
         for star_name, star_params in self.params.items():
             logger.debug(f"Star '{star_name}' parameters: {star_params}")
+
+    def _setup_filter(self, filter_fn, yamlParams):
+        if filter_fn is None:
+            return None
+        if callable(filter_fn):
+            return filter_fn
+        if isinstance(filter_fn, str):
+            return getattr(starFilters, filter_fn, starFilters.nofilterfunction)
+        
+        if yamlParams and yamlParams.Galaxy.get('filter'):
+            filter_type = yamlParams.Galaxy.get('filter')
+            params = yamlParams.Galaxy.get('filter_params', {})
+            
+            if filter_type == "component_count":
+                return starFilters.component_count_filter(params.get('target_components', 1))
+            elif filter_type == "minimum_nodes":
+                return starFilters.minimum_nodes_filter(params.get('min_nodes', 3))
+            elif filter_type == "minimum_edges":
+                return starFilters.minimum_edges_filter(params.get('min_edges', 2))
+            
+        return None
 
     def fit(self):
         """
