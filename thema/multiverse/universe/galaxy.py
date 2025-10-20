@@ -227,24 +227,16 @@ class Galaxy:
     def _setup_filter(self, filter_fn, yamlParams):
         if callable(filter_fn):
             return filter_fn
-            
-        # Handle YAML filter configuration
-        if yamlParams and yamlParams.Galaxy.get('filter'):
-            filter_type = yamlParams.Galaxy.get('filter')
-            params = yamlParams.Galaxy.get('filter_params', {})
-            
-            if filter_type == "component_count":
-                return starFilters.component_count_filter(params.get('target_components', 1))
-            elif filter_type == "minimum_nodes":
-                return starFilters.minimum_nodes_filter(params.get('min_nodes', 3))
-            elif filter_type == "minimum_edges":
-                return starFilters.minimum_edges_filter(params.get('min_edges', 2))
-        
-        # Legacy: string filter names  
         if isinstance(filter_fn, str):
             return getattr(starFilters, filter_fn, starFilters.nofilterfunction)
             
-        # Default: no filter (return None, collapse() will use nofilterfunction)
+        if yamlParams and yamlParams.Galaxy.get('filter'):
+            filter_type = yamlParams.Galaxy.get('filter')
+            if filter_type in config.filter_configs:
+                filter_config = config.filter_configs[filter_type]
+                params = {**filter_config['params'], **yamlParams.Galaxy.get('filter_params', {})}
+                return getattr(starFilters, filter_config['function'])(**params)
+            
         return None
 
     def _log_graph_distribution(self, files_to_use):
