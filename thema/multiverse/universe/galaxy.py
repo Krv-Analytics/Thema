@@ -18,7 +18,7 @@ from sklearn.manifold import MDS
 from .utils import starFilters, starSelectors
 
 from ... import config
-from ...utils import create_file_name, function_scheduler
+from ...utils import create_file_name, function_scheduler, get_current_logging_config
 from . import geodesics
 
 # Configure module logger
@@ -220,6 +220,16 @@ class Galaxy:
             except Exception as e:
                 print(e)
 
+        # Log Galaxy initialization with key parameters
+        clean_files = len(os.listdir(self.cleanDir))
+        proj_files = len(os.listdir(self.projDir))
+        logger.info(
+            f"Galaxy initialized - {len(self.params)} star type(s), {clean_files} clean files, "
+            f"{proj_files} projection files, metric: {self.metric}, selector: {self.selector}"
+        )
+        for star_name, star_params in self.params.items():
+            logger.debug(f"Star '{star_name}' parameters: {star_params}")
+
     def fit(self):
         """
         Configure and generate space of Stars.
@@ -232,6 +242,10 @@ class Galaxy:
             Saves star objects to outDir and prints a count of failed saves.
         """
         logger.info(f"Starting Galaxy fit with {len(self.params)} star type(s)")
+
+        # Get current logging config to pass to child processes
+        logging_config = get_current_logging_config()
+
         subprocesses = []
 
         for starName, starParamsDict in self.params.items():
@@ -274,6 +288,7 @@ class Galaxy:
                             starParameters,
                             starName,
                             f"{k}_{j}",
+                            logging_config,
                         )
                     )
 
@@ -303,6 +318,7 @@ class Galaxy:
         starParameters,
         starName,
         id,
+        logging_config,
     ):
         """Helper function for the fit() method. Creates a Star instances and fits it.
 
@@ -322,25 +338,39 @@ class Galaxy:
             Name of star class
         id : int
             Identifier
+        logging_config : dict or None
+            Logging configuration from parent process
 
         Returns
         -------
-        None
+        bool
+            True if saved successfully, False otherwise
 
         See Also
         --------
         `Star` class and stars directory for more info on an individual fit.
         """
-        my_star = star(
-            data_path=data_path,
-            clean_path=cleanFile,
-            projection_path=projFile,
-            **starParameters,
-        )
-        my_star.fit()
-        output_file = create_file_name(starName, starParameters, id)
-        output_file = os.path.join(self.outDir, output_file)
-        return my_star.save(output_file)
+        # Configure logging in this child process
+        from ...utils import configure_child_process_logging
+
+        configure_child_process_logging(logging_config)
+
+        try:
+            my_star = star(
+                data_path=data_path,
+                clean_path=cleanFile,
+                projection_path=projFile,
+                **starParameters,
+            )
+            my_star.fit()
+            output_file = create_file_name(starName, starParameters, id)
+            output_file = os.path.join(self.outDir, output_file)
+            return my_star.save(output_file)
+        except Exception as e:
+            logger.error(
+                f"Star {starName} #{id} failed - params: {starParameters}, error: {str(e)}"
+            )
+            return False
 
     def collapse(
         self,

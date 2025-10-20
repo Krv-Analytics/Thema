@@ -2,11 +2,16 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
+import logging
 import os
 import pickle
 from abc import abstractmethod
 
 from ...core import Core
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Star(Core):
@@ -86,5 +91,6 @@ class Star(Core):
                 return True
             else:
                 return False
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to save Star to {file_path}: {str(e)}")
             return False

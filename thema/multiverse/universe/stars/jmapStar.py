@@ -2,8 +2,8 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
-
 import itertools
+import logging
 from collections import defaultdict
 
 import networkx as nx
@@ -13,6 +13,10 @@ from sklearn.cluster import DBSCAN
 
 from ..star import Star
 from ..utils.starGraph import starGraph
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def initialize():
@@ -128,6 +132,14 @@ class jmapStar(Star):
         self.minIntersection = minIntersection
         self.clusterer = get_clusterer(clusterer)
         self.mapper = KeplerMapper()
+        
+        # Store parameters for potential debugging
+        self._params = {
+            "nCubes": nCubes,
+            "percOverlap": percOverlap, 
+            "minIntersection": minIntersection,
+            "clusterer": clusterer
+        }
 
     def fit(self):
         """Computes a kmapper complex based on the configuration parameters and
@@ -151,6 +163,16 @@ class jmapStar(Star):
                 cover=Cover(self.nCubes, self.percOverlap),
                 clusterer=self.clusterer,
             )
+            
+            if not self.complex or "nodes" not in self.complex:
+                logger.debug(
+                    f"KeplerMapper produced empty complex - params: {self._params}, "
+                    f"projection shape: {self.projection.shape}"
+                )
+                self.complex = None
+                self.starGraph = None
+                return
+            
             self.nodes = convert_keys_to_alphabet(self.complex["nodes"])
 
             graph = nx.Graph()
@@ -160,7 +182,12 @@ class jmapStar(Star):
             edges = nerve.compute(self.nodes)
 
             if len(edges) == 0:
-                self.starGraph = None
+                # Log when we get empty graphs - this is important for debugging
+                logger.debug(
+                    f"No edges found in graph - params: {self._params}, "
+                    f"nodes: {len(self.nodes)}, projection shape: {self.projection.shape}"
+                )
+                self.starGraph = starGraph(graph)  # Create empty graph instead of None
             else:
                 graph.add_nodes_from(self.nodes)
                 nx.set_node_attributes(graph, self.nodes, "membership")
@@ -169,10 +196,14 @@ class jmapStar(Star):
                     graph.add_weighted_edges_from(edges)
                 else:
                     graph.add_edges_from(edges)
+                
+                self.starGraph = starGraph(graph)
 
-            self.starGraph = starGraph(graph)
-
-        except:
+        except Exception as e:
+            logger.error(
+                f"jmapStar.fit() failed with params: {self._params}, "
+                f"projection shape: {self.projection.shape}, error: {str(e)}"
+            )
             self.complex = None
             self.starGraph = None
 
