@@ -40,6 +40,12 @@ class Thema:
     --------
     >>> thema = Thema('params.yaml')
     >>> thema.genesis()  # Run the full pipeline
+    >>> 
+    >>> # Access representative stars after genesis
+    >>> selection = thema.galaxy.selection
+    >>> print(f"Selected {len(selection)} representative stars")
+    >>> for cluster_id, info in selection.items():
+    ...     print(f"Cluster {cluster_id}: {info['star']} ({info['cluster_size']} stars)")
     """
 
     def __init__(self, YAML_PATH):
@@ -86,6 +92,10 @@ class Thema:
         --------
         >>> thema = Thema('params.yaml')
         >>> thema.genesis()
+        >>> 
+        >>> # Representative stars are automatically selected and stored in galaxy.selection
+        >>> selected_files = [info['star'] for info in thema.galaxy.selection.values()]
+        >>> print(f"Representative files: {selected_files}")
         """
         self.spaghettify_innerSystem()
         self.innerSystem_genesis()
@@ -289,6 +299,10 @@ class Thema:
         >>> thema = Thema('params.yaml')
         >>> thema.spaghettify_galaxy()  # First clean the directory
         >>> thema.galaxy_genesis()  # Process the data
+        >>> 
+        >>> # Representative stars are stored in galaxy.selection after collapse
+        >>> representative_files = [info['star'] for info in thema.galaxy.selection.values()]
+        >>> print(f"Found {len(representative_files)} representative stars")
         """
         model_outdir = os.path.join(
             self.params.outDir, self.params.runName + "/models/"

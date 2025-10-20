@@ -192,7 +192,9 @@ class Galaxy:
         self.metric = metric
         self.selector = selector
         self.nReps = nReps
-        self.filterFn = self._setup_filter(filter_fn, yamlParams if YAML_PATH is not None else None)
+        # Store YAML params for filter setup later (avoid pickling issues)
+        self._yaml_filter = filter_fn
+        self._yamlParams = yamlParams if YAML_PATH is not None else None
 
         self.keys = None
         self.distances = None
@@ -220,24 +222,13 @@ class Galaxy:
             except Exception as e:
                 print(e)
 
-        # Log Galaxy initialization with key parameters
-        clean_files = len(os.listdir(self.cleanDir))
-        proj_files = len(os.listdir(self.projDir))
-        logger.info(
-            f"Galaxy initialized - {len(self.params)} star type(s), {clean_files} clean files, "
-            f"{proj_files} projection files, metric: {self.metric}, selector: {self.selector}"
-        )
-        for star_name, star_params in self.params.items():
-            logger.debug(f"Star '{star_name}' parameters: {star_params}")
+            
 
     def _setup_filter(self, filter_fn, yamlParams):
-        if filter_fn is None:
-            return None
         if callable(filter_fn):
             return filter_fn
-        if isinstance(filter_fn, str):
-            return getattr(starFilters, filter_fn, starFilters.nofilterfunction)
-        
+            
+        # Handle YAML filter configuration
         if yamlParams and yamlParams.Galaxy.get('filter'):
             filter_type = yamlParams.Galaxy.get('filter')
             params = yamlParams.Galaxy.get('filter_params', {})
@@ -248,8 +239,37 @@ class Galaxy:
                 return starFilters.minimum_nodes_filter(params.get('min_nodes', 3))
             elif filter_type == "minimum_edges":
                 return starFilters.minimum_edges_filter(params.get('min_edges', 2))
+        
+        # Legacy: string filter names  
+        if isinstance(filter_fn, str):
+            return getattr(starFilters, filter_fn, starFilters.nofilterfunction)
             
+        # Default: no filter (return None, collapse() will use nofilterfunction)
         return None
+
+    def _log_graph_distribution(self, files_to_use):
+        import pickle
+        import networkx as nx
+        from collections import Counter
+        
+        file_paths = [os.path.join(self.outDir, f) for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+        component_counts = []
+        
+        for file_path in file_paths:
+            try:
+                with open(file_path, 'rb') as f:
+                    star_obj = pickle.load(f)
+                if star_obj.starGraph and star_obj.starGraph.graph:
+                    component_counts.append(nx.number_connected_components(star_obj.starGraph.graph))
+            except:
+                continue
+        
+        if component_counts:
+            counts = Counter(component_counts)
+            logger.debug("Component distribution:")
+            for n, count in sorted(counts.items()):
+                bar = "█" * count
+                logger.debug(f"  {n:>2} components: {bar} ({count})")
 
     def fit(self):
         """
@@ -262,7 +282,6 @@ class Galaxy:
         None
             Saves star objects to outDir and prints a count of failed saves.
         """
-        logger.info(f"Starting Galaxy fit with {len(self.params)} star type(s)")
 
         # Get current logging config to pass to child processes
         logging_config = get_current_logging_config()
@@ -322,13 +341,8 @@ class Galaxy:
         )
 
         failed_saves = sum(1 for r in results if r is False)
-        success_count = len(results) - failed_saves
-        success_rate = (success_count / len(results) * 100) if len(results) > 0 else 0
-        logger.info(
-            f"Galaxy fit complete: {success_count}/{len(results)} ({success_rate:.1f}%) stars successfully saved"
-        )
         if failed_saves > 0:
-            logger.warning(f"{failed_saves} star saves failed")
+            logger.warning(f"{failed_saves}/{len(results)} star saves failed")
 
     def _instantiate_star(
         self,
@@ -432,9 +446,9 @@ class Galaxy:
         metric = metric or self.metric
         selector = selector or self.selector
 
-        # Ensure filter_fn is a callable
+        # Set up filter when needed
         if filter_fn is None:
-            filter_fn = self.filterFn
+            filter_fn = self._setup_filter(self._yaml_filter, self._yamlParams)
         if isinstance(filter_fn, str):
             filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
         if filter_fn is None:
@@ -455,22 +469,36 @@ class Galaxy:
             else len([f for f in os.listdir(self.outDir) if f.endswith(".pkl")])
         )
 
-        logger.debug(f"Found {total_files} star files before filtering")
+        # Show graph distribution before filtering if DEBUG enabled
+        if logger.isEnabledFor(logging.DEBUG):
+            self._log_graph_distribution(files_to_use)
+        
         self.keys, self.distances = metric_fn(
             files=files_to_use, filterfunction=filter_fn, **kwargs
         )
-        logger.info(
-            f"Distance matrix stats — min distance: {np.min(self.distances):.4f}, max distance: {np.max(self.distances):.4f}"
-        )
-
         filtered_count = len(self.keys)
         logger.info(
-            f"Filter results: {filtered_count}/{total_files} graphs passed the filter"
+            f"Filter results: {filtered_count}/{total_files} graphs passed filter"
         )
+
+        # Check if we have enough graphs for clustering
+        if filtered_count < 2:
+            raise ValueError(
+                f"Only {filtered_count} graph(s) passed the filter. "
+                "Clustering requires at least 2 graphs. "
+                "Consider relaxing your filter criteria."
+            )
 
         # Use nReps or distance_threshold for AgglomerativeClustering
         if nReps is None and distance_threshold is None:
             nReps = self.nReps
+            
+        # Check if nReps is valid for the number of filtered graphs
+        if nReps and nReps > filtered_count:
+            raise ValueError(
+                f"Cannot create {nReps} clusters from {filtered_count} graphs. "
+                f"Set nReps to {filtered_count} or fewer, or relax your filter."
+            )
 
         model = AgglomerativeClustering(
             metric="precomputed",
@@ -480,9 +508,6 @@ class Galaxy:
             distance_threshold=distance_threshold,
         )
         model.fit(self.distances)
-        logger.debug(
-            f"Clustering complete with {len(set(model.labels_))} clusters found"
-        )
 
         labels = model.labels_
         subgroups = {label: self.keys[labels == label] for label in set(labels)}
@@ -494,13 +519,7 @@ class Galaxy:
                 "star": selected_star,
                 "cluster_size": len(subgroup),
             }
-            logger.debug(
-                f"Cluster {label}: selected {os.path.basename(selected_star)} from {len(subgroup)} candidates"
-            )
 
-        logger.info(
-            f"Galaxy collapse complete: {len(self.selection)} representative stars selected"
-        )
         return self.selection
 
     def get_galaxy_coordinates(self) -> np.ndarray:
