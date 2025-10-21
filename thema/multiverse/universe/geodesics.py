@@ -17,7 +17,7 @@ from .utils.starFilters import nofilterfunction
 def stellar_curvature_distance(
     files: str | list,
     filterfunction: Callable | None = None,
-    curvature="forman_curvature",
+    curvature="ollivier_ricci_curvature",
     vectorization="landscape",
 ):
     """
@@ -72,7 +72,9 @@ def stellar_curvature_distance(
     return np.array(keys), distance_matrix
 
 
-def _load_starGraphs(dir: str | list, graph_filter: Callable | None = None) -> dict:
+def _load_starGraphs(
+    dir: str | list, graph_filter: Callable | None = None
+) -> dict:
     """
     Load starGraphs from a directory or a list of pickle files.
     Only returns starGraphs that satisfy the `graph_filter`.
@@ -98,7 +100,9 @@ def _load_starGraphs(dir: str | list, graph_filter: Callable | None = None) -> d
     else:
         assert os.path.isdir(dir), "Invalid graph Directory"
         assert len(os.listdir(dir)) > 0, "Graph directory appears to be empty!"
-        files = [os.path.join(dir, f) for f in os.listdir(dir) if f.endswith(".pkl")]
+        files = [
+            os.path.join(dir, f) for f in os.listdir(dir) if f.endswith(".pkl")
+        ]
 
     if not files:
         raise ValueError("No .pkl files found to load.")
