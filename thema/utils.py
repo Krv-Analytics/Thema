@@ -17,7 +17,7 @@ try:
         from tqdm.notebook import tqdm
     else:
         from tqdm import tqdm
-except:
+except (ImportError, AttributeError):
     from tqdm import tqdm
 
 
