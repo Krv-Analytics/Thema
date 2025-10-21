@@ -2,9 +2,14 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
+import logging
 from sklearn.decomposition import PCA
 
 from ..comet import Comet
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def initialize():
@@ -73,6 +78,7 @@ class pcaProj(Comet):
         self.dimensions = dimensions
         self.seed = seed
         self.projectionArray = None
+        
 
     def fit(self):
         """

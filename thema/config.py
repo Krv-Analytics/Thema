@@ -146,3 +146,27 @@ tag_to_class = {
 star_to_observatory = {
     "jmapStar": "jmapObservatoryConfig",
 }
+
+# Map from filter YAML tags to filter functions and their parameter names
+filter_configs = {
+    "component_count": {
+        "function": "component_count_filter",
+        "params": {"target_components": 1}
+    },
+    "component_count_range": {
+        "function": "component_count_range_filter", 
+        "params": {"min_components": 1, "max_components": 10}
+    },
+    "minimum_nodes": {
+        "function": "minimum_nodes_filter",
+        "params": {"min_nodes": 3}
+    },
+    "minimum_edges": {
+        "function": "minimum_edges_filter",
+        "params": {"min_edges": 2}
+    },
+    "minimum_unique_items": {
+        "function": "minimum_unique_items_filter",
+        "params": {"min_unique_items": 10}
+    }
+}

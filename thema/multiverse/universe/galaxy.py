@@ -1,15 +1,19 @@
 # File: multiverse/universe.py
-# Lasted Updated: 05/15/24
-# Updated By: JW
+# Lasted Updated: 10/21/25
+# Updated By: SG
 
 import glob
 import importlib
 import itertools
+import logging
 import os
 import pickle
+from collections import Counter
+import time
+from typing import cast
 
 import numpy as np
-import pandas as pd
+import networkx as nx
 from omegaconf import OmegaConf
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.manifold import MDS
@@ -17,8 +21,15 @@ from sklearn.manifold import MDS
 from .utils import starFilters, starSelectors
 
 from ... import config
-from ...utils import create_file_name, function_scheduler
+from ...utils import (
+    create_file_name,
+    function_scheduler,
+    get_current_logging_config,
+)
 from . import geodesics
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Galaxy:
@@ -110,6 +121,7 @@ class Galaxy:
         metric="stellar_curvature_distance",
         selector="max_nodes",
         nReps=3,
+        filter_fn=None,
         YAML_PATH=None,
         verbose=False,
     ):
@@ -135,6 +147,9 @@ class Galaxy:
             {"star0_name" : {   "star0_parameter0":[list of star0_parameter0 values],
                                 "star0_parameter1": [list of star0_parameter1 values]},
              "star1_name": {"star1_parameter0": [list of star1_parameter0 values]} }
+        filter_fn: str, callable, or None, optional
+            Filter function to apply to stars before distance calculations.
+            Can be a string name of a function in starFilters, a callable, or None for no filtering.
         YAML_PATH : str, optional
             The path to a YAML file containing configuration settings. Default is None.
         verbose: bool
@@ -158,7 +173,7 @@ class Galaxy:
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
             nReps = yamlParams.Galaxy.nReps
-            filterFn = yamlParams.Galaxy.filter
+            filter_fn = yamlParams.Galaxy.get("filter", None)
 
             if type(yamlParams.Galaxy.stars) == str:
                 stars = [yamlParams.Galaxy.stars]
@@ -179,11 +194,14 @@ class Galaxy:
         self.cleanDir = cleanDir
         self.projDir = projDir
         self.outDir = outDir
+        self.YAML_PATH = YAML_PATH
 
         self.metric = metric
         self.selector = selector
         self.nReps = nReps
-        self.filterFn = filterFn
+        # Store YAML params for filter setup later (avoid pickling issues)
+        self._yaml_filter = filter_fn
+        self._yamlParams = yamlParams if YAML_PATH is not None else None
 
         self.keys = None
         self.distances = None
@@ -211,6 +229,66 @@ class Galaxy:
             except Exception as e:
                 print(e)
 
+        self.data = cast(str, self.data)
+        self.cleanDir = cast(str, self.cleanDir)
+        self.projDir = cast(str, self.projDir)
+        self.outDir = cast(str, self.outDir)
+
+    def _setup_filter(self, yamlParams):
+        logger.info("Checking yaml for filter configuration.")
+        if yamlParams and yamlParams.Galaxy.get("filter"):
+            filter_type = yamlParams.Galaxy.get("filter")
+            if filter_type in config.filter_configs:
+
+                filter_config = config.filter_configs[filter_type]
+                logger.info(f"Loading supported filter function: `{filter_type}`")
+                params = {
+                    **filter_config["params"],
+                    **yamlParams.Galaxy.get("filter_params", {}),
+                }
+                logger.info(f"Using filter parameters: {params}")
+                func = getattr(starFilters, filter_config["function"])(**params)
+                # Tag the callable with a human-friendly name for logging
+                try:
+                    setattr(func, "_display_name", str(filter_type))
+                except Exception:
+                    pass
+                return func
+
+        # Default to no-op filter with a stable display name
+        nf = starFilters.nofilterfunction
+        try:
+            setattr(nf, "_display_name", "nofilterfunction")
+        except Exception:
+            pass
+        return nf
+
+    def _log_graph_distribution(self, files_to_use):
+
+        out_dir = cast(str, self.outDir)
+        file_paths = [
+            os.path.join(out_dir, f) for f in os.listdir(out_dir) if f.endswith(".pkl")
+        ]
+        component_counts = []
+
+        for file_path in file_paths:
+            try:
+                with open(file_path, "rb") as f:
+                    star_obj = pickle.load(f)
+                if star_obj.starGraph and star_obj.starGraph.graph:
+                    component_counts.append(
+                        nx.number_connected_components(star_obj.starGraph.graph)
+                    )
+            except:
+                continue
+
+        if component_counts:
+            counts = Counter(component_counts)
+            logger.debug("Component distribution:")
+            for n, count in sorted(counts.items()):
+                bar = "█" * count
+                logger.debug(f"  {n:>2} components: {bar} ({count})")
+
     def fit(self):
         """
         Configure and generate space of Stars.
@@ -223,6 +301,9 @@ class Galaxy:
             Saves star objects to outDir and prints a count of failed saves.
         """
 
+        # Get current logging config to pass to child processes
+        logging_config = get_current_logging_config()
+
         subprocesses = []
 
         for starName, starParamsDict in self.params.items():
@@ -232,14 +313,16 @@ class Galaxy:
             star = module.initialize()
 
             # Load matching files
-            cleanfile_pattern = os.path.join(self.cleanDir, "*.pkl")
+            clean_dir = cast(str, self.cleanDir)
+            cleanfile_pattern = os.path.join(clean_dir, "*.pkl")
             valid_cleanFiles = glob.glob(cleanfile_pattern)
 
-            projfile_pattern = os.path.join(self.projDir, "*.pkl")
+            proj_dir = cast(str, self.projDir)
+            projfile_pattern = os.path.join(proj_dir, "*.pkl")
             valid_projFiles = glob.glob(projfile_pattern)
 
             for j, projFile in enumerate(valid_projFiles):
-                projFilePath = os.path.join(self.projDir, projFile)
+                projFilePath = os.path.join(proj_dir, projFile)
                 with open(projFilePath, "rb") as f:
                     cleanFile = pickle.load(f).get_clean_path()
 
@@ -265,6 +348,7 @@ class Galaxy:
                             starParameters,
                             starName,
                             f"{k}_{j}",
+                            logging_config,
                         )
                     )
 
@@ -277,9 +361,8 @@ class Galaxy:
         )
 
         failed_saves = sum(1 for r in results if r is False)
-        print(
-            f"\n⭐️ {len(results)-failed_saves}({(len(results)- failed_saves)/len(results)*100}%) star objects successfully saved."
-        )
+        if failed_saves > 0:
+            logger.warning(f"{failed_saves}/{len(results)} star saves failed")
 
     def _instantiate_star(
         self,
@@ -290,6 +373,7 @@ class Galaxy:
         starParameters,
         starName,
         id,
+        logging_config,
     ):
         """Helper function for the fit() method. Creates a Star instances and fits it.
 
@@ -309,25 +393,40 @@ class Galaxy:
             Name of star class
         id : int
             Identifier
+        logging_config : dict or None
+            Logging configuration from parent process
 
         Returns
         -------
-        None
+        bool
+            True if saved successfully, False otherwise
 
         See Also
         --------
         `Star` class and stars directory for more info on an individual fit.
         """
-        my_star = star(
-            data_path=data_path,
-            clean_path=cleanFile,
-            projection_path=projFile,
-            **starParameters,
-        )
-        my_star.fit()
-        output_file = create_file_name(starName, starParameters, id)
-        output_file = os.path.join(self.outDir, output_file)
-        return my_star.save(output_file)
+        # Configure logging in this child process
+        from ...utils import configure_child_process_logging
+
+        configure_child_process_logging(logging_config)
+
+        try:
+            my_star = star(
+                data_path=data_path,
+                clean_path=cleanFile,
+                projection_path=projFile,
+                **starParameters,
+            )
+            my_star.fit()
+            output_file = create_file_name(starName, starParameters, id)
+            out_dir = cast(str, self.outDir)
+            output_file = os.path.join(out_dir, output_file)
+            return my_star.save(output_file)
+        except Exception as e:
+            logger.error(
+                f"Star {starName} #{id} failed - params: {starParameters}, error: {str(e)}"
+            )
+            return False
 
     def collapse(
         self,
@@ -335,75 +434,260 @@ class Galaxy:
         nReps=None,
         selector=None,
         filter_fn=None,
+        files: list | None = None,
+        distance_threshold: float | None = None,
         **kwargs,
     ):
         """
-        Collapses the space of Stars into a small number of representative Stars
+        Collapses the space of Stars into representative Stars.
+        Either nReps (number of clusters) or distance_threshold (AgglomerativeClustering) can be used.
 
         Parameters
         ----------
-        metric: str
-            metric used when comparing graphs. Currently, supported types are `stellar_curvature_distance`
-            and `stellar_kernel_distance`.
-        nReps: int
-            The number of representative stars
-        selector: str
-            The selection criteria to choose representatives from a cluster. Currently, only "random" supported.
-        **kwargs:
-            Arguments necessary for different metric functions.
+        metric : str, optional
+            Metric function name for comparing graphs. Defaults to self.metric.
+        nReps : int, optional
+            Number of clusters for AgglomerativeClustering. Ignored if distance_threshold is set.
+        selector : str, optional
+            Selection function name to choose representative stars. Defaults to self.selector.
+        filter_fn : callable, str, or None
+            Filter function to select a subset of graphs. Defaults to no filter.
+        files : list[str] or None
+            Optional list of file paths to process. Defaults to self.outDir.
+        distance_threshold : float, optional
+            AgglomerativeClustering distance threshold. Used if nReps is None.
+        **kwargs :
+            Additional arguments passed to the metric function.
 
         Returns
         -------
         dict
-            A dictionary containing the path to the star and the size of the group it represents.
+            Mapping from cluster labels to selected stars and cluster sizes.
         """
+        logger.info("Configuring Galaxy Collapse…")
+        metric = metric or self.metric
+        selector = selector or self.selector
+        # Set up filter when needed
 
-        if metric is None:
-            metric = self.metric
-        if nReps is None:
-            nReps = self.nReps
-        if selector is None:
-            selector = self.selector
+        if callable(filter_fn):
+            logger.info(
+                f"Using provided filter function: {getattr(filter_fn, '__name__', str(type(filter_fn)))}"
+            )
+        elif filter_fn is None:
+            filter_fn = self._setup_filter(self._yamlParams)
 
-        if filter_fn is None:
-            filter_fn = self.filterFn
+        elif isinstance(filter_fn, str):
+            logger.info(
+                f"Function name provided, attempting to load from supported star filters: {filter_fn}"
+            )
+            filter_callable = getattr(
+                starFilters, filter_fn, starFilters.nofilterfunction
+            )
+            # Tag display name for logging
+            try:
+                setattr(filter_callable, "_display_name", str(filter_fn))
+            except Exception:
+                pass
+            filter_fn = filter_callable
+            logger.info(
+                f"Loaded filter function: {getattr(filter_fn, '__name__', str(type(filter_fn)))}"
+            )
+        else:
+            filter_fn = starFilters.nofilterfunction
+            try:
+                setattr(filter_fn, "_display_name", "nofilterfunction")
+            except Exception:
+                pass
+            logger.info(f"Defaulting to : {filter_fn.__name__}")
+
+        if not callable(filter_fn):
+            raise ValueError(
+                f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
+            )
 
         metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
-        # Handle the filter function
-        if filter_fn is None:
-            filter_fn = starFilters.nofilterfunction
-        else:
-            filter_fn = getattr(starFilters, filter_fn, starFilters.nofilterfunction)
-
-        self.keys, self.distances = metric_fn(
-            files=self.outDir, filterfunction=filter_fn, **kwargs
+        # Filter/metric/selector names for readability
+        filter_fn_name = getattr(
+            filter_fn,
+            "_display_name",
+            getattr(filter_fn, "__name__", str(type(filter_fn))),
         )
+        logger.info(
+            f"Filter: {filter_fn_name} | Metric: {metric} | Selector: {selector}"
+        )
+
+        # Determine files to process
+        files_to_use = files if files is not None else self.outDir
+
+        # Build a robust view of file list for logging (without changing behavior)
+        file_list: list[str]
+        out_dir = cast(str, self.outDir)
+        if files is None:
+            file_list = [
+                os.path.join(out_dir, f)
+                for f in os.listdir(out_dir)
+                if f.endswith(".pkl")
+            ]
+        else:
+            if isinstance(files, (list, tuple)):
+                file_list = list(files)
+            elif isinstance(files, str) and os.path.isdir(files):
+                dir_str = cast(str, files)
+                file_list = [
+                    os.path.join(dir_str, f)
+                    for f in os.listdir(dir_str)
+                    if f.endswith(".pkl")
+                ]
+            else:
+                # Fallback: treat as a single path
+                file_list = [str(files)]
+
+        total_files = len(file_list)
+        target_desc = (
+            f"directory '{self.outDir}'"
+            if files is None
+            else f"{total_files} provided file(s)"
+        )
+        logger.info(f"Scanning {total_files} candidate graph(s) from {target_desc}.")
+
+        # Show graph distribution before filtering if DEBUG enabled
+        if logger.isEnabledFor(logging.DEBUG):
+            self._log_graph_distribution(files_to_use)
+
+        # Determine concrete type to pass to metric function: either directory (str) or list[str]
+        out_dir: str = cast(str, self.outDir)
+        if files is None:
+            metric_files: str | list[str] = out_dir
+        else:
+            if isinstance(files, (list, tuple)):
+                metric_files = [str(f) for f in files]
+            elif isinstance(files, str) and os.path.isdir(files):
+                metric_files = files
+            else:
+                metric_files = [str(files)]
+
+        # Compute distances with timing
+        t0 = time.perf_counter()
+        self.keys, self.distances = metric_fn(
+            files=metric_files, filterfunction=filter_fn, **kwargs
+        )
+        t1 = time.perf_counter()
+        filtered_count = len(self.keys)
+        logger.info(
+            f"Filter results: {filtered_count}/{total_files} graph(s) passed the filter in {t1 - t0:.2f}s"
+        )
+
+        # Distance matrix quick stats (off-diagonal)
+        try:
+            n = self.distances.shape[0]
+            if n == self.distances.shape[1] and n == filtered_count and n > 1:
+                mask = ~np.eye(n, dtype=bool)
+                dvals = self.distances[mask]
+                finite = np.isfinite(dvals)
+                if not np.all(finite):
+                    bad = np.size(dvals) - np.count_nonzero(finite)
+                    logger.warning(
+                        f"Distance matrix contains {bad} non-finite value(s) (NaN/inf)."
+                    )
+                if np.any(finite):
+                    dvals_f = dvals[finite]
+                    logger.debug(
+                        "Distance stats (off-diagonal, finite): min=%.4f | mean=%.4f | max=%.4f | count=%d",
+                        float(np.min(dvals_f)),
+                        float(np.mean(dvals_f)),
+                        float(np.max(dvals_f)),
+                        int(dvals_f.size),
+                    )
+        except Exception:
+            # Keep logging resilient
+            pass
+
+        # Check if we have enough graphs for clustering
+        if filtered_count < 2:
+            raise ValueError(
+                f"Only {filtered_count} graph(s) passed the filter. "
+                "Clustering requires at least 2 graphs. "
+                "Consider relaxing your filter criteria."
+            )
+
+        # Use nReps or distance_threshold for AgglomerativeClustering
+        # Handle clustering configuration clarity
+        if nReps is None and distance_threshold is None:
+            nReps = self.nReps
+
+        if nReps is not None and distance_threshold is not None:
+            logger.warning(
+                "Both nReps and distance_threshold provided; using distance_threshold and ignoring nReps."
+            )
+            nReps = None
+
+        # Check if nReps is valid for the number of filtered graphs
+        if nReps and nReps > filtered_count:
+            raise ValueError(
+                f"Cannot create {nReps} clusters from {filtered_count} graphs. "
+                f"Set nReps to {filtered_count} or fewer, or relax your filter."
+            )
+
         model = AgglomerativeClustering(
             metric="precomputed",
             linkage="average",
             compute_distances=True,
-            distance_threshold=None,
             n_clusters=nReps,
+            distance_threshold=distance_threshold,
         )
+        mode_desc = (
+            f"n_clusters={nReps}"
+            if nReps is not None
+            else f"distance_threshold={distance_threshold}"
+        )
+        logger.info(
+            f"Clustering {filtered_count} graph(s) with AgglomerativeClustering ({mode_desc})…"
+        )
+        t2 = time.perf_counter()
         model.fit(self.distances)
+        t3 = time.perf_counter()
 
         labels = model.labels_
-        subgroups = {}
+        subgroups = {label: self.keys[labels == label] for label in set(labels)}
 
-        for label in labels:
-            mask = np.where(labels == label, True, False)
-            subkeys = self.keys[mask]
-            subgroups[label] = subkeys
+        # Log cluster size distribution
+        cluster_sizes = {
+            int(lbl): int(len(members)) for lbl, members in subgroups.items()
+        }
+        size_list = sorted(cluster_sizes.values(), reverse=True)
+        logger.info(
+            f"Formed {len(subgroups)} cluster(s) in {t3 - t2:.2f}s | sizes: {size_list}"
+        )
 
-        for key in subgroups.keys():
-            subgroup = subgroups[key]
+        self.selection = {}
+        for label, subgroup in subgroups.items():
             selected_star = selector_fn(subgroup)
-            self.selection[key] = {
+            self.selection[label] = {
                 "star": selected_star,
                 "cluster_size": len(subgroup),
             }
+            # Keep detailed selection at DEBUG to avoid log spam
+            try:
+                star_name = os.path.basename(str(selected_star))
+            except Exception:
+                star_name = str(selected_star)
+            logger.debug(
+                "Cluster %s: selected representative '%s' from %d member(s)",
+                str(label),
+                star_name,
+                len(subgroup),
+            )
+        total_time = (t1 - t0) + (t3 - t2)
+        logger.info(
+            f"Galaxy Collapse complete: {len(self.selection)} representative model(s) selected "
+            f"({metric}, {mode_desc}). Total compute time ~{total_time:.2f}s"
+        )
+        logger.info(
+            "Access results: this Galaxy's 'selection' maps cluster -> {'star','cluster_size'}. "
+            "If using a Thema instance, check its 'selected_model_files' for the chosen file paths."
+        )
         return self.selection
 
     def get_galaxy_coordinates(self) -> np.ndarray:
@@ -513,22 +797,24 @@ class Galaxy:
         None
         """
 
-        if YAML_PATH is None and self.YAML_PATH is not None:
-            YAML_PATH = self.YAML_PATH
+        # Resolve yaml path to a non-None string for type checking
+        if YAML_PATH is None:
+            if self.YAML_PATH is None:
+                raise ValueError("Please provide a valid filepath to YAML")
+            yaml_path = cast(str, self.YAML_PATH)
+        else:
+            yaml_path = str(YAML_PATH)
 
-        if YAML_PATH is None and self.YAML_PATH is None:
-            raise ValueError("Please provide a valid filepath to YAML")
-
-        if not os.path.isfile(YAML_PATH):
+        if not os.path.isfile(yaml_path):
             raise TypeError("File path does not point to a YAML file")
 
-        with open(YAML_PATH, "r") as f:
+        with open(yaml_path, "r") as f:
             params = OmegaConf.load(f)
 
         params.Galaxy = self.getParams()["params"]
         params.Galaxy.stars = list(self.getParams()["params"].keys())
 
-        with open(YAML_PATH, "w") as f:
+        with open(yaml_path, "w") as f:
             OmegaConf.save(params, f)
 
         print("YAML file successfully updated")

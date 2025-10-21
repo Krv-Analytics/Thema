@@ -2,9 +2,14 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
+import logging
 from sklearn.manifold import TSNE
 
 from ..comet import Comet
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def initialize():
@@ -75,6 +80,7 @@ class tsneProj(Comet):
         self.perplexity = perplexity
         self.dimensions = dimensions
         self.seed = seed
+        
 
     def fit(self):
         """

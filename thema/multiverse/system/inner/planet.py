@@ -5,15 +5,25 @@
 import os
 import pickle
 import random
+import logging
+import time
 
 import numpy as np
 import pandas as pd
 from omegaconf import ListConfig, OmegaConf
 
 from ....core import Core
-from ....utils import function_scheduler
+from ....utils import (
+    function_scheduler,
+    get_current_logging_config,
+    configure_child_process_logging,
+)
 from .inner_utils import clean_data_filename
 from .moon import Moon
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Planet(Core):
@@ -273,7 +283,7 @@ class Planet(Core):
 
         if self.outDir is not None and not os.path.isdir(self.outDir):
             try:
-                os.makedirs(outDir)
+                os.makedirs(str(outDir))
             except Exception as e:
                 print(e)
 
@@ -316,7 +326,9 @@ class Planet(Core):
 
         elif imputeColumns == "auto":
 
-            self.imputeColumns = self.data.columns[self.data.isna().any()].tolist()
+            self.imputeColumns = self.data.columns[
+                self.data.isna().any()
+            ].tolist()
 
         elif type(imputeColumns) == ListConfig or type(imputeColumns) == list:
             self.imputeColumns = imputeColumns
@@ -328,14 +340,18 @@ class Planet(Core):
             self.imputeColumns = []
 
         if imputeMethods is None or imputeMethods == "None":
-            self.imputeMethods = ["drop" for _ in range(len(self.imputeColumns))]
+            self.imputeMethods = [
+                "drop" for _ in range(len(self.imputeColumns))
+            ]
         elif imputeMethods == "auto":
             self.imputeMethods = self.get_recomended_sampling_method()
         elif type(imputeMethods) == str:
             if not imputeMethods in supported_imputeMethods:
                 print("Invalid impute methods. Defaulting to 'drop'")
                 imputeMethods = "drop"
-            self.imputeMethods = [imputeMethods for _ in range(len(self.imputeColumns))]
+            self.imputeMethods = [
+                imputeMethods for _ in range(len(self.imputeColumns))
+            ]
         else:
             assert len(imputeMethods) == len(
                 self.imputeColumns
@@ -358,6 +374,15 @@ class Planet(Core):
             )
             self.numSamples = 1
             self.seeds = [42]
+
+        # Log Planet configuration
+        logger.debug(f"Planet initialized with data shape: {self.data.shape}")
+        logger.debug(f"Number of samples to generate: {self.numSamples}")
+        logger.debug(f"Impute columns: {self.imputeColumns}")
+        logger.debug(f"Impute methods: {self.imputeMethods}")
+        logger.debug(f"Drop columns: {self.dropColumns}")
+        logger.debug(f"Encoding: {self.encoding}, Scaler: {self.scaler}")
+        logger.debug(f"Output directory: {self.outDir}")
 
     def get_missingData_summary(self) -> dict:
         """
@@ -499,28 +524,83 @@ class Planet(Core):
 
         >>> planet.imputeData.to_pickle("myCleanData")
         """
+        logger.info(
+            f"Starting Planet.fit() – creating {self.numSamples} Moon object(s)"
+        )
+        logger.debug(f"Using seeds: {self.seeds}")
+        logger.debug(f"Output directory: {self.outDir}")
+
+        # Get current logging config to pass to child processes
+        logging_config = get_current_logging_config()
+
         assert len(self.seeds) == self.numSamples
         subprocesses = []
         for i in range(self.numSamples):
-            cmd = (self._instantiate_moon, i)
+            logger.debug(
+                f"Preparing Moon {i+1}/{self.numSamples} with seed {self.seeds[i]}"
+            )
+            cmd = (self._instantiate_moon, i, logging_config)
             subprocesses.append(cmd)
 
-        function_scheduler(
+        # Pre-count outputs for delta reporting
+        pre_count = 0
+        try:
+            if self.outDir and os.path.isdir(self.outDir):
+                pre_count = len(
+                    [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+                )
+        except Exception:
+            pass
+
+        workers = min(4, self.numSamples)
+        logger.info(
+            f"Launching {len(subprocesses)} Moon process(es) with max {workers} worker(s)…"
+        )
+        t0 = time.perf_counter()
+        results = function_scheduler(
             subprocesses,
-            max_workers=min(4, self.numSamples),
+            max_workers=workers,
             out_message="SUCCESS: Imputation(s)",
             resilient=True,
             verbose=self.verbose,
         )
+        t1 = time.perf_counter()
 
-    def _instantiate_moon(self, id):
+        # Post-count outputs for delta reporting
+        created = None
+        try:
+            if self.outDir and os.path.isdir(self.outDir):
+                post_count = len(
+                    [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+                )
+                created = max(0, post_count - pre_count)
+        except Exception:
+            created = None
+
+        total = len(subprocesses)
+        duration = t1 - t0
+        if isinstance(results, list) and len(results) == total:
+            logger.info(
+                f"Planet.fit() complete in {duration:.2f}s – processed {total} Moon object(s){'' if created is None else f', created ~{created} file(s)'}"
+            )
+        else:
+            logger.info(
+                f"Planet.fit() complete in {duration:.2f}s – processed {total} Moon object(s)."
+            )
+
+    def _instantiate_moon(self, id, logging_config):
         """
         Helper function for the fit() method. See `fit()` for more details.
+
+        This method creates and processes a single Moon instance with proper
+        logging configuration for multiprocessing environments.
 
         Parameters
         ----------
         id : int
             Identifier for the Moon instance.
+        logging_config : dict or None
+            Logging configuration from parent process.
 
         Returns
         -------
@@ -529,8 +609,10 @@ class Planet(Core):
         Examples
         --------
         >>> planet = Planet()
-        >>> planet._instantiate_moon(1)
+        >>> planet._instantiate_moon(1, logging_config)
         """
+        # Configure logging in this child process
+        configure_child_process_logging(logging_config)
 
         if self.seeds is None:
             self.seeds = dict()
@@ -548,7 +630,9 @@ class Planet(Core):
         )
         my_moon.fit()
 
-        filename_without_extension, extension = os.path.splitext(self.get_data_path())
+        filename_without_extension, extension = os.path.splitext(
+            self.get_data_path()
+        )
         data_name = filename_without_extension.split("/")[-1]
         file_name = clean_data_filename(
             data_name=data_name,
@@ -556,7 +640,8 @@ class Planet(Core):
             scaler=self.scaler,
             encoding=self.encoding,
         )
-        output_filepath = os.path.join(self.outDir, file_name)
+        output_dir = str(self.outDir)
+        output_filepath = os.path.join(output_dir, file_name)
 
         my_moon.save(file_path=output_filepath)
 
@@ -595,42 +680,42 @@ class Planet(Core):
 
     def writeParams_toYaml(self, YAML_PATH=None):
         """
-        Write the specified parameters to a YAML file.
+        Write or create a YAML file with the Planet parameters.
 
         Parameters
         ----------
-        YAML_PATH : str
-            The path to an existing YAML file.
+        YAML_PATH : str, optional
+            Path to an existing or new YAML file.
 
         Returns
         -------
         None
-
-        Examples
-        --------
-        >>> planet = Planet()
-        >>> planet.writeParams_toYaml("config.yaml")
-        YAML file successfully updated
         """
         if YAML_PATH is None and self.YAML_PATH is not None:
             YAML_PATH = self.YAML_PATH
-        if YAML_PATH is None and self.YAML_PATH is None:
+        if YAML_PATH is None:
             raise ValueError("Please provide a valid filepath to YAML")
-        # Check if file exists and is correct type
-        if not os.path.isfile(YAML_PATH):
-            raise TypeError("File path does not point to a YAML file")
 
-        with open(YAML_PATH, "r") as f:
-            params = OmegaConf.load(f)
+        # If the file exists, load it; otherwise start a new config
+        if os.path.isfile(YAML_PATH):
+            params = OmegaConf.load(YAML_PATH)
+        else:
+            params = OmegaConf.create()
 
+        # Update with this object's parameters
         params.Planet = self.getParams()
         params.Planet.pop("outDir", None)
         params.Planet.pop("data", None)
 
-        with open(YAML_PATH, "w") as f:
-            OmegaConf.save(params, f)
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(YAML_PATH), exist_ok=True)
 
-        print("YAML file successfully updated")
+        # Save the YAML file
+        file_exists_before = os.path.isfile(YAML_PATH)
+        OmegaConf.save(params, YAML_PATH)
+        print(
+            f"YAML file successfully {'updated' if file_exists_before else 'created'} at {YAML_PATH}"
+        )
 
     def save(self, file_path):
         """

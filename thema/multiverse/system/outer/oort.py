@@ -5,14 +5,25 @@
 import glob
 import importlib
 import itertools
+import logging
 import os
 import pickle
+import time
 
 from omegaconf import OmegaConf
 
 from .... import config
 from ....core import Core
-from ....utils import create_file_name, function_scheduler
+from ....utils import (
+    create_file_name,
+    function_scheduler,
+    get_current_logging_config,
+    configure_child_process_logging,
+)
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Oort(Core):
@@ -208,6 +219,16 @@ class Oort(Core):
             except Exception as e:
                 print(e)
 
+        # Log Oort initialization
+        clean_files = len(os.listdir(self.cleanDir))
+        logger.info(
+            f"Oort initialized with {len(self.params)} projector type(s) and {clean_files} clean data file(s)"
+        )
+        logger.debug(f"Clean directory: {self.cleanDir}")
+        logger.debug(f"Output directory: {self.outDir}")
+        for proj_name, proj_params in self.params.items():
+            logger.debug(f"Projector '{proj_name}' parameters: {proj_params}")
+
     def fit(self):
         """
         Configure and run your projections.
@@ -225,8 +246,16 @@ class Oort(Core):
         >>> oort = Oort()
         >>> oort.fit()
         """
+        logger.info(
+            f"Starting Oort.fit() – processing {len(self.params)} projector type(s)"
+        )
+
+        # Get current logging config to pass to child processes
+        logging_config = get_current_logging_config()
+
         subprocesses = []
         for projectorName, projectorParamsDict in self.params.items():
+            logger.debug(f"Setting up projector: {projectorName}")
             projConfig = config.tag_to_class[projectorName]
             cfg = getattr(config, projConfig)
             module = importlib.import_module(cfg.module, package="thema")
@@ -234,6 +263,10 @@ class Oort(Core):
 
             file_pattern = os.path.join(self.cleanDir, "*.pkl")
             valid_files = glob.glob(file_pattern)
+            logger.debug(
+                f"Found {len(valid_files)} clean files for projector '{projectorName}'"
+            )
+
             for i, cleanFile in enumerate(valid_files):
                 parameter_combinations = itertools.product(
                     itertools.product(
@@ -245,6 +278,7 @@ class Oort(Core):
                     )
                 )
                 cleanFile = os.path.join(self.cleanDir, cleanFile)
+                param_count = 0
                 for j, combination in enumerate(parameter_combinations):
                     projectorParameters = {
                         key: value
@@ -260,20 +294,82 @@ class Oort(Core):
                         projectorParameters,
                         projectorName,
                         f"{j}_{i}",
+                        logging_config,
                     )
                     subprocesses.append(cmd)
+                    param_count += 1
+                logger.debug(
+                    f"Generated {param_count} parameter combinations for clean file {i+1}"
+                )
+
+        # Pre-count outputs for delta reporting
+        pre_count = 0
+        try:
+            if self.outDir and os.path.isdir(self.outDir):
+                pre_count = len(
+                    [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+                )
+        except Exception:
+            pass
 
         # TODO: optimize max-Works based on OS availability
-        function_scheduler(
+        total_projections = len(subprocesses)
+        workers = 4
+        logger.info(
+            f"Launching {total_projections} projection process(es) with max {workers} worker(s)…"
+        )
+
+        t0 = time.perf_counter()
+        results = function_scheduler(
             subprocesses,
             4,
             "SUCCESS: Projection(s)",
             resilient=True,
             verbose=self.verbose,
         )
+        t1 = time.perf_counter()
+
+        # Log completion stats
+        if results:
+            failed_count = sum(1 for r in results if r is False)
+            success_count = total_projections - failed_count
+            success_rate = (
+                (success_count / total_projections * 100)
+                if total_projections > 0
+                else 0
+            )
+            # Post-count outputs for delta reporting
+            created = None
+            try:
+                if self.outDir and os.path.isdir(self.outDir):
+                    post_count = len(
+                        [
+                            f
+                            for f in os.listdir(self.outDir)
+                            if f.endswith(".pkl")
+                        ]
+                    )
+                    created = max(0, post_count - pre_count)
+            except Exception:
+                created = None
+
+            logger.info(
+                f"Oort.fit() complete in {t1 - t0:.2f}s – {success_count}/{total_projections} ({success_rate:.1f}%) successful{'' if created is None else f', created ~{created} file(s)'}"
+            )
+            if failed_count > 0:
+                logger.warning(f"{failed_count} projections failed")
+        else:
+            logger.info(f"Oort.fit() complete in {t1 - t0:.2f}s")
 
     def _instantiate_projection(
-        self, data, cleanFile, projector, projectorParameters, projectorName, id
+        self,
+        data,
+        cleanFile,
+        projector,
+        projectorParameters,
+        projectorName,
+        id,
+        logging_config,
     ):
         """
         Helper function for the fit() method. Creates a projectile instance
@@ -293,10 +389,13 @@ class Oort(Core):
             Name of the projector class.
         id : int
             Identifier.
+        logging_config : dict or None
+            Logging configuration from parent process.
 
         Returns
         -------
-        None
+        bool
+            True if successful, False otherwise.
 
         See Also
         --------
@@ -311,17 +410,27 @@ class Oort(Core):
         >>> projectorParameters = {"param1": 10, "param2": "abc"}
         >>> projectorName = "MyProjector"
         >>> id = 1
-        >>> _instantiate_projection(data, cleanFile, projector, projectorParameters, projectorName, id)
+        >>> _instantiate_projection(data, cleanFile, projector, projectorParameters, projectorName, id, logging_config)
         """
-        my_projector = projector(
-            data_path=data, clean_path=cleanFile, **projectorParameters
-        )
-        my_projector.fit()
-        output_file = create_file_name(
-            className=projectorName, classParameters=projectorParameters, id=id
-        )
-        output_file = os.path.join(self.outDir, output_file)
-        my_projector.save(output_file)
+        # Configure logging in this child process
+        configure_child_process_logging(logging_config)
+
+        try:
+            my_projector = projector(
+                data_path=data, clean_path=cleanFile, **projectorParameters
+            )
+            my_projector.fit()
+            output_file = create_file_name(
+                className=projectorName,
+                classParameters=projectorParameters,
+                id=id,
+            )
+            output_file = os.path.join(self.outDir, output_file)
+            my_projector.save(output_file)
+            return True
+        except Exception as e:
+            logger.error(f"Projection {projectorName} #{id} failed: {str(e)}")
+            return False
 
     def getParams(self):
         """

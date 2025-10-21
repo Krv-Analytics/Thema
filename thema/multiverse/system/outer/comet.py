@@ -2,10 +2,15 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
+import logging
 import pickle
 from abc import abstractmethod
 
 from ....core import Core
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Comet(Core):
@@ -59,6 +64,7 @@ class Comet(Core):
         super().__init__(
             data_path=data_path, clean_path=clean_path, projection_path=None
         )
+        
 
     @abstractmethod
     def fit(self):
@@ -102,4 +108,6 @@ class Comet(Core):
             with open(file_path, "wb") as f:
                 pickle.dump(self, f)
         except Exception as e:
+            # Always log errors regardless of level
+            logger.error(f"Failed to save Comet to {file_path}: {str(e)}")
             print(e)
