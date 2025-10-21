@@ -59,7 +59,7 @@ Typical Workflow
    
    graph LR
       subgraph Input
-         A["params.yaml + raw dataset"]
+         A[params.yaml + raw dataset]
       end
       
       subgraph "Stage 1: Preprocess"
@@ -86,7 +86,7 @@ Typical Workflow
          R["Representatives"]
       end
       
-      
+
       A --> B
       B --> M1
       B --> M2
