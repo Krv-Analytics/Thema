@@ -484,7 +484,11 @@ class Galaxy:
         selector = selector or self.selector
         # Set up filter when needed
 
-        if filter_fn is None:
+        if callable(filter_fn):
+            logger.info(
+                f"Using provided filter function: {getattr(filter_fn, '__name__', str(type(filter_fn)))}"
+            )
+        elif filter_fn is None:
             filter_fn = self._setup_filter(self._yamlParams)
 
         elif isinstance(filter_fn, str):
