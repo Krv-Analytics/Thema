@@ -711,9 +711,10 @@ class Planet(Core):
         os.makedirs(os.path.dirname(YAML_PATH), exist_ok=True)
 
         # Save the YAML file
+        file_exists_before = os.path.isfile(YAML_PATH)
         OmegaConf.save(params, YAML_PATH)
         print(
-            f"YAML file successfully {'updated' if os.path.isfile(YAML_PATH) else 'created'} at {YAML_PATH}"
+            f"YAML file successfully {'updated' if file_exists_before else 'created'} at {YAML_PATH}"
         )
 
     def save(self, file_path):
