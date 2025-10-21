@@ -6,6 +6,7 @@ import os
 import pickle
 import random
 import logging
+import time
 
 import numpy as np
 import pandas as pd
@@ -282,7 +283,7 @@ class Planet(Core):
 
         if self.outDir is not None and not os.path.isdir(self.outDir):
             try:
-                os.makedirs(outDir)
+                os.makedirs(str(outDir))
             except Exception as e:
                 print(e)
 
@@ -524,7 +525,7 @@ class Planet(Core):
         >>> planet.imputeData.to_pickle("myCleanData")
         """
         logger.info(
-            f"Starting Planet.fit() - creating {self.numSamples} Moon object(s)"
+            f"Starting Planet.fit() – creating {self.numSamples} Moon object(s)"
         )
         logger.debug(f"Using seeds: {self.seeds}")
         logger.debug(f"Output directory: {self.outDir}")
@@ -541,17 +542,51 @@ class Planet(Core):
             cmd = (self._instantiate_moon, i, logging_config)
             subprocesses.append(cmd)
 
+        # Pre-count outputs for delta reporting
+        pre_count = 0
+        try:
+            if self.outDir and os.path.isdir(self.outDir):
+                pre_count = len(
+                    [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+                )
+        except Exception:
+            pass
+
+        workers = min(4, self.numSamples)
         logger.info(
-            f"Launching {len(subprocesses)} Moon processes with max {min(4, self.numSamples)} workers"
+            f"Launching {len(subprocesses)} Moon process(es) with max {workers} worker(s)…"
         )
-        function_scheduler(
+        t0 = time.perf_counter()
+        results = function_scheduler(
             subprocesses,
-            max_workers=min(4, self.numSamples),
+            max_workers=workers,
             out_message="SUCCESS: Imputation(s)",
             resilient=True,
             verbose=self.verbose,
         )
-        logger.info("Planet.fit() completed - all Moon objects processed")
+        t1 = time.perf_counter()
+
+        # Post-count outputs for delta reporting
+        created = None
+        try:
+            if self.outDir and os.path.isdir(self.outDir):
+                post_count = len(
+                    [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
+                )
+                created = max(0, post_count - pre_count)
+        except Exception:
+            created = None
+
+        total = len(subprocesses)
+        duration = t1 - t0
+        if isinstance(results, list) and len(results) == total:
+            logger.info(
+                f"Planet.fit() complete in {duration:.2f}s – processed {total} Moon object(s){'' if created is None else f', created ~{created} file(s)'}"
+            )
+        else:
+            logger.info(
+                f"Planet.fit() complete in {duration:.2f}s – processed {total} Moon object(s)."
+            )
 
     def _instantiate_moon(self, id, logging_config):
         """
@@ -605,7 +640,8 @@ class Planet(Core):
             scaler=self.scaler,
             encoding=self.encoding,
         )
-        output_filepath = os.path.join(self.outDir, file_name)
+        output_dir = str(self.outDir)
+        output_filepath = os.path.join(output_dir, file_name)
 
         my_moon.save(file_path=output_filepath)
 
