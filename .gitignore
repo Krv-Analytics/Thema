@@ -16,7 +16,9 @@ notebooks/
 .pytest_cache
 poetry.lock
 dist/
-docs/
+# Sphinx build directory
+docs/build/
+_build/
 .qodo
 
 
