@@ -1,6 +1,6 @@
 # File: multiverse/universe/geodesics.py
-# Lasted Updated: 07/29/25
-# Updated By: JW
+# Lasted Updated: 10/21/25
+# Updated By: SG
 
 import os
 import pickle
@@ -16,31 +16,50 @@ from .utils.starFilters import nofilterfunction
 def stellar_curvature_distance(
     files: str | list,
     filterfunction: Callable | None = None,
-    curvature="ollivier_ricci_curvature",
+    curvature="forman_curvature",
     vectorization="landscape",
 ):
     """
-    Compute a pairwise distance matrix between graphs based on curvature filtrations.
+    Compute a pairwise distance matrix between graphs using curvature filtrations.
 
     Parameters
     ----------
-    files : str or list
-        Either a path to a directory containing starGraphs or a list of paths to starGraph files.
+    files : str or list[str]
+        Either a path to a directory containing starGraph files or a list of individual file paths.
     filterfunction : Callable, optional
-        A customizable filter function for pulling a subset of cosmic graphs.
-        Default is None.
+        A custom filter function to select a subset of cosmic graphs. Defaults to None.
     curvature : str, optional
-        The curvature measure to use. Default is "forman_curvature".
+        The curvature measure to use. Defaults to "forman_curvature".
+
+        Supported values (increasing in complexity and computational intensity):
+            - "forman_curvature" :
+                A combinatorial measure based purely on local graph structure.
+                Fast to compute and suitable for large graphs or exploratory analysis.
+            - "balanced_forman_curvature" :
+                A refinement of Forman curvature that balances edge contributions,
+                improving sensitivity to degree heterogeneity while remaining efficient.
+            - "resistance_curvature" :
+                Derived from effective resistance distances between nodes.
+                Captures global connectivity patterns but is more computationally demanding.
+            - "ollivier_ricci_curvature" :
+                A transport-based curvature measure that reflects the geometry of
+                probabilistic mass movement between node neighborhoods. Provides the
+                most geometric insight but is the slowest to compute.
+
+        For further details, see:
+        https://github.com/aidos-lab/curvature-filtrations/blob/main/notebooks/bagpipeline.ipynb
+
     vectorization : str, optional
-        Vectorization method for computing distances. Default is "landscape".
+        Vectorization method for computing distances. Defaults to "landscape".
 
     Returns
     -------
-    keys : np.array
-        List of keys for the models being compared.
+    keys : np.ndarray
+        Array of keys identifying the models being compared.
     distance_matrix : np.ndarray
         Pairwise distance matrix between the persistence landscapes of the starGraphs.
     """
+
     # Detect if files is a list; if not, assume directory
     starGraphs = _load_starGraphs(files, graph_filter=filterfunction)
 
@@ -51,7 +70,7 @@ def stellar_curvature_distance(
     graphs = [sg.graph for sg in starGraph_list]
 
     # Map string node IDs to integers for GUDHI compatibility
-    mapped_graphs, node_mapping = _map_string_nodes_to_integers(graphs)
+    mapped_graphs, _ = _map_string_nodes_to_integers(graphs)
 
     # Create a Curvature Comparator
     C = Comparator(measure=curvature, weight="weight")
@@ -71,9 +90,7 @@ def stellar_curvature_distance(
     return np.array(keys), distance_matrix
 
 
-def _load_starGraphs(
-    dir: str | list, graph_filter: Callable | None = None
-) -> dict:
+def _load_starGraphs(dir: str | list, graph_filter: Callable | None = None) -> dict:
     """
     Load starGraphs from a directory or a list of pickle files.
     Only returns starGraphs that satisfy the `graph_filter`.
@@ -99,9 +116,7 @@ def _load_starGraphs(
     else:
         assert os.path.isdir(dir), "Invalid graph Directory"
         assert len(os.listdir(dir)) > 0, "Graph directory appears to be empty!"
-        files = [
-            os.path.join(dir, f) for f in os.listdir(dir) if f.endswith(".pkl")
-        ]
+        files = [os.path.join(dir, f) for f in os.listdir(dir) if f.endswith(".pkl")]
 
     if not files:
         raise ValueError("No .pkl files found to load.")
