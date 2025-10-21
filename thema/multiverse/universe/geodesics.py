@@ -60,19 +60,12 @@ def stellar_curvature_distance(
         Pairwise distance matrix between the persistence landscapes of the starGraphs.
     """
 
-    # Detect if files is a list; if not, assume directory
     starGraphs = _load_starGraphs(files, graph_filter=filterfunction)
-
     keys = list(starGraphs.keys())
     starGraph_list = list(starGraphs.values())
 
-    # Extract the actual NetworkX graphs
     graphs = [sg.graph for sg in starGraph_list]
-
-    # Map string node IDs to integers for GUDHI compatibility
     mapped_graphs, _ = _map_string_nodes_to_integers(graphs)
-
-    # Create a Curvature Comparator
     C = Comparator(measure=curvature, weight="weight")
 
     n = len(mapped_graphs)
@@ -112,7 +105,7 @@ def _load_starGraphs(dir: str | list, graph_filter: Callable | None = None) -> d
 
     # Handle list vs directory
     if isinstance(dir, list):
-        files = [str(f) for f in dir]  # ensure string paths
+        files = [str(f) for f in dir]
     else:
         assert os.path.isdir(dir), "Invalid graph Directory"
         assert len(os.listdir(dir)) > 0, "Graph directory appears to be empty!"
@@ -157,23 +150,18 @@ def _map_string_nodes_to_integers(graphs):
         (mapped_graphs, node_mapping) where mapped_graphs have integer
         node IDs and node_mapping is the string->int mapping dict
     """
-    # Collect all unique nodes across all graphs
     all_nodes = set()
     for graph in graphs:
         all_nodes.update(graph.nodes())
 
-    # Create consistent mapping from string nodes to integers
     node_mapping = {node: i for i, node in enumerate(sorted(all_nodes))}
 
-    # Map all graphs to use integer node IDs
     mapped_graphs = []
     for graph in graphs:
-        # Only remap if we have non-integer nodes
         if any(not isinstance(node, int) for node in graph.nodes()):
             mapped_graph = nx.relabel_nodes(graph, node_mapping)
             mapped_graphs.append(mapped_graph)
         else:
-            # Graph already has integer nodes
             mapped_graphs.append(graph.copy())
 
     return mapped_graphs, node_mapping
