@@ -9,7 +9,6 @@ from typing import Callable
 import numpy as np
 import networkx as nx
 from scott import Comparator
-from typing import Callable
 
 from .utils.starFilters import nofilterfunction
 
