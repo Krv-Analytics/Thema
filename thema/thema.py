@@ -7,6 +7,7 @@ Main module for the Thema package.
 """
 
 import os
+import networkx as nx
 from omegaconf import OmegaConf
 from thema.multiverse import Planet, Oort, Galaxy
 
@@ -40,7 +41,7 @@ class Thema:
     --------
     >>> thema = Thema('params.yaml')
     >>> thema.genesis()  # Run the full pipeline
-    >>> 
+    >>>
     >>> # Access representative stars after genesis
     >>> selection = thema.galaxy.selection
     >>> print(f"Selected {len(selection)} representative stars")
@@ -72,6 +73,7 @@ class Thema:
         self.clean_files = None
         self.projection_files = None
         self.model_files = None
+        self.selected_model_files = None
 
     def genesis(self):
         """
@@ -92,7 +94,7 @@ class Thema:
         --------
         >>> thema = Thema('params.yaml')
         >>> thema.genesis()
-        >>> 
+        >>>
         >>> # Representative stars are automatically selected and stored in galaxy.selection
         >>> selected_files = [info['star'] for info in thema.galaxy.selection.values()]
         >>> print(f"Representative files: {selected_files}")
@@ -299,7 +301,7 @@ class Thema:
         >>> thema = Thema('params.yaml')
         >>> thema.spaghettify_galaxy()  # First clean the directory
         >>> thema.galaxy_genesis()  # Process the data
-        >>> 
+        >>>
         >>> # Representative stars are stored in galaxy.selection after collapse
         >>> representative_files = [info['star'] for info in thema.galaxy.selection.values()]
         >>> print(f"Found {len(representative_files)} representative stars")
@@ -319,6 +321,9 @@ class Thema:
             model_outdir + file for file in os.listdir(model_outdir)
         ]
         self.galaxy.collapse()
+        self.selected_model_files = [
+            str(x["star"]) for x in self.galaxy.selection.values()
+        ]
 
     def spaghettify_galaxy(self):
         """
