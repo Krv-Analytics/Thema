@@ -32,7 +32,7 @@ jobs:
 
       - name: Check code formatting with Black
         run: |
-          uv run black --check --diff scott/ tests/
+          uv run black --check --diff thema/ tests/
 
   test:
     runs-on: ubuntu-latest
