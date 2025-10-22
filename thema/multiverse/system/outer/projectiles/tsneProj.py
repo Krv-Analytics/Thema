@@ -80,7 +80,6 @@ class tsneProj(Comet):
         self.perplexity = perplexity
         self.dimensions = dimensions
         self.seed = seed
-        
 
     def fit(self):
         """

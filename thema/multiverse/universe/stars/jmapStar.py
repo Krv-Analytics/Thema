@@ -132,13 +132,13 @@ class jmapStar(Star):
         self.minIntersection = minIntersection
         self.clusterer = get_clusterer(clusterer)
         self.mapper = KeplerMapper()
-        
+
         # Store parameters for potential debugging
         self._params = {
             "nCubes": nCubes,
-            "percOverlap": percOverlap, 
+            "percOverlap": percOverlap,
             "minIntersection": minIntersection,
-            "clusterer": clusterer
+            "clusterer": clusterer,
         }
 
     def fit(self):
@@ -163,7 +163,7 @@ class jmapStar(Star):
                 cover=Cover(self.nCubes, self.percOverlap),
                 clusterer=self.clusterer,
             )
-            
+
             if not self.complex or "nodes" not in self.complex:
                 logger.debug(
                     f"KeplerMapper produced empty complex - params: {self._params}, "
@@ -172,7 +172,7 @@ class jmapStar(Star):
                 self.complex = None
                 self.starGraph = None
                 return
-            
+
             self.nodes = convert_keys_to_alphabet(self.complex["nodes"])
 
             graph = nx.Graph()
@@ -196,7 +196,7 @@ class jmapStar(Star):
                     graph.add_weighted_edges_from(edges)
                 else:
                     graph.add_edges_from(edges)
-                
+
                 self.starGraph = starGraph(graph)
 
         except Exception as e:
@@ -358,13 +358,9 @@ class Nerve:
         candidates = itertools.combinations(nodes.keys(), 2)
         for candidate in candidates:
             # if there are non-unique members in the union
-            overlap = len(
-                set(nodes[candidate[0]]).intersection(nodes[candidate[1]])
-            )
+            overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
             if overlap > 0:
-                result.append(
-                    (candidate[0], candidate[1], round(1 / overlap, 3))
-                )
+                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
         return result
 
 

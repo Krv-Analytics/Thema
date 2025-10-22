@@ -248,9 +248,7 @@ def mode(column, seed):
     dtype: float64
     """
     column = column.copy()
-    mode_value = column.mode().iloc[
-        0
-    ]  # Get the first mode if multiple modes exist
+    mode_value = column.mode().iloc[0]  # Get the first mode if multiple modes exist
     column.fillna(mode_value, inplace=True)
     return column
 

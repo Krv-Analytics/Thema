@@ -161,9 +161,7 @@ class Oort(Core):
         """
         if YAML_PATH is not None:
             self.YAML_PATH = YAML_PATH
-            assert os.path.isfile(
-                YAML_PATH
-            ), "yaml parameter file could not be found."
+            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -171,9 +169,7 @@ class Oort(Core):
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(
-                yamlParams.outDir, yamlParams.runName + "/clean/"
-            )
+            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
             outDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
@@ -343,11 +339,7 @@ class Oort(Core):
             try:
                 if self.outDir and os.path.isdir(self.outDir):
                     post_count = len(
-                        [
-                            f
-                            for f in os.listdir(self.outDir)
-                            if f.endswith(".pkl")
-                        ]
+                        [f for f in os.listdir(self.outDir) if f.endswith(".pkl")]
                     )
                     created = max(0, post_count - pre_count)
             except Exception:
