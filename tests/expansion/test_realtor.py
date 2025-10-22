@@ -113,7 +113,7 @@ class TestRealtor:
     ):
         """Test random_walk generates the correct number of samples."""
         target_vector = np.array([2.0, 3.0])  # Matches node 1
-        
+
         # Use MockRealtor to handle string node IDs
         realtor = MockRealtor(
             target_vector,
@@ -137,7 +137,7 @@ class TestRealtor:
         """Test random_walk distribution is affected by target vector."""
         # Using a target vector that matches node 1
         target_vector = np.array([2.0, 3.0])
-        
+
         # Use MockRealtor to handle string node IDs
         realtor = MockRealtor(
             target_vector,
@@ -279,7 +279,9 @@ class TestRealtor:
         )
 
         best_node = realtor.node_docking()
-        assert best_node == "B"  # Should pick the middle node (B corresponds to index 1)
+        assert (
+            best_node == "B"
+        )  # Should pick the middle node (B corresponds to index 1)
 
         # Case 2: Target vector is in a completely different space
         target_vector = np.array([100.0, 100.0])  # Far from all nodes
@@ -292,9 +294,7 @@ class TestRealtor:
 
         best_node = realtor.node_docking()
         # Should still find the closest node (furthest one in this case)
-        assert (
-            best_node == "C"
-        )  # Node C with [5.0, 5.0] is closest to [100.0, 100.0]
+        assert best_node == "C"  # Node C with [5.0, 5.0] is closest to [100.0, 100.0]
 
         # Case 3: High-dimensional features
         high_dim_features = np.random.rand(3, 10)  # 10-dimensional features

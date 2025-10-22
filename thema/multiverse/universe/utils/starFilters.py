@@ -34,9 +34,7 @@ def component_count_filter(target_components: int) -> Callable:
     return _filter
 
 
-def component_count_range_filter(
-    min_components: int, max_components: int
-) -> Callable:
+def component_count_range_filter(min_components: int, max_components: int) -> Callable:
     """Filter for graphs within component count range.
 
     Args:
@@ -50,9 +48,7 @@ def component_count_range_filter(
     def _filter(graphobject) -> int:
         if graphobject.starGraph is None:
             return 0
-        n_components = nx.number_connected_components(
-            graphobject.starGraph.graph
-        )
+        n_components = nx.number_connected_components(graphobject.starGraph.graph)
         return 1 if min_components <= n_components <= max_components else 0
 
     return _filter
@@ -71,11 +67,7 @@ def minimum_nodes_filter(min_nodes: int) -> Callable:
     def _filter(graphobject) -> int:
         if graphobject.starGraph is None:
             return 0
-        return (
-            1
-            if graphobject.starGraph.graph.number_of_nodes() >= min_nodes
-            else 0
-        )
+        return 1 if graphobject.starGraph.graph.number_of_nodes() >= min_nodes else 0
 
     return _filter
 
@@ -93,11 +85,7 @@ def minimum_edges_filter(min_edges: int) -> Callable:
     def _filter(graphobject) -> int:
         if graphobject.starGraph is None:
             return 0
-        return (
-            1
-            if graphobject.starGraph.graph.number_of_edges() >= min_edges
-            else 0
-        )
+        return 1 if graphobject.starGraph.graph.number_of_edges() >= min_edges else 0
 
     return _filter
 

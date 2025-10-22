@@ -59,9 +59,7 @@ def star_link(star_obj, node_features=None, group_features=None):
     >>> print(f"Random walk samples: {samples[:5]}...")
     """
     if not hasattr(star_obj, "starGraph") or star_obj.starGraph is None:
-        raise ValueError(
-            "Star object does not have an initialized starGraph attribute"
-        )
+        raise ValueError("Star object does not have an initialized starGraph attribute")
 
     if not hasattr(star_obj.starGraph, "graph"):
         raise ValueError("starGraph does not contain a valid graph attribute")

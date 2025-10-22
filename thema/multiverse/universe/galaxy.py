@@ -831,3 +831,14 @@ class Galaxy:
             file names.
         """
         pass
+
+    # Ensure Galaxy instances are pickle-friendly for multiprocessing
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        for k, v in list(state.items()):
+            if callable(v):
+                state[k] = None
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)

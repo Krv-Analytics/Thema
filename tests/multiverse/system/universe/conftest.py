@@ -308,9 +308,7 @@ def temp_real_jmap_starGraphs():
     """Create starGraphs using actual jmapStar objects with realistic parameters"""
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a small dataset for jmapStar to work with
-        with tempfile.NamedTemporaryFile(
-            suffix=".pkl", delete=False
-        ) as tmp_dataFile:
+        with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as tmp_dataFile:
             test_data = ut.generate_dataframe()
             test_data.to_pickle(tmp_dataFile.name)
 

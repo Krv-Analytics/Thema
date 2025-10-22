@@ -78,7 +78,6 @@ class pcaProj(Comet):
         self.dimensions = dimensions
         self.seed = seed
         self.projectionArray = None
-        
 
     def fit(self):
         """

@@ -61,9 +61,7 @@ def function_scheduler(
     """
     with warnings.catch_warnings(record=True) as outputs:
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = [
-                executor.submit(func, *args) for func, *args in functions
-            ]
+            futures = [executor.submit(func, *args) for func, *args in functions]
 
             # Setting progress bar to track the number of completed functions
             progress_bar = tqdm(
@@ -239,9 +237,7 @@ def configure_child_process_logging(config):
                     thema_logger.removeHandler(handler)
 
             handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                "%(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
             handler.setFormatter(formatter)
             thema_logger.addHandler(handler)
             thema_logger.setLevel(config["level"])

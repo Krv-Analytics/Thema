@@ -175,9 +175,7 @@ class TestStarLinkIntegration:
             assert best_node in ["A", "B", "C"]
 
             # Random walk should also work
-            samples = realtor.random_walk(
-                n_samples=10, m_steps=20, metric=metric
-            )
+            samples = realtor.random_walk(n_samples=10, m_steps=20, metric=metric)
             assert len(samples) == 10
             assert all(node in ["A", "B", "C"] for node in samples)
 

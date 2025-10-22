@@ -64,7 +64,6 @@ class Comet(Core):
         super().__init__(
             data_path=data_path, clean_path=clean_path, projection_path=None
         )
-        
 
     @abstractmethod
     def fit(self):
