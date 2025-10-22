@@ -37,5 +37,6 @@ docs = [
 
 [dependency-groups]
 dev = [
+    "black>=25.9.0",
     "ipykernel>=6.30.1",
 ]
