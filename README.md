@@ -1,9 +1,35 @@
-# THEMA 🔮 
-*By Krv Analytics.*
+# THEMA 🔮
+
+<p align="center">
+  <a href="https://github.com/Krv-Analytics/Thema/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/Krv-Analytics/Thema?style=flat-square">
+  </a>
+  <a href="https://github.com/Krv-Analytics/Thema/blob/main/LICENSE.md">
+    <img src="https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey?style=flat-square">
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square&logo=python">
+  </a>
+  <a href="https://krv-analytics.github.io/Thema/">
+    <img src="https://img.shields.io/badge/docs-available-green?style=flat-square&logo=gitbook">
+  </a>
+  <br>
+  <a href="https://krv.ai">
+    <img src="https://img.shields.io/badge/web-krv.ai-black?style=flat-square&logo=vercel">
+  </a>
+  <a href="https://www.linkedin.com/company/krv-analytics">
+    <img src="https://img.shields.io/badge/LinkedIn-Krv%20Analytics-blue?style=flat-square&logo=linkedin">
+  </a>
+  <a href="mailto:team@krv.ai">
+    <img src="https://img.shields.io/badge/Email-team@krv.ai-fe2b27?style=flat-square&logo=gmail">
+  </a>
+</p>
+
+_By Krv Analytics._
 
 ---
 
-Welcome to **Thema**, our custom *Topological Hyperparameter Evaluation and Mapping Algorithm*!🌟
+Welcome to **Thema**, our custom _Topological Hyperparameter Evaluation and Mapping Algorithm_!🌟
 
 ---
 
@@ -14,7 +40,9 @@ Imagine navigating a landscape of endless possibilities, where each preprocessin
 Dive into the world of Thema and transform the way you explore and interpret your data. With Thema, the subject of your analysis is always the star of the show! 🌠🚀
 
 ---
+
 ## Installation
+
 To install the Thema software package, you can use pip, the Python package installer. Follow the steps below to install Thema:
 
 1. Open a terminal.
@@ -24,7 +52,7 @@ To install the Thema software package, you can use pip, the Python package insta
 ```
 pip install thema
 ```
-   
+
 This command will download and install the latest version of Thema from the Python Package Index (PyPI).
 
 Once the installation is complete, you can verify that Thema is installed correctly by running:
@@ -36,8 +64,8 @@ pip show thema
 This will display information about the installed package, including its version and location. Now you're ready to start using Thema in your projects!
 
 ---
-## Usage
 
+## Usage
 
 Welcome to the **Thema** usage tutorial! This guide will walk you through the process of using Thema to analyze your data, generate embeddings, and visualize the results. Follow the steps below to get started. See `params.yaml.sample` as a template for defining your own representation grid search. Once you've filled this out, follwow the steps below!
 
