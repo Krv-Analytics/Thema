@@ -62,8 +62,8 @@ jobs:
 
       - name: Run tests
         run: |
-          uv run pytest
+          uv run pytest -v -m "not compute"
 
       - name: Test summary
         run: |
-          echo "✅ All tests passed for Python ${{ matrix.python-version }}"
+          echo "✅ All Light-weight tests passed for Python ${{ matrix.python-version }}"
