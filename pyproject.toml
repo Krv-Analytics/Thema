@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "category-encoders>=2.8.1",
-    "curvature-filtrations>=0.1.1",
+    "curvature-filtrations>=0.1.2",
     "hdbscan>=0.8.40",
     "kmapper>=2.1.0",
     "networkx>=3.4.2",
