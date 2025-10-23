@@ -1,7 +1,7 @@
 [project]
 name = "thema"
 version = "0.1.3"
-description = "Topological Hyperparameter Evaluation and Mapping Algorithm, by Krv Analytics "
+description = "Topological Hyperparameter Evaluation and Mapping Algorithm, by Krv Labs"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
