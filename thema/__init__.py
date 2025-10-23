@@ -5,6 +5,7 @@ Thema is a package for topological data analysis and hyperparameter optimization
 It provides a unified pipeline for data cleaning, dimension reduction, and
 topological analysis.
 
+
 Main Components:
 ---------------
 - Thema: The main entry point for the package
@@ -17,6 +18,9 @@ Main Components:
 - Galaxy: For coordinating multiple Star instances
 - starGraph: For storing and manipulating topological graphs
 """
+
+__version__ = "0.1.3"
+__author__ = "Krv-Labs"
 
 # Import key components for easier access
 from .core import Core

@@ -27,10 +27,13 @@ Oort:
     - tsne
     - pca 
 Galaxy:
+  filter: component_count_range
+  filter_params:
+    min_components: 7
+    max_components: 10
   metric: stellar_curvature_distance
-  selector: random
-  nReps: 3
-  filter: None
+  selector: max_nodes
+  nReps: 4
   stars:
     - jmap 
   jmap:
