@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added: black>=25.9.0 (development)
 - Added: furo>=2025.7.19 (docs)
 - Added: sphinx>=8.1.3 (docs)
-- Updated: curvature-filtrations>=0.1.1
+- Updated: curvature-filtrations>=0.1.2
 - Removed: UMAP-related dependencies
 
 ---
