@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "Thema"
 copyright = "2024, Sidney Gathrid, Stuart Wayland, Jeremy Wayland"
 author = "Sidney Gathrid, Stuart Wayland, Jeremy Wayland"
-release = "1.0"
+release = "v0.1.3"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -59,9 +59,21 @@ html_theme = "furo"
 # html_theme = "sphinx_rtd_theme"
 
 html_static_path = ["_static"]
+html_title = "Thema v0.1.3"
+
+html_theme_options = {
+    "light_logo": "logo.png",
+    "dark_logo": "logo-dark.png",
+    "sidebar_hide_name": False,
+}
+
 
 html_css_files = [
-    "custom.css",  # your custom CSS file
+    "custom.css",
+]
+
+html_js_files = [
+    "logo-link.js",
 ]
 
 nbsphinx_allow_errors = True
