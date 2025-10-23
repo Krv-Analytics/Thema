@@ -25,7 +25,7 @@
   </a>
 </p>
 
-_By Krv Analytics._
+_By Krv Labs._
 
 ---
 
