@@ -58,6 +58,12 @@ class Star(Core):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def get_pseudoLaplacian(self):
+        """An abstract method to be implemented by children of Star. This function must be realized by a matrix representation of the
+        star graph somewhat representative of a laplacian."""
+        raise NotImplementedError
+
     def save(self, file_path, force=False):
         """
         Save the current object instance to a file using pickle serialization.
