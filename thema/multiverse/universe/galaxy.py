@@ -156,7 +156,9 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -164,11 +166,15 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
+            cleanDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/clean/"
+            )
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
+            outDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/models/"
+            )
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -267,7 +273,9 @@ class Galaxy:
 
         out_dir = cast(str, self.outDir)
         file_paths = [
-            os.path.join(out_dir, f) for f in os.listdir(out_dir) if f.endswith(".pkl")
+            os.path.join(out_dir, f)
+            for f in os.listdir(out_dir)
+            if f.endswith(".pkl")
         ]
         component_counts = []
 
@@ -505,7 +513,9 @@ class Galaxy:
                 f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
             )
 
-        metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
+        metric_fn = getattr(
+            geodesics, metric, geodesics.stellar_curvature_distance
+        )
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
         # Filter/metric/selector names for readability
@@ -550,7 +560,9 @@ class Galaxy:
             if files is None
             else f"{total_files} provided file(s)"
         )
-        logger.info(f"Scanning {total_files} candidate graph(s) from {target_desc}.")
+        logger.info(
+            f"Scanning {total_files} candidate graph(s) from {target_desc}."
+        )
 
         # Show graph distribution before filtering if DEBUG enabled
         if logger.isEnabledFor(logging.DEBUG):
@@ -831,6 +843,87 @@ class Galaxy:
             file names.
         """
         pass
+
+    def _compute_cosmicGraphHelper(self, starFile, neighborhood):
+        """Helper function for compute_cosmicGraph used for parallelization."""
+        assert os.path.isfile(starFile), f"{starFile} is a directory?"
+        with open(starFile, "rb") as f:
+            star = pickle.load(f)
+        return star.get_pseudoLaplacian(neighborhood=neighborhood)
+
+    def compute_cosmicGraph(
+        self, useReps=False, neighborhood="cc", threshold=0.0, metric=None
+    ):
+        """Computes the cosmicGraph of the galaxy.
+
+        Parameters
+        ---------
+        useReps: bool, default = True
+            If true, uses curvature representatives as only contributing models.
+
+        neighborhood: str
+            Options are specific to star. Pleas see docs for get_pseudoLaplacian for the star you are using. (e.g. jmapStar
+            has neighborhood options of "cc" and "node" )
+
+        threshold: float, default=0.0
+            Percentage of agreement amongst contributing model to constitute an edge.
+
+        metric: str
+            metric used when comparing graphs. Currently, supported types are `stellar_curvature_distance`
+            and `stellar_kernel_distance`. Only relevant if you  haven't run `collapse()` previously.
+
+        """
+        starFiles = []
+
+        model_pattern = os.path.join(self.outDir, "*.pkl")
+        starFiles = glob.glob(model_pattern)
+
+        # Get the number of data points from one of the star files
+        if len(starFiles) == 0:
+            raise ValueError("No star files found in models directory")
+
+        with open(starFiles[0], "rb") as f:
+            sample_star = pickle.load(f)
+        n = len(sample_star.clean)
+
+        subprocesses = []
+        for starFile in starFiles:
+            cmd = (self._compute_cosmicGraphHelper, starFile, neighborhood)
+            subprocesses.append(cmd)
+
+        pseudo_laplacians = function_scheduler(
+            subprocesses,
+            4,
+            "SUCCESS: Pseudo Laplacians ",
+            resilient=True,
+            verbose=self.verbose,
+        )
+        galactic_pseudoLaplacian = sum(pseudo_laplacians)
+        cosmic_wadj = np.zeros((n, n), dtype=float)
+        cosmic_adj = np.zeros((n, n), dtype=int)
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    if (
+                        galactic_pseudoLaplacian[i, i]
+                        + galactic_pseudoLaplacian[j, j]
+                        + galactic_pseudoLaplacian[i, j]
+                    ) > 0:
+                        cosmic_wadj[i, j] = -(
+                            galactic_pseudoLaplacian[i, j]
+                            / (
+                                galactic_pseudoLaplacian[i, i]
+                                + galactic_pseudoLaplacian[j, j]
+                                + galactic_pseudoLaplacian[i, j]
+                            )
+                        )
+                    if cosmic_wadj[i, j] > threshold:
+                        cosmic_adj[i, j] = 1
+        cosmicGraph = nx.from_numpy_array(cosmic_adj)
+        for i, j in cosmicGraph.edges():
+            cosmicGraph[i][j]["weight"] = cosmic_wadj[i][j]
+
+        self.cosmicGraph = cosmicGraph
 
     # Ensure Galaxy instances are pickle-friendly for multiprocessing
     def __getstate__(self):
