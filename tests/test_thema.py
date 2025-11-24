@@ -34,9 +34,7 @@ def test_genesis_workflow_success(valid_yaml_file, monkeypatch):
     monkeypatch.setattr(
         t, "spaghettify_galaxy", lambda: called.append("spaghettify_galaxy")
     )
-    monkeypatch.setattr(
-        t, "galaxy_genesis", lambda: called.append("galaxy_genesis")
-    )
+    monkeypatch.setattr(t, "galaxy_genesis", lambda: called.append("galaxy_genesis"))
     t.genesis()
     assert called == [
         "spaghettify_innerSystem",

@@ -9,9 +9,7 @@ def test_mapper_pseudo_laplacian_node_neighborhood():
     complex_data = {"nodes": {"a": [0, 1], "b": [1, 2]}}
     n = 3
     components = None  # Not used for "node"
-    result = mapper_pseudo_laplacian(
-        complex_data, n, components, neighborhood="node"
-    )
+    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="node")
     expected = np.array([[1, -1, 0], [-1, 2, -1], [0, -1, 1]])
     np.testing.assert_array_equal(result, expected)
 
@@ -24,9 +22,7 @@ def test_mapper_pseudo_laplacian_cc_neighborhood():
     mock_component = Mock()
     mock_component.nodes = ["a", "b"]
     components = {0: mock_component}
-    result = mapper_pseudo_laplacian(
-        complex_data, n, components, neighborhood="cc"
-    )
+    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="cc")
     # When all nodes are in one component, all items [0,1,2] are in one neighborhood
     # So the matrix should have all items connected
     expected = np.array([[1, -1, -1], [-1, 1, -1], [-1, -1, 1]])

@@ -130,21 +130,15 @@ class gudhiStar(Star):
 
         """
         try:
-            self.mapper.fit(
-                X=self.projection, filters=self.projection, colors=labels
-            )
-            graph = self.mapper.get_networkx(
-                set_attributes_from_colors=bool(labels)
-            )
+            self.mapper.fit(X=self.projection, filters=self.projection, colors=labels)
+            graph = self.mapper.get_networkx(set_attributes_from_colors=bool(labels))
             for u, v in graph.edges():
                 graph[u][v]["weight"] = 1
             self.complex = {"nodes": nx.get_node_attributes(graph, "membership")}
             self.nodes = convert_keys_to_alphabet(self.complex["nodes"])
             relabel_map = {
                 old: new
-                for old, new in zip(
-                    self.complex["nodes"].keys(), self.nodes.keys()
-                )
+                for old, new in zip(self.complex["nodes"].keys(), self.nodes.keys())
             }
             graph = nx.relabel_nodes(graph, relabel_map)
             nx.set_node_attributes(graph, self.nodes, "membership")
