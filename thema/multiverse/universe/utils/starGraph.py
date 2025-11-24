@@ -32,7 +32,7 @@ class starGraph:
         in the graph using Dijkstra's algorithm.
     """
 
-    def __init__(self, graph):
+    def __init__(self, graph: nx.Graph):
         """
         Initialize the starGraph class.
 
@@ -42,6 +42,7 @@ class starGraph:
             The graph object representing the star graph.
         """
         self.graph = graph
+        self._components = None
 
     @property
     def is_EdgeLess(self):
@@ -66,12 +67,15 @@ class starGraph:
             A dictionary where the keys are component indices and the values
             are subgraphs representing the connected components.
         """
-        return dict(
-            [
-                (i, self.graph.subgraph(c).copy())
-                for i, c in enumerate(nx.connected_components(self.graph))
-            ]
-        )
+        if self._components is None:
+            self._components = dict(
+                [
+                    (i, self.graph.subgraph(c).copy())
+                    for i, c in enumerate(nx.connected_components(self.graph))
+                ]
+            )
+
+        return self._components
 
     def get_MST(self, k=0, components=None):
         """
@@ -132,8 +136,8 @@ class starGraph:
 
             mst = nx.Graph()
 
-            for i in range(len(self._components)):
-                cc_mst = nx.minimum_spanning_tree(self._components[i], weight="weight")
+            for i in range(len(self.components)):
+                cc_mst = nx.minimum_spanning_tree(self.components[i], weight="weight")
 
                 # Component is to be split into specified number of groups
                 if i in components:

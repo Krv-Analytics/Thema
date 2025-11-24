@@ -2,17 +2,23 @@
 # Last Update: 05/15/24
 # Updated by: JW
 
-import itertools
+
 import logging
-from collections import defaultdict
+
 
 import networkx as nx
-from hdbscan import HDBSCAN
 from kmapper import Cover, KeplerMapper
-from sklearn.cluster import DBSCAN
+
 
 from ..star import Star
 from ..utils.starGraph import starGraph
+from ..utils.starHelpers import (
+    convert_keys_to_alphabet,
+    mapper_pseudo_laplacian,
+    mapper_unclustered_items,
+    get_clusterer,
+    Nerve,
+)
 
 # Configure module logger
 logger = logging.getLogger(__name__)
@@ -132,6 +138,7 @@ class jmapStar(Star):
         self.minIntersection = minIntersection
         self.clusterer = get_clusterer(clusterer)
         self.mapper = KeplerMapper()
+        self.complex = None
 
         # Store parameters for potential debugging
         self._params = {
@@ -179,9 +186,9 @@ class jmapStar(Star):
             nerve = Nerve(minIntersection=self.minIntersection)
 
             # Fit Nerve to generate edges
-            edges = nerve.compute(self.nodes)
+            self.edges = nerve.compute(self.nodes)
 
-            if len(edges) == 0:
+            if len(self.edges) == 0:
                 # Log when we get empty graphs - this is important for debugging
                 logger.debug(
                     f"No edges found in graph - params: {self._params}, "
@@ -193,9 +200,9 @@ class jmapStar(Star):
                 nx.set_node_attributes(graph, self.nodes, "membership")
 
                 if self.minIntersection == -1:
-                    graph.add_weighted_edges_from(edges)
+                    graph.add_weighted_edges_from(self.edges)
                 else:
-                    graph.add_edges_from(edges)
+                    graph.add_edges_from(self.edges)
 
                 self.starGraph = starGraph(graph)
 
@@ -207,6 +214,27 @@ class jmapStar(Star):
             self.complex = None
             self.starGraph = None
 
+    def get_pseudoLaplacian(self, neighborhood="node"):
+        """Calculates and returns a pseudo laplacian n by n matrix representing neighborhoods in the graph. Here, n corresponds to
+        the number of items (ie rows in the clean data - keep in mind some raw data rows may have been dropped in cleaning). Here,
+        the diagonal element A_ii represents the number of neighborhoods item i appears in. The element A_ij represent the number of
+        neighborhoods both item i and j belong to.
+
+        Parameters
+        ----------
+        neighborhood: str
+            Specifies the type of neighborhood. For jmapStar, neighborhood options are 'node' or 'cc'
+        """
+        if self.complex is None:
+            self.fit()
+
+        return mapper_pseudo_laplacian(
+            complex=self.complex,
+            n=len(self.clean),
+            components=self.starGraph.components,
+            neighborhood=neighborhood,
+        )
+
     def get_unclustered_items(self):
         """
         Returns the list of items that were not clustered in the
@@ -217,200 +245,4 @@ class jmapStar(Star):
         self._unclustered_item : list
            A list of unclustered item ids
         """
-        N = len(self.clean)
-        labels = dict()
-        unclustered_items = []
-        for idx in range(N):
-            place_holder = []
-            for node_id in self.nodes.keys():
-                if idx in self.nodes[node_id]:
-                    place_holder.append(node_id)
-
-            if len(place_holder) == 0:
-                place_holder = -1
-                unclustered_items.append(idx)
-            labels[idx] = place_holder
-
-        return unclustered_items
-
-
-########################################################################################
-
-# Nerve Class
-
-########################################################################################
-
-
-class Nerve:
-    """
-    A class to handle generating weighted graphs from Keppler Mapper Simplicial Complexes.
-
-    Parameters
-    ----------
-    weighted : bool, optional
-        True if you want to generate a weighted graph.
-        If False, please specify a `minIntersection`.
-    minIntersection : int, optional
-        Minimum intersection considered when computing the nerve.
-        An edge will be created only when the intersection between
-        two nodes is greater than or equal to `minIntersection`.
-        Not specifying this parameter will result in an unweighted graph.
-    """
-
-    def __init__(self, minIntersection: int = -1):
-        self.minIntersection = minIntersection
-
-    def __repr__(self):
-        return f"Nerve(minIntersection={self.minIntersection})"
-
-    def compute(self, nodes):
-        """
-        Compte the nerve of a simplicial complex.
-
-        Parameters
-        ----------
-        nodes : dict
-            A dictionary with entries `{node id}:{list of ids in node}`.
-
-        Returns
-        -------
-        edges : list
-            A 1-skeleton of the nerve (intersecting nodes).
-
-        Examples
-        --------
-        >>> nodes = {'node1': [1, 2, 3], 'node2': [2, 3, 4]}
-        >>> compute(nodes)
-        [['node1', 'node2']]
-        """
-        if self.minIntersection == -1:
-            return self.compute_weighted_edges(nodes)
-        else:
-            return self.compute_unweighted_edges(nodes)
-
-    def compute_unweighted_edges(self, nodes):
-        """
-        Helper function to find edges of the overlapping clusters.
-
-        Parameters
-        ----------
-        nodes : dict
-            A dictionary with entries `{node id}:{list of ids in node}`.
-
-        Returns
-        -------
-        edges : list
-            A 1-skeleton of the nerve (intersecting nodes).
-
-        simplicies : list
-            Complete list of simplices.
-
-        Examples
-        --------
-        >>> nodes = {'node1': [1, 2, 3], 'node2': [2, 3, 4]}
-        >>> compute_unweighted_edges(nodes)
-        [['node1', 'node2']]
-
-        """
-
-        result = defaultdict(list)
-
-        # Create links when clusters from different hypercubes have members with the same sample id.
-        candidates = itertools.combinations(nodes.keys(), 2)
-        for candidate in candidates:
-            # if there are non-unique members in the union
-            if (
-                len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
-                >= self.minIntersection
-            ):
-                result[candidate[0]].append(candidate[1])
-
-        edges = [[x, end] for x in result for end in result[x]]
-        return edges
-
-    def compute_weighted_edges(self, nodes):
-        """
-        Helper function to find edges of the overlapping clusters.
-
-        Parameters
-        ----------
-        nodes : dict
-            A dictionary with entries `{node id}:{list of ids in node}`.
-
-        Returns
-        -------
-        edges : list
-            A 1-skeleton of the nerve (intersecting nodes).
-
-        simplicies : list
-            Complete list of simplices.
-
-        Examples
-        --------
-        >>> nodes = {'node1': [1, 2, 3], 'node2': [2, 3, 4]}
-        >>> compute_weighted_edges(nodes)
-        [('node1', 'node2', 0.333)]
-
-        """
-
-        result = []
-        # Create links when clusters from different hypercubes have members with the same sample id.
-        candidates = itertools.combinations(nodes.keys(), 2)
-        for candidate in candidates:
-            # if there are non-unique members in the union
-            overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
-            if overlap > 0:
-                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
-        return result
-
-
-########################################################################################
-
-# Kepler Mapper clustering utility functions
-
-########################################################################################
-
-
-def get_clusterer(clusterer: list):
-    """
-    Converts a list configuration to an initialized clusterer.
-
-    Parameters
-    ----------
-    clusterer: list
-        A length 2 list containing in position 0 the name of the clusterer, and
-        in position 1 the parameters to configure it.
-        *Example*
-        clusterer = ["HDBSCAN", {"minDist":0.1}]
-
-    Returns
-    -------
-    An initialized clustering object
-    """
-    if clusterer[0] == "HDBSCAN":
-        return HDBSCAN(**clusterer[1])
-
-    elif clusterer[0] == "DBSCAN":
-        return DBSCAN(**clusterer[1])
-
-    else:
-        raise ValueError("Only HDBSCAN and DBSCAN supported at this time.")
-
-
-def convert_keys_to_alphabet(dictionary):
-    """Simple Helper function to make kmapper node labels more readable."""
-    base = 26  # Number of letters in the alphabet
-    new_dict = {}
-
-    keys = list(dictionary.keys())
-    for i, key in enumerate(keys):
-        # Calculate the position of each letter in the new key
-        position = i
-        new_key = ""
-        while position >= 0:
-            new_key = chr(ord("a") + (position % base)) + new_key
-            position = (position // base) - 1
-
-        new_dict[new_key] = dictionary[key]
-
-    return new_dict
+        return mapper_unclustered_items(len(self.clean), self.nodes)
