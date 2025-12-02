@@ -208,6 +208,7 @@ Next Steps
    :hidden:
 
    user_guide
+   userGuides/cosmic_graph
 
 References
 ----------
