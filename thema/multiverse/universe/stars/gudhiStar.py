@@ -26,7 +26,7 @@ class gudhiStar(Star):
     """
     GUDHI Star Class
     ----------
-    - inherts from Star
+    - inherits from Star
 
     Generates a graph representation of projection using gudhi.
 
