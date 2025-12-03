@@ -1,7 +1,7 @@
 Cosmic Graphs
 =============
 
-.. image:: ../_static/cosmic_graph_banner.png
+.. image:: ../_static/cosmic2.png
    :alt: Cosmic Graph Concept
    :align: center
 
