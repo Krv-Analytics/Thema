@@ -49,7 +49,7 @@ class pyballStar(Star):
     get_clean_path() -> str
         returns path to Moon object containing clean data
     get_projection_path()-> str
-        returns path to Comet object contatining projection data
+        returns path to Comet object containing projection data
     fit() -> None
         Computes a complex and corresponding starGraph
     get_unclustered_items() -> list
