@@ -317,7 +317,9 @@ class Thema:
             str(x["star"]) for x in self.galaxy.selection.values()
         ]
         # Check for cosmic graph configuration
-        cosmic_config = self.params.Galaxy.get("cosmic_graph", {})
+        cosmic_config = {}
+        if hasattr(self.params, 'Galaxy') and self.params.Galaxy:
+            cosmic_config = self.params.Galaxy.get("cosmic_graph", {})
         # Default to False if not specified (opt-in behavior for legacy compatibility)
         is_enabled = cosmic_config.get("enabled", False)
 
