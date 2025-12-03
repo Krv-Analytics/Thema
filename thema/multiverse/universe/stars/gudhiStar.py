@@ -75,7 +75,7 @@ class gudhiStar(Star):
         C: float = 10.0,
     ):
         """
-        Constructs an instance of jmapStar
+        Constructs an instance of gudhiStar
 
         Parameters
         ---------
