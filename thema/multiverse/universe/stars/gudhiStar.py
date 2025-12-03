@@ -82,7 +82,7 @@ class gudhiStar(Star):
         data_path : str
             A path to the raw data file.
         clean_path : str
-            A path to a cofigured Moon object file.
+            A path to a configured Moon object file.
         projection_path : str
             A path to a configured Comet object file.
         N: int
