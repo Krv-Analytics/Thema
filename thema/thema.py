@@ -318,7 +318,7 @@ class Thema:
         ]
         # Check for cosmic graph configuration
         cosmic_config = {}
-        if hasattr(self.params, 'Galaxy') and self.params.Galaxy:
+        if hasattr(self.params, "Galaxy") and self.params.Galaxy:
             cosmic_config = self.params.Galaxy.get("cosmic_graph", {})
         # Default to False if not specified (opt-in behavior for legacy compatibility)
         is_enabled = cosmic_config.get("enabled", False)
@@ -326,7 +326,9 @@ class Thema:
         if is_enabled:
             neighborhood = cosmic_config.get("neighborhood", "cc")
             threshold = cosmic_config.get("threshold", 0.0)
-            self.galaxy.compute_cosmicGraph(neighborhood=neighborhood, threshold=threshold)
+            self.galaxy.compute_cosmicGraph(
+                neighborhood=neighborhood, threshold=threshold
+            )
             self.cosmicGraph = self.galaxy.cosmicGraph
         else:
             self.cosmicGraph = None

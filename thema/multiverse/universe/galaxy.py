@@ -812,24 +812,26 @@ class Galaxy:
             params = OmegaConf.load(f)
 
         # Create Galaxy configuration with all required parameters
-        galaxy_config = OmegaConf.create({
-            "metric": self.metric,
-            "selector": self.selector,
-            "nReps": self.nReps,
-            "stars": list(self.params.keys()),
-        })
+        galaxy_config = OmegaConf.create(
+            {
+                "metric": self.metric,
+                "selector": self.selector,
+                "nReps": self.nReps,
+                "stars": list(self.params.keys()),
+            }
+        )
 
         # Add star-specific parameters
         for star_name, star_params in self.params.items():
             galaxy_config[star_name] = star_params
 
         # Add filter configuration if it exists in the original YAML
-        if self._yamlParams and hasattr(self._yamlParams, 'Galaxy'):
-            if hasattr(self._yamlParams.Galaxy, 'filter'):
+        if self._yamlParams and hasattr(self._yamlParams, "Galaxy"):
+            if hasattr(self._yamlParams.Galaxy, "filter"):
                 galaxy_config.filter = self._yamlParams.Galaxy.filter
-            if hasattr(self._yamlParams.Galaxy, 'filter_params'):
+            if hasattr(self._yamlParams.Galaxy, "filter_params"):
                 galaxy_config.filter_params = self._yamlParams.Galaxy.filter_params
-            if hasattr(self._yamlParams.Galaxy, 'cosmic_graph'):
+            if hasattr(self._yamlParams.Galaxy, "cosmic_graph"):
                 galaxy_config.cosmic_graph = self._yamlParams.Galaxy.cosmic_graph
 
         params.Galaxy = galaxy_config
