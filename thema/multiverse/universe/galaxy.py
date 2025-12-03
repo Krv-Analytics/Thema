@@ -872,7 +872,7 @@ class Galaxy:
             If true, uses curvature representatives as only contributing models.
 
         neighborhood: str
-            Options are specific to star. Pleas see docs for get_pseudoLaplacian for the star you are using. (e.g. jmapStar
+            Options are specific to star. Please see docs for get_pseudoLaplacian for the star you are using. (e.g. jmapStar
             has neighborhood options of "cc" and "node" )
 
         threshold: float, default=0.0
