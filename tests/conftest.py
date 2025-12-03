@@ -170,6 +170,11 @@ def complete_yaml_file(tmp_path):
             "nReps": 2,
             "selector": "max_nodes",
             "filter": None,
+            "cosmic_graph": {
+                "enabled": True,
+                "neighborhood": "cc",
+                "threshold": 0.0,
+            },
             "jmap": {
                 "nCubes": [4],
                 "percOverlap": [0.5],

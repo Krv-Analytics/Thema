@@ -256,7 +256,7 @@ def test_galaxy_genesis_workflow_order(valid_yaml_file, monkeypatch):
             calls.append("Galaxy.collapse")
             return self.selection
 
-        def compute_cosmicGraph(self):
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
             calls.append("Galaxy.compute_cosmicGraph")
             import networkx as nx
 
@@ -276,12 +276,11 @@ def test_galaxy_genesis_workflow_order(valid_yaml_file, monkeypatch):
         # Run galaxy_genesis
         t.galaxy_genesis()
 
-        # Verify call order
+        # Verify call order - cosmic_graph is disabled by default
         assert calls == [
             "Galaxy.__init__",
             "Galaxy.fit",
             "Galaxy.collapse",
-            "Galaxy.compute_cosmicGraph",
         ]
 
         # Verify attributes were set
@@ -304,10 +303,7 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
     class MockGalaxy:
         def __init__(self, YAML_PATH):
             self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
-            self.cosmicGraph = nx.Graph()
-            self.cosmicGraph.add_node(0)
-            self.cosmicGraph.add_node(1)
-            self.cosmicGraph.add_edge(0, 1, weight=0.5)
+            self.cosmicGraph = None
 
         def fit(self):
             pass
@@ -315,8 +311,11 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
         def collapse(self):
             return self.selection
 
-        def compute_cosmicGraph(self):
-            pass
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            self.cosmicGraph = nx.Graph()
+            self.cosmicGraph.add_node(0)
+            self.cosmicGraph.add_node(1)
+            self.cosmicGraph.add_edge(0, 1, weight=0.5)
 
     # Patch Galaxy
     import thema.thema
@@ -332,11 +331,8 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
         # Run galaxy_genesis
         t.galaxy_genesis()
 
-        # Verify cosmicGraph was assigned correctly
-        assert t.cosmicGraph is t.galaxy.cosmicGraph
-        assert t.cosmicGraph.number_of_nodes() == 2
-        assert t.cosmicGraph.number_of_edges() == 1
-        assert t.cosmicGraph[0][1]["weight"] == 0.5
+        # Verify cosmicGraph is None (disabled by default)
+        assert t.cosmicGraph is None
 
     finally:
         # Restore original Galaxy
