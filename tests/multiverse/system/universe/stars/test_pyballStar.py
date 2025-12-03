@@ -3,7 +3,6 @@
 # Updated By: JW
 
 import pickle
-import networkx.utils as nxut
 
 
 from thema.multiverse.universe.stars.pyballStar import pyballStar
