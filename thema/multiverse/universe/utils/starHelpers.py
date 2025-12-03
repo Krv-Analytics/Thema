@@ -76,7 +76,7 @@ class Nerve:
 
     def compute(self, nodes):
         """
-        Compte the nerve of a simplicial complex.
+        Compute the nerve of a simplicial complex.
 
         Parameters
         ----------
