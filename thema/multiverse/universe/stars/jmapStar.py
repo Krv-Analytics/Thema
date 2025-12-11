@@ -163,56 +163,49 @@ class jmapStar(Star):
         empty complexes.
 
         """
-        try:
-            self.complex = self.mapper.map(
-                lens=self.projection,
-                X=self.projection,
-                cover=Cover(self.nCubes, self.percOverlap),
-                clusterer=self.clusterer,
-            )
+        self.complex = self.mapper.map(
+            lens=self.projection,
+            X=self.projection,
+            cover=Cover(self.nCubes, self.percOverlap),
+            clusterer=self.clusterer,
+        )
 
-            if not self.complex or "nodes" not in self.complex:
-                logger.debug(
-                    f"KeplerMapper produced empty complex - params: {self._params}, "
-                    f"projection shape: {self.projection.shape}"
-                )
-                self.complex = None
-                self.starGraph = None
-                return
-
-            self.nodes = convert_keys_to_alphabet(self.complex["nodes"])
-
-            graph = nx.Graph()
-            nerve = Nerve(minIntersection=self.minIntersection)
-
-            # Fit Nerve to generate edges
-            self.edges = nerve.compute(self.nodes)
-
-            if len(self.edges) == 0:
-                # Log when we get empty graphs - this is important for debugging
-                logger.debug(
-                    f"No edges found in graph - params: {self._params}, "
-                    f"nodes: {len(self.nodes)}, projection shape: {self.projection.shape}"
-                )
-                self.starGraph = starGraph(graph)  # Create empty graph instead of None
-            else:
-                graph.add_nodes_from(self.nodes)
-                nx.set_node_attributes(graph, self.nodes, "membership")
-
-                if self.minIntersection == -1:
-                    graph.add_weighted_edges_from(self.edges)
-                else:
-                    graph.add_edges_from(self.edges)
-
-                self.starGraph = starGraph(graph)
-
-        except Exception as e:
-            logger.error(
-                f"jmapStar.fit() failed with params: {self._params}, "
-                f"projection shape: {self.projection.shape}, error: {str(e)}"
+        if not self.complex or "nodes" not in self.complex:
+            logger.debug(
+                f"KeplerMapper produced empty complex - params: {self._params}, "
+                f"projection shape: {self.projection.shape}"
             )
             self.complex = None
             self.starGraph = None
+            return
+
+        self.nodes = convert_keys_to_alphabet(self.complex["nodes"])
+
+        graph = nx.Graph()
+        nerve = Nerve(minIntersection=self.minIntersection)
+
+        # Fit Nerve to generate edges
+        self.edges = nerve.compute(self.nodes)
+
+        if len(self.edges) == 0:
+            # Log when we get empty graphs - this is important for debugging
+            logger.debug(
+                f"No edges found in graph - params: {self._params}, "
+                f"nodes: {len(self.nodes)}, projection shape: {self.projection.shape}"
+            )
+            self.starGraph = starGraph(
+                graph
+            )  # Create empty graph instead of None
+        else:
+            graph.add_nodes_from(self.nodes)
+            nx.set_node_attributes(graph, self.nodes, "membership")
+
+            if self.minIntersection == -1:
+                graph.add_weighted_edges_from(self.edges)
+            else:
+                graph.add_edges_from(self.edges)
+
+            self.starGraph = starGraph(graph)
 
     def get_pseudoLaplacian(self, neighborhood="node"):
         """Calculates and returns a pseudo laplacian n by n matrix representing neighborhoods in the graph. Here, n corresponds to
