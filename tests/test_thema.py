@@ -34,7 +34,9 @@ def test_genesis_workflow_success(valid_yaml_file, monkeypatch):
     monkeypatch.setattr(
         t, "spaghettify_galaxy", lambda: called.append("spaghettify_galaxy")
     )
-    monkeypatch.setattr(t, "galaxy_genesis", lambda: called.append("galaxy_genesis"))
+    monkeypatch.setattr(
+        t, "galaxy_genesis", lambda: called.append("galaxy_genesis")
+    )
     t.genesis()
     assert called == [
         "spaghettify_innerSystem",
@@ -138,15 +140,13 @@ def test_galaxy_genesis_creates_cosmic_graph(complete_yaml_file):
     assert hasattr(t, "galaxy")
     assert t.galaxy is not None
 
-    # Verify collapse was called (selection should be populated)
-    assert hasattr(t.galaxy, "selection")
-    assert isinstance(t.galaxy.selection, dict)
-    assert len(t.galaxy.selection) > 0
-
-    # Verify selected_model_files was populated
+    # When cosmic graph is enabled, collapse is NOT called
+    # So selection and selected_model_files should NOT be populated
     assert hasattr(t, "selected_model_files")
-    assert isinstance(t.selected_model_files, list)
-    assert len(t.selected_model_files) > 0
+    # selected_model_files should not be set when cosmic graph is enabled
+    assert (
+        not hasattr(t, "selected_model_files") or t.selected_model_files is None
+    )
 
     # Verify cosmicGraph was created and assigned
     assert hasattr(t, "cosmicGraph")
@@ -156,11 +156,115 @@ def test_galaxy_genesis_creates_cosmic_graph(complete_yaml_file):
     # Verify cosmicGraph is the same as galaxy.cosmicGraph
     assert t.cosmicGraph is t.galaxy.cosmicGraph
 
+    # Verify the cosmic graph has nodes (it should have been computed)
+    assert t.cosmicGraph.number_of_nodes() > 0
+
 
 @pytest.mark.compute
-def test_galaxy_genesis_selected_files_match_selection(complete_yaml_file):
-    """Test that selected_model_files matches galaxy.selection"""
-    t = Thema(complete_yaml_file)
+def test_galaxy_genesis_selected_files_match_selection(tmp_path):
+    """Test that selected_model_files matches galaxy.selection when cosmic graph is disabled"""
+    import pandas as pd
+    import numpy as np
+    import yaml
+    from thema.multiverse import Planet, Oort
+
+    # Generate test data
+    np.random.seed(42)
+    data = pd.DataFrame(
+        {
+            "A": np.random.choice(["cat", "dog", "bird"], 100),
+            "B": np.random.randn(100),
+            "Num1": np.random.randn(100),
+            "Num2": np.random.randn(100),
+            "Num3": np.random.randn(100),
+            "Num4": np.random.randn(100),
+            "Num5": np.random.randn(100),
+        }
+    )
+
+    # Save data
+    data_file = tmp_path / "test_data.pkl"
+    data.to_pickle(str(data_file))
+
+    # Setup directories
+    out_dir = tmp_path / "out"
+    run_name = "test_run"
+    clean_dir = out_dir / run_name / "clean"
+    proj_dir = out_dir / run_name / "projections"
+
+    clean_dir.mkdir(parents=True, exist_ok=True)
+    proj_dir.mkdir(parents=True, exist_ok=True)
+
+    # Run Planet
+    planet = Planet(
+        data=str(data_file),
+        outDir=str(clean_dir) + "/",
+        imputeColumns=["B"],
+        imputeMethods=["sampleNormal"],
+        numSamples=2,
+        seeds=[42, 41],
+        encoding="one_hot",
+        scaler="standard",
+    )
+    planet.fit()
+
+    # Run Oort
+    oort = Oort(
+        data=str(data_file),
+        cleanDir=str(clean_dir) + "/",
+        outDir=str(proj_dir) + "/",
+        params={
+            "tsne": {"perplexity": [2], "dimensions": [2], "seed": [42]},
+            "pca": {"dimensions": [2], "seed": [42]},
+        },
+    )
+    oort.fit()
+
+    # Create YAML configuration WITHOUT cosmic graph (to test collapse behavior)
+    yaml_content = {
+        "runName": run_name,
+        "data": str(data_file),
+        "outDir": str(out_dir),
+        "Planet": {
+            "scaler": "standard",
+            "encoding": "one_hot",
+            "numSamples": 2,
+            "seeds": [42, 41],
+            "dropColumns": None,
+            "imputeColumns": ["B"],
+            "imputeMethods": ["sampleNormal"],
+        },
+        "Oort": {
+            "projectiles": ["tsne", "pca"],
+            "tsne": {"perplexity": [2], "dimensions": [2], "seed": [42]},
+            "pca": {"dimensions": [2], "seed": [42]},
+        },
+        "Galaxy": {
+            "stars": ["jmap"],
+            "metric": "stellar_curvature_distance",
+            "nReps": 2,
+            "selector": "max_nodes",
+            "filter": None,
+            # Cosmic graph disabled to test collapse behavior
+            "cosmic_graph": {
+                "enabled": False,
+            },
+            "jmap": {
+                "nCubes": [4],
+                "percOverlap": [0.5],
+                "minIntersection": [-1],
+                "clusterer": [
+                    ["HDBSCAN", {"min_cluster_size": 2}],
+                ],
+            },
+        },
+    }
+
+    yaml_path = tmp_path / "params.yaml"
+    with open(yaml_path, "w") as f:
+        yaml.dump(yaml_content, f)
+
+    t = Thema(str(yaml_path))
 
     # Setup prerequisites
     t.spaghettify_innerSystem()
@@ -172,10 +276,14 @@ def test_galaxy_genesis_selected_files_match_selection(complete_yaml_file):
     # Run galaxy_genesis
     t.galaxy_genesis()
 
+    # When cosmic graph is disabled, collapse IS called
     # Extract star files from selection
-    selection_files = [str(info["star"]) for info in t.galaxy.selection.values()]
+    selection_files = [
+        str(info["star"]) for info in t.galaxy.selection.values()
+    ]
 
     # Should match selected_model_files
+    assert t.selected_model_files is not None
     assert set(t.selected_model_files) == set(selection_files)
 
 
@@ -202,9 +310,13 @@ def test_full_genesis_workflow_with_cosmic_graph(complete_yaml_file):
     assert t.model_files is not None
     assert len(t.model_files) > 0
 
+    # When cosmic graph is enabled, selected_model_files should NOT be set
+    # (collapse is not called to avoid expensive computation)
+    assert (
+        not hasattr(t, "selected_model_files") or t.selected_model_files is None
+    )
+
     # Verify cosmic graph functionality
-    assert t.selected_model_files is not None
-    assert len(t.selected_model_files) > 0
     assert hasattr(t, "cosmicGraph")
     assert isinstance(t.cosmicGraph, nx.Graph)
     assert t.cosmicGraph.number_of_nodes() > 0
@@ -246,7 +358,9 @@ def test_galaxy_genesis_workflow_order(valid_yaml_file, monkeypatch):
     class MockGalaxy:
         def __init__(self, YAML_PATH):
             calls.append("Galaxy.__init__")
-            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
             self.cosmicGraph = None
 
         def fit(self):
@@ -302,7 +416,9 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
     # Mock Galaxy with a specific cosmicGraph
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
             self.cosmicGraph = None
 
         def fit(self):
@@ -336,4 +452,316 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
 
     finally:
         # Restore original Galaxy
+        monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
+
+
+def test_collapse_called_when_cosmic_graph_disabled(
+    valid_yaml_file, monkeypatch
+):
+    """Test that collapse() is called when cosmic graphs are disabled"""
+    t = Thema(valid_yaml_file)
+
+    # Track method calls
+    calls = []
+
+    # Mock Galaxy to track calls
+    class MockGalaxy:
+        def __init__(self, YAML_PATH):
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
+            self.cosmicGraph = None
+
+        def fit(self):
+            calls.append("fit")
+
+        def collapse(self):
+            calls.append("collapse")
+            return self.selection
+
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            calls.append("compute_cosmicGraph")
+            import networkx as nx
+
+            self.cosmicGraph = nx.Graph()
+
+    # Patch Galaxy
+    import thema.thema
+
+    original_galaxy = thema.thema.Galaxy
+    monkeypatch.setattr(thema.thema, "Galaxy", MockGalaxy)
+
+    # Create model directory
+    model_outdir = os.path.join(t.params.outDir, t.params.runName + "/models/")
+    os.makedirs(model_outdir, exist_ok=True)
+
+    try:
+        # Run galaxy_genesis (cosmic graphs disabled by default)
+        t.galaxy_genesis()
+
+        # Verify collapse was called
+        assert "collapse" in calls
+        # Verify compute_cosmicGraph was NOT called
+        assert "compute_cosmicGraph" not in calls
+        # Verify cosmicGraph is None
+        assert t.cosmicGraph is None
+        # Verify selected_model_files was set
+        assert t.selected_model_files is not None
+        assert isinstance(t.selected_model_files, list)
+
+    finally:
+        monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
+
+
+def test_collapse_not_called_when_cosmic_graph_enabled(
+    valid_yaml_file, monkeypatch
+):
+    """Test that collapse() is NOT called when cosmic graphs are enabled"""
+    t = Thema(valid_yaml_file)
+
+    # Enable cosmic graphs in the config
+    from omegaconf import OmegaConf
+
+    t.params.Galaxy = OmegaConf.create(
+        {
+            "cosmic_graph": {
+                "enabled": True,
+                "neighborhood": "cc",
+                "threshold": 0.0,
+            }
+        }
+    )
+
+    # Track method calls
+    calls = []
+
+    # Mock Galaxy to track calls
+    class MockGalaxy:
+        def __init__(self, YAML_PATH):
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
+            self.cosmicGraph = None
+
+        def fit(self):
+            calls.append("fit")
+
+        def collapse(self):
+            calls.append("collapse")
+            return self.selection
+
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            calls.append("compute_cosmicGraph")
+            import networkx as nx
+
+            self.cosmicGraph = nx.Graph()
+
+    # Patch Galaxy
+    import thema.thema
+
+    original_galaxy = thema.thema.Galaxy
+    monkeypatch.setattr(thema.thema, "Galaxy", MockGalaxy)
+
+    # Create model directory
+    model_outdir = os.path.join(t.params.outDir, t.params.runName + "/models/")
+    os.makedirs(model_outdir, exist_ok=True)
+
+    try:
+        # Run galaxy_genesis
+        t.galaxy_genesis()
+
+        # Verify compute_cosmicGraph was called
+        assert "compute_cosmicGraph" in calls
+        # Verify collapse was NOT called
+        assert "collapse" not in calls
+        # Verify cosmicGraph is set
+        assert t.cosmicGraph is not None
+        # Verify selected_model_files was NOT set (only set when collapse is called)
+        assert t.selected_model_files is None
+
+    finally:
+        monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
+
+
+def test_cosmic_graph_config_parameters_passed_correctly(
+    valid_yaml_file, monkeypatch
+):
+    """Test that cosmic graph configuration parameters are passed correctly"""
+    t = Thema(valid_yaml_file)
+
+    # Enable cosmic graphs with specific parameters
+    from omegaconf import OmegaConf
+
+    t.params.Galaxy = OmegaConf.create(
+        {
+            "cosmic_graph": {
+                "enabled": True,
+                "neighborhood": "knn",
+                "threshold": 0.5,
+            }
+        }
+    )
+
+    # Track parameters passed to compute_cosmicGraph
+    captured_params = {}
+
+    # Mock Galaxy to capture parameters
+    class MockGalaxy:
+        def __init__(self, YAML_PATH):
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
+            self.cosmicGraph = None
+
+        def fit(self):
+            pass
+
+        def collapse(self):
+            return self.selection
+
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            captured_params["neighborhood"] = neighborhood
+            captured_params["threshold"] = threshold
+            import networkx as nx
+
+            self.cosmicGraph = nx.Graph()
+
+    # Patch Galaxy
+    import thema.thema
+
+    original_galaxy = thema.thema.Galaxy
+    monkeypatch.setattr(thema.thema, "Galaxy", MockGalaxy)
+
+    # Create model directory
+    model_outdir = os.path.join(t.params.outDir, t.params.runName + "/models/")
+    os.makedirs(model_outdir, exist_ok=True)
+
+    try:
+        # Run galaxy_genesis
+        t.galaxy_genesis()
+
+        # Verify parameters were passed correctly
+        assert captured_params["neighborhood"] == "knn"
+        assert captured_params["threshold"] == 0.5
+
+    finally:
+        monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
+
+
+def test_default_cosmic_graph_behavior_without_config(
+    valid_yaml_file, monkeypatch
+):
+    """Test default behavior when Galaxy config is not present"""
+    t = Thema(valid_yaml_file)
+
+    # Ensure Galaxy config doesn't exist
+    if hasattr(t.params, "Galaxy"):
+        delattr(t.params, "Galaxy")
+
+    # Track method calls
+    calls = []
+
+    # Mock Galaxy to track calls
+    class MockGalaxy:
+        def __init__(self, YAML_PATH):
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
+            self.cosmicGraph = None
+
+        def fit(self):
+            calls.append("fit")
+
+        def collapse(self):
+            calls.append("collapse")
+            return self.selection
+
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            calls.append("compute_cosmicGraph")
+            import networkx as nx
+
+            self.cosmicGraph = nx.Graph()
+
+    # Patch Galaxy
+    import thema.thema
+
+    original_galaxy = thema.thema.Galaxy
+    monkeypatch.setattr(thema.thema, "Galaxy", MockGalaxy)
+
+    # Create model directory
+    model_outdir = os.path.join(t.params.outDir, t.params.runName + "/models/")
+    os.makedirs(model_outdir, exist_ok=True)
+
+    try:
+        # Run galaxy_genesis
+        t.galaxy_genesis()
+
+        # Verify collapse was called (default behavior)
+        assert "collapse" in calls
+        # Verify compute_cosmicGraph was NOT called
+        assert "compute_cosmicGraph" not in calls
+        # Verify cosmicGraph is None
+        assert t.cosmicGraph is None
+
+    finally:
+        monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
+
+
+def test_cosmic_graph_enabled_false_explicitly(valid_yaml_file, monkeypatch):
+    """Test behavior when cosmic graphs are explicitly disabled"""
+    t = Thema(valid_yaml_file)
+
+    # Explicitly disable cosmic graphs
+    from omegaconf import OmegaConf
+
+    t.params.Galaxy = OmegaConf.create({"cosmic_graph": {"enabled": False}})
+
+    # Track method calls
+    calls = []
+
+    # Mock Galaxy to track calls
+    class MockGalaxy:
+        def __init__(self, YAML_PATH):
+            self.selection = {
+                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
+            }
+            self.cosmicGraph = None
+
+        def fit(self):
+            calls.append("fit")
+
+        def collapse(self):
+            calls.append("collapse")
+            return self.selection
+
+        def compute_cosmicGraph(self, neighborhood="cc", threshold=0.0):
+            calls.append("compute_cosmicGraph")
+            import networkx as nx
+
+            self.cosmicGraph = nx.Graph()
+
+    # Patch Galaxy
+    import thema.thema
+
+    original_galaxy = thema.thema.Galaxy
+    monkeypatch.setattr(thema.thema, "Galaxy", MockGalaxy)
+
+    # Create model directory
+    model_outdir = os.path.join(t.params.outDir, t.params.runName + "/models/")
+    os.makedirs(model_outdir, exist_ok=True)
+
+    try:
+        # Run galaxy_genesis
+        t.galaxy_genesis()
+
+        # Verify collapse was called
+        assert "collapse" in calls
+        # Verify compute_cosmicGraph was NOT called
+        assert "compute_cosmicGraph" not in calls
+        # Verify cosmicGraph is None
+        assert t.cosmicGraph is None
+        # Verify selected_model_files was set
+        assert t.selected_model_files is not None
+
+    finally:
         monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
