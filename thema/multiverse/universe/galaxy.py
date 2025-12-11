@@ -156,7 +156,9 @@ class Galaxy:
             Set to true to see warnings + print messages
         """
         if YAML_PATH is not None:
-            assert os.path.isfile(YAML_PATH), "yaml parameter file could not be found."
+            assert os.path.isfile(
+                YAML_PATH
+            ), "yaml parameter file could not be found."
             try:
                 with open(YAML_PATH, "r") as f:
                     yamlParams = OmegaConf.load(f)
@@ -164,11 +166,15 @@ class Galaxy:
                 print(e)
 
             data = yamlParams.data
-            cleanDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/clean/")
+            cleanDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/clean/"
+            )
             projDir = os.path.join(
                 yamlParams.outDir, yamlParams.runName + "/projections/"
             )
-            outDir = os.path.join(yamlParams.outDir, yamlParams.runName + "/models/")
+            outDir = os.path.join(
+                yamlParams.outDir, yamlParams.runName + "/models/"
+            )
 
             metric = yamlParams.Galaxy.metric
             selector = yamlParams.Galaxy.selector
@@ -241,7 +247,9 @@ class Galaxy:
             if filter_type in config.filter_configs:
 
                 filter_config = config.filter_configs[filter_type]
-                logger.info(f"Loading supported filter function: `{filter_type}`")
+                logger.info(
+                    f"Loading supported filter function: `{filter_type}`"
+                )
                 params = {
                     **filter_config["params"],
                     **yamlParams.Galaxy.get("filter_params", {}),
@@ -267,7 +275,9 @@ class Galaxy:
 
         out_dir = cast(str, self.outDir)
         file_paths = [
-            os.path.join(out_dir, f) for f in os.listdir(out_dir) if f.endswith(".pkl")
+            os.path.join(out_dir, f)
+            for f in os.listdir(out_dir)
+            if f.endswith(".pkl")
         ]
         component_counts = []
 
@@ -505,7 +515,9 @@ class Galaxy:
                 f"filter_fn must be None, callable, or string, got {type(filter_fn)}"
             )
 
-        metric_fn = getattr(geodesics, metric, geodesics.stellar_curvature_distance)
+        metric_fn = getattr(
+            geodesics, metric, geodesics.stellar_curvature_distance
+        )
         selector_fn = getattr(starSelectors, selector, starSelectors.max_nodes)
 
         # Filter/metric/selector names for readability
@@ -550,7 +562,9 @@ class Galaxy:
             if files is None
             else f"{total_files} provided file(s)"
         )
-        logger.info(f"Scanning {total_files} candidate graph(s) from {target_desc}.")
+        logger.info(
+            f"Scanning {total_files} candidate graph(s) from {target_desc}."
+        )
 
         # Show graph distribution before filtering if DEBUG enabled
         if logger.isEnabledFor(logging.DEBUG):
@@ -830,9 +844,13 @@ class Galaxy:
             if hasattr(self._yamlParams.Galaxy, "filter"):
                 galaxy_config.filter = self._yamlParams.Galaxy.filter
             if hasattr(self._yamlParams.Galaxy, "filter_params"):
-                galaxy_config.filter_params = self._yamlParams.Galaxy.filter_params
+                galaxy_config.filter_params = (
+                    self._yamlParams.Galaxy.filter_params
+                )
             if hasattr(self._yamlParams.Galaxy, "cosmic_graph"):
-                galaxy_config.cosmic_graph = self._yamlParams.Galaxy.cosmic_graph
+                galaxy_config.cosmic_graph = (
+                    self._yamlParams.Galaxy.cosmic_graph
+                )
 
         params.Galaxy = galaxy_config
 
@@ -862,25 +880,20 @@ class Galaxy:
         return star.get_pseudoLaplacian(neighborhood=neighborhood)
 
     def compute_cosmicGraph(
-        self, useReps=False, neighborhood="cc", threshold=0.0, metric=None
+        self,
+        neighborhood="cc",
+        threshold=0.0,
     ):
         """Computes the cosmicGraph of the galaxy.
 
         Parameters
         ---------
-        useReps: bool, default = True
-            If true, uses curvature representatives as only contributing models.
-
         neighborhood: str
             Options are specific to star. Please see docs for get_pseudoLaplacian for the star you are using. (e.g. jmapStar
             has neighborhood options of "cc" and "node" )
 
         threshold: float, default=0.0
             Percentage of agreement amongst contributing model to constitute an edge.
-
-        metric: str
-            metric used when comparing graphs. Currently, supported types are `stellar_curvature_distance`
-            and `stellar_kernel_distance`. Only relevant if you  haven't run `collapse()` previously.
 
         """
         starFiles = []
