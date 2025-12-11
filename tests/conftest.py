@@ -44,6 +44,18 @@ def pytest_configure(config):
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     sys.path.append(root_path)
 
+    # Monkeypatch sklearn for compatibility with dependencies using removed force_all_finite
+    import sklearn.utils.validation
+
+    _original_check_array = sklearn.utils.validation.check_array
+
+    def _check_array_monkeypatch(*args, **kwargs):
+        if "force_all_finite" in kwargs:
+            kwargs["ensure_all_finite"] = kwargs.pop("force_all_finite")
+        return _original_check_array(*args, **kwargs)
+
+    sklearn.utils.validation.check_array = _check_array_monkeypatch
+
 
 @pytest.fixture(autouse=True)
 def patch_multiverse_modules(request, monkeypatch):
