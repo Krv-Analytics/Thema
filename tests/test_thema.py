@@ -34,9 +34,7 @@ def test_genesis_workflow_success(valid_yaml_file, monkeypatch):
     monkeypatch.setattr(
         t, "spaghettify_galaxy", lambda: called.append("spaghettify_galaxy")
     )
-    monkeypatch.setattr(
-        t, "galaxy_genesis", lambda: called.append("galaxy_genesis")
-    )
+    monkeypatch.setattr(t, "galaxy_genesis", lambda: called.append("galaxy_genesis"))
     t.genesis()
     assert called == [
         "spaghettify_innerSystem",
@@ -144,9 +142,7 @@ def test_galaxy_genesis_creates_cosmic_graph(complete_yaml_file):
     # So selection and selected_model_files should NOT be populated
     assert hasattr(t, "selected_model_files")
     # selected_model_files should not be set when cosmic graph is enabled
-    assert (
-        not hasattr(t, "selected_model_files") or t.selected_model_files is None
-    )
+    assert not hasattr(t, "selected_model_files") or t.selected_model_files is None
 
     # Verify cosmicGraph was created and assigned
     assert hasattr(t, "cosmicGraph")
@@ -278,9 +274,7 @@ def test_galaxy_genesis_selected_files_match_selection(tmp_path):
 
     # When cosmic graph is disabled, collapse IS called
     # Extract star files from selection
-    selection_files = [
-        str(info["star"]) for info in t.galaxy.selection.values()
-    ]
+    selection_files = [str(info["star"]) for info in t.galaxy.selection.values()]
 
     # Should match selected_model_files
     assert t.selected_model_files is not None
@@ -312,9 +306,7 @@ def test_full_genesis_workflow_with_cosmic_graph(complete_yaml_file):
 
     # When cosmic graph is enabled, selected_model_files should NOT be set
     # (collapse is not called to avoid expensive computation)
-    assert (
-        not hasattr(t, "selected_model_files") or t.selected_model_files is None
-    )
+    assert not hasattr(t, "selected_model_files") or t.selected_model_files is None
 
     # Verify cosmic graph functionality
     assert hasattr(t, "cosmicGraph")
@@ -358,9 +350,7 @@ def test_galaxy_genesis_workflow_order(valid_yaml_file, monkeypatch):
     class MockGalaxy:
         def __init__(self, YAML_PATH):
             calls.append("Galaxy.__init__")
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -416,9 +406,7 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
     # Mock Galaxy with a specific cosmicGraph
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -455,9 +443,7 @@ def test_cosmicGraph_attribute_assignment(valid_yaml_file, monkeypatch):
         monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
 
 
-def test_collapse_called_when_cosmic_graph_disabled(
-    valid_yaml_file, monkeypatch
-):
+def test_collapse_called_when_cosmic_graph_disabled(valid_yaml_file, monkeypatch):
     """Test that collapse() is called when cosmic graphs are disabled"""
     t = Thema(valid_yaml_file)
 
@@ -467,9 +453,7 @@ def test_collapse_called_when_cosmic_graph_disabled(
     # Mock Galaxy to track calls
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -513,9 +497,7 @@ def test_collapse_called_when_cosmic_graph_disabled(
         monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
 
 
-def test_collapse_not_called_when_cosmic_graph_enabled(
-    valid_yaml_file, monkeypatch
-):
+def test_collapse_not_called_when_cosmic_graph_enabled(valid_yaml_file, monkeypatch):
     """Test that collapse() is NOT called when cosmic graphs are enabled"""
     t = Thema(valid_yaml_file)
 
@@ -538,9 +520,7 @@ def test_collapse_not_called_when_cosmic_graph_enabled(
     # Mock Galaxy to track calls
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -583,9 +563,7 @@ def test_collapse_not_called_when_cosmic_graph_enabled(
         monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
 
 
-def test_cosmic_graph_config_parameters_passed_correctly(
-    valid_yaml_file, monkeypatch
-):
+def test_cosmic_graph_config_parameters_passed_correctly(valid_yaml_file, monkeypatch):
     """Test that cosmic graph configuration parameters are passed correctly"""
     t = Thema(valid_yaml_file)
 
@@ -608,9 +586,7 @@ def test_cosmic_graph_config_parameters_passed_correctly(
     # Mock Galaxy to capture parameters
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -648,9 +624,7 @@ def test_cosmic_graph_config_parameters_passed_correctly(
         monkeypatch.setattr(thema.thema, "Galaxy", original_galaxy)
 
 
-def test_default_cosmic_graph_behavior_without_config(
-    valid_yaml_file, monkeypatch
-):
+def test_default_cosmic_graph_behavior_without_config(valid_yaml_file, monkeypatch):
     """Test default behavior when Galaxy config is not present"""
     t = Thema(valid_yaml_file)
 
@@ -664,9 +638,7 @@ def test_default_cosmic_graph_behavior_without_config(
     # Mock Galaxy to track calls
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):
@@ -722,9 +694,7 @@ def test_cosmic_graph_enabled_false_explicitly(valid_yaml_file, monkeypatch):
     # Mock Galaxy to track calls
     class MockGalaxy:
         def __init__(self, YAML_PATH):
-            self.selection = {
-                "0": {"star": "/fake/path.pkl", "cluster_size": 5}
-            }
+            self.selection = {"0": {"star": "/fake/path.pkl", "cluster_size": 5}}
             self.cosmicGraph = None
 
         def fit(self):

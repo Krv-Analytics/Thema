@@ -164,9 +164,7 @@ class Thema:
         >>> thema.spaghettify_innerSystem()  # First clean the directory
         >>> thema.innerSystem_genesis()  # Process the data
         """
-        clean_outdir = os.path.join(
-            self.params.outDir, self.params.runName + "/clean"
-        )
+        clean_outdir = os.path.join(self.params.outDir, self.params.runName + "/clean")
         if os.path.isdir(clean_outdir):
             assert (
                 len(os.listdir(clean_outdir)) == 0
@@ -175,9 +173,7 @@ class Thema:
             os.makedirs(clean_outdir)
         self.planet = Planet(YAML_PATH=self.YAML_PATH)
         self.planet.fit()
-        self.clean_files = [
-            clean_outdir + file for file in os.listdir(clean_outdir)
-        ]
+        self.clean_files = [clean_outdir + file for file in os.listdir(clean_outdir)]
 
     def spaghettify_innerSystem(self):
         """
@@ -196,9 +192,7 @@ class Thema:
         >>> thema = Thema('params.yaml')
         >>> thema.spaghettify_innerSystem()  # Clean the inner system directory
         """
-        clean_outdir = os.path.join(
-            self.params.outDir, self.params.runName + "/clean"
-        )
+        clean_outdir = os.path.join(self.params.outDir, self.params.runName + "/clean")
         if os.path.isdir(clean_outdir):
             for filename in os.listdir(clean_outdir):
                 file_path = os.path.join(clean_outdir, filename)
@@ -245,9 +239,7 @@ class Thema:
             os.makedirs(proj_outdir)
         self.oort = Oort(YAML_PATH=self.YAML_PATH)
         self.oort.fit()
-        self.projection_files = [
-            proj_outdir + file for file in os.listdir(proj_outdir)
-        ]
+        self.projection_files = [proj_outdir + file for file in os.listdir(proj_outdir)]
 
     def spaghettify_outerSystem(self):
         """
@@ -319,9 +311,7 @@ class Thema:
             os.makedirs(model_outdir)
         self.galaxy = Galaxy(YAML_PATH=self.YAML_PATH)
         self.galaxy.fit()
-        self.model_files = [
-            model_outdir + file for file in os.listdir(model_outdir)
-        ]
+        self.model_files = [model_outdir + file for file in os.listdir(model_outdir)]
 
         # Check for cosmic graph configuration
         cosmic_config = {}
