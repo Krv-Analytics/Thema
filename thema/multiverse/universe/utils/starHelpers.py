@@ -5,7 +5,9 @@ from hdbscan import HDBSCAN
 from sklearn.cluster import DBSCAN
 
 
-def mapper_pseudo_laplacian(complex, n, components, neighborhood="node") -> np.ndarray:
+def mapper_pseudo_laplacian(
+    complex, n, components, neighborhood="node"
+) -> np.ndarray:
     """Calculates and returns a pseudo laplacian n by n matrix representing neighborhoods in the graph. Here, n corresponds to
     the number of items (ie rows in the clean data - keep in mind some raw data rows may have been dropped in cleaning). Here,
     the diagonal element A_ii represents the number of neighborhoods item i appears in. The element A_ij represent the number of
@@ -14,10 +16,12 @@ def mapper_pseudo_laplacian(complex, n, components, neighborhood="node") -> np.n
     Parameters
     ----------
     neighborhood: str
-        Specifies the type of neighborhood. For jmapStar, neighborhood options are 'node' or 'cc'
+        Specifies the type of neighborhood. For our current stars, neighborhood options are 'node' or 'cc'
     """
     if complex is None:
-        raise ValueError("Complex cannot be None when calculating pseudoLaplacian.")
+        raise ValueError(
+            "Complex cannot be None when calculating pseudoLaplacian."
+        )
     nodes = complex["nodes"]
     pseudoLaplacian = np.zeros((n, n), dtype=int)
 
@@ -32,7 +36,7 @@ def mapper_pseudo_laplacian(complex, n, components, neighborhood="node") -> np.n
             neighborhoods[i] = list(set(group_members))
     else:
         raise ValueError(
-            "Only 'cc' and 'nodes' supported as neighorhoods for jmapStar."
+            "Only 'cc' and 'nodes' supported as neighborhoods for jmapStar."
         )
 
     for indices in neighborhoods.values():
@@ -169,9 +173,13 @@ class Nerve:
         candidates = itertools.combinations(nodes.keys(), 2)
         for candidate in candidates:
             # if there are non-unique members in the union
-            overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
+            overlap = len(
+                set(nodes[candidate[0]]).intersection(nodes[candidate[1]])
+            )
             if overlap > 0:
-                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
+                result.append(
+                    (candidate[0], candidate[1], round(1 / overlap, 3))
+                )
         return result
 
 
