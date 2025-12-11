@@ -193,9 +193,7 @@ class jmapStar(Star):
                 f"No edges found in graph - params: {self._params}, "
                 f"nodes: {len(self.nodes)}, projection shape: {self.projection.shape}"
             )
-            self.starGraph = starGraph(
-                graph
-            )  # Create empty graph instead of None
+            self.starGraph = starGraph(graph)  # Create empty graph instead of None
         else:
             graph.add_nodes_from(self.nodes)
             nx.set_node_attributes(graph, self.nodes, "membership")
