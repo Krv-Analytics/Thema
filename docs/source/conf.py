@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "Thema"
 copyright = "2024, Sidney Gathrid, Stuart Wayland, Jeremy Wayland"
 author = "Sidney Gathrid, Stuart Wayland, Jeremy Wayland"
-release = "v0.1.3"
+release = "v0.1.4"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
