@@ -6,7 +6,7 @@ from sklearn.cluster import DBSCAN
 
 
 def mapper_pseudo_laplacian(
-    complex, n, components, neighborhood="node"
+    complex: dict, n: int, components: dict, neighborhood: str = "node"
 ) -> np.ndarray:
     """Calculates and returns a pseudo laplacian n by n matrix representing neighborhoods in the graph. Here, n corresponds to
     the number of items (ie rows in the clean data - keep in mind some raw data rows may have been dropped in cleaning). Here,
@@ -15,8 +15,32 @@ def mapper_pseudo_laplacian(
 
     Parameters
     ----------
-    neighborhood: str
-        Specifies the type of neighborhood. For our current stars, neighborhood options are 'node' or 'cc'
+    complex : dict
+        A dictionary containing the simplicial complex structure. Must include a 'nodes' key
+        with a dictionary mapping node IDs to lists of item indices.
+    n : int
+        The number of items (rows) in the dataset. Determines the dimensions of the
+        returned matrix (n x n).
+    components : dict
+        A dictionary of connected components, where each component has a 'nodes' attribute
+        containing the node IDs belonging to that component. Used when neighborhood='cc'.
+    neighborhood : str, optional
+        Specifies the type of neighborhood. For our current stars, neighborhood options are
+        'node' or 'cc'. Default is 'node'.
+        - 'node': Uses individual nodes as neighborhoods
+        - 'cc': Uses connected components as neighborhoods
+
+    Returns
+    -------
+    np.ndarray
+        An n x n pseudo-Laplacian matrix where diagonal elements represent the number of
+        neighborhoods each item appears in, and off-diagonal elements represent (negatively)
+        the number of shared neighborhoods between items.
+
+    Raises
+    ------
+    ValueError
+        If complex is None or if neighborhood is not 'node' or 'cc'.
     """
     if complex is None:
         raise ValueError(
