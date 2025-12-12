@@ -43,7 +43,9 @@ def mapper_pseudo_laplacian(
         If complex is None or if neighborhood is not 'node' or 'cc'.
     """
     if complex is None:
-        raise ValueError("Complex cannot be None when calculating pseudoLaplacian.")
+        raise ValueError(
+            "Complex cannot be None when calculating pseudoLaplacian."
+        )
     nodes = complex["nodes"]
     pseudoLaplacian = np.zeros((n, n), dtype=int)
 
@@ -80,7 +82,7 @@ def mapper_pseudo_laplacian(
 
 class Nerve:
     """
-    A class to handle generating weighted graphs from Keppler Mapper Simplicial Complexes.
+    A class to handle generating weighted graphs from Kepler Mapper Simplicial Complexes.
 
     Parameters
     ----------
@@ -195,9 +197,13 @@ class Nerve:
         candidates = itertools.combinations(nodes.keys(), 2)
         for candidate in candidates:
             # if there are non-unique members in the union
-            overlap = len(set(nodes[candidate[0]]).intersection(nodes[candidate[1]]))
+            overlap = len(
+                set(nodes[candidate[0]]).intersection(nodes[candidate[1]])
+            )
             if overlap > 0:
-                result.append((candidate[0], candidate[1], round(1 / overlap, 3)))
+                result.append(
+                    (candidate[0], candidate[1], round(1 / overlap, 3))
+                )
         return result
 
 
