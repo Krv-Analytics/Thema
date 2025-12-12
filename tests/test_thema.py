@@ -236,7 +236,7 @@ def test_galaxy_genesis_selected_files_match_selection(tmp_path):
             "pca": {"dimensions": [2], "seed": [42]},
         },
         "Galaxy": {
-            "stars": ["jmap"],
+            "stars": ["jmapStar"],
             "metric": "stellar_curvature_distance",
             "nReps": 2,
             "selector": "max_nodes",
@@ -245,7 +245,7 @@ def test_galaxy_genesis_selected_files_match_selection(tmp_path):
             "cosmic_graph": {
                 "enabled": False,
             },
-            "jmap": {
+            "jmapStar": {
                 "nCubes": [4],
                 "percOverlap": [0.5],
                 "minIntersection": [-1],
