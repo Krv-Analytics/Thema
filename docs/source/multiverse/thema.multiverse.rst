@@ -31,6 +31,9 @@ Architecture
          │   ├── starGraph.py
          │   └── starSelectors.py
          └── stars
+            ├── gudhiStar.py
+            ├── jmapStar.py
+            └── pyballStar.py
 
 
 Subpackages
