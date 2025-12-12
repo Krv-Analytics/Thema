@@ -58,7 +58,7 @@ def mapper_pseudo_laplacian(
             neighborhoods[i] = list(set(group_members))
     else:
         raise ValueError(
-            "Only 'cc' and 'nodes' supported as neighborhoods for our current mapper-based stars."
+            "Only 'cc' and 'node' supported as neighborhoods for our current mapper-based stars."
         )
 
     for indices in neighborhoods.values():
