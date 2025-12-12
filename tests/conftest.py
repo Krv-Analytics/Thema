@@ -56,6 +56,14 @@ def pytest_configure(config):
 
     sklearn.utils.validation.check_array = _check_array_monkeypatch
 
+    # Rebind any modules that imported the original check_array before this patch
+    for module in list(sys.modules.values()):
+        if module is None:
+            continue
+        cached = getattr(module, "check_array", None)
+        if cached is _original_check_array:
+            setattr(module, "check_array", _check_array_monkeypatch)
+
 
 @pytest.fixture(autouse=True)
 def patch_multiverse_modules(request, monkeypatch):
