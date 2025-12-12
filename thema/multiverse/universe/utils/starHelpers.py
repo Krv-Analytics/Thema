@@ -53,7 +53,7 @@ def mapper_pseudo_laplacian(
         neighborhoods = {}
         for i in components:
             group_members = []
-            for node in components[i].nodes:
+            for node in nodes:
                 group_members += nodes[node]
             neighborhoods[i] = list(set(group_members))
     else:
