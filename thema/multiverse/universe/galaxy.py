@@ -19,6 +19,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.manifold import MDS
 
 from .utils import starFilters, starSelectors
+from .utils.starHelpers import normalize_cosmicGraph
 
 from ... import config
 from ...utils import (
@@ -904,29 +905,11 @@ class Galaxy:
             verbose=self.verbose,
         )
         galactic_pseudoLaplacian = sum(pseudo_laplacians)
-        cosmic_wadj = np.zeros((n, n), dtype=float)
-        cosmic_adj = np.zeros((n, n), dtype=int)
-        for i in range(n):
-            for j in range(n):
-                if i != j:
-                    if (
-                        galactic_pseudoLaplacian[i, i]
-                        + galactic_pseudoLaplacian[j, j]
-                        + galactic_pseudoLaplacian[i, j]
-                    ) > 0:
-                        cosmic_wadj[i, j] = -(
-                            galactic_pseudoLaplacian[i, j]
-                            / (
-                                galactic_pseudoLaplacian[i, i]
-                                + galactic_pseudoLaplacian[j, j]
-                                + galactic_pseudoLaplacian[i, j]
-                            )
-                        )
-                    if cosmic_wadj[i, j] > threshold:
-                        cosmic_adj[i, j] = 1
-        cosmicGraph = nx.from_numpy_array(cosmic_adj)
-        for i, j in cosmicGraph.edges():
-            cosmicGraph[i][j]["weight"] = cosmic_wadj[i][j]
+
+        # Delegate normalization and thresholding to helper for testability
+        cosmicGraph, cosmic_wadj, cosmic_adj = normalize_cosmicGraph(
+            galactic_pseudoLaplacian, threshold
+        )
 
         self.cosmicGraph = cosmicGraph
 

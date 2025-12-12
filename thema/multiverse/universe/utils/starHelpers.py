@@ -1,8 +1,55 @@
 import numpy as np
 import itertools
+import networkx as nx
 from collections import defaultdict
 from hdbscan import HDBSCAN
 from sklearn.cluster import DBSCAN
+
+
+def normalize_cosmicGraph(galactic_pseudoLaplacian: np.ndarray, threshold: float = 0.0):
+    """
+    Normalize a summed pseudo-Laplacian into a weighted adjacency matrix and
+    a binary adjacency (thresholded), then build a NetworkX graph with
+    the continuous weights assigned to the 'weight' attribute.
+
+    Parameters
+    ----------
+    galactic_pseudoLaplacian : np.ndarray
+        Square matrix representing the sum of per-star pseudo-Laplacians.
+    threshold : float
+        Minimum weight required to include an edge in the binary adjacency.
+
+    Returns
+    -------
+    tuple
+        (cosmicGraph, cosmic_wadj, cosmic_adj)
+        - cosmicGraph : networkx.Graph with 'weight' attributes
+        - cosmic_wadj : np.ndarray of continuous weights
+        - cosmic_adj : np.ndarray of binary adjacency (int)
+    """
+    n = int(galactic_pseudoLaplacian.shape[0])
+    cosmic_wadj = np.zeros((n, n), dtype=float)
+    cosmic_adj = np.zeros((n, n), dtype=int)
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            denom = (
+                galactic_pseudoLaplacian[i, i]
+                + galactic_pseudoLaplacian[j, j]
+                + galactic_pseudoLaplacian[i, j]
+            )
+            if denom > 0:
+                cosmic_wadj[i, j] = -(galactic_pseudoLaplacian[i, j] / denom)
+            if cosmic_wadj[i, j] > threshold:
+                cosmic_adj[i, j] = 1
+
+    cosmicGraph = nx.from_numpy_array(cosmic_adj)
+    for u, v in cosmicGraph.edges():
+        cosmicGraph[u][v]["weight"] = float(cosmic_wadj[u, v])
+
+    return cosmicGraph, cosmic_wadj, cosmic_adj
 
 
 def mapper_pseudo_laplacian(
