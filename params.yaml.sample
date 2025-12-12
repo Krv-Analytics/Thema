@@ -5,8 +5,8 @@ Planet:
   scaler: standard
   encoding: one_hot
   dropColumns: 
-    - ID
-  imputeColumns: auto
+    - List out the columns you want to drop here!
+  imputeColumns: auto 
   imputeMethods: auto 
   numSamples: 10
   seeds: auto 
@@ -39,8 +39,10 @@ Galaxy:
     neighborhood: cc
     threshold: 0.0
   stars:
-    - jmap 
-  jmap:
+    - jmapStar
+    - pyballStar
+    - gudhiStar
+  jmapStar:
     nCubes:
       - 5
     percOverlap:
@@ -50,3 +52,21 @@ Galaxy:
     clusterer:
       - [HDBSCAN, {min_cluster_size: 5}] 
       - [HDBSCAN, {min_cluster_size: 7}]
+  pyballStar:
+    EPS:
+      - 0.1
+      - 0.2
+  gudhiStar:
+    clusterer:
+      - [HDBSCAN, {min_cluster_size: 5}]
+    N:
+      - 100
+    beta:
+      - 0.0
+    C:
+      - 10.0
+
+
+
+
+
