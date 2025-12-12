@@ -286,12 +286,12 @@ Parameters
 Mapper Configuration
 --------------------
 
-The ``params`` dictionary uses the ``"jmap"`` key:
+The ``params`` dictionary uses the ``"jmapStar"`` key:
 
 .. code-block:: python
 
     params = {
-        "jmap": {
+        "jmapStar": {
             "nCubes": [5, 10, 20],
             "percOverlap": [0.5, 0.6, 0.7],
             "minIntersection": [-1],
@@ -374,7 +374,7 @@ Example
 .. code-block:: python
 
     mapper_config = {
-        "jmap": {
+        "jmapStar": {
             "nCubes": [5, 10, 20],
             "percOverlap": [0.55, 0.65, 0.75],
             "minIntersection": [-1],
@@ -654,7 +654,7 @@ Complete Workflow Example
         projDir=projections_dir,
         outDir=graphs_dir,
         params={
-            "jmap": {
+            "jmapStar": {
                 "nCubes": [5, 10, 20],
                 "percOverlap": [0.6, 0.7],
                 "minIntersection": [-1],

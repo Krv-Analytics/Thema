@@ -134,7 +134,7 @@ Typical Workflow
    oort = Oort(cleanDir="./clean", params={"tsne": {...}})
    oort.fit()
 
-   galaxy = Galaxy(projDir="./projections", params={"jmap": {...}})
+   galaxy = Galaxy(projDir="./projections", params={"jmapStar": {...}})
    galaxy.fit()
    representatives = galaxy.collapse()
 

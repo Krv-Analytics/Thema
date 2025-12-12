@@ -145,9 +145,9 @@ Registering Custom Stars
 
 To use custom stars in the pipeline:
 
-1. Add your star class to ``thema/multiverse/universe/projectiles/``
-2. Register in ``thema/config.py`` via ``tag_to_class`` mapping
-3. Reference by tag in YAML or params dict
+1. Add your star class to ``thema/multiverse/universe/stars/``
+2. Register it in ``thema/config.py`` via the ``star_name_to_config`` mapping
+3. Reference the class name directly in YAML or parameter dictionaries
 
 Scaling to Large Datasets
 -------------------------
@@ -226,8 +226,8 @@ Example: Large-Scale Workflow
        cleanDir="./outputs/large_run/clean",
        projDir="./outputs/large_run/projections",
        outDir="./outputs/large_run/models",
-       params={
-           "jmap": {
+      params={
+          "jmapStar": {
                "nCubes": [5, 10, 20],
                "percOverlap": [0.5, 0.7],
                "minIntersection": [-1],
