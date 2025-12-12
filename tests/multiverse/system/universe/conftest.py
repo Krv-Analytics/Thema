@@ -198,12 +198,12 @@ def temp_galaxyYaml_1():
             }
 
             modeling = {
-                "stars": ["jmap"],
+                "stars": ["jmapStar"],
                 "metric": "stellar_curvature_distance",
                 "nReps": 3,
                 "selector": "max_nodes",
                 "filter": None,
-                "jmap": {
+                "jmapStar": {
                     "nCubes": [4],
                     "percOverlap": [0.5],
                     "minIntersection": [-1],

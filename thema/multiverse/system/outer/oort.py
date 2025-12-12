@@ -206,7 +206,7 @@ class Oort(Core):
 
         for proj in self.params.keys():
             assert (
-                proj in config.tag_to_class.keys()
+                proj in config.projector_tag_to_config.keys()
             ), f"{proj} is currently not a supported projectile."
 
         if not os.path.isdir(self.outDir):
@@ -252,7 +252,7 @@ class Oort(Core):
         subprocesses = []
         for projectorName, projectorParamsDict in self.params.items():
             logger.debug(f"Setting up projector: {projectorName}")
-            projConfig = config.tag_to_class[projectorName]
+            projConfig = config.projector_tag_to_config[projectorName]
             cfg = getattr(config, projConfig)
             module = importlib.import_module(cfg.module, package="thema")
             projector = module.initialize()

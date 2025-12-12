@@ -185,7 +185,7 @@ def complete_yaml_file(tmp_path):
             "pca": {"dimensions": [2], "seed": [42]},
         },
         "Galaxy": {
-            "stars": ["jmap"],
+            "stars": ["jmapStar"],
             "metric": "stellar_curvature_distance",
             "nReps": 2,
             "selector": "max_nodes",
@@ -195,7 +195,7 @@ def complete_yaml_file(tmp_path):
                 "neighborhood": "cc",
                 "threshold": 0.0,
             },
-            "jmap": {
+            "jmapStar": {
                 "nCubes": [4],
                 "percOverlap": [0.5],
                 "minIntersection": [-1],

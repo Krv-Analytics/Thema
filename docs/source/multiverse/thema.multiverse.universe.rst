@@ -31,10 +31,15 @@ Architecture
     ├── geodesics.py
     ├── star.py
     ├── utils
+    │   ├── starFilters.py
     │   ├── starGraph.py
+    │   ├── starHelpers.py
     │   └── starSelectors.py
     └── stars
-        └── jmapStar.py
+        ├── gudhiStar.py
+        ├── jmapStar.py
+        └── pyballStar.py
+
 
 Module Contents
 ---------------
