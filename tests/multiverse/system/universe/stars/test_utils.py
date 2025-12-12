@@ -9,7 +9,9 @@ def test_mapper_pseudo_laplacian_node_neighborhood():
     complex_data = {"nodes": {"a": [0, 1], "b": [1, 2]}}
     n = 3
     components = None  # Not used for "node"
-    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="node")
+    result = mapper_pseudo_laplacian(
+        complex_data, n, components, neighborhood="node"
+    )
     expected = np.array([[1, -1, 0], [-1, 2, -1], [0, -1, 1]])
     np.testing.assert_array_equal(result, expected)
 
@@ -22,7 +24,9 @@ def test_mapper_pseudo_laplacian_cc_neighborhood():
     mock_component = Mock()
     mock_component.nodes = ["a", "b"]
     components = {0: mock_component}
-    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="cc")
+    result = mapper_pseudo_laplacian(
+        complex_data, n, components, neighborhood="cc"
+    )
     # When all nodes are in one component, all items [0,1,2] are in one neighborhood
     # So the matrix should have all items connected
     expected = np.array([[1, -1, -1], [-1, 1, -1], [-1, -1, 1]])
@@ -43,7 +47,7 @@ def test_mapper_pseudo_laplacian_invalid_neighborhood():
     complex_data = {"nodes": {"a": [0, 1]}}
     with pytest.raises(
         ValueError,
-        match="Only 'cc' and 'nodes' supported as neighborhoods for our current mapper-based stars.",
+        match="Only 'cc' and 'node' supported as neighborhoods for our current mapper-based stars.",
     ):
         mapper_pseudo_laplacian(complex_data, 2, None, neighborhood="invalid")
 
@@ -92,7 +96,9 @@ def test_mapper_pseudo_laplacian_with_jmap_style_complex():
     n = 8
     components = None
 
-    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="node")
+    result = mapper_pseudo_laplacian(
+        complex_data, n, components, neighborhood="node"
+    )
 
     # Verify result properties
     assert isinstance(result, np.ndarray)
@@ -130,7 +136,9 @@ def test_mapper_pseudo_laplacian_connected_components_type():
 
     components = {0: mock_component_0, 1: mock_component_1}
 
-    result = mapper_pseudo_laplacian(complex_data, n, components, neighborhood="cc")
+    result = mapper_pseudo_laplacian(
+        complex_data, n, components, neighborhood="cc"
+    )
 
     # Verify result properties
     assert isinstance(result, np.ndarray)
