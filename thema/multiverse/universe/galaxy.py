@@ -10,7 +10,7 @@ import os
 import pickle
 from collections import Counter
 import time
-from typing import cast
+from typing import Mapping, cast
 
 import numpy as np
 import networkx as nx
@@ -80,11 +80,11 @@ class Galaxy:
     >>> outDir = <PATH TO OUT DIRECTORY OF PROJECTIONS>
 
     >>> params = {
-    ...   "jmap": {   "nCubes":[2,5,8],
-    ...                "percOverlap": [0.2, 0.4],
-    ...            "minIntersection":[-1],
-    ...            "clusterer": [["HDBSCAN", {"minDist":0.1}]]
-    ...            }
+    ...   "jmapStar": {   "nCubes":[2,5,8],
+    ...                    "percOverlap": [0.2, 0.4],
+    ...                    "minIntersection":[-1],
+    ...                    "clusterer": [["HDBSCAN", {"minDist":0.1}]]
+    ...                }
     ... }
     >>> galaxy = Galaxy(params=params,
     ...            data=data,
@@ -183,10 +183,20 @@ class Galaxy:
 
             self.params = {}
             for star in stars:
-                self.params[star] = yamlParams.Galaxy[star]
+                canonical_star = self._canonicalize_star_name(star)
+                self.params[canonical_star] = yamlParams.Galaxy[star]
 
         elif params is not None:
-            self.params = params
+            self.params = {}
+            params_mapping: Mapping[str, object]
+            if isinstance(params, Mapping):
+                params_mapping = params  # type: ignore[assignment]
+            else:
+                params_mapping = cast(Mapping[str, object], params)
+
+            for star_name, star_config in params_mapping.items():
+                canonical_star = self._canonicalize_star_name(star_name)
+                self.params[canonical_star] = star_config
 
         else:
             raise ValueError("please provide a parameter dictionary")
@@ -234,6 +244,38 @@ class Galaxy:
         self.cleanDir = cast(str, self.cleanDir)
         self.projDir = cast(str, self.projDir)
         self.outDir = cast(str, self.outDir)
+
+    @staticmethod
+    def _canonicalize_star_name(star_name: str) -> str:
+        valid_stars = set(config.star_name_to_config.keys())
+        legacy_aliases = {"jmap": "jmapStar"}
+
+        if star_name in valid_stars:
+            return star_name
+
+        if star_name in legacy_aliases:
+            suggestion = legacy_aliases[star_name]
+            raise ValueError(
+                f"Star '{star_name}' has been renamed to '{suggestion}'. Update your configuration to use the class name."
+            )
+
+        canonical_by_lower = {name.lower(): name for name in valid_stars}
+        lowered = star_name.lower()
+        if lowered in canonical_by_lower:
+            suggestion = canonical_by_lower[lowered]
+            raise ValueError(
+                f"Star '{star_name}' must use the exact class name '{suggestion}'."
+            )
+
+        raise ValueError(
+            f"Unsupported star '{star_name}'. Supported stars: {sorted(valid_stars)}"
+        )
+
+    @staticmethod
+    def _get_star_config_class(star_name: str):
+        canonical_star = Galaxy._canonicalize_star_name(star_name)
+        config_name = config.star_name_to_config[canonical_star]
+        return getattr(config, config_name)
 
     def _setup_filter(self, yamlParams):
         logger.info("Checking yaml for filter configuration.")
@@ -308,8 +350,7 @@ class Galaxy:
         subprocesses = []
 
         for starName, starParamsDict in self.params.items():
-            star_configName = config.tag_to_class[starName]
-            cfg = getattr(config, star_configName)
+            cfg = self._get_star_config_class(starName)
             module = importlib.import_module(cfg.module)
             star = module.initialize()
 
