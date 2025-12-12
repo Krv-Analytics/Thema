@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-12-11
+
+### Added
+
+- **Cosmic Graph**: New ensemble graph representation that collapses the multiverse of Mapper graphs into a single unified graph where nodes represent individual data items
+  - Opt-in via YAML configuration with `cosmic_graph.enabled: true`
+  - Configurable neighborhood types (`cc` or `node`) and edge thresholds
+  - Computes pseudo-Laplacian matrices across all stars to measure co-occurrence stability
+- **New Star variants**: Alternative graph construction methods for generating Mapper-style graphs
+  - `gudhiStar`: Leverages GUDHI's MapperComplex with auto-tuned parameters
+  - `pyballStar`: Simplified BallMapper-based approach with single `EPS` parameter
+- **Pseudo-Laplacian computation**: Added `get_pseudoLaplacian()` method to all Star classes for matrix representations of graph neighborhoods
+
+### Changed
+
+- Python CI updated to 3.13
+- Refactored shared star utilities into `starHelpers.py` module
+- `starGraph.components` now cached for performance
+
+### Dependencies
+
+- Added: `gudhi>=3.11.0`
+- Added: `pyballmapper>=0.3.7`
+
+### Documentation
+
+- New Cosmic Graph user guide with configuration examples and API reference
+- Enhanced Stars documentation with comparison table and usage recommendations
+
 ## [0.1.3] - 2025-10-23
 
 ### Added

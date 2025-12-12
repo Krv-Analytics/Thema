@@ -45,8 +45,6 @@ Welcome to THEMA. Browse the API or dive into the multiverse when you're ready t
 
    configuration
    multiverse/thema.multiverse
-   multiverse/thema.multiverse.system
-   multiverse/thema.multiverse.universe
    expansion/thema.expansion
 
 .. raw:: html

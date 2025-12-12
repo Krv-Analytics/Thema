@@ -19,6 +19,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.manifold import MDS
 
 from .utils import starFilters, starSelectors
+from .utils.starHelpers import normalize_cosmicGraph
 
 from ... import config
 from ...utils import (
@@ -811,8 +812,30 @@ class Galaxy:
         with open(yaml_path, "r") as f:
             params = OmegaConf.load(f)
 
-        params.Galaxy = self.getParams()["params"]
-        params.Galaxy.stars = list(self.getParams()["params"].keys())
+        # Create Galaxy configuration with all required parameters
+        galaxy_config = OmegaConf.create(
+            {
+                "metric": self.metric,
+                "selector": self.selector,
+                "nReps": self.nReps,
+                "stars": list(self.params.keys()),
+            }
+        )
+
+        # Add star-specific parameters
+        for star_name, star_params in self.params.items():
+            galaxy_config[star_name] = star_params
+
+        # Add filter configuration if it exists in the original YAML
+        if self._yamlParams and hasattr(self._yamlParams, "Galaxy"):
+            if hasattr(self._yamlParams.Galaxy, "filter"):
+                galaxy_config.filter = self._yamlParams.Galaxy.filter
+            if hasattr(self._yamlParams.Galaxy, "filter_params"):
+                galaxy_config.filter_params = self._yamlParams.Galaxy.filter_params
+            if hasattr(self._yamlParams.Galaxy, "cosmic_graph"):
+                galaxy_config.cosmic_graph = self._yamlParams.Galaxy.cosmic_graph
+
+        params.Galaxy = galaxy_config
 
         with open(yaml_path, "w") as f:
             OmegaConf.save(params, f)
@@ -831,6 +854,64 @@ class Galaxy:
             file names.
         """
         pass
+
+    def _compute_cosmicGraphHelper(self, starFile, neighborhood):
+        """Helper function for compute_cosmicGraph used for parallelization."""
+        assert os.path.isfile(starFile), f"{starFile} is a directory?"
+        with open(starFile, "rb") as f:
+            star = pickle.load(f)
+        return star.get_pseudoLaplacian(neighborhood=neighborhood)
+
+    def compute_cosmicGraph(
+        self,
+        neighborhood="cc",
+        threshold=0.0,
+    ):
+        """Computes the cosmicGraph of the galaxy.
+
+        Parameters
+        ---------
+        neighborhood: str
+            Options are specific to star. Please see docs for get_pseudoLaplacian for the star you are using. (e.g. jmapStar
+            has neighborhood options of "cc" and "node" )
+
+        threshold: float, default=0.0
+            Percentage of agreement amongst contributing model to constitute an edge.
+
+        """
+        starFiles = []
+
+        model_pattern = os.path.join(self.outDir, "*.pkl")
+        starFiles = glob.glob(model_pattern)
+
+        # Get the number of data points from one of the star files
+        if len(starFiles) == 0:
+            raise ValueError("No star files found in models directory")
+
+        with open(starFiles[0], "rb") as f:
+            sample_star = pickle.load(f)
+        n = len(sample_star.clean)
+
+        subprocesses = []
+        for starFile in starFiles:
+            cmd = (self._compute_cosmicGraphHelper, starFile, neighborhood)
+            subprocesses.append(cmd)
+
+        pseudo_laplacians = function_scheduler(
+            subprocesses,
+            4,
+            "SUCCESS: Pseudo Laplacians ",
+            resilient=True,
+            verbose=self.verbose,
+        )
+        galactic_pseudoLaplacian = sum(pseudo_laplacians)
+
+        # Delegate normalization and thresholding to helper for testability
+        cosmicGraph, cosmic_wadj, cosmic_adj = normalize_cosmicGraph(
+            galactic_pseudoLaplacian, threshold
+        )
+
+        self.cosmicGraph = cosmicGraph
 
     # Ensure Galaxy instances are pickle-friendly for multiprocessing
     def __getstate__(self):

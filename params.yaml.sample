@@ -34,6 +34,10 @@ Galaxy:
   metric: stellar_curvature_distance
   selector: max_nodes
   nReps: 4
+  cosmic_graph:
+    enabled: true
+    neighborhood: cc
+    threshold: 0.0
   stars:
     - jmap 
   jmap:
